@@ -11,7 +11,7 @@ import TravelJournalDetail from './components/TravelJournalDetail';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<UserProfile />}>
+      <Route path="/:uid" element={<UserProfile />}>
         <Route path="itineraries" element={<Itineraries />} />
         <Route path="saved-spots" element={<SavedSpots />} />
         <Route path="travel-journals" element={<TravelJournals />}></Route>

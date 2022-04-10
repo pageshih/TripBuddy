@@ -16,7 +16,7 @@ const flexColumn = css`
   flex-direction: column;
 `;
 
-function TextField({ children, placeholder, value, onChange }) {
+function TextField({ children, placeholder, value, onChange, type }) {
   return (
     <div
       css={css`
@@ -29,6 +29,7 @@ function TextField({ children, placeholder, value, onChange }) {
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        type={type}
       />
     </div>
   );
