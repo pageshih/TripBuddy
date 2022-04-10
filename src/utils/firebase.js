@@ -11,7 +11,6 @@ import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -33,13 +32,13 @@ const firebaseAuth = {
 
 const firestore = {
   db: getFirestore(app),
-  postTimeList(path, userUID, timeList, merge) {
-    return setDoc(doc(this.db, path, userUID), { timeList }, { merge });
+  setProfile(userUID, profile, merge) {
+    return setDoc(doc(this.db, 'profile', userUID), { profile }, { merge });
   },
-  getTimeList(path, userUID) {
+  getProfile(userUID) {
     return new Promise((resolve) => {
-      getDoc(doc(this.db, path, userUID)).then((timeListSnap) => {
-        resolve(timeListSnap.data());
+      getDoc(doc(this.db, 'profile', userUID)).then((profileSnap) => {
+        resolve(profileSnap.data());
       });
     });
   },
