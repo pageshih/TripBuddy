@@ -11,7 +11,7 @@ function Login() {
   const signIn = () => {
     firebaseAuth.signIn(email, password).then((res) => {
       console.log(res);
-      navigate(`/${res.user.uid}`);
+      navigate(`/${res.user.uid}/itineraries`);
     });
   };
   return (
