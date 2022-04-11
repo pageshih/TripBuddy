@@ -25,8 +25,8 @@ const firebaseAuth = {
   userSignOut() {
     return signOut(this.auth);
   },
-  checkIsLogIn(change, error) {
-    return onAuthStateChanged(this.auth, change, error);
+  checkIsLogIn(actionWhenChange, actionWhenError) {
+    return onAuthStateChanged(this.auth, actionWhenChange, actionWhenError);
   },
 };
 

@@ -16,7 +16,7 @@ const activeStyle = (isActive) => {
 };
 
 function UserProfile() {
-  const { uid } = useContext(UidContext);
+  const { uid, setUid } = useContext(UidContext);
   const [profile, setProfile] = useState();
   const navigate = useNavigate();
   const logout = () => {
@@ -24,6 +24,7 @@ function UserProfile() {
       .userSignOut()
       .then(() => {
         alert('logout');
+        setUid(undefined);
         navigate('/login');
       })
       .catch((res) => console.log(res));
@@ -34,8 +35,15 @@ function UserProfile() {
         .getProfile(uid)
         .then((res) => setProfile(res))
         .catch((res) => console.log(res.code, res.message));
+    } else {
+      firebaseAuth.checkIsLogIn(
+        (userImpl) => {
+          setUid(userImpl.user.uid);
+        },
+        (error) => console.log(error)
+      );
     }
-  }, [uid]);
+  }, [uid, setUid]);
   return (
     <>
       {profile && (
