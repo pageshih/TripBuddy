@@ -4,8 +4,6 @@ import { css } from '@emotion/react';
 const base = css`
   border: none;
   cursor: pointer;
-  padding: 10px;
-  font-size: 16px;
   &:hover {
     box-shadow: 1px 1px 3px 1px lightgray;
   }
@@ -13,6 +11,8 @@ const base = css`
 
 const Button = styled.button`
   ${base}
+  padding: 10px;
+  font-size: 16px;
   background-color: ${(props) => {
     if (props.primary) {
       return 'aliceblue';
@@ -26,4 +26,12 @@ const Button = styled.button`
   margin-left: ${(props) => props.marginLeft};
 `;
 
-export { Button };
+const RoundButton = styled.button`
+  ${base}
+  background-color: lightgray;
+  border-radius: 50%;
+  width: ${(props) => props.size || 'auto'};
+  height: ${(props) => props.size || 'auto'};
+`;
+
+export { Button, RoundButton };
