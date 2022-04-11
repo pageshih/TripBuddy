@@ -1,17 +1,20 @@
+import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { firebaseAuth } from '../utils/firebase';
+import { UidContext } from '../App';
 import { Button } from '../utils/Button';
 import { TextField } from '../utils/TextField';
-import { useState } from 'react';
-import { firebaseAuth } from '../utils/firebase';
-import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
+  const { setUid } = useContext(UidContext);
   const navigate = useNavigate();
   const signIn = () => {
     firebaseAuth.signIn(email, password).then((res) => {
       console.log(res);
-      navigate(`/${res.user.uid}/itineraries`);
+      setUid(res.user.uid);
+      navigate(`/itineraries`);
     });
   };
   return (

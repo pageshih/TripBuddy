@@ -1,7 +1,8 @@
-import { Outlet, useParams, NavLink, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
+import { UidContext } from '../App';
 import { FlexDiv } from '../utils/Layout';
 import { Button } from '../utils/Button';
 
@@ -15,7 +16,7 @@ const activeStyle = (isActive) => {
 };
 
 function UserProfile() {
-  const { uid } = useParams();
+  const { uid } = useContext(UidContext);
   const [profile, setProfile] = useState();
   const navigate = useNavigate();
   const logout = () => {
@@ -51,21 +52,21 @@ function UserProfile() {
               style={({ isActive }) => {
                 return activeStyle(isActive);
               }}
-              to={`/${uid}/itineraries`}>
+              to={`/itineraries`}>
               我的行程
             </NavLink>
             <NavLink
               style={({ isActive }) => {
                 return activeStyle(isActive);
               }}
-              to={`/${uid}/saved-spots`}>
+              to={`/saved-spots`}>
               候補景點
             </NavLink>
             <NavLink
               style={({ isActive }) => {
                 return activeStyle(isActive);
               }}
-              to={`/${uid}/travel-journals`}>
+              to={`/travel-journals`}>
               我的遊記
             </NavLink>
           </FlexDiv>
