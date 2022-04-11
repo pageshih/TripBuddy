@@ -11,6 +11,12 @@ const FlexDiv = styled.div`
 const CardStyle = css`
   border: 1px solid lightgray;
   padding: 10px;
+  list-style: none;
+  display: flex;
+`;
+const CardRow = styled.ul`
+  ${CardStyle}
+  gap: ${(props) => props.gap || '0px'}
 `;
 
-export { FlexDiv };
+export { FlexDiv, CardRow };
