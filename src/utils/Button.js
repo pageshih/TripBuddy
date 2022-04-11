@@ -13,6 +13,17 @@ const base = css`
 
 const Button = styled.button`
   ${base}
+  background-color: ${(props) => {
+    if (props.primary) {
+      return 'aliceblue';
+    } else if (props.secondary) {
+      return 'skyblue';
+    } else {
+      return 'transparent';
+    }
+  }};
+  align-self: ${(props) => props.alignSelf || 'auto'};
+  margin-left: ${(props) => props.marginLeft};
 `;
 
 export { Button };
