@@ -8,5 +8,9 @@ const FlexDiv = styled.div`
   flex-direction: ${(props) => props.direction || 'row'};
   gap: ${(props) => props.gap || 0};
 `;
+const CardStyle = css`
+  border: 1px solid lightgray;
+  padding: 10px;
+`;
 
 export { FlexDiv };
