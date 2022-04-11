@@ -16,7 +16,7 @@ function Map({ center, zoom }) {
       setInfoWindow(new window.google.maps.InfoWindow());
     } else {
       window.google.maps.event.addListener(map, 'click', (e) => {
-        console.log(e);
+        console.log(e.latLng.lat(), e.latLng.lng());
         e.stop();
       });
     }
