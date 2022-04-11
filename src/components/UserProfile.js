@@ -38,7 +38,7 @@ function UserProfile() {
     } else {
       firebaseAuth.checkIsLogIn(
         (userImpl) => {
-          setUid(userImpl.user.uid);
+          setUid(userImpl.uid);
         },
         (error) => console.log(error)
       );
