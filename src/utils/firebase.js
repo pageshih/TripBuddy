@@ -10,7 +10,14 @@ import {
 import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+} from 'firebase/firestore';
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -41,6 +48,14 @@ const firestore = {
         resolve(profileSnap.data());
       });
     });
+  },
+  setSavedSpots(userUID, place) {
+    console.log(place.place_id);
+    return setDoc(
+      doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
+      place,
+      { merge: 'merge' }
+    );
   },
 };
 

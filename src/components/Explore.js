@@ -122,7 +122,25 @@ function Map({ setPlaceDetail }) {
                   })
                 );
                 map.panTo(place.geometry.location);
-                setPlaceDetail(place);
+                const removeMethodsInPlaceDetail = {
+                  name: place.name,
+                  place_id: place.place_id,
+                  formatted_address: place.formatted_address,
+                  geometry: {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng(),
+                  },
+                  opening_hours: {
+                    open_now: place.opening_hours.open_now,
+                    periods: place.opening_hours.periods,
+                    weekday_text: place.opening_hours.weekday_text,
+                  },
+                  photos: place.photos.map((item) => item.getUrl()),
+                  reviews: place.reviews,
+                  website: place.website,
+                  rating: place.rating,
+                };
+                setPlaceDetail(removeMethodsInPlaceDetail);
               }
             });
           }
@@ -148,8 +166,8 @@ function Explore() {
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
 
-  const addToWaitingSpots = () => {
-    console.log(placeDetail);
+  const addToSavedSpots = () => {
+    firestore.setSavedSpots(uid, placeDetail);
   };
   useEffect(() => {
     if (uid) {
@@ -179,7 +197,7 @@ function Explore() {
             {placeDetail && (
               <>
                 <img
-                  src={placeDetail.photos[0].getUrl()}
+                  src={placeDetail.photos[0]}
                   alt="placePhoto"
                   style={{ width: '100%' }}
                 />
@@ -191,7 +209,7 @@ function Explore() {
                   primary
                   display="block"
                   width="100%"
-                  onClick={addToWaitingSpots}>
+                  onClick={addToSavedSpots}>
                   加入候補景點
                 </Button>
                 <h3>評論</h3>
