@@ -42,10 +42,13 @@ const featureShowPattern = {
 };
 
 const RoundBtnOnMap = styled(RoundButton)`
+  width: 60px;
+  height: 60px;
   position: absolute;
   top: 100px;
   right: 30px;
   z-index: 1000;
+  border: 2px solid white;
 `;
 
 function Map({ setPlaceDetail }) {
@@ -129,6 +132,7 @@ function Map({ setPlaceDetail }) {
             map.setOptions({
               styles: featureShowPattern.default,
             });
+            setPlaceDetail(undefined);
           }
         }
         e.stop();
@@ -144,6 +148,9 @@ function Explore() {
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
 
+  const addToWaitingSpots = () => {
+    console.log(placeDetail);
+  };
   useEffect(() => {
     if (uid) {
       console.log(uid);
@@ -165,7 +172,10 @@ function Explore() {
     <>
       {uid && (
         <FlexDiv height="100vh">
-          <FlexChildDiv basis="300px" overflow="scroll" padding="0 20px 0 0">
+          <FlexChildDiv
+            basis={placeDetail && '500px'}
+            overflow="scroll"
+            padding={placeDetail && '15px 20px'}>
             {placeDetail && (
               <>
                 <img
@@ -177,7 +187,11 @@ function Explore() {
                 <p>評分：{placeDetail.rating}</p>
                 <p>地址：{placeDetail.formatted_address}</p>
                 <a href={placeDetail.website}>官方網站</a>
-                <Button primary display="block" width="100%">
+                <Button
+                  primary
+                  display="block"
+                  width="100%"
+                  onClick={addToWaitingSpots}>
                   加入候補景點
                 </Button>
                 <h3>評論</h3>
@@ -197,7 +211,7 @@ function Explore() {
             )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <RoundBtnOnMap size="48px">候補</RoundBtnOnMap>
+            <RoundBtnOnMap>候補景點</RoundBtnOnMap>
             <Map setPlaceDetail={setPlaceDetail} />
           </Wrapper>
         </FlexDiv>
