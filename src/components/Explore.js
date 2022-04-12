@@ -40,10 +40,16 @@ const featureShowPattern = {
   ],
 };
 
-function Map({ center, zoom }) {
+function Map() {
   const ref = useRef();
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
+  const [placeDetail, setPlaceDetail] = useState();
+  const center = {
+    lat: 25.038621247241373,
+    lng: 121.53236932147014,
+  };
+  const zoom = 16;
   useEffect(() => {
     if (ref.current && !map) {
       setMap(new window.google.maps.Map(ref.current, { center, zoom }));
@@ -52,7 +58,7 @@ function Map({ center, zoom }) {
         styles: featureShowPattern.default,
       });
     }
-  }, [ref, map, center, zoom]);
+  }, [ref, map]);
 
   useEffect(() => {
     if (ref.current && map) {
@@ -63,7 +69,16 @@ function Map({ center, zoom }) {
           });
           const placeRequest = {
             placeId: e.placeId,
-            fields: ['name', 'formatted_address', 'place_id', 'geometry'],
+            fields: [
+              'name',
+              'formatted_address',
+              'place_id',
+              'geometry',
+              'photos',
+              'rating',
+              'opening_hours',
+              'website',
+            ],
           };
           if (marker) {
             marker.setMap(null);
@@ -95,6 +110,8 @@ function Map({ center, zoom }) {
                     },
                   })
                 );
+                map.panTo(place.geometry.location);
+                setPlaceDetail(place);
               }
             });
           }
@@ -117,8 +134,7 @@ function Map({ center, zoom }) {
 function Explore() {
   const { uid, setUid } = useContext(UidContext);
   const navigate = useNavigate();
-  const center = { lat: 25.038621247241373, lng: 121.53236932147014 };
-  const zoom = 16;
+
   useEffect(() => {
     if (uid) {
       console.log(uid);
@@ -145,7 +161,7 @@ function Explore() {
             <h1>Explore</h1>
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <Map center={center} zoom={zoom} />
+            <Map />
           </Wrapper>
         </FlexDiv>
       )}
