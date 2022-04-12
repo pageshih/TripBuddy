@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import { UidContext } from '../App';
-import { RoundButton } from '../utils/Button';
+import { RoundButton, Button } from '../utils/Button';
 import { FlexDiv, FlexChildDiv } from '../utils/Layout';
 import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
+import styled from '@emotion/styled';
 
 const featureShowPattern = {
   default: [
@@ -40,11 +41,17 @@ const featureShowPattern = {
   ],
 };
 
-function Map() {
+const RoundBtnOnMap = styled(RoundButton)`
+  position: absolute;
+  top: 100px;
+  right: 30px;
+  z-index: 1000;
+`;
+
+function Map({ setPlaceDetail }) {
   const ref = useRef();
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
-  const [placeDetail, setPlaceDetail] = useState();
   const center = {
     lat: 25.038621247241373,
     lng: 121.53236932147014,
@@ -78,6 +85,7 @@ function Map() {
               'rating',
               'opening_hours',
               'website',
+              'reviews',
             ],
           };
           if (marker) {
@@ -134,6 +142,7 @@ function Map() {
 function Explore() {
   const { uid, setUid } = useContext(UidContext);
   const navigate = useNavigate();
+  const [placeDetail, setPlaceDetail] = useState();
 
   useEffect(() => {
     if (uid) {
@@ -155,13 +164,41 @@ function Explore() {
   return (
     <>
       {uid && (
-        <FlexDiv>
-          <FlexChildDiv basis="300px">
-            <RoundButton size="48px">候補</RoundButton>
-            <h1>Explore</h1>
+        <FlexDiv height="100vh">
+          <FlexChildDiv basis="300px" overflow="scroll" padding="0 20px 0 0">
+            {placeDetail && (
+              <>
+                <img
+                  src={placeDetail.photos[0].getUrl()}
+                  alt="placePhoto"
+                  style={{ width: '100%' }}
+                />
+                <h2>{placeDetail.name}</h2>
+                <p>評分：{placeDetail.rating}</p>
+                <p>地址：{placeDetail.formatted_address}</p>
+                <a href={placeDetail.website}>官方網站</a>
+                <Button primary display="block" width="100%">
+                  加入候補景點
+                </Button>
+                <h3>評論</h3>
+                <ul>
+                  {placeDetail.reviews.map((review) => (
+                    <li key={review.time}>
+                      <FlexDiv>
+                        <a href={review.author_url}>{review.author_name}</a>
+                      </FlexDiv>
+                      <p>{review.relative_time_description}</p>
+                      <p>評分：{review.rating}</p>
+                      <p>{review.text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <Map />
+            <RoundBtnOnMap size="48px">候補</RoundBtnOnMap>
+            <Map setPlaceDetail={setPlaceDetail} />
           </Wrapper>
         </FlexDiv>
       )}

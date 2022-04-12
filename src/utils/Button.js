@@ -22,16 +22,18 @@ const Button = styled.button`
       return 'transparent';
     }
   }};
-  align-self: ${(props) => props.alignSelf || 'auto'};
+  align-self: ${(props) => props.alignSelf};
   margin-left: ${(props) => props.marginLeft};
+  display: ${(props) => props.display};
+  width: ${(props) => props.width};
 `;
 
 const RoundButton = styled.button`
   ${base}
   background-color: lightgray;
   border-radius: 50%;
-  width: ${(props) => props.size || 'auto'};
-  height: ${(props) => props.size || 'auto'};
+  width: ${(props) => props.size};
+  height: ${(props) => props.size};
 `;
 
 export { Button, RoundButton };
