@@ -165,9 +165,13 @@ function Explore() {
   const { uid, setUid } = useContext(UidContext);
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
+  const [savedSpots, setSavedSpots] = useState();
 
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
+  };
+  const getSavedSpots = () => {
+    firestore.getSavedSpots().then((res) => console.log(res));
   };
   useEffect(() => {
     if (uid) {
@@ -229,7 +233,7 @@ function Explore() {
             )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <RoundBtnOnMap>候補景點</RoundBtnOnMap>
+            <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>
             <Map setPlaceDetail={setPlaceDetail} />
           </Wrapper>
         </FlexDiv>

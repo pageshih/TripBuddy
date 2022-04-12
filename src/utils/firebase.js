@@ -16,6 +16,9 @@ import {
   setDoc,
   getDoc,
   collection,
+  getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
 
 // Initialize Firebase
@@ -50,12 +53,22 @@ const firestore = {
     });
   },
   setSavedSpots(userUID, place) {
-    console.log(place.place_id);
     return setDoc(
       doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
       place,
       { merge: 'merge' }
     );
+  },
+  getSavedSpots(userUID) {
+    return new Promise((resolve) => {
+      const queryRef = query(
+        collection(this.db, 'savedSpots', userUID, 'places')
+      );
+      getDocs(queryRef).then((profileSnap) => {
+        console.log(profileSnap);
+        resolve(profileSnap);
+      });
+    });
   },
 };
 
