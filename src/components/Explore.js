@@ -86,7 +86,7 @@ function Explore() {
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
-  const [addSpotList, setAddSpotList] = useState([]);
+  const [selectedSpotList, setSelectedSpotList] = useState([]);
 
   const CheckboxDiv = styled.div`
     color: white;
@@ -97,15 +97,23 @@ function Explore() {
     top: -10px;
     left: -10px;
     background-color: ${(props) =>
-      addSpotList?.some((item) => item === props.id) ? 'skyblue' : 'white'};
+      selectedSpotList?.some((item) => item === props.id)
+        ? 'skyblue'
+        : 'white'};
     cursor: pointer;
   `;
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
     setSavedSpots([...savedSpots, placeDetail]);
   };
-  const removeFromSavedSpots = (id) => {
-    setSavedSpots(savedSpots.filter((spot) => spot.place_id !== id));
+  const removeFromSavedSpots = (idAry) => {
+    let newSavedSpots;
+    idAry.forEach((id) => {
+      newSavedSpots = savedSpots.filter((spot) => {
+        return spot.place_id !== id;
+      });
+    });
+    setSavedSpots(newSavedSpots);
   };
   const getSavedSpots = () => {
     if (!showSavedSpots) {
@@ -173,7 +181,7 @@ function Explore() {
                   width="100%"
                   onClick={() =>
                     placeDetail.savedSpot
-                      ? removeFromSavedSpots(placeDetail.place_id)
+                      ? removeFromSavedSpots([placeDetail.place_id])
                       : addToSavedSpots()
                   }>
                   {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
@@ -200,8 +208,7 @@ function Explore() {
                     column
                     gap="20px"
                     position="relative"
-                    key={spot.place_id}
-                    onClick={() => savedSpotDetail(spot)}>
+                    key={spot.place_id}>
                     <label name={spot.place_id}>
                       <CheckboxDiv
                         id={spot.place_id}
@@ -214,29 +221,40 @@ function Explore() {
                         id={spot.place_id}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setAddSpotList([...addSpotList, e.target.id]);
+                            setSelectedSpotList([
+                              ...selectedSpotList,
+                              e.target.id,
+                            ]);
                           } else {
-                            setAddSpotList(
-                              addSpotList.filter((item) => item !== e.target.id)
+                            setSelectedSpotList(
+                              selectedSpotList.filter(
+                                (item) => item !== e.target.id
+                              )
                             );
                           }
                         }}
                       />
                     </label>
-                    <img
-                      src={spot?.photos[0]}
-                      style={{ width: '100%', objectFit: 'cover' }}
-                      alt="spot"
-                    />
-                    <FlexChildDiv>
-                      <h3>{spot.name}</h3>
-                      <p>{spot.formatted_address}</p>
-                      <p>{spot.rating}</p>
-                    </FlexChildDiv>
+                    <div onClick={() => savedSpotDetail(spot)}>
+                      <img
+                        src={spot?.photos[0]}
+                        style={{ width: '100%', objectFit: 'cover' }}
+                        alt="spot"
+                      />
+                      <FlexChildDiv>
+                        <h3>{spot.name}</h3>
+                        <p>{spot.formatted_address}</p>
+                        <p>{spot.rating}</p>
+                      </FlexChildDiv>
+                    </div>
                   </Card>
                 ))}
-                <Button styled="danger">刪除景點</Button>
-                <Button styled="primary">加入行程</Button>
+                <Button styled="primary">新增行程</Button>
+                <Button
+                  styled="danger"
+                  onClick={() => removeFromSavedSpots(selectedSpotList)}>
+                  刪除景點
+                </Button>
               </CardWrapper>
             )}
           </FlexChildDiv>
