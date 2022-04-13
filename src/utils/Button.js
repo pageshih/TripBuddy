@@ -1,16 +1,7 @@
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 
-const base = css`
-  border: none;
-  cursor: pointer;
-  &:hover {
-    box-shadow: 1px 1px 3px 1px lightgray;
-  }
-`;
-
 const Button = styled.button`
-  ${base}
   padding: 10px;
   font-size: 16px;
   background-color: ${(props) => {
@@ -29,7 +20,6 @@ const Button = styled.button`
 `;
 
 const RoundButton = styled.button`
-  ${base}
   background-color: lightgray;
   border-radius: 50%;
   width: ${(props) => props.size};

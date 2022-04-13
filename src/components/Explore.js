@@ -60,6 +60,19 @@ function Map({ setPlaceDetail }) {
     lng: 121.53236932147014,
   };
   const zoom = 16;
+  const selectedMarkerStyle = (labelName) => ({
+    label: {
+      text: labelName,
+      color: '#de3400',
+      className: 'label',
+    },
+    icon: {
+      url: markerIcon,
+      labelOrigin: new window.google.maps.Point(25, -10),
+      size: new window.google.maps.Size(48, 48),
+    },
+  });
+
   useEffect(() => {
     if (ref.current && !map) {
       setMap(new window.google.maps.Map(ref.current, { center, zoom }));
@@ -79,17 +92,6 @@ function Map({ setPlaceDetail }) {
           });
           const placeRequest = {
             placeId: e.placeId,
-            fields: [
-              'name',
-              'formatted_address',
-              'place_id',
-              'geometry',
-              'photos',
-              'rating',
-              'opening_hours',
-              'website',
-              'reviews',
-            ],
           };
           if (marker) {
             marker.setMap(null);
@@ -109,16 +111,7 @@ function Map({ setPlaceDetail }) {
                   new window.google.maps.Marker({
                     map,
                     position: place.geometry.location,
-                    label: {
-                      text: place.name,
-                      color: '#de3400',
-                      className: 'label',
-                    },
-                    icon: {
-                      url: markerIcon,
-                      labelOrigin: new window.google.maps.Point(25, -10),
-                      size: new window.google.maps.Size(48, 48),
-                    },
+                    ...selectedMarkerStyle(place.name),
                   })
                 );
                 map.panTo(place.geometry.location);
@@ -139,8 +132,10 @@ function Map({ setPlaceDetail }) {
                   reviews: place.reviews,
                   website: place.website,
                   rating: place.rating,
+                  types: place.types,
                 };
                 setPlaceDetail(removeMethodsInPlaceDetail);
+                console.log(place);
               }
             });
           }
@@ -206,6 +201,7 @@ function Explore() {
                   style={{ width: '100%' }}
                 />
                 <h2>{placeDetail.name}</h2>
+                <p>{}</p>
                 <p>評分：{placeDetail.rating}</p>
                 <p>地址：{placeDetail.formatted_address}</p>
                 <a href={placeDetail.website}>官方網站</a>
