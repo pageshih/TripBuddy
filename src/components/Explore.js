@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import googleMap from '../utils/googleMap';
-import { UidContext } from '../App';
+import { Context } from '../App';
 import { RoundButton, Button } from '../utils/Button';
 import { FlexDiv, FlexChildDiv, Card, CardWrapper } from '../utils/Layout';
 import styled from '@emotion/styled';
@@ -78,10 +78,10 @@ const RoundBtnOnMap = styled(RoundButton)`
   border: 2px solid white;
 `;
 
-function Explore() {
+function Explore({ setWaitingSpots }) {
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
-  const { uid, setUid } = useContext(UidContext);
+  const { uid, setUid } = useContext(Context);
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
@@ -127,7 +127,15 @@ function Explore() {
       .catch((error) => console.log(error));
   };
   const addSelectSpotsToItinerary = (idAry) => {
-    console.log(idAry);
+    let waitingSpots = [];
+    idAry.forEach((id) => {
+      const add = savedSpots.filter((spot) => {
+        return spot.place_id === id;
+      });
+      waitingSpots = [...waitingSpots, ...add];
+    });
+    setWaitingSpots(waitingSpots);
+    navigate('/add');
   };
   const getSavedSpots = () => {
     if (!showSavedSpots) {

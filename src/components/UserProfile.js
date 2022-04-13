@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
-import { UidContext } from '../App';
+import { Context } from '../App';
 import { FlexDiv } from '../utils/Layout';
 import { Button } from '../utils/Button';
 
@@ -16,7 +16,7 @@ const activeStyle = (isActive) => {
 };
 
 function UserProfile() {
-  const { uid, setUid } = useContext(UidContext);
+  const { uid, setUid } = useContext(Context);
   const [profile, setProfile] = useState();
   const navigate = useNavigate();
   const logout = () => {

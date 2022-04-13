@@ -10,12 +10,16 @@ import Explore from './components/Explore';
 import AddItinerary from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 
-const UidContext = createContext();
+const Context = createContext();
 
 function App() {
   const [uid, setUid] = useState();
+  const [waitingSpots, setWaitingSpots] = useState();
   const cssReset = css`
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
     }
@@ -35,7 +39,7 @@ function App() {
   return (
     <>
       <Global styles={cssReset} />
-      <UidContext.Provider value={{ uid, setUid }}>
+      <Context.Provider value={{ uid, setUid }}>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<UserProfile />}>
@@ -46,17 +50,29 @@ function App() {
                 element={<TravelJournals />}></Route>
             </Route>
             <Route path="/login" element={<Login />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/add" element={<AddItinerary />} />
+
+            <Route
+              path="/explore"
+              element={<Explore setWaitingSpots={setWaitingSpots} />}
+            />
+            <Route
+              path="/add"
+              element={
+                <AddItinerary
+                  waitingSpots={waitingSpots}
+                  setWaitingSpots={setWaitingSpots}
+                />
+              }
+            />
             <Route
               path="/travel-journals/:journalID"
               element={<TravelJournalDetail />}
             />
           </Routes>
         </BrowserRouter>
-      </UidContext.Provider>
+      </Context.Provider>
     </>
   );
 }
 
-export { App, UidContext };
+export { App, Context };

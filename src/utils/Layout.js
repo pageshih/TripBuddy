@@ -2,6 +2,11 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 
+const Container = styled.div`
+  max-width: ${(props) => props.maxWidth};
+  margin: ${(props) => props.margin};
+`;
+
 const FlexDiv = styled.div`
   display: flex;
   flex-wrap: ${(props) => props.wrap};
@@ -41,4 +46,4 @@ const Card = styled.li`
   }
 `;
 
-export { FlexDiv, FlexChildDiv, CardWrapper, Card };
+export { FlexDiv, FlexChildDiv, CardWrapper, Card, Container };

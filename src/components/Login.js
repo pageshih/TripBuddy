@@ -1,14 +1,14 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '../utils/firebase';
-import { UidContext } from '../App';
+import { Context } from '../App';
 import { Button } from '../utils/Button';
 import { TextField } from '../utils/TextField';
 
 function Login() {
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
-  const { setUid } = useContext(UidContext);
+  const { setUid } = useContext(Context);
   const navigate = useNavigate();
   const signIn = () => {
     firebaseAuth.signIn(email, password).then((res) => {
