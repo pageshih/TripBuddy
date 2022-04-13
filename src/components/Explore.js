@@ -104,25 +104,30 @@ function Explore() {
   `;
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
-    setSavedSpots([...savedSpots, placeDetail]);
+    if (savedSpots) {
+      setSavedSpots([...savedSpots, placeDetail]);
+    } else {
+      setSavedSpots([placeDetail]);
+    }
   };
   const removeFromSavedSpots = (idAry) => {
     let newSavedSpots = [...savedSpots];
     idAry.forEach((id) => {
       newSavedSpots.forEach((spot, index, array) => {
         if (spot.place_id === id) {
-          console.log(id, newSavedSpots);
           array.splice(index, 1);
         }
       });
     });
     firestore
       .deleteSavesSpots(uid, idAry)
-      .then((res) => {
-        console.log(res);
+      .then(() => {
         setSavedSpots(newSavedSpots);
       })
       .catch((error) => console.log(error));
+  };
+  const addSelectSpotsToItinerary = (idAry) => {
+    console.log(idAry);
   };
   const getSavedSpots = () => {
     if (!showSavedSpots) {
@@ -258,7 +263,13 @@ function Explore() {
                     </div>
                   </Card>
                 ))}
-                <Button styled="primary">新增行程</Button>
+                <Button
+                  styled="primary"
+                  onClick={() => {
+                    addSelectSpotsToItinerary(selectedSpotList);
+                  }}>
+                  新增行程
+                </Button>
                 <Button
                   styled="danger"
                   onClick={() => removeFromSavedSpots(selectedSpotList)}>

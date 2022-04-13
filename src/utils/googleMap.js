@@ -53,23 +53,23 @@ const googleMap = {
           place
         ) {
           const removeMethodsInPlaceDetail = {
-            name: place?.name,
-            place_id: place?.place_id,
-            formatted_address: place?.formatted_address,
+            name: place.name || '未提供',
+            place_id: place.place_id || '未提供',
+            formatted_address: place.formatted_address || '未提供',
             geometry: {
-              lat: place?.geometry?.location?.lat(),
-              lng: place?.geometry?.location?.lng(),
+              lat: place.geometry.location.lat() || '未提供',
+              lng: place.geometry.location.lng() || '未提供',
             },
             opening_hours: {
-              open_now: place?.opening_hours?.open_now,
-              periods: place?.opening_hours?.periods,
-              weekday_text: place?.opening_hours?.weekday_text,
+              open_now: place.opening_hours.open_now || '未提供',
+              periods: place.opening_hours.periods || '未提供',
+              weekday_text: place.opening_hours.weekday_text || '未提供',
             },
-            photos: place?.photos?.map((item) => item.getUrl()),
-            reviews: place?.reviews,
-            website: place?.website,
-            rating: place?.rating,
-            types: place?.types,
+            photos: place.photos.map((item) => item.getUrl()) || '未提供',
+            reviews: place.reviews || '未提供',
+            website: place.website || '未提供',
+            rating: place.rating || '未提供',
+            types: place.types || '未提供',
           };
           resolve(removeMethodsInPlaceDetail);
         } else {

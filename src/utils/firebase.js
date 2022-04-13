@@ -20,6 +20,7 @@ import {
   query,
   where,
   deleteDoc,
+  writeBatch,
 } from 'firebase/firestore';
 
 // Initialize Firebase
@@ -73,18 +74,15 @@ const firestore = {
     });
   },
   deleteSavesSpots(userUID, placeIdAry) {
-    const promises = placeIdAry.map((place_id) => {
-      return new Promise((resolve, reject) => {
-        const placeDocRef = doc(
-          collection(this.db, 'savedSpots', userUID, 'places'),
-          place_id
-        );
-        deleteDoc(placeDocRef)
-          .then(() => resolve(200))
-          .catch((error) => reject(error));
-      });
+    const batch = writeBatch(this.db);
+    placeIdAry.forEach((place_id) => {
+      const placeDocRef = doc(
+        collection(this.db, 'savedSpots', userUID, 'places'),
+        place_id
+      );
+      batch.delete(placeDocRef);
     });
-    return Promise.all(promises);
+    return batch.commit();
   },
 };
 
