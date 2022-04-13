@@ -26,7 +26,6 @@ const FlexChildDiv = styled.div`
 const cardStyle = css`
   border: 1px solid lightgray;
   padding: 10px;
-  list-style: none;
   display: flex;
 `;
 const CardRow = styled.ul`

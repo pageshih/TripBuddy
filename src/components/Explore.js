@@ -3,11 +3,10 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firebaseAuth, firestore } from '../utils/firebase';
+import googleMap from '../utils/googleMap';
 import { UidContext } from '../App';
 import { RoundButton, Button } from '../utils/Button';
 import { FlexDiv, FlexChildDiv } from '../utils/Layout';
-import markerIcon from '../images/place_black_48dp.svg';
-import '../marker.css';
 import styled from '@emotion/styled';
 
 const featureShowPattern = {
@@ -60,26 +59,12 @@ function Map({ setPlaceDetail }) {
     lng: 121.53236932147014,
   };
   const zoom = 16;
-  const selectedMarkerStyle = (labelName) => ({
-    label: {
-      text: labelName,
-      color: '#de3400',
-      className: 'label',
-    },
-    icon: {
-      url: markerIcon,
-      labelOrigin: new window.google.maps.Point(25, -10),
-      size: new window.google.maps.Size(48, 48),
-    },
-  });
 
   useEffect(() => {
     if (ref.current && !map) {
-      setMap(new window.google.maps.Map(ref.current, { center, zoom }));
+      setMap(googleMap.initMap(ref.current, center, zoom));
     } else {
-      map.setOptions({
-        styles: featureShowPattern.default,
-      });
+      googleMap.setMapStyle(map, featureShowPattern.default);
     }
   }, [ref, map]);
 
@@ -87,64 +72,27 @@ function Map({ setPlaceDetail }) {
     if (ref.current && map) {
       window.google.maps.event.addListener(map, 'click', (e) => {
         if (e.placeId) {
-          map.setOptions({
-            styles: featureShowPattern.hideAll,
-          });
-          const placeRequest = {
-            placeId: e.placeId,
-          };
+          googleMap.setMapStyle(map, featureShowPattern.hideAll);
           if (marker) {
-            marker.setMap(null);
+            googleMap.deleteMarker(marker);
           } else {
-            const placeService = new window.google.maps.places.PlacesService(
-              map
-            );
-            placeService.getDetails(placeRequest, (place, status) => {
-              if (
-                status === window.google.maps.places.PlacesServiceStatus.OK &&
-                place &&
-                place.geometry &&
-                place.geometry.location &&
-                place.name
-              ) {
+            googleMap
+              .getPlaceDetails(map, e.placeId)
+              .then((detail) => {
                 setMarker(
-                  new window.google.maps.Marker({
-                    map,
-                    position: place.geometry.location,
-                    ...selectedMarkerStyle(place.name),
-                  })
+                  googleMap.setSelectedMarker(map, detail.geometry, detail.name)
                 );
-                map.panTo(place.geometry.location);
-                const removeMethodsInPlaceDetail = {
-                  name: place.name,
-                  place_id: place.place_id,
-                  formatted_address: place.formatted_address,
-                  geometry: {
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng(),
-                  },
-                  opening_hours: {
-                    open_now: place.opening_hours.open_now,
-                    periods: place.opening_hours.periods,
-                    weekday_text: place.opening_hours.weekday_text,
-                  },
-                  photos: place.photos.map((item) => item.getUrl()),
-                  reviews: place.reviews,
-                  website: place.website,
-                  rating: place.rating,
-                  types: place.types,
-                };
-                setPlaceDetail(removeMethodsInPlaceDetail);
-                console.log(place);
-              }
-            });
+                map.panTo(detail.geometry);
+                setPlaceDetail(detail);
+              })
+              .catch((status) => {
+                console.log(status);
+              });
           }
         } else {
           if (marker) {
-            marker.setMap(null);
-            map.setOptions({
-              styles: featureShowPattern.default,
-            });
+            googleMap.deleteMarker(marker);
+            googleMap.setMapStyle(map, featureShowPattern.default);
             setPlaceDetail(undefined);
           }
         }
