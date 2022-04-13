@@ -9,37 +9,6 @@ import { RoundButton, Button } from '../utils/Button';
 import { FlexDiv, FlexChildDiv, Card, CardWrapper } from '../utils/Layout';
 import styled from '@emotion/styled';
 
-const featureShowPattern = {
-  default: [
-    {
-      featureType: 'poi',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      featureType: 'poi.business',
-      stylers: [{ visibility: 'on' }],
-    },
-    {
-      featureType: 'poi.attraction',
-      stylers: [{ visibility: 'on' }],
-    },
-    {
-      featureType: 'poi.park',
-      stylers: [{ visibility: 'on' }],
-    },
-    {
-      featureType: 'poi.place_of_worship',
-      stylers: [{ visibility: 'on' }],
-    },
-  ],
-  hideAll: [
-    {
-      featureType: 'poi',
-      stylers: [{ visibility: 'off' }],
-    },
-  ],
-};
-
 function Map({
   setPlaceDetail,
   setMap,
@@ -133,6 +102,10 @@ function Explore() {
   `;
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
+    setSavedSpots([...savedSpots, placeDetail]);
+  };
+  const removeFromSavedSpots = (id) => {
+    setSavedSpots(savedSpots.filter((spot) => spot.place_id !== id));
   };
   const getSavedSpots = () => {
     if (!showSavedSpots) {
@@ -150,7 +123,9 @@ function Explore() {
   const savedSpotDetail = (spot) => {
     setShowSavedSpots(false);
     setPlaceDetail({ ...spot, savedSpot: true });
-    googleMap.deleteMarker(marker);
+    if (marker) {
+      googleMap.deleteMarker(marker);
+    }
     map.panTo(spot.geometry);
     setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
@@ -196,7 +171,11 @@ function Explore() {
                   type="button"
                   display="block"
                   width="100%"
-                  onClick={addToSavedSpots}>
+                  onClick={() =>
+                    placeDetail.savedSpot
+                      ? removeFromSavedSpots(placeDetail.place_id)
+                      : addToSavedSpots()
+                  }>
                   {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
                 </Button>
                 <h3>評論</h3>
@@ -222,7 +201,7 @@ function Explore() {
                     gap="20px"
                     position="relative"
                     key={spot.place_id}
-                    onClick={savedSpotDetail(spot)}>
+                    onClick={() => savedSpotDetail(spot)}>
                     <label name={spot.place_id}>
                       <CheckboxDiv
                         id={spot.place_id}
