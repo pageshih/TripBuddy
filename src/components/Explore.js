@@ -40,10 +40,15 @@ const featureShowPattern = {
   ],
 };
 
-function Map({ setPlaceDetail }) {
+function Map({
+  setPlaceDetail,
+  setMap,
+  map,
+  marker,
+  setMarker,
+  setShowSavedSpots,
+}) {
   const ref = useRef();
-  const [map, setMap] = useState();
-  const [marker, setMarker] = useState();
   const center = {
     lat: 25.038621247241373,
     lng: 121.53236932147014,
@@ -54,7 +59,7 @@ function Map({ setPlaceDetail }) {
     if (ref.current && !map) {
       setMap(googleMap.initMap(ref.current, center, zoom));
     } else {
-      googleMap.setMapStyle(map, featureShowPattern.default);
+      googleMap.setMapStyle(map, 'default');
     }
   }, [ref, map]);
 
@@ -62,7 +67,7 @@ function Map({ setPlaceDetail }) {
     if (ref.current && map) {
       window.google.maps.event.addListener(map, 'click', (e) => {
         if (e.placeId) {
-          googleMap.setMapStyle(map, featureShowPattern.hideAll);
+          setShowSavedSpots(false);
           if (marker) {
             googleMap.deleteMarker(marker);
           } else {
@@ -82,7 +87,7 @@ function Map({ setPlaceDetail }) {
         } else {
           if (marker) {
             googleMap.deleteMarker(marker);
-            googleMap.setMapStyle(map, featureShowPattern.default);
+            googleMap.setMapStyle(map, 'default');
             setPlaceDetail(undefined);
           }
         }
@@ -105,6 +110,8 @@ const RoundBtnOnMap = styled(RoundButton)`
 `;
 
 function Explore() {
+  const [map, setMap] = useState();
+  const [marker, setMarker] = useState();
   const { uid, setUid } = useContext(UidContext);
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
@@ -122,6 +129,7 @@ function Explore() {
     left: -10px;
     background-color: ${(props) =>
       addSpotList?.some((item) => item === props.id) ? 'skyblue' : 'white'};
+    cursor: pointer;
   `;
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
@@ -138,6 +146,13 @@ function Explore() {
     } else if (showSavedSpots) {
       setShowSavedSpots(false);
     }
+  };
+  const savedSpotDetail = (spot) => {
+    setShowSavedSpots(false);
+    setPlaceDetail({ ...spot, savedSpot: true });
+    googleMap.deleteMarker(marker);
+    map.panTo(spot.geometry);
+    setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
   useEffect(() => {
     if (uid) {
@@ -164,7 +179,7 @@ function Explore() {
             basis={placeDetail || showSavedSpots ? '500px' : null}
             overflow="scroll"
             padding={placeDetail || showSavedSpots ? '15px 20px' : null}>
-            {placeDetail && (
+            {!showSavedSpots && placeDetail && (
               <>
                 <img
                   src={placeDetail.photos[0]}
@@ -177,11 +192,12 @@ function Explore() {
                 <p>地址：{placeDetail.formatted_address}</p>
                 <a href={placeDetail.website}>官方網站</a>
                 <Button
-                  primary
+                  styled={placeDetail.savedSpot ? 'danger' : 'primary'}
+                  type="button"
                   display="block"
                   width="100%"
                   onClick={addToSavedSpots}>
-                  加入候補景點
+                  {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
                 </Button>
                 <h3>評論</h3>
                 <ul>
@@ -198,12 +214,16 @@ function Explore() {
                 </ul>
               </>
             )}
-            <CardWrapper column gap="20px">
-              {showSavedSpots &&
-                savedSpots &&
-                savedSpots.map((spot) => (
-                  <label name={spot.place_id} key={spot.place_id}>
-                    <Card column gap="20px" position="relative">
+            {showSavedSpots && savedSpots && (
+              <CardWrapper column gap="20px">
+                {savedSpots.map((spot) => (
+                  <Card
+                    column
+                    gap="20px"
+                    position="relative"
+                    key={spot.place_id}
+                    onClick={savedSpotDetail(spot)}>
+                    <label name={spot.place_id}>
                       <CheckboxDiv
                         id={spot.place_id}
                         className="material-icons">
@@ -214,7 +234,6 @@ function Explore() {
                         style={{ display: 'none' }}
                         id={spot.place_id}
                         onChange={(e) => {
-                          console.log(e.target.checked);
                           if (e.target.checked) {
                             setAddSpotList([...addSpotList, e.target.id]);
                           } else {
@@ -224,24 +243,34 @@ function Explore() {
                           }
                         }}
                       />
-                      <img
-                        src={spot?.photos[0]}
-                        style={{ width: '100%', objectFit: 'cover' }}
-                        alt="spot"
-                      />
-                      <FlexChildDiv>
-                        <h3>{spot.name}</h3>
-                        <p>{spot.formatted_address}</p>
-                        <p>{spot.rating}</p>
-                      </FlexChildDiv>
-                    </Card>
-                  </label>
+                    </label>
+                    <img
+                      src={spot?.photos[0]}
+                      style={{ width: '100%', objectFit: 'cover' }}
+                      alt="spot"
+                    />
+                    <FlexChildDiv>
+                      <h3>{spot.name}</h3>
+                      <p>{spot.formatted_address}</p>
+                      <p>{spot.rating}</p>
+                    </FlexChildDiv>
+                  </Card>
                 ))}
-            </CardWrapper>
+                <Button styled="danger">刪除景點</Button>
+                <Button styled="primary">加入行程</Button>
+              </CardWrapper>
+            )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
             <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>
-            <Map setPlaceDetail={setPlaceDetail} />
+            <Map
+              setPlaceDetail={setPlaceDetail}
+              setMap={setMap}
+              map={map}
+              setMarker={setMarker}
+              marker={marker}
+              setShowSavedSpots={setShowSavedSpots}
+            />
           </Wrapper>
         </FlexDiv>
       )}

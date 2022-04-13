@@ -2,12 +2,42 @@ import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
 
 const googleMap = {
+  featureShowPattern: {
+    default: [
+      {
+        featureType: 'poi',
+        stylers: [{ visibility: 'off' }],
+      },
+      {
+        featureType: 'poi.business',
+        stylers: [{ visibility: 'on' }],
+      },
+      {
+        featureType: 'poi.attraction',
+        stylers: [{ visibility: 'on' }],
+      },
+      {
+        featureType: 'poi.park',
+        stylers: [{ visibility: 'on' }],
+      },
+      {
+        featureType: 'poi.place_of_worship',
+        stylers: [{ visibility: 'on' }],
+      },
+    ],
+    hideAll: [
+      {
+        featureType: 'poi',
+        stylers: [{ visibility: 'off' }],
+      },
+    ],
+  },
   initMap(ref, center, zoom) {
     return new window.google.maps.Map(ref, { center, zoom });
   },
   setMapStyle(map, styles) {
     map.setOptions({
-      styles,
+      styles: this.featureShowPattern[styles],
     });
   },
   getPlaceDetails(map, placeId, fields) {
@@ -63,6 +93,7 @@ const googleMap = {
     };
   },
   setSelectedMarker(map, position, labelName) {
+    this.setMapStyle(map, 'hideAll');
     return new window.google.maps.Marker({
       map,
       position,
