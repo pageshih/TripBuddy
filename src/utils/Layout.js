@@ -23,14 +23,12 @@ const FlexChildDiv = styled.div`
   overflow: ${(props) => props.overflow};
   padding: ${(props) => props.padding};
 `;
-const cardStyle = css`
+const Card = styled.ul`
   border: 1px solid lightgray;
   padding: 10px;
   display: flex;
-`;
-const CardRow = styled.ul`
-  ${cardStyle}
-  gap: ${(props) => props.gap}
+  gap: ${(props) => props.gap};
+  flex-direction: ${(props) => props.column && 'column'};
 `;
 
-export { FlexDiv, CardRow, FlexChildDiv };
+export { FlexDiv, Card, FlexChildDiv };

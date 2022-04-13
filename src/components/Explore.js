@@ -6,7 +6,7 @@ import { firebaseAuth, firestore } from '../utils/firebase';
 import googleMap from '../utils/googleMap';
 import { UidContext } from '../App';
 import { RoundButton, Button } from '../utils/Button';
-import { FlexDiv, FlexChildDiv } from '../utils/Layout';
+import { FlexDiv, FlexChildDiv, Card } from '../utils/Layout';
 import styled from '@emotion/styled';
 
 const featureShowPattern = {
@@ -39,16 +39,6 @@ const featureShowPattern = {
     },
   ],
 };
-
-const RoundBtnOnMap = styled(RoundButton)`
-  width: 60px;
-  height: 60px;
-  position: absolute;
-  top: 100px;
-  right: 30px;
-  z-index: 1000;
-  border: 2px solid white;
-`;
 
 function Map({ setPlaceDetail }) {
   const ref = useRef();
@@ -104,17 +94,38 @@ function Map({ setPlaceDetail }) {
   return <div style={{ width: '100%', height: '100vh' }} ref={ref} />;
 }
 
+const RoundBtnOnMap = styled(RoundButton)`
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 100px;
+  right: 30px;
+  z-index: 1000;
+  border: 2px solid white;
+`;
+
 function Explore() {
   const { uid, setUid } = useContext(UidContext);
   const navigate = useNavigate();
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
+  const [showSavedSpots, setShowSavedSpots] = useState(false);
 
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
   };
   const getSavedSpots = () => {
-    firestore.getSavedSpots().then((res) => console.log(res));
+    if (!savedSpots && !showSavedSpots) {
+      setShowSavedSpots(true);
+      firestore
+        .getSavedSpots(uid)
+        .then((res) => setSavedSpots(res))
+        .catch((error) => console.error(error));
+    } else if (showSavedSpots) {
+      setShowSavedSpots(false);
+    } else if (!showSavedSpots) {
+      setShowSavedSpots(true);
+    }
   };
   useEffect(() => {
     if (uid) {
@@ -138,9 +149,9 @@ function Explore() {
       {uid && (
         <FlexDiv height="100vh">
           <FlexChildDiv
-            basis={placeDetail && '500px'}
+            basis={placeDetail || showSavedSpots ? '500px' : null}
             overflow="scroll"
-            padding={placeDetail && '15px 20px'}>
+            padding={placeDetail || showSavedSpots ? '15px 20px' : null}>
             {placeDetail && (
               <>
                 <img
@@ -175,6 +186,22 @@ function Explore() {
                 </ul>
               </>
             )}
+            {showSavedSpots &&
+              savedSpots &&
+              savedSpots.map((spot) => (
+                <Card column key={spot.place_id} gap="20px">
+                  <img
+                    src={spot?.photos[0]}
+                    style={{ width: '100%', objectFit: 'cover' }}
+                    alt="spot"
+                  />
+                  <li>
+                    <h3>{spot.name}</h3>
+                    <p>{spot.formatted_address}</p>
+                    <p>{spot.rating}</p>
+                  </li>
+                </Card>
+              ))}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
             <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>

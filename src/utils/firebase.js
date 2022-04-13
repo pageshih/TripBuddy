@@ -60,14 +60,15 @@ const firestore = {
     );
   },
   getSavedSpots(userUID) {
-    return new Promise((resolve) => {
-      const queryRef = query(
-        collection(this.db, 'savedSpots', userUID, 'places')
-      );
-      getDocs(queryRef).then((profileSnap) => {
-        console.log(profileSnap);
-        resolve(profileSnap);
-      });
+    return new Promise((resolve, reject) => {
+      const placesRef = collection(this.db, 'savedSpots', userUID, 'places');
+      getDocs(placesRef)
+        .then((profileSnap) => {
+          resolve(profileSnap.docs.map((doc) => doc.data()));
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   },
 };

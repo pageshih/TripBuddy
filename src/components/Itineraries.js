@@ -1,11 +1,11 @@
-import { CardRow } from '../utils/Layout';
+import { Card } from '../utils/Layout';
 
 function Itineraries() {
   return (
-    <CardRow gap="20px">
+    <Card gap="20px">
       <img src="https://fakeimg.pl/150/" alt="cover" />
       <h1>Itinerary</h1>
-    </CardRow>
+    </Card>
   );
 }
 
