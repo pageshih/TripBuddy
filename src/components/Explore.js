@@ -107,13 +107,8 @@ function Explore() {
     setSavedSpots([...savedSpots, placeDetail]);
   };
   const removeFromSavedSpots = (idAry) => {
-    let deleteSpots = [];
     let newSavedSpots = [...savedSpots];
     idAry.forEach((id) => {
-      const deleted = savedSpots.filter((spot) => {
-        return spot.place_id === id;
-      });
-      deleteSpots = [...deleteSpots, ...deleted];
       newSavedSpots.forEach((spot, index, array) => {
         if (spot.place_id === id) {
           console.log(id, newSavedSpots);
@@ -121,12 +116,13 @@ function Explore() {
         }
       });
     });
-    console.log(deleteSpots, newSavedSpots);
-    setSavedSpots(newSavedSpots);
-    // firestore
-    //   .deleteSavesSpots(uid, deleteSpots)
-    //   .then((res) => console.log(res))
-    //   .catch((error) => console.log(error));
+    firestore
+      .deleteSavesSpots(uid, idAry)
+      .then((res) => {
+        console.log(res);
+        setSavedSpots(newSavedSpots);
+      })
+      .catch((error) => console.log(error));
   };
   const getSavedSpots = () => {
     if (!showSavedSpots) {
@@ -270,7 +266,7 @@ function Explore() {
                 </Button>
               </CardWrapper>
             )}
-            {showSavedSpots && savedSpots.length === 0 && (
+            {showSavedSpots && savedSpots?.length === 0 && (
               <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
             )}
           </FlexChildDiv>

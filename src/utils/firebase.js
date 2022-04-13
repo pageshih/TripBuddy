@@ -80,7 +80,7 @@ const firestore = {
           place_id
         );
         deleteDoc(placeDocRef)
-          .then(() => resolve('spots have been deleted'))
+          .then(() => resolve(200))
           .catch((error) => reject(error));
       });
     });
