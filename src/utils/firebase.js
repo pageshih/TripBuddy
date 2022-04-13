@@ -19,6 +19,7 @@ import {
   getDocs,
   query,
   where,
+  deleteDoc,
 } from 'firebase/firestore';
 
 // Initialize Firebase
@@ -70,6 +71,20 @@ const firestore = {
           reject(error);
         });
     });
+  },
+  deleteSavesSpots(userUID, placeIdAry) {
+    const promises = placeIdAry.map((place_id) => {
+      return new Promise((resolve, reject) => {
+        const placeDocRef = doc(
+          collection(this.db, 'savedSpots', userUID, 'places'),
+          place_id
+        );
+        deleteDoc(placeDocRef)
+          .then(() => resolve('spots have been deleted'))
+          .catch((error) => reject(error));
+      });
+    });
+    return Promise.all(promises);
   },
 };
 
