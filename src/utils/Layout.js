@@ -23,12 +23,22 @@ const FlexChildDiv = styled.div`
   overflow: ${(props) => props.overflow};
   padding: ${(props) => props.padding};
 `;
-const Card = styled.ul`
+const CardWrapper = styled.ul`
+  display: flex;
+  gap: ${(props) => props.gap};
+  flex-direction: ${(props) => props.column && 'column'};
+`;
+const Card = styled.li`
   border: 1px solid lightgray;
   padding: 10px;
   display: flex;
   gap: ${(props) => props.gap};
   flex-direction: ${(props) => props.column && 'column'};
+  position: ${(props) => props.position};
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 5px lightgray;
+  }
 `;
 
-export { FlexDiv, Card, FlexChildDiv };
+export { FlexDiv, FlexChildDiv, CardWrapper, Card };

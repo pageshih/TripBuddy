@@ -6,7 +6,7 @@ import { firebaseAuth, firestore } from '../utils/firebase';
 import googleMap from '../utils/googleMap';
 import { UidContext } from '../App';
 import { RoundButton, Button } from '../utils/Button';
-import { FlexDiv, FlexChildDiv, Card } from '../utils/Layout';
+import { FlexDiv, FlexChildDiv, Card, CardWrapper } from '../utils/Layout';
 import styled from '@emotion/styled';
 
 const featureShowPattern = {
@@ -110,21 +110,33 @@ function Explore() {
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
+  const [addSpotList, setAddSpotList] = useState([]);
 
+  const CheckboxDiv = styled.div`
+    color: white;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    align-self: flex-start;
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background-color: ${(props) =>
+      addSpotList?.some((item) => item === props.id) ? 'skyblue' : 'white'};
+  `;
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
   };
   const getSavedSpots = () => {
-    if (!savedSpots && !showSavedSpots) {
+    if (!showSavedSpots) {
       setShowSavedSpots(true);
-      firestore
-        .getSavedSpots(uid)
-        .then((res) => setSavedSpots(res))
-        .catch((error) => console.error(error));
+      if (!savedSpots) {
+        firestore
+          .getSavedSpots(uid)
+          .then((res) => setSavedSpots(res))
+          .catch((error) => console.error(error));
+      }
     } else if (showSavedSpots) {
       setShowSavedSpots(false);
-    } else if (!showSavedSpots) {
-      setShowSavedSpots(true);
     }
   };
   useEffect(() => {
@@ -186,22 +198,46 @@ function Explore() {
                 </ul>
               </>
             )}
-            {showSavedSpots &&
-              savedSpots &&
-              savedSpots.map((spot) => (
-                <Card column key={spot.place_id} gap="20px">
-                  <img
-                    src={spot?.photos[0]}
-                    style={{ width: '100%', objectFit: 'cover' }}
-                    alt="spot"
-                  />
-                  <li>
-                    <h3>{spot.name}</h3>
-                    <p>{spot.formatted_address}</p>
-                    <p>{spot.rating}</p>
-                  </li>
-                </Card>
-              ))}
+            <CardWrapper column gap="20px">
+              {showSavedSpots &&
+                savedSpots &&
+                savedSpots.map((spot) => (
+                  <label name={spot.place_id} key={spot.place_id}>
+                    <Card column gap="20px" position="relative">
+                      <CheckboxDiv
+                        id={spot.place_id}
+                        className="material-icons">
+                        check
+                      </CheckboxDiv>
+                      <input
+                        type="checkbox"
+                        style={{ display: 'none' }}
+                        id={spot.place_id}
+                        onChange={(e) => {
+                          console.log(e.target.checked);
+                          if (e.target.checked) {
+                            setAddSpotList([...addSpotList, e.target.id]);
+                          } else {
+                            setAddSpotList(
+                              addSpotList.filter((item) => item !== e.target.id)
+                            );
+                          }
+                        }}
+                      />
+                      <img
+                        src={spot?.photos[0]}
+                        style={{ width: '100%', objectFit: 'cover' }}
+                        alt="spot"
+                      />
+                      <FlexChildDiv>
+                        <h3>{spot.name}</h3>
+                        <p>{spot.formatted_address}</p>
+                        <p>{spot.rating}</p>
+                      </FlexChildDiv>
+                    </Card>
+                  </label>
+                ))}
+            </CardWrapper>
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
             <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>

@@ -15,6 +15,7 @@ const UidContext = createContext();
 function App() {
   const [uid, setUid] = useState();
   const cssReset = css`
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
     body {
       margin: 0;
     }
@@ -28,6 +29,7 @@ function App() {
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
   `;
   return (
