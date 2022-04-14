@@ -14,7 +14,6 @@ import {
 function ChooseDate(props) {
   return (
     <>
-      <h2>預計要去玩幾天呢？</h2>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
         <FlexDiv gap="20px">
           <DatePicker
@@ -65,21 +64,21 @@ function AddItinerary({ setWaitingSpots, waitingSpots }) {
   const [title, setTitle] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
-  const addOverView = [
-    {
-      title: '為這趟旅程取個名字吧！',
-      type: 'text',
-      placeholder: '請輸入行程名稱',
-    },
-    {
-      title: '您選擇了這些景點：',
-      type: 'cards',
-    },
-    {
-      title: '預計要去玩幾天呢？',
-      type: 'calender',
-    },
-  ];
+  // const addOverView = [
+  //   {
+  //     title: '為這趟旅程取個名字吧！',
+  //     type: 'text',
+  //     placeholder: '請輸入行程名稱',
+  //   },
+  //   {
+  //     title: '您選擇了這些景點：',
+  //     type: 'cards',
+  //   },
+  //   {
+  //     title: '預計要去玩幾天呢？',
+  //     type: 'calender',
+  //   },
+  // ];
 
   return (
     <Container maxWidth="1200px" margin="80px auto 0px auto">
@@ -116,12 +115,30 @@ function AddItinerary({ setWaitingSpots, waitingSpots }) {
           );
         })}
       </CardWrapper>
-      <ChooseDate
+      <h2>預計要去玩幾天呢？</h2>
+      <FlexDiv gap="20px">
+        <TextInput
+          type="date"
+          value={startDate}
+          onChange={(e) => {
+            setStartDate(e.target.value);
+          }}
+        />
+        <p>到</p>
+        <TextInput
+          type="date"
+          value={endDate}
+          onChange={(e) => {
+            setEndDate(e.target.value);
+          }}
+        />
+      </FlexDiv>
+      {/* <ChooseDate
         startDate={startDate}
         setStartDate={setStartDate}
         endDate={endDate}
         setEndDate={setEndDate}
-      />
+      /> */}
     </Container>
   );
 }

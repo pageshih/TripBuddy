@@ -84,6 +84,12 @@ const firestore = {
     });
     return batch.commit();
   },
+  setItineraryOverView(userUID) {
+    const itineraryOverviewRef = doc(
+      collection(this.db, 'itineraries', userUID, 'overviews')
+    );
+    console.log(itineraryOverviewRef.id);
+  },
 };
 
 export { firebaseAuth, firestore };
