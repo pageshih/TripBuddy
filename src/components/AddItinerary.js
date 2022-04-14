@@ -169,17 +169,53 @@ function AddOverView(props) {
 }
 
 function AddSchedule(props) {
-  const [overviewData, setOverviewData] = useState();
+  const [data, setData] = useState();
   const { uid } = useContext(Context);
+  const timestampToString = (timestamp) => {
+    return new Date(timestamp).toLocaleDateString();
+  };
   useEffect(() => {
     firestore
       .getItinerary(uid, props.itineraryId)
-      .then((res) => console.log(res))
+      .then((res) => setData(res))
       .catch((error) => console.log(error));
   }, []);
   return (
     <>
       <p>id: {props.itineraryId}</p>
+      {data && (
+        <>
+          <h2>{data.title}</h2>
+          <p>
+            {timestampToString(data.start_date)} -
+            {timestampToString(data.end_date)}
+          </p>
+          <div>
+            <p>待定景點</p>
+            <CardWrapper>
+              {data.waitingSpots?.map((spot) => (
+                <Card
+                  key={spot.place_id}
+                  column
+                  gap="20px"
+                  position="relative"
+                  basis="350px">
+                  <img
+                    style={{ width: '100%', objectFit: 'cover' }}
+                    src={spot.photos[0]}
+                    alt={spot.name}
+                  />
+                  <div>
+                    <h3>{spot.name}</h3>
+                    <p>{spot.formatted_address}</p>
+                    <p>{spot.rating}</p>
+                  </div>
+                </Card>
+              ))}
+            </CardWrapper>
+          </div>
+        </>
+      )}
     </>
   );
 }
