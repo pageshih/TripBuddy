@@ -78,16 +78,56 @@ const RoundBtnOnMap = styled(RoundButton)`
   border: 2px solid white;
 `;
 
-function Explore({ setWaitingSpots }) {
-  const [map, setMap] = useState();
-  const [marker, setMarker] = useState();
-  const { uid, setUid } = useContext(Context);
-  const navigate = useNavigate();
-  const [placeDetail, setPlaceDetail] = useState();
-  const [savedSpots, setSavedSpots] = useState();
-  const [showSavedSpots, setShowSavedSpots] = useState(false);
-  const [selectedSpotList, setSelectedSpotList] = useState([]);
+function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
+  return (
+    <>
+      <img
+        src={placeDetail.photos[0]}
+        alt="placePhoto"
+        style={{ width: '100%' }}
+      />
+      <h2>{placeDetail.name}</h2>
+      <p>{}</p>
+      <p>評分：{placeDetail.rating}</p>
+      <p>地址：{placeDetail.formatted_address}</p>
+      <a href={placeDetail.website}>官方網站</a>
+      <Button
+        styled={placeDetail.savedSpot ? 'danger' : 'primary'}
+        type="button"
+        display="block"
+        width="100%"
+        onClick={() =>
+          placeDetail.savedSpot
+            ? removeFromSavedSpots([placeDetail.place_id])
+            : addToSavedSpots()
+        }>
+        {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
+      </Button>
+      <h3>評論</h3>
+      <ul>
+        {placeDetail.reviews.map((review) => (
+          <li key={review.time}>
+            <FlexDiv>
+              <a href={review.author_url}>{review.author_name}</a>
+            </FlexDiv>
+            <p>{review.relative_time_description}</p>
+            <p>評分：{review.rating}</p>
+            <p>{review.text}</p>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
 
+function SavedSpotsList({
+  savedSpots,
+  setWaitingSpots,
+  getSavedSpotDetail,
+  removeFromSavedSpots,
+}) {
+  const navigate = useNavigate();
+  const [selectedSpotList, setSelectedSpotList] = useState([]);
   const CheckboxDiv = styled.div`
     color: white;
     border: 1px solid lightgray;
@@ -102,6 +142,79 @@ function Explore({ setWaitingSpots }) {
         : 'white'};
     cursor: pointer;
   `;
+  const addSelectSpotsToItinerary = (idAry) => {
+    let waitingSpots = [];
+    idAry.forEach((id) => {
+      const add = savedSpots.filter((spot) => {
+        return spot.place_id === id;
+      });
+      waitingSpots = [...waitingSpots, ...add];
+    });
+    setWaitingSpots(waitingSpots);
+    navigate('/add');
+  };
+  return (
+    <CardWrapper column gap="20px">
+      {savedSpots.map((spot) => (
+        <Card column gap="20px" position="relative" key={spot.place_id}>
+          <label name={spot.place_id}>
+            <CheckboxDiv id={spot.place_id} className="material-icons">
+              check
+            </CheckboxDiv>
+            <input
+              type="checkbox"
+              style={{ display: 'none' }}
+              id={spot.place_id}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedSpotList([...selectedSpotList, e.target.id]);
+                } else {
+                  setSelectedSpotList(
+                    selectedSpotList.filter((item) => item !== e.target.id)
+                  );
+                }
+              }}
+            />
+          </label>
+          <div onClick={() => getSavedSpotDetail(spot)}>
+            <img
+              src={spot?.photos[0]}
+              style={{ width: '100%', objectFit: 'cover' }}
+              alt="spot"
+            />
+            <FlexChildDiv>
+              <h3>{spot.name}</h3>
+              <p>{spot.formatted_address}</p>
+              <p>{spot.rating}</p>
+            </FlexChildDiv>
+          </div>
+        </Card>
+      ))}
+      <Button
+        styled="primary"
+        onClick={() => {
+          addSelectSpotsToItinerary(selectedSpotList);
+        }}>
+        新增行程
+      </Button>
+      <Button
+        styled="danger"
+        onClick={() => removeFromSavedSpots(selectedSpotList)}>
+        刪除景點
+      </Button>
+    </CardWrapper>
+  );
+}
+
+function Explore({ setWaitingSpots }) {
+  const navigate = useNavigate();
+  const { uid, setUid } = useContext(Context);
+  const [map, setMap] = useState();
+  const [marker, setMarker] = useState();
+  const [placeDetail, setPlaceDetail] = useState();
+  const [savedSpots, setSavedSpots] = useState();
+  const [showSavedSpots, setShowSavedSpots] = useState(false);
+
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
     if (savedSpots) {
@@ -126,17 +239,6 @@ function Explore({ setWaitingSpots }) {
       })
       .catch((error) => console.log(error));
   };
-  const addSelectSpotsToItinerary = (idAry) => {
-    let waitingSpots = [];
-    idAry.forEach((id) => {
-      const add = savedSpots.filter((spot) => {
-        return spot.place_id === id;
-      });
-      waitingSpots = [...waitingSpots, ...add];
-    });
-    setWaitingSpots(waitingSpots);
-    navigate('/add');
-  };
   const getSavedSpots = () => {
     if (!showSavedSpots) {
       setShowSavedSpots(true);
@@ -150,7 +252,7 @@ function Explore({ setWaitingSpots }) {
       setShowSavedSpots(false);
     }
   };
-  const savedSpotDetail = (spot) => {
+  const getSavedSpotDetail = (spot) => {
     setShowSavedSpots(false);
     setPlaceDetail({ ...spot, savedSpot: true });
     if (marker) {
@@ -185,105 +287,19 @@ function Explore({ setWaitingSpots }) {
             overflow="scroll"
             padding={placeDetail || showSavedSpots ? '15px 20px' : null}>
             {!showSavedSpots && placeDetail && (
-              <>
-                <img
-                  src={placeDetail.photos[0]}
-                  alt="placePhoto"
-                  style={{ width: '100%' }}
-                />
-                <h2>{placeDetail.name}</h2>
-                <p>{}</p>
-                <p>評分：{placeDetail.rating}</p>
-                <p>地址：{placeDetail.formatted_address}</p>
-                <a href={placeDetail.website}>官方網站</a>
-                <Button
-                  styled={placeDetail.savedSpot ? 'danger' : 'primary'}
-                  type="button"
-                  display="block"
-                  width="100%"
-                  onClick={() =>
-                    placeDetail.savedSpot
-                      ? removeFromSavedSpots([placeDetail.place_id])
-                      : addToSavedSpots()
-                  }>
-                  {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
-                </Button>
-                <h3>評論</h3>
-                <ul>
-                  {placeDetail.reviews.map((review) => (
-                    <li key={review.time}>
-                      <FlexDiv>
-                        <a href={review.author_url}>{review.author_name}</a>
-                      </FlexDiv>
-                      <p>{review.relative_time_description}</p>
-                      <p>評分：{review.rating}</p>
-                      <p>{review.text}</p>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <PlaceDetail
+                placeDetail={placeDetail}
+                addToSavedSpots={addToSavedSpots}
+                removeFromSavedSpots={removeFromSavedSpots}
+              />
             )}
             {showSavedSpots && savedSpots?.length > 0 && (
-              <CardWrapper column gap="20px">
-                {savedSpots.map((spot) => (
-                  <Card
-                    column
-                    gap="20px"
-                    position="relative"
-                    key={spot.place_id}>
-                    <label name={spot.place_id}>
-                      <CheckboxDiv
-                        id={spot.place_id}
-                        className="material-icons">
-                        check
-                      </CheckboxDiv>
-                      <input
-                        type="checkbox"
-                        style={{ display: 'none' }}
-                        id={spot.place_id}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedSpotList([
-                              ...selectedSpotList,
-                              e.target.id,
-                            ]);
-                          } else {
-                            setSelectedSpotList(
-                              selectedSpotList.filter(
-                                (item) => item !== e.target.id
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    </label>
-                    <div onClick={() => savedSpotDetail(spot)}>
-                      <img
-                        src={spot?.photos[0]}
-                        style={{ width: '100%', objectFit: 'cover' }}
-                        alt="spot"
-                      />
-                      <FlexChildDiv>
-                        <h3>{spot.name}</h3>
-                        <p>{spot.formatted_address}</p>
-                        <p>{spot.rating}</p>
-                      </FlexChildDiv>
-                    </div>
-                  </Card>
-                ))}
-                <Button
-                  styled="primary"
-                  onClick={() => {
-                    addSelectSpotsToItinerary(selectedSpotList);
-                  }}>
-                  新增行程
-                </Button>
-                <Button
-                  styled="danger"
-                  onClick={() => removeFromSavedSpots(selectedSpotList)}>
-                  刪除景點
-                </Button>
-              </CardWrapper>
+              <SavedSpotsList
+                savedSpots={savedSpots}
+                removeFromSavedSpots={removeFromSavedSpots}
+                getSavedSpotDetail={getSavedSpotDetail}
+                setWaitingSpots={setWaitingSpots}
+              />
             )}
             {showSavedSpots && savedSpots?.length === 0 && (
               <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
