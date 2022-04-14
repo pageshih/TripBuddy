@@ -7,7 +7,11 @@ import Itineraries from './components/Itineraries';
 import SavedSpots from './components/SavedSpots';
 import TravelJournals from './components/TravelJournals';
 import Explore from './components/Explore';
-import AddItinerary from './components/AddItinerary';
+import {
+  AddItinerary,
+  AddOverView,
+  AddSchedule,
+} from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 
 const Context = createContext();
@@ -55,15 +59,18 @@ function App() {
               path="/explore"
               element={<Explore setWaitingSpots={setWaitingSpots} />}
             />
-            <Route
-              path="/add"
-              element={
-                <AddItinerary
-                  waitingSpots={waitingSpots}
-                  setWaitingSpots={setWaitingSpots}
-                />
-              }
-            />
+            <Route path="/add" element={<AddItinerary />}>
+              <Route
+                path=""
+                element={
+                  <AddOverView
+                    waitingSpots={waitingSpots}
+                    setWaitingSpots={setWaitingSpots}
+                  />
+                }
+              />
+              <Route path=":itineraryId" element={<AddSchedule />} />
+            </Route>
             <Route
               path="/travel-journals/:journalID"
               element={<TravelJournalDetail />}

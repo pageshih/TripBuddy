@@ -122,14 +122,20 @@ const firestore = {
   getItinerary(userUID, itineraryId) {
     const itineraryUserRef = doc(this.db, 'itineraries', userUID);
     const getOverviews = new Promise((resolve, reject) => {
-      getDoc(doc(collection(itineraryUserRef, 'overviews'), itineraryId))
+      const overviewsRef = doc(
+        collection(itineraryUserRef, 'overviews'),
+        itineraryId
+      );
+      getDoc(overviewsRef)
         .then((snapShot) => resolve(snapShot.data()))
         .catch((error) => reject(error));
     });
     const getWaitingSpots = new Promise((resolve, reject) => {
-      getDocs(
-        collection(itineraryUserRef, 'details', itineraryId, 'waitingSpots')
-      )
+      const waitingSpotsRef = collection(
+        doc(itineraryUserRef, 'details', itineraryId),
+        'waitingSpots'
+      );
+      getDocs(waitingSpotsRef)
         .then((snapShots) => {
           const docs = snapShots.docs.map((snapShot) => {
             return snapShot.data();

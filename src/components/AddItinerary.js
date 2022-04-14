@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { firestore } from '../utils/firebase';
+import { firebaseAuth, firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { TextInput } from './styledComponents/TextField';
 import { Button } from './styledComponents/Button';
@@ -60,8 +61,10 @@ function ChooseDate(props) {
     </>
   );
 }
+
 function AddOverView(props) {
   const { uid } = useContext(Context);
+  const navigate = useNavigate();
   const [title, setTitle] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -91,8 +94,7 @@ function AddOverView(props) {
     firestore
       .createItinerary(uid, basicInfo, props.waitingSpots)
       .then((itineraryId) => {
-        props.setItineraryId(itineraryId);
-        props.setShowSchedule(true);
+        navigate(`/add/${itineraryId}`);
       })
       .catch((error) => {
         console.log(error);
@@ -168,21 +170,24 @@ function AddOverView(props) {
   );
 }
 
-function AddSchedule(props) {
+function AddSchedule() {
   const [data, setData] = useState();
+  const { itineraryId } = useParams();
   const { uid } = useContext(Context);
   const timestampToString = (timestamp) => {
     return new Date(timestamp).toLocaleDateString();
   };
   useEffect(() => {
-    firestore
-      .getItinerary(uid, props.itineraryId)
-      .then((res) => setData(res))
-      .catch((error) => console.log(error));
-  }, []);
+    if (uid && itineraryId) {
+      firestore
+        .getItinerary(uid, itineraryId)
+        .then((res) => setData(res))
+        .catch((error) => console.log(error));
+    }
+  }, [uid, itineraryId]);
   return (
     <>
-      <p>id: {props.itineraryId}</p>
+      <p>id: {itineraryId}</p>
       {data && (
         <>
           <h2>{data.title}</h2>
@@ -219,22 +224,32 @@ function AddSchedule(props) {
     </>
   );
 }
-function AddItinerary({ setWaitingSpots, waitingSpots }) {
-  const [showSchedule, setShowSchedule] = useState();
-  const [itineraryId, setItineraryId] = useState();
+function AddItinerary() {
+  const navigate = useNavigate();
+  const { uid, setUid } = useContext(Context);
+
+  useEffect(() => {
+    if (uid) {
+      console.log(uid);
+    } else {
+      firebaseAuth.checkIsLogIn(
+        (userImpl) => {
+          if (userImpl) {
+            setUid(userImpl.uid);
+          } else {
+            alert('請先登入');
+            navigate('/login');
+          }
+        },
+        (error) => console.log(error)
+      );
+    }
+  }, [uid, setUid]);
   return (
     <>
-      {!showSchedule ? (
-        <AddOverView
-          waitingSpots={waitingSpots}
-          setShowSchedule={setShowSchedule}
-          setItineraryId={setItineraryId}
-        />
-      ) : (
-        <AddSchedule itineraryId={itineraryId} />
-      )}
+      <Outlet />
     </>
   );
 }
 
-export default AddItinerary;
+export { AddOverView, AddSchedule, AddItinerary };
