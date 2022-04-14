@@ -27,6 +27,7 @@ const Button = styled.button`
   }};
   align-self: ${(props) => props.alignSelf};
   margin-left: ${(props) => props.marginLeft};
+  margin: ${(props) => props.margin};
   display: ${(props) => props.display};
   width: ${(props) => props.width};
   pointer-events: ${(props) => props.disable && 'none'};

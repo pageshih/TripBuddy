@@ -84,11 +84,20 @@ const firestore = {
     });
     return batch.commit();
   },
-  setItineraryOverView(userUID) {
+  setItineraryOverView(userUID, basicInfo, merge) {
     const itineraryOverviewRef = doc(
       collection(this.db, 'itineraries', userUID, 'overviews')
     );
-    console.log(itineraryOverviewRef.id);
+    const overview = {
+      ...basicInfo,
+      itinerary_id: itineraryOverviewRef.id,
+      cover_photo: 'https://picsum.photos/200/300',
+    };
+    return new Promise((resolve, reject) => {
+      setDoc(itineraryOverviewRef, overview, { merge })
+        .then(() => resolve(itineraryOverviewRef.id))
+        .catch((error) => reject(error));
+    });
   },
 };
 

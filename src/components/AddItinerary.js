@@ -1,8 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { TextInput } from './styledComponents/TextField';
+import { Button } from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -58,9 +60,8 @@ function ChooseDate(props) {
     </>
   );
 }
-
-function AddItinerary({ setWaitingSpots, waitingSpots }) {
-  const { uid, setUid } = useContext(Context);
+function AddOverView(props) {
+  const { uid } = useContext(Context);
   const [title, setTitle] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -79,21 +80,37 @@ function AddItinerary({ setWaitingSpots, waitingSpots }) {
   //     type: 'calender',
   //   },
   // ];
-
+  const createItinerary = () => {
+    const getTimestamp = (date) => new Date(date).getTime();
+    const basicInfo = {
+      title,
+      start_date: getTimestamp(startDate),
+      end_date: getTimestamp(endDate),
+    };
+    firestore
+      .setItineraryOverView(uid, basicInfo)
+      .then((itineraryId) => {
+        props.setShowSchedule(true);
+        props.setItineraryId(itineraryId);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   return (
     <Container maxWidth="1200px" margin="80px auto 0px auto">
       <h2>為這趟旅程取個名字吧！</h2>
       <TextInput
         type="text"
         placeholder="請輸入行程名稱"
-        value={title}
+        value={props.title}
         onChange={(e) => {
           setTitle(e.target.value);
         }}
       />
       <h2>您選擇了這些景點：</h2>
       <CardWrapper gap="20px">
-        {waitingSpots?.map((spot) => {
+        {props.waitingSpots?.map((spot) => {
           return (
             <Card
               column
@@ -133,6 +150,13 @@ function AddItinerary({ setWaitingSpots, waitingSpots }) {
           }}
         />
       </FlexDiv>
+      <Button
+        styled="primary"
+        margin="20px 0 0 auto"
+        display="block"
+        onClick={createItinerary}>
+        新建行程
+      </Button>
       {/* <ChooseDate
         startDate={startDate}
         setStartDate={setStartDate}
@@ -140,6 +164,27 @@ function AddItinerary({ setWaitingSpots, waitingSpots }) {
         setEndDate={setEndDate}
       /> */}
     </Container>
+  );
+}
+
+function AddSchedule(props) {
+  return <p>showSchedule:{props.itineraryId}</p>;
+}
+function AddItinerary({ setWaitingSpots, waitingSpots }) {
+  const [showSchedule, setShowSchedule] = useState();
+  const [itineraryId, setItineraryId] = useState();
+  return (
+    <>
+      {!showSchedule ? (
+        <AddOverView
+          waitingSpots={waitingSpots}
+          setShowSchedule={setShowSchedule}
+          setItineraryId={setItineraryId}
+        />
+      ) : (
+        <AddSchedule itineraryId={itineraryId} />
+      )}
+    </>
   );
 }
 
