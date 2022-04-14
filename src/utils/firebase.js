@@ -84,20 +84,65 @@ const firestore = {
     });
     return batch.commit();
   },
-  setItineraryOverView(userUID, basicInfo, merge) {
-    const itineraryOverviewRef = doc(
-      collection(this.db, 'itineraries', userUID, 'overviews')
+  createItinerary(userUID, basicInfo, waitingSpots, merge) {
+    const batch = writeBatch(this.db);
+    const itineraryUserRef = doc(this.db, 'itineraries', userUID);
+    const itineraryOverviewRef = doc(collection(itineraryUserRef, 'overviews'));
+    const itineraryDetailRef = doc(
+      collection(itineraryUserRef, 'details'),
+      itineraryOverviewRef.id
+    );
+    const itineraryDetailWaitingSpotsRef = collection(
+      itineraryDetailRef,
+      'waitingSpots'
     );
     const overview = {
       ...basicInfo,
       itinerary_id: itineraryOverviewRef.id,
       cover_photo: 'https://picsum.photos/200/300',
     };
-    return new Promise((resolve, reject) => {
-      setDoc(itineraryOverviewRef, overview, { merge })
-        .then(() => resolve(itineraryOverviewRef.id))
+
+    batch.set(itineraryUserRef, {});
+    batch.set(itineraryOverviewRef, overview, { merge });
+    batch.set(
+      itineraryDetailRef,
+      { itinerary_id: itineraryOverviewRef.id },
+      { merge }
+    );
+    waitingSpots.forEach((spot) => {
+      batch.set(doc(itineraryDetailWaitingSpotsRef, spot.place_id), spot, {
+        merge,
+      });
+    });
+    return batch
+      .commit()
+      .then(() => Promise.resolve(itineraryOverviewRef.id))
+      .catch((error) => Promise.reject(error));
+  },
+  getItinerary(userUID, itineraryId) {
+    const itineraryUserRef = doc(this.db, 'itineraries', userUID);
+    const getOverviews = new Promise((resolve, reject) => {
+      getDoc(doc(collection(itineraryUserRef, 'overviews'), itineraryId))
+        .then((snapShot) => resolve(snapShot.data()))
         .catch((error) => reject(error));
     });
+    const getWaitingSpots = new Promise((resolve, reject) => {
+      getDocs(
+        collection(itineraryUserRef, 'details', itineraryId, 'waitingSpots')
+      )
+        .then((snapShots) => {
+          const docs = snapShots.docs.map((snapShot) => {
+            return snapShot.data();
+          });
+          resolve({ waitingSpots: docs });
+        })
+        .catch((error) => reject(error));
+    });
+    return Promise.all([getOverviews, getWaitingSpots]).then((docs) =>
+      docs.reduce((acc, doc) => {
+        return { ...acc, ...doc };
+      }, {})
+    );
   },
 };
 

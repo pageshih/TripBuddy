@@ -65,6 +65,7 @@ function AddOverView(props) {
   const [title, setTitle] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
+
   // const addOverView = [
   //   {
   //     title: '為這趟旅程取個名字吧！',
@@ -88,10 +89,10 @@ function AddOverView(props) {
       end_date: getTimestamp(endDate),
     };
     firestore
-      .setItineraryOverView(uid, basicInfo)
+      .createItinerary(uid, basicInfo, props.waitingSpots)
       .then((itineraryId) => {
-        props.setShowSchedule(true);
         props.setItineraryId(itineraryId);
+        props.setShowSchedule(true);
       })
       .catch((error) => {
         console.log(error);
@@ -168,7 +169,19 @@ function AddOverView(props) {
 }
 
 function AddSchedule(props) {
-  return <p>showSchedule:{props.itineraryId}</p>;
+  const [overviewData, setOverviewData] = useState();
+  const { uid } = useContext(Context);
+  useEffect(() => {
+    firestore
+      .getItinerary(uid, props.itineraryId)
+      .then((res) => console.log(res))
+      .catch((error) => console.log(error));
+  }, []);
+  return (
+    <>
+      <p>id: {props.itineraryId}</p>
+    </>
+  );
 }
 function AddItinerary({ setWaitingSpots, waitingSpots }) {
   const [showSchedule, setShowSchedule] = useState();
