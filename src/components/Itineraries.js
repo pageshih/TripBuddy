@@ -1,4 +1,4 @@
-import { Card } from '../utils/Layout';
+import { Card } from './styledComponents/Layout';
 
 function Itineraries() {
   return (

@@ -2,8 +2,8 @@ import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
-import { Button } from '../utils/Button';
-import { TextField } from '../utils/TextField';
+import { Button } from './styledComponents/Button';
+import { TextField } from './styledComponents/TextField';
 
 function Login() {
   const [email, setEmail] = useState('test@mail.com');

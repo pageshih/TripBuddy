@@ -1,8 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
-import { TextInput } from '../utils/TextField';
-import { Container } from '../utils/Layout';
-import { FlexDiv, FlexChildDiv, Card, CardWrapper } from '../utils/Layout';
+import { TextInput } from './styledComponents/TextField';
+import { Container } from './styledComponents/Layout';
+import {
+  FlexDiv,
+  FlexChildDiv,
+  Card,
+  CardWrapper,
+} from './styledComponents/Layout';
 
 function AddItinerary({ setWaitingSpots, waitingSpots }) {
   const { uid, setUid } = useContext(Context);

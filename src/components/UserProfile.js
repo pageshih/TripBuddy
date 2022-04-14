@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import { Context } from '../App';
-import { FlexDiv } from '../utils/Layout';
-import { Button } from '../utils/Button';
+import { FlexDiv } from './styledComponents/Layout';
+import { Button } from './styledComponents/Button';
 
 const ProfileImg = styled.img`
   border-radius: 50%;

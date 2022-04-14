@@ -5,8 +5,13 @@ import { googleMapApiKey } from '../utils/apiKey';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import googleMap from '../utils/googleMap';
 import { Context } from '../App';
-import { RoundButton, Button } from '../utils/Button';
-import { FlexDiv, FlexChildDiv, Card, CardWrapper } from '../utils/Layout';
+import { RoundButton, Button } from './styledComponents/Button';
+import {
+  FlexDiv,
+  FlexChildDiv,
+  Card,
+  CardWrapper,
+} from './styledComponents/Layout';
 import styled from '@emotion/styled';
 
 function Map({
