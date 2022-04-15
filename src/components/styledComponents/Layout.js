@@ -32,6 +32,7 @@ const CardWrapper = styled.ul`
   display: flex;
   gap: ${(props) => props.gap};
   flex-direction: ${(props) => props.column && 'column'};
+  max-width: ${(props) => props.maxWidth};
 `;
 const Card = styled.li`
   border: 1px solid lightgray;

@@ -1,7 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import styled from '@emotion/styled';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { TextInput } from './styledComponents/TextField';
@@ -13,6 +15,7 @@ import {
   Card,
   CardWrapper,
 } from './styledComponents/Layout';
+import { style } from '@mui/system';
 
 function ChooseDate(props) {
   return (
@@ -169,9 +172,32 @@ function AddOverView(props) {
     </Container>
   );
 }
-
+const DraggableCard = (props) => {
+  const SpotCard = styled(Card)`
+    flex-direction: column;
+    gap: 20px;
+    flex-basis: 300px;
+    cursor: grab;
+    &:hover {
+      cursor: grab;
+    }
+  `;
+  return (
+    <Draggable draggableId={props.id} index={props.index}>
+      {(provided) => (
+        <SpotCard
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}>
+          {props.children}
+        </SpotCard>
+      )}
+    </Draggable>
+  );
+};
 function AddSchedule() {
-  const [data, setData] = useState();
+  const [overviews, setOverviews] = useState();
+  const [waitingSpots, setWaitingSpots] = useState();
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
   const timestampToString = (timestamp) => {
@@ -181,47 +207,76 @@ function AddSchedule() {
     if (uid && itineraryId) {
       firestore
         .getItinerary(uid, itineraryId)
-        .then((res) => setData(res))
+        .then((res) => {
+          setWaitingSpots(res.waitingSpots);
+          setOverviews(res.overviews);
+        })
         .catch((error) => console.log(error));
     }
   }, [uid, itineraryId]);
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+    const items = reorder(
+      waitingSpots,
+      result.source.index,
+      result.destination.index
+    );
+    setWaitingSpots(items);
+  };
+
   return (
-    <>
+    <DragDropContext onDragEnd={onDragEnd}>
       <p>id: {itineraryId}</p>
-      {data && (
+      {overviews && (
         <>
-          <h2>{data.title}</h2>
+          <h2>{overviews.title}</h2>
           <p>
-            {timestampToString(data.start_date)} -
-            {timestampToString(data.end_date)}
+            {timestampToString(overviews.start_date)} -
+            {timestampToString(overviews.end_date)}
           </p>
           <div>
             <p>待定景點</p>
-            <CardWrapper>
-              {data.waitingSpots?.map((spot) => (
-                <Card
-                  key={spot.place_id}
+            <Droppable droppableId="waitingSpotsArea">
+              {(provided) => (
+                <CardWrapper
                   column
                   gap="20px"
-                  position="relative"
-                  basis="350px">
-                  <img
-                    style={{ width: '100%', objectFit: 'cover' }}
-                    src={spot.photos[0]}
-                    alt={spot.name}
-                  />
-                  <div>
-                    <h3>{spot.name}</h3>
-                    <p>{spot.formatted_address}</p>
-                    <p>{spot.rating}</p>
-                  </div>
-                </Card>
-              ))}
-            </CardWrapper>
+                  maxWidth="300px"
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}>
+                  {waitingSpots?.map((spot, index) => (
+                    <DraggableCard
+                      key={spot.place_id}
+                      index={index}
+                      id={spot.place_id}>
+                      <img
+                        style={{ width: '100%', objectFit: 'cover' }}
+                        src={spot.photos[0]}
+                        alt={spot.name}
+                      />
+                      <div>
+                        <h3>{spot.name}</h3>
+                        <p>{spot.formatted_address}</p>
+                        <p>{spot.rating}</p>
+                      </div>
+                    </DraggableCard>
+                  ))}
+                  {provided.placeholder}
+                </CardWrapper>
+              )}
+            </Droppable>
           </div>
         </>
       )}
-    </>
+    </DragDropContext>
   );
 }
 function AddItinerary() {

@@ -145,8 +145,13 @@ const firestore = {
         .catch((error) => reject(error));
     });
     return Promise.all([getOverviews, getWaitingSpots]).then((docs) =>
-      docs.reduce((acc, doc) => {
-        return { ...acc, ...doc };
+      docs.reduce((acc, doc, index) => {
+        if (index === 0) {
+          acc.overviews = doc;
+          return acc;
+        } else {
+          return { ...acc, ...doc };
+        }
       }, {})
     );
   },
