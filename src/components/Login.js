@@ -1,11 +1,11 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
 import { Button } from './styledComponents/Button';
 import { TextField } from './styledComponents/TextField';
 
-function Login() {
+function Login(props) {
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
   const { setUid } = useContext(Context);
@@ -14,9 +14,13 @@ function Login() {
     firebaseAuth.signIn(email, password).then((res) => {
       console.log(res);
       setUid(res.user.uid);
+      props.setIsLogInOut(true);
       navigate(`/itineraries`);
     });
   };
+  useEffect(() => {
+    props?.setIsLogInOut(false);
+  }, [props]);
   return (
     <>
       <TextField

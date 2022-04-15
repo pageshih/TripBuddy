@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { firebaseAuth, firestore } from '../utils/firebase';
+import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { TextInput } from './styledComponents/TextField';
 import { Button } from './styledComponents/Button';
@@ -225,31 +225,7 @@ function AddSchedule() {
   );
 }
 function AddItinerary() {
-  const navigate = useNavigate();
-  const { uid, setUid } = useContext(Context);
-
-  useEffect(() => {
-    if (uid) {
-      console.log(uid);
-    } else {
-      firebaseAuth.checkIsLogIn(
-        (userImpl) => {
-          if (userImpl) {
-            setUid(userImpl.uid);
-          } else {
-            alert('請先登入');
-            navigate('/login');
-          }
-        },
-        (error) => console.log(error)
-      );
-    }
-  }, [uid, setUid]);
-  return (
-    <>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
 
 export { AddOverView, AddSchedule, AddItinerary };

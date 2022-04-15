@@ -2,7 +2,7 @@ import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
-import { firebaseAuth, firestore } from '../utils/firebase';
+import { firestore } from '../utils/firebase';
 import googleMap from '../utils/googleMap';
 import { Context } from '../App';
 import { RoundButton, Button } from './styledComponents/Button';
@@ -266,23 +266,6 @@ function Explore({ setWaitingSpots }) {
     map.panTo(spot.geometry);
     setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
-  useEffect(() => {
-    if (uid) {
-      console.log(uid);
-    } else {
-      firebaseAuth.checkIsLogIn(
-        (userImpl) => {
-          if (userImpl) {
-            setUid(userImpl.uid);
-          } else {
-            alert('請先登入');
-            navigate('/login');
-          }
-        },
-        (error) => console.log(error)
-      );
-    }
-  }, [uid, setUid]);
   return (
     <>
       {uid && (
