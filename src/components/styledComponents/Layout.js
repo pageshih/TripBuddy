@@ -38,6 +38,7 @@ const Card = styled.li`
   padding: 10px;
   display: flex;
   gap: ${(props) => props.gap};
+  flex-basis: ${(props) => props.basis};
   flex-direction: ${(props) => props.column && 'column'};
   position: ${(props) => props.position};
   &:hover {
