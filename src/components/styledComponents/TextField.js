@@ -35,4 +35,9 @@ function TextField({ children, placeholder, value, onChange, type }) {
   );
 }
 
-export { TextField };
+const TextInput = styled.input`
+  ${inputBase}
+  width: 100%;
+`;
+
+export { TextField, TextInput };

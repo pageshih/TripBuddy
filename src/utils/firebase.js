@@ -10,7 +10,19 @@ import {
 import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  writeBatch,
+} from 'firebase/firestore';
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -41,6 +53,36 @@ const firestore = {
         resolve(profileSnap.data());
       });
     });
+  },
+  setSavedSpots(userUID, place) {
+    return setDoc(
+      doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
+      place,
+      { merge: 'merge' }
+    );
+  },
+  getSavedSpots(userUID) {
+    return new Promise((resolve, reject) => {
+      const placesRef = collection(this.db, 'savedSpots', userUID, 'places');
+      getDocs(placesRef)
+        .then((profileSnap) => {
+          resolve(profileSnap.docs.map((doc) => doc.data()));
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  },
+  deleteSavesSpots(userUID, placeIdAry) {
+    const batch = writeBatch(this.db);
+    placeIdAry.forEach((place_id) => {
+      const placeDocRef = doc(
+        collection(this.db, 'savedSpots', userUID, 'places'),
+        place_id
+      );
+      batch.delete(placeDocRef);
+    });
+    return batch.commit();
   },
 };
 

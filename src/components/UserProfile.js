@@ -2,9 +2,9 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
-import { UidContext } from '../App';
-import { FlexDiv } from '../utils/Layout';
-import { Button } from '../utils/Button';
+import { Context } from '../App';
+import { FlexDiv } from './styledComponents/Layout';
+import { Button } from './styledComponents/Button';
 
 const ProfileImg = styled.img`
   border-radius: 50%;
@@ -16,7 +16,7 @@ const activeStyle = (isActive) => {
 };
 
 function UserProfile() {
-  const { uid, setUid } = useContext(UidContext);
+  const { uid, setUid } = useContext(Context);
   const [profile, setProfile] = useState();
   const navigate = useNavigate();
   const logout = () => {
@@ -38,7 +38,7 @@ function UserProfile() {
     } else {
       firebaseAuth.checkIsLogIn(
         (userImpl) => {
-          setUid(userImpl.user.uid);
+          setUid(userImpl.uid);
         },
         (error) => console.log(error)
       );

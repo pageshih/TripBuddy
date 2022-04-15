@@ -1,5 +1,6 @@
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { createContext, useState } from 'react';
+import { Global, css } from '@emotion/react';
 import Login from './components/Login';
 import UserProfile from './components/UserProfile';
 import Itineraries from './components/Itineraries';
@@ -9,30 +10,69 @@ import Explore from './components/Explore';
 import AddItinerary from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 
-const UidContext = createContext();
+const Context = createContext();
 
 function App() {
   const [uid, setUid] = useState();
+  const [waitingSpots, setWaitingSpots] = useState();
+  const cssReset = css`
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      &:hover {
+        box-shadow: 1px 1px 3px 1px lightgray;
+      }
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+  `;
   return (
-    <UidContext.Provider value={{ uid, setUid }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<UserProfile />}>
-            <Route path="itineraries" element={<Itineraries />} />
-            <Route path="saved-spots" element={<SavedSpots />} />
-            <Route path="travel-journals" element={<TravelJournals />}></Route>
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/add" element={<AddItinerary />} />
-          <Route
-            path="/travel-journals/:journalID"
-            element={<TravelJournalDetail />}
-          />
-        </Routes>
-      </BrowserRouter>
-    </UidContext.Provider>
+    <>
+      <Global styles={cssReset} />
+      <Context.Provider value={{ uid, setUid }}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<UserProfile />}>
+              <Route path="itineraries" element={<Itineraries />} />
+              <Route path="saved-spots" element={<SavedSpots />} />
+              <Route
+                path="travel-journals"
+                element={<TravelJournals />}></Route>
+            </Route>
+            <Route path="/login" element={<Login />} />
+
+            <Route
+              path="/explore"
+              element={<Explore setWaitingSpots={setWaitingSpots} />}
+            />
+            <Route
+              path="/add"
+              element={
+                <AddItinerary
+                  waitingSpots={waitingSpots}
+                  setWaitingSpots={setWaitingSpots}
+                />
+              }
+            />
+            <Route
+              path="/travel-journals/:journalID"
+              element={<TravelJournalDetail />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </Context.Provider>
+    </>
   );
 }
 
-export { App, UidContext };
+export { App, Context };
