@@ -5,6 +5,7 @@ import { css, jsx } from '@emotion/react';
 const Container = styled.div`
   max-width: ${(props) => props.maxWidth};
   margin: ${(props) => props.margin};
+  background-color: ${(props) => props.backgroundColor};
 `;
 
 const FlexDiv = styled.div`
@@ -33,6 +34,7 @@ const CardWrapper = styled.ul`
   gap: ${(props) => props.gap};
   flex-direction: ${(props) => props.column && 'column'};
   max-width: ${(props) => props.maxWidth};
+  background-color: ${(props) => props.backgroundColor};
 `;
 const Card = styled.li`
   border: 1px solid lightgray;

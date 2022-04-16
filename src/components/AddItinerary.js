@@ -172,8 +172,8 @@ function AddOverView(props) {
     </Container>
   );
 }
-const DraggableCard = (props) => {
-  const SpotCard = styled(Card)`
+const SpotCard = (props) => {
+  const SpotStyledCard = styled(Card)`
     flex-direction: column;
     gap: 20px;
     flex-basis: 300px;
@@ -185,12 +185,37 @@ const DraggableCard = (props) => {
   return (
     <Draggable draggableId={props.id} index={props.index}>
       {(provided) => (
-        <SpotCard
+        <SpotStyledCard
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
           {props.children}
-        </SpotCard>
+        </SpotStyledCard>
+      )}
+    </Draggable>
+  );
+};
+const ScheduleCard = (props) => {
+  const ScheduleStyledCard = styled(Card)`
+    gap: 20px;
+    flex-basis: 500px;
+    cursor: grab;
+    &:hover {
+      cursor: grab;
+    }
+  `;
+  return (
+    <Draggable draggableId={props.id} index={props.index}>
+      {(provided) => (
+        <FlexDiv>
+          <p>停留 {props.duration} 分鐘</p>
+          <ScheduleStyledCard
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}>
+            {props.children}
+          </ScheduleStyledCard>
+        </FlexDiv>
       )}
     </Draggable>
   );
@@ -198,6 +223,9 @@ const DraggableCard = (props) => {
 function AddSchedule() {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
+  const [schedules, setSchedules] = useState();
+  const [departTime, setDepartTime] = useState('9:00');
+  const [edit, setEdit] = useState();
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
   const timestampToString = (timestamp) => {
@@ -253,7 +281,7 @@ function AddSchedule() {
                   ref={provided.innerRef}
                   {...provided.droppableProps}>
                   {waitingSpots?.map((spot, index) => (
-                    <DraggableCard
+                    <SpotCard
                       key={spot.place_id}
                       index={index}
                       id={spot.place_id}>
@@ -267,12 +295,66 @@ function AddSchedule() {
                         <p>{spot.formatted_address}</p>
                         <p>{spot.rating}</p>
                       </div>
-                    </DraggableCard>
+                    </SpotCard>
                   ))}
                   {provided.placeholder}
                 </CardWrapper>
               )}
             </Droppable>
+            <Container backgroundColor="#fffff5">
+              <FlexDiv
+                alignItems="center"
+                gap="20px"
+                onClick={(e) => {
+                  if (e.target.id !== 'save') {
+                    setEdit('depart');
+                  }
+                }}>
+                <p>出發時間</p>
+                {edit === 'depart' ? (
+                  <>
+                    <input
+                      type="text"
+                      value={departTime}
+                      onChange={(e) => {
+                        setDepartTime(e.target.value);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      id="save"
+                      onClick={(e) => {
+                        if (e.target.id === 'save') {
+                          setEdit('save');
+                        }
+                      }}>
+                      儲存
+                    </button>
+                  </>
+                ) : (
+                  <h2>{departTime}</h2>
+                )}
+              </FlexDiv>
+              <Droppable droppableId="scheduleArea">
+                {(provided) => (
+                  <CardWrapper
+                    column
+                    gap="20px"
+                    backgroundColor="gray"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    {schedules ? (
+                      schedules.map((schedule, index) => (
+                        <ScheduleCard key={index}></ScheduleCard>
+                      ))
+                    ) : (
+                      <Button styled="primary">新增行程</Button>
+                    )}
+                    {provided.placeholder}
+                  </CardWrapper>
+                )}
+              </Droppable>
+            </Container>
           </div>
         </>
       )}
