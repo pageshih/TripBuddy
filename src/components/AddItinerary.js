@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
@@ -263,13 +263,20 @@ function AddSchedule() {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
-  const [departTime, setDepartTime] = useState('9:00');
-  const [startTime, setStartTime] = useState(departTime);
+  const [departTime, setDepartTime] = useState();
   const [edit, setEdit] = useState();
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
-  const timestampToString = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString();
+  const timestampToString = (timestamp, type) => {
+    const timeType = {
+      date: new Date(timestamp).toLocaleDateString(),
+      time: new Date(timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }),
+    };
+    return timeType[type] || '';
   };
   useEffect(() => {
     if (uid && itineraryId) {
@@ -278,6 +285,7 @@ function AddSchedule() {
         .then((res) => {
           setWaitingSpots(res.waitingSpots);
           setOverviews(res.overviews);
+          setDepartTime(res.overviews.start_date);
         })
         .catch((error) => console.log(error));
     }
@@ -289,13 +297,23 @@ function AddSchedule() {
     return result;
   };
   const addSchedule = (spotIndex, scheduleIndex, type) => {
+    let startTime;
     const newSpotsList = Array.from(waitingSpots);
     const newScheduleList = Array.from(schedules);
     const [remove] = newSpotsList.splice(spotIndex, 1);
+    if (scheduleIndex > 0) {
+      for (let i = 0; i < scheduleIndex; i += 1) {
+        startTime =
+          newScheduleList[i].duration * 60 * 1000 +
+          newScheduleList[0].start_time;
+      }
+    } else {
+      startTime = overviews.start_time;
+    }
     const addData = {
-      start_time: startTime,
+      start_time: timestampToString(startTime, 'time'),
       place_id: remove.place_id,
-      duration: 30,
+      duration: 60,
       type,
       placeDetail: remove,
       schedule_id: 'unknown',
@@ -393,8 +411,8 @@ function AddSchedule() {
               <Container>
                 <h2>{overviews.title}</h2>
                 <p>
-                  {timestampToString(overviews.start_date)} -
-                  {timestampToString(overviews.end_date)}
+                  {timestampToString(overviews.start_date, 'date')} -
+                  {timestampToString(overviews.end_date, 'date')}
                 </p>
               </Container>
               <FlexDiv
@@ -410,7 +428,7 @@ function AddSchedule() {
                   <>
                     <input
                       type="text"
-                      value={departTime}
+                      value={timestampToString(departTime, 'time')}
                       onChange={(e) => {
                         setDepartTime(e.target.value);
                       }}
@@ -427,7 +445,7 @@ function AddSchedule() {
                     </button>
                   </>
                 ) : (
-                  <h2>{departTime}</h2>
+                  <h2>{timestampToString(departTime, 'time')}</h2>
                 )}
               </FlexDiv>
               <Droppable droppableId="scheduleArea">
