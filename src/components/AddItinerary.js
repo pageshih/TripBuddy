@@ -14,6 +14,7 @@ import {
   FlexChildDiv,
   Card,
   CardWrapper,
+  cardCss,
 } from './styledComponents/Layout';
 import { style } from '@mui/system';
 
@@ -174,6 +175,7 @@ function AddOverView(props) {
 }
 const SpotCard = (props) => {
   const SpotStyledCard = styled(Card)`
+    background-color: white;
     flex-direction: column;
     gap: 20px;
     flex-basis: 300px;
@@ -196,26 +198,63 @@ const SpotCard = (props) => {
   );
 };
 const ScheduleCard = (props) => {
-  const ScheduleStyledCard = styled(Card)`
+  const ScheduleStyledCard = styled.div`
+    ${cardCss}
+    flex-grow: 1;
     gap: 20px;
     flex-basis: 500px;
     cursor: grab;
+    background-color: white;
     &:hover {
       cursor: grab;
     }
   `;
+  const ScheduleWapper = styled.li`
+    padding: 30px;
+    display: flex;
+    gap: 20px;
+  `;
+  const transportMode = [
+    {
+      mode: 'BICYCLING',
+      text: '騎自行車',
+    },
+    {
+      mode: 'DRIVING',
+      text: '開車',
+    },
+    {
+      mode: 'TRANSIT',
+      text: '搭乘大眾運輸',
+    },
+    {
+      mode: 'WALKING',
+      text: '走路',
+    },
+  ];
   return (
     <Draggable draggableId={props.id} index={props.index}>
       {(provided) => (
-        <FlexDiv>
-          <p>停留 {props.duration} 分鐘</p>
-          <ScheduleStyledCard
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}>
-            {props.children}
-          </ScheduleStyledCard>
-        </FlexDiv>
+        <ScheduleWapper
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}>
+          {props.schedule.type === 'spot' ? (
+            <>
+              <p>停留 {props.schedule.duration} 分鐘</p>
+              <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
+            </>
+          ) : (
+            <p>
+              {transportMode.map((transport) => {
+                return transport.mode === props.schedule.transport_mode
+                  ? transport.text
+                  : '沒有東西';
+              })}
+              <span>{props.schedule.duration}</span>
+            </p>
+          )}
+        </ScheduleWapper>
       )}
     </Draggable>
   );
@@ -223,8 +262,9 @@ const ScheduleCard = (props) => {
 function AddSchedule() {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
-  const [schedules, setSchedules] = useState();
+  const [schedules, setSchedules] = useState([]);
   const [departTime, setDepartTime] = useState('9:00');
+  const [startTime, setStartTime] = useState(departTime);
   const [edit, setEdit] = useState();
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
@@ -248,60 +288,115 @@ function AddSchedule() {
     result.splice(endIndex, 0, removed);
     return result;
   };
+  const addSchedule = (spotIndex, scheduleIndex, type) => {
+    const newSpotsList = Array.from(waitingSpots);
+    const newScheduleList = Array.from(schedules);
+    const [remove] = newSpotsList.splice(spotIndex, 1);
+    const addData = {
+      start_time: startTime,
+      place_id: remove.place_id,
+      duration: 30,
+      type,
+      placeDetail: remove,
+      schedule_id: 'unknown',
+    };
+    console.log(schedules);
+    newScheduleList.splice(scheduleIndex, 0, addData);
+    console.log(newScheduleList);
+
+    return {
+      newSpotsList,
+      newScheduleList,
+    };
+  };
   const onDragEnd = (result) => {
+    const startAndEnd = {
+      startId: result.source.droppableId,
+      startIndex: result.source.index,
+      endId: result.destination.droppableId,
+      endIndex: result.destination.index,
+    };
+    console.log(result);
     if (!result.destination) {
       return;
     }
-    const items = reorder(
-      waitingSpots,
-      result.source.index,
-      result.destination.index
-    );
-    setWaitingSpots(items);
+    if (
+      startAndEnd.startId === 'waitingSpotsArea' &&
+      startAndEnd.endId === 'scheduleArea'
+    ) {
+      const { newSpotsList, newScheduleList } = addSchedule(
+        startAndEnd.startIndex,
+        startAndEnd.endIndex,
+        'spot'
+      );
+      console.log(newSpotsList, newScheduleList);
+      setWaitingSpots(newSpotsList);
+      setSchedules(newScheduleList);
+    } else if (startAndEnd.startId === startAndEnd.endId) {
+      let list;
+      if (startAndEnd.startId === 'waitingSpotsArea') {
+        list = waitingSpots;
+      } else {
+        list = schedules;
+      }
+      const items = reorder(
+        list,
+        result.source.index,
+        result.destination.index
+      );
+      setWaitingSpots(items);
+    } else {
+    }
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <p>id: {itineraryId}</p>
       {overviews && (
         <>
-          <h2>{overviews.title}</h2>
-          <p>
-            {timestampToString(overviews.start_date)} -
-            {timestampToString(overviews.end_date)}
-          </p>
-          <div>
-            <p>待定景點</p>
-            <Droppable droppableId="waitingSpotsArea">
-              {(provided) => (
-                <CardWrapper
-                  column
-                  gap="20px"
-                  maxWidth="300px"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}>
-                  {waitingSpots?.map((spot, index) => (
-                    <SpotCard
-                      key={spot.place_id}
-                      index={index}
-                      id={spot.place_id}>
-                      <img
-                        style={{ width: '100%', objectFit: 'cover' }}
-                        src={spot.photos[0]}
-                        alt={spot.name}
-                      />
-                      <div>
-                        <h3>{spot.name}</h3>
-                        <p>{spot.formatted_address}</p>
-                        <p>{spot.rating}</p>
-                      </div>
-                    </SpotCard>
-                  ))}
-                  {provided.placeholder}
-                </CardWrapper>
-              )}
-            </Droppable>
-            <Container backgroundColor="#fffff5">
+          <FlexDiv minHeight="100vh">
+            <FlexChildDiv
+              padding="30px"
+              style={{ backgroundColor: '#f7f7f7' }}
+              basis="360px">
+              <p>待定景點</p>
+              <Droppable droppableId="waitingSpotsArea">
+                {(provided) => (
+                  <CardWrapper
+                    column
+                    gap="20px"
+                    maxWidth="300px"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    {waitingSpots?.map((spot, index) => (
+                      <SpotCard
+                        key={spot.place_id}
+                        index={index}
+                        id={spot.place_id}>
+                        <img
+                          style={{ width: '100%', objectFit: 'cover' }}
+                          src={spot.photos[0]}
+                          alt={spot.name}
+                        />
+                        <div>
+                          <h3>{spot.name}</h3>
+                          <p>{spot.formatted_address}</p>
+                          <p>{spot.rating}</p>
+                        </div>
+                      </SpotCard>
+                    ))}
+                    {provided.placeholder}
+                  </CardWrapper>
+                )}
+              </Droppable>
+            </FlexChildDiv>
+            <FlexChildDiv grow="1" order="-1" padding="30px">
+              <Container>
+                <h2>{overviews.title}</h2>
+                <p>
+                  {timestampToString(overviews.start_date)} -
+                  {timestampToString(overviews.end_date)}
+                </p>
+              </Container>
               <FlexDiv
                 alignItems="center"
                 gap="20px"
@@ -340,22 +435,37 @@ function AddSchedule() {
                   <CardWrapper
                     column
                     gap="20px"
-                    backgroundColor="gray"
+                    backgroundColor="#f0f0f0"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
-                    {schedules ? (
+                    {schedules?.length > 0 ? (
                       schedules.map((schedule, index) => (
-                        <ScheduleCard key={index}></ScheduleCard>
+                        <ScheduleCard
+                          key={index}
+                          index={index}
+                          id={schedule.schedule_id}
+                          schedule={schedule}>
+                          <div>{schedule.start_time}</div>
+                          <img
+                            style={{ width: '300px' }}
+                            src={schedule.placeDetail.photos[0]}
+                            alt={schedule.placeDetail.name}
+                          />
+                          <div>
+                            <h3>{schedule.placeDetail.name}</h3>
+                            <p>{schedule.placeDetail.formatted_address}</p>
+                          </div>
+                        </ScheduleCard>
                       ))
                     ) : (
-                      <Button styled="primary">新增行程</Button>
+                      <p>拖拉卡片以新增行程</p>
                     )}
                     {provided.placeholder}
                   </CardWrapper>
                 )}
               </Droppable>
-            </Container>
-          </div>
+            </FlexChildDiv>
+          </FlexDiv>
         </>
       )}
     </DragDropContext>
