@@ -172,10 +172,10 @@ function SavedSpotsList({
               id={spot.place_id}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedSpotList([...selectedSpotList, e.target.id]);
+                  setSelectedSpotList([...selectedSpotList, spot.place_id]);
                 } else {
                   setSelectedSpotList(
-                    selectedSpotList.filter((item) => item !== e.target.id)
+                    selectedSpotList.filter((item) => item !== spot.place_id)
                   );
                 }
               }}
