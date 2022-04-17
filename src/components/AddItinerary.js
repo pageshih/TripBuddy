@@ -348,7 +348,7 @@ function AddSchedule() {
       endId: result.destination.droppableId,
       endIndex: result.destination.index,
     };
-    console.log(result);
+    // console.log(result);
     if (!result.destination) {
       return;
     }
@@ -376,7 +376,21 @@ function AddSchedule() {
         result.source.index,
         result.destination.index
       );
-      setWaitingSpots(items);
+      if (startAndEnd.startId === 'scheduleArea') {
+        const updateTimeSchedule = items.map((item, index, array) => {
+          if (index > 0) {
+            const prevSchedule = array[index - 1];
+            item.start_time =
+              prevSchedule.start_time + prevSchedule.duration * 60 * 1000;
+          } else {
+            item.start_time = departTime;
+          }
+          return item;
+        });
+        setSchedules(updateTimeSchedule);
+      } else {
+        setWaitingSpots(items);
+      }
     } else {
     }
   };
@@ -473,7 +487,7 @@ function AddSchedule() {
                     {schedules?.length > 0 ? (
                       schedules.map((schedule, index) => (
                         <ScheduleCard
-                          key={index}
+                          key={schedule.schedule_id}
                           index={index}
                           id={schedule.schedule_id}
                           schedule={schedule}>
