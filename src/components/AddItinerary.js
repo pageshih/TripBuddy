@@ -326,7 +326,8 @@ function AddSchedule() {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
-  const [departTime, setDepartTime] = useState();
+  const [day, setDay] = useState(0);
+  const [departString, setDepartString] = useState();
   const [edit, setEdit] = useState();
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
@@ -339,7 +340,9 @@ function AddSchedule() {
           if (res) {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
-            setDepartTime(res.overviews.start_date);
+            setDepartString(
+              timestampToString(res.overviews.departTimes[0], 'time')
+            );
             res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(res.schedules);
           } else {
@@ -355,14 +358,19 @@ function AddSchedule() {
     result.splice(endIndex, 0, removed);
     return result;
   };
-  const updateTimeOfSchedule = (list, sourceIndex, isSetSchedule) => {
+  const updateTimeOfSchedule = (
+    list,
+    sourceIndex,
+    isSetSchedule,
+    newDepartTime
+  ) => {
     const updatedList = list.map((schedule, index, array) => {
       if (index > 0 && index >= sourceIndex) {
         const prevSchedule = array[index - 1];
         schedule.start_time =
           prevSchedule.start_time + prevSchedule.duration * 60 * 1000;
       } else {
-        schedule.start_time = departTime;
+        schedule.start_time = newDepartTime || overviews.departTimes[day];
       }
       return schedule;
     });
@@ -384,7 +392,7 @@ function AddSchedule() {
           newScheduleList[0].start_time;
       }
     } else {
-      startTime = departTime;
+      startTime = overviews.departTimes[day];
     }
     updateTimeOfSchedule(newScheduleList, scheduleIndex);
     const addData = {
@@ -463,6 +471,13 @@ function AddSchedule() {
     }, -1);
     updateTimeOfSchedule(newSchedules, sourceIndex, true);
   };
+  const updateOverviews = (newOverviews) => {
+    setOverviews(newOverviews);
+    firestore
+      .editOverviews(uid, itineraryId, newOverviews)
+      .then(() => console.log('updated overviews'))
+      .catch((error) => console.error(error));
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
@@ -524,9 +539,9 @@ function AddSchedule() {
                   <>
                     <input
                       type="text"
-                      value={timestampToString(departTime, 'time')}
+                      value={departString}
                       onChange={(e) => {
-                        setDepartTime(e.target.value);
+                        setDepartString(e.target.value);
                       }}
                     />
                     <button
@@ -535,13 +550,27 @@ function AddSchedule() {
                       onClick={(e) => {
                         if (e.target.id === 'save') {
                           setEdit('save');
+                          const inputTime = departString.split(':');
+                          const newTime = new Date(
+                            overviews.departTimes[day]
+                          ).setHours(
+                            Number(inputTime[0]),
+                            Number(inputTime[1])
+                          );
+                          const updateTimes = [...overviews.departTimes];
+                          updateTimes[day] = newTime;
+                          updateOverviews({
+                            ...overviews,
+                            departTimes: updateTimes,
+                          });
+                          updateTimeOfSchedule(schedules, 0, true, newTime);
                         }
                       }}>
                       儲存
                     </button>
                   </>
                 ) : (
-                  <h2>{timestampToString(departTime, 'time')}</h2>
+                  <h2>{departString}</h2>
                 )}
               </FlexDiv>
               <Droppable droppableId="scheduleArea">

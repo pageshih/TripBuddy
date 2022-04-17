@@ -96,8 +96,15 @@ const firestore = {
       itineraryDetailRef,
       'waitingSpots'
     );
+    let departTimes = [];
+    const millisecondsOfDay = 24 * 60 * 60 * 1000;
+    const totalaDays = Number(basicInfo.end_date - basicInfo.start_date);
+    for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
+      departTimes.push(basicInfo.start_date + i * millisecondsOfDay);
+    }
     const overview = {
       ...basicInfo,
+      departTimes,
       itinerary_id: itineraryOverviewRef.id,
       cover_photo: 'https://picsum.photos/200/300',
     };
@@ -203,6 +210,16 @@ const firestore = {
       batch.set(doc(schedulesRef, data.schedule_id), data, { merge });
     });
     return batch.commit();
+  },
+  editOverviews(userUID, itineraryId, newOverview) {
+    return setDoc(
+      doc(
+        collection(this.db, 'itineraries', userUID, 'overviews'),
+        itineraryId
+      ),
+      newOverview,
+      { merge: 'merge' }
+    );
   },
 };
 
