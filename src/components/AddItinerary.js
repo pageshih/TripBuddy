@@ -209,6 +209,8 @@ const SpotCard = (props) => {
   );
 };
 const ScheduleCard = (props) => {
+  const [isEditDuration, setIsEditDuration] = useState();
+  const [duration, setDuration] = useState(props.schedule.duration);
   const ScheduleStyledCard = styled.div`
     ${cardCss}
     flex-grow: 1;
@@ -248,7 +250,44 @@ const ScheduleCard = (props) => {
           {...provided.dragHandleProps}>
           {props.schedule.type === 'spot' ? (
             <>
-              <p>停留 {props.schedule.duration} 分鐘</p>
+              <p
+                onClick={(e) => {
+                  if (e.target.id !== 'duration') {
+                    setIsEditDuration(true);
+                  }
+                }}>
+                停留{' '}
+                {isEditDuration ? (
+                  <>
+                    <input
+                      id="duration"
+                      type="text"
+                      placeholder="請輸入分鐘"
+                      value={duration}
+                      onChange={(e) => {
+                        setDuration(e.target.value);
+                      }}
+                    />
+                    <span>分鐘</span>
+                    <button
+                      id="duration"
+                      type="button"
+                      style={{ marginLeft: '5px', backgroundColor: 'white' }}
+                      onClick={(e) => {
+                        if (e.target.id === 'duration') {
+                          setIsEditDuration(false);
+                        }
+                      }}>
+                      儲存
+                    </button>
+                  </>
+                ) : (
+                  <span>
+                    {duration < 60 ? duration : duration / 60}{' '}
+                    {duration < 60 ? '分鐘' : '小時'}
+                  </span>
+                )}
+              </p>
               <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
             </>
           ) : (
