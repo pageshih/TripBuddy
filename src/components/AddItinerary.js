@@ -284,6 +284,7 @@ function AddSchedule() {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
             setDepartTime(res.overviews.start_date);
+            res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(res.schedules);
           } else {
             alert('找不到行程資料');
@@ -297,6 +298,22 @@ function AddSchedule() {
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     return result;
+  };
+  const updateTimeOfSchedule = (list, sourceIndex, isSetSchedule) => {
+    const updatedList = list.map((schedule, index, array) => {
+      if (index > 0 && index >= sourceIndex) {
+        const prevSchedule = array[index - 1];
+        schedule.start_time =
+          prevSchedule.start_time + prevSchedule.duration * 60 * 1000;
+      } else {
+        schedule.start_time = departTime;
+      }
+      return schedule;
+    });
+    firestore.editSchedule(uid, itineraryId, updatedList, 'merge');
+    if (isSetSchedule) {
+      setSchedules(updatedList);
+    }
   };
   const addSchedule = (spotIndex, scheduleIndex, type) => {
     let startTime;
@@ -313,13 +330,7 @@ function AddSchedule() {
     } else {
       startTime = departTime;
     }
-    for (let i = scheduleIndex; i < newScheduleList.length; i += 1) {
-      newScheduleList[i].start_time += duration * 60 * 1000;
-    }
-    const updateSchedules = newScheduleList.map(
-      (_, index) => index >= scheduleIndex
-    );
-    firestore.editSchedule(uid, itineraryId, updateSchedules, 'merge');
+    updateTimeOfSchedule(newScheduleList, scheduleIndex);
     const addData = {
       start_time: startTime,
       place_id: remove.place_id,
@@ -332,9 +343,7 @@ function AddSchedule() {
       .setSchedule(uid, itineraryId, addData)
       .then(() => console.log('success'))
       .catch((error) => console.error(error));
-    console.log(schedules);
     newScheduleList.splice(scheduleIndex, 0, addData);
-    console.log(newScheduleList);
 
     return {
       newSpotsList,
@@ -348,10 +357,10 @@ function AddSchedule() {
       endId: result.destination.droppableId,
       endIndex: result.destination.index,
     };
-    // console.log(result);
     if (!result.destination) {
       return;
     }
+
     if (
       startAndEnd.startId === 'waitingSpotsArea' &&
       startAndEnd.endId === 'scheduleArea'
@@ -365,33 +374,22 @@ function AddSchedule() {
       setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
     } else if (startAndEnd.startId === startAndEnd.endId) {
-      let list;
-      if (startAndEnd.startId === 'waitingSpotsArea') {
-        list = waitingSpots;
-      } else {
-        list = schedules;
-      }
+      const list =
+        startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
       const items = reorder(
         list,
         result.source.index,
         result.destination.index
       );
       if (startAndEnd.startId === 'scheduleArea') {
-        const updateTimeSchedule = items.map((item, index, array) => {
-          if (index > 0) {
-            const prevSchedule = array[index - 1];
-            item.start_time =
-              prevSchedule.start_time + prevSchedule.duration * 60 * 1000;
-          } else {
-            item.start_time = departTime;
-          }
-          return item;
-        });
-        setSchedules(updateTimeSchedule);
+        updateTimeOfSchedule(items, startAndEnd.startIndex, true);
       } else {
         setWaitingSpots(items);
       }
-    } else {
+    } else if (
+      startAndEnd.startId === 'scheduleArea' &&
+      startAndEnd.endId === 'waitingSpotsArea'
+    ) {
     }
   };
 
