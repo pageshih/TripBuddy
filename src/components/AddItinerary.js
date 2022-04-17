@@ -250,24 +250,36 @@ const ScheduleCard = (props) => {
           {...provided.dragHandleProps}>
           {props.schedule.type === 'spot' ? (
             <>
-              <p
+              <FlexDiv
+                alignItems="center"
+                gap="5px"
                 onClick={(e) => {
                   if (e.target.id !== 'duration') {
                     setIsEditDuration(true);
                   }
                 }}>
-                停留{' '}
+                <p>停留</p>
                 {isEditDuration ? (
                   <>
-                    <input
-                      id="duration"
-                      type="text"
-                      placeholder="請輸入分鐘"
-                      value={duration}
-                      onChange={(e) => {
-                        setDuration(e.target.value);
-                      }}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDuration((prevValue) =>
+                          prevValue >= 30 ? prevValue - 30 : 0
+                        );
+                      }}>
+                      -
+                    </button>
+                    <p>{duration}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDuration((prevValue) =>
+                          prevValue < 1440 ? prevValue + 30 : 1440
+                        );
+                      }}>
+                      +
+                    </button>
                     <span>分鐘</span>
                     <button
                       id="duration"
@@ -276,18 +288,23 @@ const ScheduleCard = (props) => {
                       onClick={(e) => {
                         if (e.target.id === 'duration') {
                           setIsEditDuration(false);
+                          props.updateDuration(
+                            props.schedule.schedule_id,
+                            duration
+                          );
                         }
                       }}>
                       儲存
                     </button>
                   </>
                 ) : (
-                  <span>
+                  <p>
+                    {' '}
                     {duration < 60 ? duration : duration / 60}{' '}
                     {duration < 60 ? '分鐘' : '小時'}
-                  </span>
+                  </p>
                 )}
-              </p>
+              </FlexDiv>
               <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
             </>
           ) : (
@@ -431,7 +448,21 @@ function AddSchedule() {
     ) {
     }
   };
-
+  const updateDuration = (scheduleId, newDuration) => {
+    const newSchedules = Array.from(schedules);
+    newSchedules.forEach((schedule) => {
+      if (schedule.schedule_id === scheduleId) {
+        schedule.duration = newDuration;
+      }
+    });
+    const sourceIndex = schedules.reduce((acc, item, index) => {
+      if (item.schedule_id === scheduleId) {
+        acc = index;
+      }
+      return acc;
+    }, -1);
+    updateTimeOfSchedule(newSchedules, sourceIndex, true);
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
@@ -527,7 +558,8 @@ function AddSchedule() {
                           key={schedule.schedule_id}
                           index={index}
                           id={schedule.schedule_id}
-                          schedule={schedule}>
+                          schedule={schedule}
+                          updateDuration={updateDuration}>
                           <div>
                             {timestampToString(schedule.start_time, 'time')}
                           </div>
