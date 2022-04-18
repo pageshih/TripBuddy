@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.eeb157c2.css","mappings":"AAAA,OAEE,eAAgB,CADhB,2EAA+E,CAE/E,oBACF","sources":["marker.css"],"sourcesContent":[".label{\n  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;\n  max-width: 150px;\n  white-space: pre-line;\n}"],"names":[],"sourceRoot":""}
