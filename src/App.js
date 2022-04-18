@@ -1,13 +1,18 @@
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
-import { createContext, useState } from 'react';
+import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
+import { createContext, useState, useEffect } from 'react';
 import { Global, css } from '@emotion/react';
+import { firebaseAuth } from './utils/firebase';
 import Login from './components/Login';
 import UserProfile from './components/UserProfile';
 import Itineraries from './components/Itineraries';
 import SavedSpots from './components/SavedSpots';
 import TravelJournals from './components/TravelJournals';
 import Explore from './components/Explore';
-import AddItinerary from './components/AddItinerary';
+import {
+  AddItinerary,
+  AddOverView,
+  AddSchedule,
+} from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 
 const Context = createContext();
@@ -15,6 +20,8 @@ const Context = createContext();
 function App() {
   const [uid, setUid] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
+  const [goLogin, setGoLogin] = useState();
+  const [isLogInOut, setIsLogInOut] = useState();
   const cssReset = css`
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
     * {
@@ -36,37 +43,95 @@ function App() {
       margin: 0;
     }
   `;
+  const LoginOrPage = (props) => {
+    useEffect(() => {
+      if (goLogin && !isLogInOut) {
+        alert('請先登入');
+      }
+    }, []);
+    return (
+      <>
+        {goLogin ? (
+          <Navigate to="/login" replace={true} />
+        ) : goLogin !== undefined ? (
+          props.element
+        ) : (
+          <p>loading...</p>
+        )}
+      </>
+    );
+  };
+  useEffect(() => {
+    if (uid) {
+      console.log(uid);
+    } else {
+      firebaseAuth.checkIsLogIn(
+        (userImpl) => {
+          if (userImpl) {
+            setUid(userImpl.uid);
+            setGoLogin(false);
+          } else {
+            setGoLogin(true);
+          }
+        },
+        (error) => console.log(error)
+      );
+    }
+  }, [uid, setUid]);
   return (
     <>
       <Global styles={cssReset} />
       <Context.Provider value={{ uid, setUid }}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<UserProfile />}>
+            <Route
+              path="/"
+              element={
+                <LoginOrPage
+                  element={<UserProfile setIsLogInOut={setIsLogInOut} />}
+                />
+              }>
               <Route path="itineraries" element={<Itineraries />} />
               <Route path="saved-spots" element={<SavedSpots />} />
               <Route
                 path="travel-journals"
                 element={<TravelJournals />}></Route>
             </Route>
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={<Login setIsLogInOut={setIsLogInOut} />}
+            />
 
             <Route
               path="/explore"
-              element={<Explore setWaitingSpots={setWaitingSpots} />}
-            />
-            <Route
-              path="/add"
               element={
-                <AddItinerary
-                  waitingSpots={waitingSpots}
-                  setWaitingSpots={setWaitingSpots}
+                <LoginOrPage
+                  element={<Explore setWaitingSpots={setWaitingSpots} />}
                 />
               }
             />
+            <Route path="/add" element={<AddItinerary />}>
+              <Route
+                path=""
+                element={
+                  <LoginOrPage
+                    element={
+                      <AddOverView
+                        waitingSpots={waitingSpots}
+                        setWaitingSpots={setWaitingSpots}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path=":itineraryId"
+                element={<LoginOrPage element={<AddSchedule />} />}
+              />
+            </Route>
             <Route
               path="/travel-journals/:journalID"
-              element={<TravelJournalDetail />}
+              element={<LoginOrPage element={<TravelJournalDetail />} />}
             />
           </Routes>
         </BrowserRouter>

@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
@@ -15,17 +15,16 @@ const activeStyle = (isActive) => {
   return { color: isActive ? 'blue' : 'black' };
 };
 
-function UserProfile() {
+function UserProfile(props) {
   const { uid, setUid } = useContext(Context);
   const [profile, setProfile] = useState();
-  const navigate = useNavigate();
   const logout = () => {
     firebaseAuth
       .userSignOut()
       .then(() => {
         alert('logout');
         setUid(undefined);
-        navigate('/login');
+        props.setIsLogOut(true);
       })
       .catch((res) => console.log(res));
   };
@@ -35,13 +34,6 @@ function UserProfile() {
         .getProfile(uid)
         .then((res) => setProfile(res))
         .catch((res) => console.log(res.code, res.message));
-    } else {
-      firebaseAuth.checkIsLogIn(
-        (userImpl) => {
-          setUid(userImpl.uid);
-        },
-        (error) => console.log(error)
-      );
     }
   }, [uid, setUid]);
   return (
