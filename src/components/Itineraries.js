@@ -101,10 +101,17 @@ function Itineraries() {
                   <Card gap="20px" column>
                     <FlexDiv gap="20px">
                       <p>{timestampToString(schedule.start_time, 'time')}</p>
-                      <img
-                        src={schedule.placeDetail.photos[0]}
-                        alt={schedule.placeDetail.name}
-                      />
+                      <div style={{ width: '200px', height: '150px' }}>
+                        <img
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                          src={schedule.placeDetail.photos[0]}
+                          alt={schedule.placeDetail.name}
+                        />
+                      </div>
                       <h3>{schedule.placeDetail.name}</h3>
                     </FlexDiv>
                     {Math.floor((schedule.start_time - now) / (60 * 1000)) <=
