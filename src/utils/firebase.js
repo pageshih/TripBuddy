@@ -221,6 +221,22 @@ const firestore = {
       { merge: 'merge' }
     );
   },
+  getScheduleWithTime(userUID, itineraryId, timestamp) {
+    const schedulesRef = collection(
+      this.db,
+      'itineraries',
+      userUID,
+      'details',
+      itineraryId,
+      'schedules'
+    );
+    console.log(timestamp);
+    const q = query(schedulesRef, where('end_time', '>=', Number(timestamp)));
+    return getDocs(q).then((snapShots) => {
+      const target = snapShots.docs.map((doc) => doc.data());
+      return Promise.resolve(target);
+    });
+  },
   getItineraries(userUID) {
     return getDocs(
       collection(this.db, 'itineraries', userUID, 'overviews')
