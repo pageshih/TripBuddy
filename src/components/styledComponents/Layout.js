@@ -35,6 +35,7 @@ const CardWrapper = styled.ul`
   flex-direction: ${(props) => props.column && 'column'};
   max-width: ${(props) => props.maxWidth};
   background-color: ${(props) => props.backgroundColor};
+  padding: ${(props) => props.padding};
 `;
 const cardCss = css`
   border: 1px solid lightgray;
