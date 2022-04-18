@@ -367,10 +367,11 @@ function AddSchedule() {
     const updatedList = list.map((schedule, index, array) => {
       if (index > 0 && index >= sourceIndex) {
         const prevSchedule = array[index - 1];
-        schedule.start_time =
-          prevSchedule.start_time + prevSchedule.duration * 60 * 1000;
+        schedule.start_time = prevSchedule.end_time;
+        schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       } else {
         schedule.start_time = newDepartTime || overviews.departTimes[day];
+        schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       }
       return schedule;
     });
@@ -394,9 +395,9 @@ function AddSchedule() {
     } else {
       startTime = overviews.departTimes[day];
     }
-    updateTimeOfSchedule(newScheduleList, scheduleIndex);
     const addData = {
       start_time: startTime,
+      end_time: startTime + duration * 60 * 1000,
       place_id: remove.place_id,
       duration,
       type,
@@ -437,6 +438,7 @@ function AddSchedule() {
       console.log(newSpotsList, newScheduleList);
       setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
+      updateTimeOfSchedule(newScheduleList, startAndEnd.endIndex, true);
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
