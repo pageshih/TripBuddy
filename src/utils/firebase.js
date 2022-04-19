@@ -237,10 +237,15 @@ const firestore = {
       return Promise.resolve(target);
     });
   },
-  getItineraries(userUID) {
-    return getDocs(
-      collection(this.db, 'itineraries', userUID, 'overviews')
-    ).then((snapShots) => {
+  getItineraries(userUID, timestamp) {
+    const overviewsRef = collection(
+      this.db,
+      'itineraries',
+      userUID,
+      'overviews'
+    );
+    const q = query(overviewsRef, where('end_date', '>=', Number(timestamp)));
+    return getDocs(q).then((snapShots) => {
       const itineraries = snapShots.docs.map((doc) => doc.data());
       return Promise.resolve(itineraries);
     });

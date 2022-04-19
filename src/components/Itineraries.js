@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -25,6 +26,7 @@ const timestampToString = (timestamp, type) => {
 
 function Itineraries() {
   const { uid } = useContext(Context);
+  const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
@@ -32,40 +34,45 @@ function Itineraries() {
 
   useEffect(() => {
     firestore
-      .getItineraries(uid)
+      .getItineraries(uid, now)
       .then((res) => {
-        const itineraries = {
-          coming: [],
-          future: [],
-        };
-        let progressingSchedules;
-        res?.forEach(async (itinerary) => {
-          const countDownDay = Math.floor(
-            (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
-          );
-          console.log(countDownDay);
-          if (countDownDay <= 0 && countDownDay >= -1) {
-            firestore
-              .getScheduleWithTime(uid, itinerary.itinerary_id, now)
-              .then((res) => {
-                if (res) {
-                  console.log(res, now);
-                  progressingSchedules = res;
-                  setProgressing({
-                    overview: itinerary,
-                    schedule: progressingSchedules,
-                  });
-                }
-              })
-              .catch((error) => console.error(error));
-          } else if (countDownDay < 7 && countDownDay > 0) {
-            itineraries.coming.push(itinerary);
-          } else if (countDownDay > 7) {
-            itineraries.future.push(itinerary);
-          }
-        });
-        setComing(itineraries.coming);
-        setFuture(itineraries.future);
+        if (res.length <= 0) {
+          setEmpty(true);
+        } else {
+          setEmpty(false);
+          const itineraries = {
+            coming: [],
+            future: [],
+          };
+          let progressingSchedules;
+          res?.forEach(async (itinerary) => {
+            const countDownDay = Math.floor(
+              (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
+            );
+            console.log(countDownDay);
+            if (countDownDay <= 0 && countDownDay >= -1) {
+              firestore
+                .getScheduleWithTime(uid, itinerary.itinerary_id, now)
+                .then((res) => {
+                  if (res) {
+                    console.log(res, now);
+                    progressingSchedules = res;
+                    setProgressing({
+                      overview: itinerary,
+                      schedule: progressingSchedules,
+                    });
+                  }
+                })
+                .catch((error) => console.error(error));
+            } else if (countDownDay < 7 && countDownDay > 0) {
+              itineraries.coming.push(itinerary);
+            } else if (countDownDay > 7) {
+              itineraries.future.push(itinerary);
+            }
+          });
+          setComing(itineraries.coming);
+          setFuture(itineraries.future);
+        }
       })
       .catch((error) => console.log(error));
   }, []);
@@ -178,7 +185,16 @@ function Itineraries() {
           ))}
         </Container>
       ) : (
-        <p>loading...</p>
+        <>
+          {empty === undefined ? (
+            <p>loading...</p>
+          ) : (
+            <>
+              <p>沒有行程可以顯示</p>
+              <Link to="/explore">探索景點</Link>
+            </>
+          )}
+        </>
       )}
     </CardWrapper>
   );
