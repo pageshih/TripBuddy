@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -41,7 +42,23 @@ const firebaseAuth = {
     return onAuthStateChanged(this.auth, actionWhenChange, actionWhenError);
   },
 };
-
+const firebaseStorage = {
+  storage: getStorage(app),
+  uploadImagesOfReviews({ userUID, itineraryId, scheduleId }, files) {
+    const uploadPromises = files.map((file) => {
+      const itineraryImagesRef = ref(
+        this.storage,
+        `${userUID}/${itineraryId}/${scheduleId}/${file.name}`
+      );
+      return uploadBytes(itineraryImagesRef, file)
+        .then((uploadResult) => {
+          return getDownloadURL(uploadResult.ref);
+        })
+        .then((url) => url);
+    });
+    return Promise.all(uploadPromises);
+  },
+};
 const firestore = {
   db: getFirestore(app),
   setProfile(userUID, profile, merge) {
@@ -196,7 +213,7 @@ const firestore = {
     batch.delete(waitingSpotRef);
     return batch.commit();
   },
-  editSchedule(userUID, itineraryId, updateDatas, merge) {
+  editSchedules(userUID, itineraryId, updateDatas, merge) {
     const batch = writeBatch(this.db);
     const schedulesRef = collection(
       this.db,
@@ -251,4 +268,4 @@ const firestore = {
   },
 };
 
-export { firebaseAuth, firestore };
+export { firebaseAuth, firestore, firebaseStorage };

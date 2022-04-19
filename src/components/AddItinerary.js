@@ -370,7 +370,7 @@ function AddSchedule() {
       }
       return schedule;
     });
-    firestore.editSchedule(uid, itineraryId, updatedList, 'merge');
+    firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
     if (isSetSchedule) {
       setSchedules(updatedList);
     }

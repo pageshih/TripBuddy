@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
-import { firestore } from '../utils/firebase';
+import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
 import {
   Card,
@@ -64,7 +64,6 @@ function AddReview(props) {
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [reviewTags, setReviewTags] = useState();
   const [imageBuffer, setImageBuffer] = useState();
-
   const AddBtn = (props) => {
     return (
       <button type="text" onClick={props.onClickFn}>
@@ -84,7 +83,34 @@ function AddReview(props) {
       setAddTag('');
     }
   };
+  const uploadFirestore = async () => {
+    console.log(checkedReviewTags, imageBuffer);
+    const gallery = await firebaseStorage.uploadImagesOfReviews(
+      {
+        userUID: uid,
+        scheduleId: props.scheduleId,
+        itineraryId: props.itineraryId,
+      },
+      imageBuffer
+    );
+    const updateSchedule = [
+      {
+        schedule_id: props.scheduleId,
+        reviewTags: checkedReviewTags,
+        gallery,
+      },
+    ];
+    firestore
+      .editSchedules(uid, props.itineraryId, updateSchedule, 'merge')
+      .then(() => {
+        setCheckedReviewTags([]);
+        setImageBuffer([]);
+        alert('上傳成功！');
+      })
+      .catch((error) => console.error(error));
+  };
   useEffect(() => {
+    setReviewTags(props.reviewTags);
     if (reviewTags && reviewTags.length > 0) {
       setShowInput(false);
     } else {
@@ -107,17 +133,17 @@ function AddReview(props) {
                     true
                   }
                   onChange={(e) => {
+                    let newCheckedTags;
                     if (e.target.checked) {
-                      setCheckedReviewTags([
-                        ...checkedReviewTags,
-                        e.target.value,
-                      ]);
+                      newCheckedTags = checkedReviewTags
+                        ? [...checkedReviewTags, e.target.value]
+                        : [e.target.value];
                     } else {
-                      const newCheckedTags = checkedReviewTags.filter(
+                      newCheckedTags = checkedReviewTags.filter(
                         (tag) => e.target.value !== tag
                       );
-                      setCheckedReviewTags(newCheckedTags);
                     }
+                    setCheckedReviewTags(newCheckedTags);
                   }}
                 />
               </label>
@@ -147,7 +173,7 @@ function AddReview(props) {
         {imageBuffer?.map((blob, index) => {
           const blobUrl = URL.createObjectURL(blob);
           return (
-            <FlexDiv alignItems="flex-start">
+            <FlexDiv alignItems="flex-start" key={blob.lastModified}>
               <div
                 key={blob.name}
                 style={{ maxWidth: '300px', height: '200px' }}>
@@ -171,7 +197,9 @@ function AddReview(props) {
         })}
       </FlexDiv>
       <AddImages imageBuffer={imageBuffer} setImageBuffer={setImageBuffer} />
-      <button>儲存</button>
+      <button type="click" onClick={uploadFirestore}>
+        儲存
+      </button>
     </Container>
   );
 }
@@ -285,6 +313,8 @@ function Itineraries() {
                       <AddReview
                         key={schedule.schedule_id}
                         itineraryId={progressing.overview.itinerary_id}
+                        scheduleId={schedule.schedule_id}
+                        reviewTags={progressing.overview.reviews}
                       />
                     )}
                   </ScheduleCard>
