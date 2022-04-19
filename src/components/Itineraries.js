@@ -48,7 +48,10 @@ function Itineraries() {
             const countDownDay = Math.floor(
               (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
             );
-            if (countDownDay <= 0 && countDownDay >= -1) {
+            const tripDays =
+              (itinerary.end_date - itinerary.start_date) /
+              (24 * 60 * 60 * 1000);
+            if (countDownDay <= 0 && countDownDay + tripDays >= -1) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now)
                 .then((scheduleProcessing) => {
@@ -79,8 +82,8 @@ function Itineraries() {
         <Container>
           {progressing.overview && <h2>進行中的行程</h2>}
           {progressing.overview && (
-            <div>
-              <Card key={progressing.overview.itinerary_id} gap="20px">
+            <div key={progressing.overview.itinerary_id}>
+              <Card gap="20px">
                 <div
                   style={{
                     width: '200px',
