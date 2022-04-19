@@ -9,9 +9,6 @@ import {
   FlexDiv,
 } from './styledComponents/Layout';
 
-function InProgressItinerary() {
-  return <></>;
-}
 const timestampToString = (timestamp, type) => {
   const timeType = {
     date: new Date(timestamp).toLocaleDateString(),
@@ -23,6 +20,116 @@ const timestampToString = (timestamp, type) => {
   };
   return timeType[type] || '';
 };
+
+function AddReview(props) {
+  const [addTag, setAddTag] = useState('');
+  const [showInput, setShowInput] = useState();
+  const [checkedReviewTags, setCheckedReviewTags] = useState();
+  const [reviewTags, setReviewTags] = useState();
+
+  const AddBtn = (props) => {
+    return (
+      <button type="text" onClick={props.onClickFn}>
+        +
+      </button>
+    );
+  };
+  const addCheckedTag = () => {
+    if (addTag) {
+      const newReviewTags = reviewTags ? [...reviewTags] : [];
+      const newCheckedTags = checkedReviewTags ? [...checkedReviewTags] : [];
+      setReviewTags([...newReviewTags, addTag]);
+      setCheckedReviewTags([...newCheckedTags, addTag]);
+      setAddTag('');
+    }
+  };
+  useEffect(() => {
+    if (reviewTags && reviewTags.length > 0) {
+      setShowInput(false);
+    } else {
+      setShowInput(true);
+    }
+  }, []);
+  return (
+    <Container>
+      <FlexDiv alignItems="center" gap="10px">
+        <form>
+          {reviewTags &&
+            reviewTags.map((tag) => (
+              <label key={tag}>
+                {tag}
+                <input
+                  value={tag}
+                  type="checkbox"
+                  checked={
+                    checkedReviewTags?.some((checked) => tag === checked) &&
+                    true
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setCheckedReviewTags([
+                        ...checkedReviewTags,
+                        e.target.value,
+                      ]);
+                    } else {
+                      const newCheckedTags = checkedReviewTags.filter(
+                        (tag) => e.target.value !== tag
+                      );
+                      setCheckedReviewTags(newCheckedTags);
+                    }
+                  }}
+                />
+              </label>
+            ))}
+          {showInput ? (
+            <>
+              <input
+                type="type"
+                placeholder="按 + 新增心得標籤"
+                value={addTag}
+                onChange={(e) => {
+                  setAddTag(e.target.value);
+                }}
+              />
+              <AddBtn onClickFn={addCheckedTag} />
+            </>
+          ) : (
+            <AddBtn
+              onClickFn={() => {
+                setShowInput(true);
+              }}
+            />
+          )}
+        </form>
+      </FlexDiv>
+      <button>上傳照片</button>
+      <button>儲存</button>
+    </Container>
+  );
+}
+
+function ScheduleCard(props) {
+  return (
+    <Card gap="20px" column>
+      <FlexDiv gap="20px">
+        <p>{timestampToString(props.schedule.start_time, 'time')}</p>
+        <div style={{ width: '200px', height: '150px' }}>
+          <img
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+            src={props.schedule.placeDetail.photos[0]}
+            alt={props.schedule.placeDetail.name}
+          />
+        </div>
+        <h3>{props.schedule.placeDetail.name}</h3>
+      </FlexDiv>
+      {props.children}
+    </Card>
+  );
+}
 
 function Itineraries() {
   const { uid } = useContext(Context);
@@ -104,36 +211,10 @@ function Itineraries() {
               </Card>
               {progressing.schedule?.map((schedule) => {
                 return (
-                  <Card gap="20px" column>
-                    <FlexDiv gap="20px">
-                      <p>{timestampToString(schedule.start_time, 'time')}</p>
-                      <div style={{ width: '200px', height: '150px' }}>
-                        <img
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }}
-                          src={schedule.placeDetail.photos[0]}
-                          alt={schedule.placeDetail.name}
-                        />
-                      </div>
-                      <h3>{schedule.placeDetail.name}</h3>
-                    </FlexDiv>
+                  <ScheduleCard schedule={schedule} key={schedule.schedule_id}>
                     {Math.floor((schedule.start_time - now) / (60 * 1000)) <=
-                      0 && (
-                      <Container>
-                        <FlexDiv>
-                          <label>
-                            餐點可口
-                            <input type="checkbox" />
-                          </label>
-                        </FlexDiv>
-                        <button>上傳照片</button>
-                        <button>儲存</button>
-                      </Container>
-                    )}
-                  </Card>
+                      0 && <AddReview key={schedule.schedule_id} />}
+                  </ScheduleCard>
                 );
               })}
             </div>
