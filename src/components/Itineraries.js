@@ -35,8 +35,8 @@ function Itineraries() {
   useEffect(() => {
     firestore
       .getItineraries(uid, now)
-      .then((res) => {
-        if (res.length <= 0) {
+      .then((overviews) => {
+        if (overviews.length <= 0) {
           setEmpty(true);
         } else {
           setEmpty(false);
@@ -44,22 +44,18 @@ function Itineraries() {
             coming: [],
             future: [],
           };
-          let progressingSchedules;
-          res?.forEach(async (itinerary) => {
+          overviews?.forEach(async (itinerary) => {
             const countDownDay = Math.floor(
               (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
             );
-            console.log(countDownDay);
             if (countDownDay <= 0 && countDownDay >= -1) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now)
-                .then((res) => {
-                  if (res) {
-                    console.log(res, now);
-                    progressingSchedules = res;
+                .then((scheduleProcessing) => {
+                  if (scheduleProcessing) {
                     setProgressing({
                       overview: itinerary,
-                      schedule: progressingSchedules,
+                      schedule: scheduleProcessing,
                     });
                   }
                 })
@@ -74,7 +70,7 @@ function Itineraries() {
           setFuture(itineraries.future);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   }, []);
 
   return (
