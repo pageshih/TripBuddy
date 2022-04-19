@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -20,12 +21,49 @@ const timestampToString = (timestamp, type) => {
   };
   return timeType[type] || '';
 };
-
+function AddImages(props) {
+  const compressImages = async (files) => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    const images = [...files].map((image) => {
+      return imageCompression(image, options);
+    });
+    return Promise.all(images);
+  };
+  return (
+    <label
+      style={{
+        backgroundColor: 'lightgray',
+        fontSize: '13px',
+        padding: '1px 5px',
+      }}>
+      <input
+        type="file"
+        style={{ display: 'none' }}
+        accept="image/*"
+        multiple
+        onChange={async (e) => {
+          let addCompressed = await compressImages(e.target.files);
+          if (props.imageBuffer?.length > 0) {
+            addCompressed = [...props.imageBuffer, ...addCompressed];
+          }
+          props.setImageBuffer(addCompressed);
+        }}
+      />
+      上傳照片
+    </label>
+  );
+}
 function AddReview(props) {
+  const { uid } = useContext(Context);
   const [addTag, setAddTag] = useState('');
   const [showInput, setShowInput] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [reviewTags, setReviewTags] = useState();
+  const [imageBuffer, setImageBuffer] = useState();
 
   const AddBtn = (props) => {
     return (
@@ -39,6 +77,9 @@ function AddReview(props) {
       const newReviewTags = reviewTags ? [...reviewTags] : [];
       const newCheckedTags = checkedReviewTags ? [...checkedReviewTags] : [];
       setReviewTags([...newReviewTags, addTag]);
+      firestore.editOverviews(uid, props.itineraryId, {
+        reviews: [...newReviewTags, addTag],
+      });
       setCheckedReviewTags([...newCheckedTags, addTag]);
       setAddTag('');
     }
@@ -102,7 +143,34 @@ function AddReview(props) {
           )}
         </form>
       </FlexDiv>
-      <button>上傳照片</button>
+      <FlexDiv gap="20px">
+        {imageBuffer?.map((blob, index) => {
+          const blobUrl = URL.createObjectURL(blob);
+          return (
+            <FlexDiv alignItems="flex-start">
+              <div
+                key={blob.name}
+                style={{ maxWidth: '300px', height: '200px' }}>
+                <img
+                  src={blobUrl}
+                  alt={blob.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+              <button
+                onClick={() => {
+                  const newImagesBuffer = imageBuffer.filter(
+                    (_, newIndex) => index !== newIndex
+                  );
+                  setImageBuffer(newImagesBuffer);
+                }}>
+                X
+              </button>
+            </FlexDiv>
+          );
+        })}
+      </FlexDiv>
+      <AddImages imageBuffer={imageBuffer} setImageBuffer={setImageBuffer} />
       <button>儲存</button>
     </Container>
   );
@@ -213,7 +281,12 @@ function Itineraries() {
                 return (
                   <ScheduleCard schedule={schedule} key={schedule.schedule_id}>
                     {Math.floor((schedule.start_time - now) / (60 * 1000)) <=
-                      0 && <AddReview key={schedule.schedule_id} />}
+                      0 && (
+                      <AddReview
+                        key={schedule.schedule_id}
+                        itineraryId={progressing.overview.itinerary_id}
+                      />
+                    )}
                   </ScheduleCard>
                 );
               })}

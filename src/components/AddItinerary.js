@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+// import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+// import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import styled from '@emotion/styled';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
@@ -16,55 +16,55 @@ import {
   CardWrapper,
   cardCss,
 } from './styledComponents/Layout';
-import { style } from '@mui/system';
+// import { style } from '@mui/system';
 
-function ChooseDate(props) {
-  return (
-    <>
-      <LocalizationProvider dateAdapter={AdapterLuxon}>
-        <FlexDiv gap="20px">
-          <DatePicker
-            label="date range"
-            value={props.startDate}
-            onChange={(newDate) => {
-              props.setStartDate(newDate);
-            }}
-            renderInput={({ inputRef, inputProps, InputProps }) => (
-              <FlexDiv alignItems="center">
-                <TextInput
-                  ref={inputRef}
-                  {...inputProps}
-                  placeholder="旅程開始日期"
-                  readOnly
-                />
-                {InputProps?.endAdornment}
-              </FlexDiv>
-            )}
-          />
-          <p>到</p>
-          <DatePicker
-            label="date range"
-            value={props.endDate}
-            onChange={(newDate) => {
-              props.setEndDate(newDate);
-            }}
-            renderInput={({ inputRef, inputProps, InputProps }) => (
-              <FlexDiv alignItems="center">
-                <TextInput
-                  ref={inputRef}
-                  {...inputProps}
-                  placeholder="旅程結束日期"
-                  readOnly
-                />
-                {InputProps?.endAdornment}
-              </FlexDiv>
-            )}
-          />
-        </FlexDiv>
-      </LocalizationProvider>
-    </>
-  );
-}
+// function ChooseDate(props) {
+//   return (
+//     <>
+//       <LocalizationProvider dateAdapter={AdapterLuxon}>
+//         <FlexDiv gap="20px">
+//           <DatePicker
+//             label="date range"
+//             value={props.startDate}
+//             onChange={(newDate) => {
+//               props.setStartDate(newDate);
+//             }}
+//             renderInput={({ inputRef, inputProps, InputProps }) => (
+//               <FlexDiv alignItems="center">
+//                 <TextInput
+//                   ref={inputRef}
+//                   {...inputProps}
+//                   placeholder="旅程開始日期"
+//                   readOnly
+//                 />
+//                 {InputProps?.endAdornment}
+//               </FlexDiv>
+//             )}
+//           />
+//           <p>到</p>
+//           <DatePicker
+//             label="date range"
+//             value={props.endDate}
+//             onChange={(newDate) => {
+//               props.setEndDate(newDate);
+//             }}
+//             renderInput={({ inputRef, inputProps, InputProps }) => (
+//               <FlexDiv alignItems="center">
+//                 <TextInput
+//                   ref={inputRef}
+//                   {...inputProps}
+//                   placeholder="旅程結束日期"
+//                   readOnly
+//                 />
+//                 {InputProps?.endAdornment}
+//               </FlexDiv>
+//             )}
+//           />
+//         </FlexDiv>
+//       </LocalizationProvider>
+//     </>
+//   );
+// }
 const timestampToString = (timestamp, type) => {
   const timeType = {
     date: new Date(timestamp).toLocaleDateString(),
