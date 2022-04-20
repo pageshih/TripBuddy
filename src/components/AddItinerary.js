@@ -196,7 +196,10 @@ const SpotCard = (props) => {
     }
   `;
   return (
-    <Draggable draggableId={props.id} index={props.index}>
+    <Draggable
+      draggableId={props.id}
+      index={props.index}
+      isDragDisabled={props.browse}>
       {(provided) => (
         <SpotStyledCard
           ref={provided.innerRef}
@@ -242,7 +245,10 @@ const ScheduleCard = (props) => {
     },
   ];
   return (
-    <Draggable draggableId={props.id} index={props.index}>
+    <Draggable
+      draggableId={props.id}
+      index={props.index}
+      isDragDisabled={props.browse}>
       {(provided) => (
         <ScheduleWapper
           ref={provided.innerRef}
@@ -322,20 +328,22 @@ const ScheduleCard = (props) => {
     </Draggable>
   );
 };
-function AddSchedule() {
+
+function AddSchedule(props) {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
   const [edit, setEdit] = useState();
+  const [isBrowse, setIsBrowse] = useState(props.browse);
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
 
   useEffect(() => {
     if (uid && itineraryId) {
       firestore
-        .getItinerary(uid, itineraryId)
+        .getItinerary(uid, itineraryId, true)
         .then((res) => {
           if (res) {
             setWaitingSpots(res.waitingSpots);
@@ -408,6 +416,7 @@ function AddSchedule() {
       newScheduleList,
     };
   };
+  const uploadFirestore = () => {};
   const onDragEnd = (result) => {
     const startAndEnd = {
       startId: result.source.droppableId,
@@ -473,41 +482,61 @@ function AddSchedule() {
       {overviews && (
         <>
           <FlexDiv minHeight="100vh">
-            <FlexChildDiv
-              padding="30px"
-              style={{ backgroundColor: '#f7f7f7' }}
-              basis="360px">
-              <p>待定景點</p>
-              <Droppable droppableId="waitingSpotsArea">
-                {(provided) => (
-                  <CardWrapper
-                    column
-                    gap="20px"
-                    maxWidth="300px"
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}>
-                    {waitingSpots?.map((spot, index) => (
-                      <SpotCard
-                        key={spot.place_id}
-                        index={index}
-                        id={spot.place_id}>
-                        <img
-                          style={{ width: '100%', objectFit: 'cover' }}
-                          src={spot.photos[0]}
-                          alt={spot.name}
-                        />
-                        <div>
-                          <h3>{spot.name}</h3>
-                          <p>{spot.formatted_address}</p>
-                          <p>{spot.rating}</p>
-                        </div>
-                      </SpotCard>
-                    ))}
-                    {provided.placeholder}
-                  </CardWrapper>
-                )}
-              </Droppable>
-            </FlexChildDiv>
+            {isBrowse ? (
+              <button
+                style={{ alignSelf: 'flex-start', margin: '50px 30px 0 0' }}
+                onClick={() => setIsBrowse(false)}>
+                編輯
+              </button>
+            ) : (
+              <FlexChildDiv
+                padding="30px"
+                style={{ backgroundColor: '#f7f7f7' }}
+                basis="360px">
+                <button
+                  style={{
+                    alignSelf: 'flex-end',
+                    backgroundColor: 'crimson',
+                    color: 'white',
+                  }}
+                  onClick={() => setIsBrowse(true)}>
+                  結束編輯
+                </button>
+                <p>待定景點</p>
+                <Droppable
+                  droppableId="waitingSpotsArea"
+                  isDropDisabled={isBrowse}>
+                  {(provided) => (
+                    <CardWrapper
+                      column
+                      gap="20px"
+                      maxWidth="300px"
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      browse={isBrowse}>
+                      {waitingSpots?.map((spot, index) => (
+                        <SpotCard
+                          key={spot.place_id}
+                          index={index}
+                          id={spot.place_id}>
+                          <img
+                            style={{ width: '100%', objectFit: 'cover' }}
+                            src={spot.photos[0]}
+                            alt={spot.name}
+                          />
+                          <div>
+                            <h3>{spot.name}</h3>
+                            <p>{spot.formatted_address}</p>
+                            <p>{spot.rating}</p>
+                          </div>
+                        </SpotCard>
+                      ))}
+                      {provided.placeholder}
+                    </CardWrapper>
+                  )}
+                </Droppable>
+              </FlexChildDiv>
+            )}
             <FlexChildDiv grow="1" order="-1" padding="30px">
               <Container>
                 <h2>{overviews.title}</h2>
@@ -520,7 +549,7 @@ function AddSchedule() {
                 alignItems="center"
                 gap="20px"
                 onClick={(e) => {
-                  if (e.target.id !== 'save') {
+                  if (!isBrowse && e.target.id !== 'save') {
                     setEdit('depart');
                   }
                 }}>
@@ -563,7 +592,7 @@ function AddSchedule() {
                   <h2>{departString}</h2>
                 )}
               </FlexDiv>
-              <Droppable droppableId="scheduleArea">
+              <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (
                   <CardWrapper
                     column
@@ -578,7 +607,8 @@ function AddSchedule() {
                           index={index}
                           id={schedule.schedule_id}
                           schedule={schedule}
-                          updateDuration={updateDuration}>
+                          updateDuration={updateDuration}
+                          browse={isBrowse}>
                           <div>
                             {timestampToString(schedule.start_time, 'time')}
                           </div>
