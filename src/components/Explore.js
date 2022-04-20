@@ -179,8 +179,7 @@ function SavedSpotsList({
 }
 
 function Explore({ setWaitingSpots }) {
-  const navigate = useNavigate();
-  const { uid, setUid } = useContext(Context);
+  const { uid } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
@@ -194,11 +193,15 @@ function Explore({ setWaitingSpots }) {
       .catch((error) => console.error(error));
   }, []);
   const addToSavedSpots = () => {
-    firestore.setSavedSpots(uid, placeDetail);
-    if (savedSpots) {
-      setSavedSpots([...savedSpots, placeDetail]);
+    if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
+      firestore.setSavedSpots(uid, placeDetail);
+      if (savedSpots?.length > 0) {
+        setSavedSpots([...savedSpots, placeDetail]);
+      } else {
+        setSavedSpots([placeDetail]);
+      }
     } else {
-      setSavedSpots([placeDetail]);
+      alert('此景點已在候補清單中！');
     }
   };
   const removeFromSavedSpots = (idAry) => {
