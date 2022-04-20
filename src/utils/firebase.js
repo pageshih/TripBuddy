@@ -71,6 +71,11 @@ const firestore = {
       });
     });
   },
+  editProfile(userUID, newProfile) {
+    return setDoc(doc(this.db, 'profile', userUID), newProfile, {
+      merge: 'merge',
+    });
+  },
   setSavedSpots(userUID, place) {
     return setDoc(
       doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
