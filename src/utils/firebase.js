@@ -148,7 +148,7 @@ const firestore = {
       .then(() => Promise.resolve(itineraryOverviewRef.id))
       .catch((error) => Promise.reject(error));
   },
-  getItinerary(userUID, itineraryId) {
+  getItinerary(userUID, itineraryId, isEdit) {
     const itineraryUserRef = doc(this.db, 'itineraries', userUID);
     const getOverviews = new Promise((resolve, reject) => {
       const overviewsRef = doc(
@@ -187,16 +187,19 @@ const firestore = {
         })
         .catch((error) => reject(error));
     });
-    return Promise.all([getOverviews, getWaitingSpots, getSchedules]).then(
-      (docs) =>
-        docs.reduce((acc, doc, index) => {
-          if (index === 0) {
-            acc.overviews = doc;
-            return acc;
-          } else {
-            return { ...acc, ...doc };
-          }
-        }, {})
+    return Promise.all(
+      isEdit
+        ? [getOverviews, getWaitingSpots, getSchedules]
+        : [getOverviews, getSchedules]
+    ).then((docs) =>
+      docs.reduce((acc, doc, index) => {
+        if (index === 0) {
+          acc.overviews = doc;
+          return acc;
+        } else {
+          return { ...acc, ...doc };
+        }
+      }, {})
     );
   },
   setSchedule(userUID, itineraryId, scheduleData) {

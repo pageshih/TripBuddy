@@ -13,7 +13,6 @@ import {
   AddOverView,
   AddSchedule,
 } from './components/AddItinerary';
-import ItineraryDetail from './components/ItineraryDetail.js';
 import TravelJournalDetail from './components/TravelJournalDetail';
 
 const Context = createContext();
@@ -132,7 +131,7 @@ function App() {
             </Route>
             <Route
               path=":itineraryId"
-              element={<LoginOrPage element={<ItineraryDetail />} />}
+              element={<LoginOrPage element={<AddSchedule browse />} />}
             />
             <Route
               path="/travel-journals/:journalID"
