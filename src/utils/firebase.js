@@ -95,7 +95,7 @@ const firestore = {
         });
     });
   },
-  deleteSavesSpots(userUID, placeIdAry) {
+  deleteSavedSpots(userUID, placeIdAry) {
     const batch = writeBatch(this.db);
     placeIdAry.forEach((place_id) => {
       const placeDocRef = doc(

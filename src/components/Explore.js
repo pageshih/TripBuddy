@@ -12,6 +12,7 @@ import {
   Card,
   CardWrapper,
 } from './styledComponents/Layout';
+import { CheckboxCustom } from './styledComponents/TextField';
 import styled from '@emotion/styled';
 
 function Map({
@@ -133,28 +134,12 @@ function SavedSpotsList({
 }) {
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const CheckboxDiv = styled.div`
-    color: white;
-    border: 1px solid lightgray;
-    border-radius: 5px;
-    align-self: flex-start;
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    background-color: ${(props) =>
-      selectedSpotList?.some((item) => item === props.id)
-        ? 'skyblue'
-        : 'white'};
-    cursor: pointer;
-  `;
-  const addSelectSpotsToItinerary = (idAry) => {
-    let waitingSpots = [];
-    idAry.forEach((id) => {
-      const add = savedSpots.filter((spot) => {
-        return spot.place_id === id;
-      });
-      waitingSpots = [...waitingSpots, ...add];
-    });
+  const addSelectSpotsToItinerary = () => {
+    const waitingSpots = savedSpots.filter(
+      (spot) =>
+        selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
+        spot
+    );
     setWaitingSpots(waitingSpots);
     navigate('/add');
   };
@@ -162,25 +147,11 @@ function SavedSpotsList({
     <CardWrapper column gap="20px">
       {savedSpots.map((spot) => (
         <Card column gap="20px" position="relative" key={spot.place_id}>
-          <label name={spot.place_id}>
-            <CheckboxDiv id={spot.place_id} className="material-icons">
-              check
-            </CheckboxDiv>
-            <input
-              type="checkbox"
-              style={{ display: 'none' }}
-              id={spot.place_id}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedSpotList([...selectedSpotList, spot.place_id]);
-                } else {
-                  setSelectedSpotList(
-                    selectedSpotList.filter((item) => item !== spot.place_id)
-                  );
-                }
-              }}
-            />
-          </label>
+          <CheckboxCustom
+            id={spot.place_id}
+            selectedList={selectedSpotList}
+            setSelectedList={setSelectedSpotList}
+          />
           <div onClick={() => getSavedSpotDetail(spot)}>
             <img
               src={spot?.photos[0]}
@@ -195,11 +166,7 @@ function SavedSpotsList({
           </div>
         </Card>
       ))}
-      <Button
-        styled="primary"
-        onClick={() => {
-          addSelectSpotsToItinerary(selectedSpotList);
-        }}>
+      <Button styled="primary" onClick={addSelectSpotsToItinerary}>
         新增行程
       </Button>
       <Button
@@ -212,20 +179,29 @@ function SavedSpotsList({
 }
 
 function Explore({ setWaitingSpots }) {
-  const navigate = useNavigate();
-  const { uid, setUid } = useContext(Context);
+  const { uid } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
 
+  useEffect(() => {
+    firestore
+      .getSavedSpots(uid)
+      .then((res) => setSavedSpots(res))
+      .catch((error) => console.error(error));
+  }, []);
   const addToSavedSpots = () => {
-    firestore.setSavedSpots(uid, placeDetail);
-    if (savedSpots) {
-      setSavedSpots([...savedSpots, placeDetail]);
+    if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
+      firestore.setSavedSpots(uid, placeDetail);
+      if (savedSpots?.length > 0) {
+        setSavedSpots([...savedSpots, placeDetail]);
+      } else {
+        setSavedSpots([placeDetail]);
+      }
     } else {
-      setSavedSpots([placeDetail]);
+      alert('此景點已在候補清單中！');
     }
   };
   const removeFromSavedSpots = (idAry) => {
@@ -238,25 +214,13 @@ function Explore({ setWaitingSpots }) {
       });
     });
     firestore
-      .deleteSavesSpots(uid, idAry)
+      .deleteSavedSpots(uid, idAry)
       .then(() => {
         setSavedSpots(newSavedSpots);
       })
       .catch((error) => console.log(error));
   };
-  const getSavedSpots = () => {
-    if (!showSavedSpots) {
-      setShowSavedSpots(true);
-      if (!savedSpots) {
-        firestore
-          .getSavedSpots(uid)
-          .then((res) => setSavedSpots(res))
-          .catch((error) => console.error(error));
-      }
-    } else if (showSavedSpots) {
-      setShowSavedSpots(false);
-    }
-  };
+
   const getSavedSpotDetail = (spot) => {
     setShowSavedSpots(false);
     setPlaceDetail({ ...spot, savedSpot: true });
@@ -294,7 +258,9 @@ function Explore({ setWaitingSpots }) {
             )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>
+            <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
+              候補景點
+            </RoundBtnOnMap>
             <Map
               setPlaceDetail={setPlaceDetail}
               setMap={setMap}
