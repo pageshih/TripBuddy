@@ -18,6 +18,7 @@ const activeStyle = (isActive) => {
 function UserProfile(props) {
   const { uid, setUid } = useContext(Context);
   const [profile, setProfile] = useState();
+  const [reviewTags, setReviewTags] = useState();
   const logout = () => {
     firebaseAuth
       .userSignOut()
@@ -32,7 +33,10 @@ function UserProfile(props) {
     if (uid) {
       firestore
         .getProfile(uid)
-        .then((res) => setProfile(res))
+        .then((res) => {
+          setProfile(res);
+          setReviewTags(res.reviews);
+        })
         .catch((res) => console.log(res.code, res.message));
     }
   }, [uid, setUid]);
@@ -70,7 +74,7 @@ function UserProfile(props) {
               我的遊記
             </NavLink>
           </FlexDiv>
-          <Outlet />
+          <Outlet context={[reviewTags, setReviewTags]} />
         </>
       )}
     </>
