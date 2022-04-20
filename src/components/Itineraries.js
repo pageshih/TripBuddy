@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import styled from '@emotion/styled';
 import { firestore, firebaseStorage } from '../utils/firebase';
@@ -258,6 +258,7 @@ function ScheduleCard(props) {
 
 function Itineraries() {
   const { uid } = useContext(Context);
+  const navigate = useNavigate();
   const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
   const [coming, setComing] = useState();
@@ -315,7 +316,11 @@ function Itineraries() {
           {progressing?.overview && <h2>進行中的行程</h2>}
           {progressing?.overview && (
             <div key={progressing.overview.itinerary_id}>
-              <Card gap="20px">
+              <Card
+                gap="20px"
+                onClick={() => {
+                  navigate(`/${progressing.overview.itinerary_id}`);
+                }}>
                 <div
                   style={{
                     width: '200px',
@@ -357,7 +362,12 @@ function Itineraries() {
           )}
           {coming?.length > 0 && <h2>即將到來的行程</h2>}
           {coming?.map((itinerary) => (
-            <Card key={itinerary.itinerary_id} gap="20px">
+            <Card
+              key={itinerary.itinerary_id}
+              gap="20px"
+              onClick={() => {
+                navigate(`/${itinerary.itinerary_id}`);
+              }}>
               <div
                 style={{
                   width: '200px',
@@ -379,7 +389,12 @@ function Itineraries() {
           ))}
           {future?.length > 0 && <h2>其他行程</h2>}
           {future?.map((itinerary) => (
-            <Card key={itinerary.itinerary_id} gap="20px">
+            <Card
+              key={itinerary.itinerary_id}
+              gap="20px"
+              onClick={() => {
+                navigate(`/${itinerary.itinerary_id}`);
+              }}>
               <div
                 style={{
                   width: '200px',
