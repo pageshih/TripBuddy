@@ -416,7 +416,6 @@ function AddSchedule(props) {
       newScheduleList,
     };
   };
-  const uploadFirestore = () => {};
   const onDragEnd = (result) => {
     const startAndEnd = {
       startId: result.source.droppableId,
