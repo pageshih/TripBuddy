@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -9,17 +10,19 @@ import {
 } from './styledComponents/Layout';
 import { CheckboxCustom } from './styledComponents/TextField';
 
-function SavedSpots() {
+function SavedSpots(props) {
   const { uid } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
+  const navigate = useNavigate();
   const deleteSpots = () => {
     const isDelete = window.confirm('確定要刪除這些景點嗎？(此動作無法復原）');
     if (isDelete) {
       const newSavedSpots = savedSpots.filter((spot) => {
         return (
-          selectedSpotList.every((selected) => selected !== spot.place_id) &&
-          spot
+          selectedSpotList.every(
+            (selectedId) => selectedId !== spot.place_id
+          ) && spot
         );
       });
       setSavedSpots(newSavedSpots);
@@ -28,6 +31,16 @@ function SavedSpots() {
         .then(() => alert('景點已刪除！'))
         .catch((error) => console.error(error));
     }
+  };
+  const addSelectSpotsToItinerary = () => {
+    const waitingSpots = savedSpots.filter(
+      (spot) =>
+        selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
+        spot
+    );
+    console.log(waitingSpots);
+    props.setWaitingSpots(waitingSpots);
+    navigate('/add');
   };
   useEffect(() => {
     firestore
@@ -51,8 +64,10 @@ function SavedSpots() {
         <button type="click" onClick={deleteSpots}>
           刪除景點
         </button>
-        <button>加入既定行程</button>
-        <button>加入新建立的行程</button>
+        {/* <button>加入既定行程</button> */}
+        <button type="click" onClick={addSelectSpotsToItinerary}>
+          加入新建立的行程
+        </button>
       </FlexDiv>
       <CardWrapper column padding="20px" gap="20px">
         {savedSpots?.map((spot) => (
@@ -76,7 +91,9 @@ function SavedSpots() {
             </div>
           </Card>
         ))}
-        <button>新增景點</button>
+        <button type="click" onClick={() => navigate('/explore')}>
+          新增景點
+        </button>
       </CardWrapper>
     </>
   );
