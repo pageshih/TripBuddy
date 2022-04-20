@@ -358,19 +358,14 @@ function AddSchedule() {
     result.splice(endIndex, 0, removed);
     return result;
   };
-  const updateTimeOfSchedule = (
-    list,
-    sourceIndex,
-    isSetSchedule,
-    newDepartTime
-  ) => {
+  const updateTimeOfSchedule = (list, isSetSchedule, newDepartTime) => {
     const updatedList = list.map((schedule, index, array) => {
-      if (index > 0 && index >= sourceIndex) {
-        const prevSchedule = array[index - 1];
-        schedule.start_time = prevSchedule.end_time;
+      if (index === 0) {
+        schedule.start_time = newDepartTime || overviews.departTimes[day];
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       } else {
-        schedule.start_time = newDepartTime || overviews.departTimes[day];
+        const prevSchedule = array[index - 1];
+        schedule.start_time = prevSchedule.end_time;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       }
       return schedule;
@@ -387,11 +382,9 @@ function AddSchedule() {
     const newScheduleList = Array.from(schedules);
     const [remove] = newSpotsList.splice(spotIndex, 1);
     if (scheduleIndex > 0) {
-      for (let i = 0; i < scheduleIndex; i += 1) {
-        startTime =
-          newScheduleList[i].duration * 60 * 1000 +
-          newScheduleList[0].start_time;
-      }
+      console.log(newScheduleList);
+      startTime = newScheduleList[scheduleIndex - 1].end_time;
+      console.log(scheduleIndex, startTime);
     } else {
       startTime = overviews.departTimes[day];
     }
@@ -425,7 +418,7 @@ function AddSchedule() {
     if (!result.destination) {
       return;
     }
-
+    console.log(result);
     if (
       startAndEnd.startId === 'waitingSpotsArea' &&
       startAndEnd.endId === 'scheduleArea'
@@ -438,7 +431,7 @@ function AddSchedule() {
       console.log(newSpotsList, newScheduleList);
       setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
-      updateTimeOfSchedule(newScheduleList, startAndEnd.endIndex, true);
+      updateTimeOfSchedule(newScheduleList);
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
@@ -448,7 +441,7 @@ function AddSchedule() {
         result.destination.index
       );
       if (startAndEnd.startId === 'scheduleArea') {
-        updateTimeOfSchedule(items, startAndEnd.startIndex, true);
+        updateTimeOfSchedule(items, true);
       } else {
         setWaitingSpots(items);
       }
@@ -463,15 +456,10 @@ function AddSchedule() {
     newSchedules.forEach((schedule) => {
       if (schedule.schedule_id === scheduleId) {
         schedule.duration = newDuration;
+        schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       }
     });
-    const sourceIndex = schedules.reduce((acc, item, index) => {
-      if (item.schedule_id === scheduleId) {
-        acc = index;
-      }
-      return acc;
-    }, -1);
-    updateTimeOfSchedule(newSchedules, sourceIndex, true);
+    updateTimeOfSchedule(newSchedules, true);
   };
   const updateOverviews = (newOverviews) => {
     setOverviews(newOverviews);
@@ -565,7 +553,7 @@ function AddSchedule() {
                             ...overviews,
                             departTimes: updateTimes,
                           });
-                          updateTimeOfSchedule(schedules, 0, true, newTime);
+                          updateTimeOfSchedule(schedules, true, newTime);
                         }
                       }}>
                       儲存
