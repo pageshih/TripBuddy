@@ -13,6 +13,22 @@ function SavedSpots() {
   const { uid } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
+  const deleteSpots = () => {
+    const isDelete = window.confirm('確定要刪除這些景點嗎？(此動作無法復原）');
+    if (isDelete) {
+      const newSavedSpots = savedSpots.filter((spot) => {
+        return (
+          selectedSpotList.every((selected) => selected !== spot.place_id) &&
+          spot
+        );
+      });
+      setSavedSpots(newSavedSpots);
+      firestore
+        .deleteSavedSpots(uid, selectedSpotList)
+        .then(() => alert('景點已刪除！'))
+        .catch((error) => console.error(error));
+    }
+  };
   useEffect(() => {
     firestore
       .getSavedSpots(uid)
@@ -22,14 +38,25 @@ function SavedSpots() {
   return (
     <>
       <FlexDiv gap="20px" justifyContent="flex-end" padding="20px">
-        <button>全選</button>
-        <button>刪除景點</button>
+        <button
+          type="click"
+          onClick={() =>
+            setSelectedSpotList(savedSpots.map((spot) => spot.place_id))
+          }>
+          全選
+        </button>
+        <button type="click" onClick={() => setSelectedSpotList([])}>
+          取消全選
+        </button>
+        <button type="click" onClick={deleteSpots}>
+          刪除景點
+        </button>
         <button>加入既定行程</button>
         <button>加入新建立的行程</button>
       </FlexDiv>
       <CardWrapper column padding="20px" gap="20px">
         {savedSpots?.map((spot) => (
-          <Card gap="20px" position="relative">
+          <Card gap="20px" position="relative" key={spot.place_id}>
             <CheckboxCustom
               id={spot.place_id}
               selectedList={selectedSpotList}

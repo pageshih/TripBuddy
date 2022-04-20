@@ -92,7 +92,10 @@ function App() {
                 />
               }>
               <Route path="itineraries" element={<Itineraries />} />
-              <Route path="saved-spots" element={<SavedSpots />} />
+              <Route
+                path="saved-spots"
+                element={<SavedSpots setWaitingSpots={setWaitingSpots} />}
+              />
               <Route
                 path="travel-journals"
                 element={<TravelJournals />}></Route>

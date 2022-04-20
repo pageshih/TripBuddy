@@ -135,13 +135,12 @@ function SavedSpotsList({
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
   const addSelectSpotsToItinerary = (idAry) => {
-    let waitingSpots = [];
-    idAry.forEach((id) => {
+    const waitingSpots = idAry.reduce((acc, id) => {
       const add = savedSpots.filter((spot) => {
         return spot.place_id === id;
       });
-      waitingSpots = [...waitingSpots, ...add];
-    });
+      return [...acc, ...add];
+    }, []);
     setWaitingSpots(waitingSpots);
     navigate('/add');
   };
@@ -211,7 +210,7 @@ function Explore({ setWaitingSpots }) {
       });
     });
     firestore
-      .deleteSavesSpots(uid, idAry)
+      .deleteSavedSpots(uid, idAry)
       .then(() => {
         setSavedSpots(newSavedSpots);
       })
