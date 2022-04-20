@@ -134,13 +134,12 @@ function SavedSpotsList({
 }) {
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const addSelectSpotsToItinerary = (idAry) => {
-    const waitingSpots = idAry.reduce((acc, id) => {
-      const add = savedSpots.filter((spot) => {
-        return spot.place_id === id;
-      });
-      return [...acc, ...add];
-    }, []);
+  const addSelectSpotsToItinerary = () => {
+    const waitingSpots = savedSpots.filter(
+      (spot) =>
+        selectedSpotList.every((selectedId) => spot.place_id === selectedId) &&
+        spot
+    );
     setWaitingSpots(waitingSpots);
     navigate('/add');
   };
@@ -167,11 +166,7 @@ function SavedSpotsList({
           </div>
         </Card>
       ))}
-      <Button
-        styled="primary"
-        onClick={() => {
-          addSelectSpotsToItinerary(selectedSpotList);
-        }}>
+      <Button styled="primary" onClick={addSelectSpotsToItinerary}>
         新增行程
       </Button>
       <Button
@@ -192,6 +187,12 @@ function Explore({ setWaitingSpots }) {
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
 
+  useEffect(() => {
+    firestore
+      .getSavedSpots(uid)
+      .then((res) => setSavedSpots(res))
+      .catch((error) => console.error(error));
+  }, []);
   const addToSavedSpots = () => {
     firestore.setSavedSpots(uid, placeDetail);
     if (savedSpots) {
@@ -216,19 +217,7 @@ function Explore({ setWaitingSpots }) {
       })
       .catch((error) => console.log(error));
   };
-  const getSavedSpots = () => {
-    if (!showSavedSpots) {
-      setShowSavedSpots(true);
-      if (!savedSpots) {
-        firestore
-          .getSavedSpots(uid)
-          .then((res) => setSavedSpots(res))
-          .catch((error) => console.error(error));
-      }
-    } else if (showSavedSpots) {
-      setShowSavedSpots(false);
-    }
-  };
+
   const getSavedSpotDetail = (spot) => {
     setShowSavedSpots(false);
     setPlaceDetail({ ...spot, savedSpot: true });
@@ -266,7 +255,9 @@ function Explore({ setWaitingSpots }) {
             )}
           </FlexChildDiv>
           <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
-            <RoundBtnOnMap onClick={getSavedSpots}>候補景點</RoundBtnOnMap>
+            <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
+              候補景點
+            </RoundBtnOnMap>
             <Map
               setPlaceDetail={setPlaceDetail}
               setMap={setMap}
