@@ -12,6 +12,7 @@ import {
   Card,
   CardWrapper,
 } from './styledComponents/Layout';
+import { CheckboxCustom } from './styledComponents/TextField';
 import styled from '@emotion/styled';
 
 function Map({
@@ -133,20 +134,6 @@ function SavedSpotsList({
 }) {
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const CheckboxDiv = styled.div`
-    color: white;
-    border: 1px solid lightgray;
-    border-radius: 5px;
-    align-self: flex-start;
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    background-color: ${(props) =>
-      selectedSpotList?.some((item) => item === props.id)
-        ? 'skyblue'
-        : 'white'};
-    cursor: pointer;
-  `;
   const addSelectSpotsToItinerary = (idAry) => {
     let waitingSpots = [];
     idAry.forEach((id) => {
@@ -162,25 +149,11 @@ function SavedSpotsList({
     <CardWrapper column gap="20px">
       {savedSpots.map((spot) => (
         <Card column gap="20px" position="relative" key={spot.place_id}>
-          <label name={spot.place_id}>
-            <CheckboxDiv id={spot.place_id} className="material-icons">
-              check
-            </CheckboxDiv>
-            <input
-              type="checkbox"
-              style={{ display: 'none' }}
-              id={spot.place_id}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedSpotList([...selectedSpotList, spot.place_id]);
-                } else {
-                  setSelectedSpotList(
-                    selectedSpotList.filter((item) => item !== spot.place_id)
-                  );
-                }
-              }}
-            />
-          </label>
+          <CheckboxCustom
+            id={spot.place_id}
+            selectedList={selectedSpotList}
+            setSelectedList={setSelectedSpotList}
+          />
           <div onClick={() => getSavedSpotDetail(spot)}>
             <img
               src={spot?.photos[0]}
