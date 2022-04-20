@@ -260,7 +260,10 @@ const firestore = {
       userUID,
       'overviews'
     );
-    const q = query(overviewsRef, where('end_date', '>=', Number(timestamp)));
+    const q = query(
+      overviewsRef,
+      where('end_date', '>=', Number(timestamp - 24 * 60 * 60 * 1000))
+    );
     return getDocs(q).then((snapShots) => {
       const itineraries = snapShots.docs.map((doc) => doc.data());
       return Promise.resolve(itineraries);

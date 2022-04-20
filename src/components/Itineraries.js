@@ -21,18 +21,18 @@ const timestampToString = (timestamp, type) => {
   };
   return timeType[type] || '';
 };
-function AddImages(props) {
-  const compressImages = async (files) => {
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-    };
-    const images = [...files].map((image) => {
-      return imageCompression(image, options);
-    });
-    return Promise.all(images);
+const compressImages = async (files) => {
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
   };
+  const images = [...files].map((image) => {
+    return imageCompression(image, options);
+  });
+  return Promise.all(images);
+};
+function AddImages(props) {
   return (
     <label
       style={{
@@ -64,13 +64,7 @@ function AddReview(props) {
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [reviewTags, setReviewTags] = useState();
   const [imageBuffer, setImageBuffer] = useState();
-  const AddBtn = (props) => {
-    return (
-      <button type="text" onClick={props.onClickFn}>
-        +
-      </button>
-    );
-  };
+
   const addCheckedTag = () => {
     if (addTag) {
       const newReviewTags = reviewTags ? [...reviewTags] : [];
@@ -158,14 +152,18 @@ function AddReview(props) {
                   setAddTag(e.target.value);
                 }}
               />
-              <AddBtn onClickFn={addCheckedTag} />
+              <button type="text" onClick={addCheckedTag}>
+                +
+              </button>
             </>
           ) : (
-            <AddBtn
-              onClickFn={() => {
+            <button
+              type="text"
+              onClick={() => {
                 setShowInput(true);
-              }}
-            />
+              }}>
+              +
+            </button>
           )}
         </form>
       </FlexDiv>
@@ -239,7 +237,7 @@ function Itineraries() {
     firestore
       .getItineraries(uid, now)
       .then((overviews) => {
-        if (overviews.length <= 0) {
+        if (overviews?.length <= 0) {
           setEmpty(true);
         } else {
           setEmpty(false);
@@ -247,7 +245,7 @@ function Itineraries() {
             coming: [],
             future: [],
           };
-          overviews?.forEach(async (itinerary) => {
+          overviews.forEach(async (itinerary) => {
             const countDownDay = Math.floor(
               (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
             );
@@ -281,10 +279,10 @@ function Itineraries() {
 
   return (
     <CardWrapper column gap="20px" padding="20px">
-      {progressing && coming && future ? (
+      {!empty ? (
         <Container>
-          {progressing.overview && <h2>進行中的行程</h2>}
-          {progressing.overview && (
+          {progressing?.overview && <h2>進行中的行程</h2>}
+          {progressing?.overview && (
             <div key={progressing.overview.itinerary_id}>
               <Card gap="20px">
                 <div
@@ -323,7 +321,7 @@ function Itineraries() {
             </div>
           )}
           {coming?.length > 0 && <h2>即將到來的行程</h2>}
-          {coming.map((itinerary) => (
+          {coming?.map((itinerary) => (
             <Card key={itinerary.itinerary_id} gap="20px">
               <div
                 style={{
@@ -345,7 +343,7 @@ function Itineraries() {
             </Card>
           ))}
           {future?.length > 0 && <h2>其他行程</h2>}
-          {future.map((itinerary) => (
+          {future?.map((itinerary) => (
             <Card key={itinerary.itinerary_id} gap="20px">
               <div
                 style={{
