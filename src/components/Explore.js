@@ -137,7 +137,7 @@ function SavedSpotsList({
   const addSelectSpotsToItinerary = () => {
     const waitingSpots = savedSpots.filter(
       (spot) =>
-        selectedSpotList.every((selectedId) => spot.place_id === selectedId) &&
+        selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
         spot
     );
     setWaitingSpots(waitingSpots);
