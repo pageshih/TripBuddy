@@ -261,7 +261,7 @@ const firestore = {
       return Promise.resolve(target);
     });
   },
-  getItineraries(userUID, timestamp) {
+  getItineraries(userUID, timestamp, isJournal) {
     const overviewsRef = collection(
       this.db,
       'itineraries',
@@ -270,7 +270,11 @@ const firestore = {
     );
     const q = query(
       overviewsRef,
-      where('end_date', '>=', Number(timestamp - 24 * 60 * 60 * 1000))
+      where(
+        'end_date',
+        isJournal ? '<=' : '>=',
+        Number(timestamp - 24 * 60 * 60 * 1000)
+      )
     );
     return getDocs(q).then((snapShots) => {
       const itineraries = snapShots.docs.map((doc) => doc.data());

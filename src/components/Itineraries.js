@@ -124,7 +124,7 @@ function AddReview(props) {
   return (
     <Container>
       <FlexDiv alignItems="center" gap="10px">
-        <form>
+        <div>
           {reviewTags &&
             reviewTags.map((tag) => (
               <label key={tag}>
@@ -152,30 +152,28 @@ function AddReview(props) {
                 />
               </label>
             ))}
-          {showInput ? (
-            <>
-              <input
-                type="type"
-                placeholder="按 + 新增心得標籤"
-                value={addTag}
-                onChange={(e) => {
-                  setAddTag(e.target.value);
-                }}
-              />
-              <button type="click" onClick={addCheckedTag}>
-                +
-              </button>
-            </>
-          ) : (
-            <button
-              type="click"
-              onClick={() => {
-                setShowInput(true);
-              }}>
-              +
-            </button>
-          )}
-        </form>
+        </div>
+        {showInput ? (
+          <form onSubmit={addCheckedTag}>
+            <input
+              type="type"
+              placeholder="按 + 新增心得標籤"
+              value={addTag}
+              onChange={(e) => {
+                setAddTag(e.target.value);
+              }}
+            />
+            <button type="submit">+</button>
+          </form>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setShowInput(true);
+            }}>
+            +
+          </button>
+        )}
       </FlexDiv>
       <FlexDiv gap="20px">
         {gallery?.map((url, index) => (
