@@ -16,6 +16,7 @@ import {
   CardWrapper,
   cardCss,
 } from './styledComponents/Layout';
+import { timestampToString } from '../utils/utilities';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -65,17 +66,6 @@ import {
 //     </>
 //   );
 // }
-const timestampToString = (timestamp, type) => {
-  const timeType = {
-    date: new Date(timestamp).toLocaleDateString(),
-    time: new Date(timestamp).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }),
-  };
-  return timeType[type] || '';
-};
 
 function AddOverView(props) {
   const { uid } = useContext(Context);
