@@ -339,7 +339,7 @@ function AddSchedule(props) {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
             setDepartString(
-              timestampToString(res.overviews.departTimes[0], 'time')
+              timestampToString(res.overviews.depart_times[0], 'time')
             );
             res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(res.schedules);
@@ -359,7 +359,7 @@ function AddSchedule(props) {
   const updateTimeOfSchedule = (list, isSetSchedule, newDepartTime) => {
     const updatedList = list.map((schedule, index, array) => {
       if (index === 0) {
-        schedule.start_time = newDepartTime || overviews.departTimes[day];
+        schedule.start_time = newDepartTime || overviews.depart_times[day];
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
       } else {
         const prevSchedule = array[index - 1];
@@ -384,7 +384,7 @@ function AddSchedule(props) {
       startTime = newScheduleList[scheduleIndex - 1].end_time;
       console.log(scheduleIndex, startTime);
     } else {
-      startTime = overviews.departTimes[day];
+      startTime = overviews.depart_times[day];
     }
     const addData = {
       start_time: startTime,
@@ -560,16 +560,16 @@ function AddSchedule(props) {
                           setEdit('save');
                           const inputTime = departString.split(':');
                           const newTime = new Date(
-                            overviews.departTimes[day]
+                            overviews.depart_times[day]
                           ).setHours(
                             Number(inputTime[0]),
                             Number(inputTime[1])
                           );
-                          const updateTimes = [...overviews.departTimes];
+                          const updateTimes = [...overviews.depart_times];
                           updateTimes[day] = newTime;
                           updateOverviews({
                             ...overviews,
-                            departTimes: updateTimes,
+                            depart_times: updateTimes,
                           });
                           updateTimeOfSchedule(schedules, true, newTime);
                         }

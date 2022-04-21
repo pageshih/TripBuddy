@@ -126,7 +126,7 @@ const firestore = {
     }
     const overview = {
       ...basicInfo,
-      departTimes,
+      depart_times: departTimes,
       itinerary_id: itineraryOverviewRef.id,
       cover_photo: 'https://picsum.photos/200/300',
     };
