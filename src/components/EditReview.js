@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import { compressImages } from '../utils/utilities';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv, Container } from './styledComponents/Layout';
+import { TextAreaReview } from './styledComponents/TextField';
 
 function ReviewTags(props) {
   return (
@@ -144,14 +144,14 @@ function ReviewGallery(props) {
               </FlexDiv>
             );
           })}
+          {props.isEdit && (
+            <AddImages
+              imageBuffer={props.imageBuffer}
+              setImageBuffer={props.setImageBuffer}
+            />
+          )}
         </FlexDiv>
       </div>
-      {props.isEdit && (
-        <AddImages
-          imageBuffer={props.imageBuffer}
-          setImageBuffer={props.setImageBuffer}
-        />
-      )}
     </>
   );
 }
@@ -217,6 +217,8 @@ function AddReview(props) {
   const [addTag, setAddTag] = useState();
   const [imageBuffer, setImageBuffer] = useState();
   const [showInput, setShowInput] = useState();
+  const [review, setReview] = useState();
+  const [reviewShowInput, setReviewShowInput] = useState(false);
 
   const addCheckedTag = (e) => {
     e.preventDefault();
@@ -252,6 +254,7 @@ function AddReview(props) {
     );
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
+    setReview(props.reviews.review);
   }, [props.isEdit]);
   return (
     <Container>
@@ -273,41 +276,61 @@ function AddReview(props) {
         imageBuffer={imageBuffer}
         setImageBuffer={setImageBuffer}
       />
-      {props.isEdit && (
-        <button
-          type="click"
-          onClick={async () => {
-            const uploadFirestore = new uploadReviewFirestore({
-              uid,
-              itineraryId: props.itineraryId,
-              scheduleId: props.scheduleId,
-              updateSchedule: {
-                review_tags: checkedReviewTags,
-              },
-              imageBuffer,
-              gallery,
-            });
-            uploadFirestore.doUpload().then((newGallery) => {
-              setGallery(newGallery);
-              setImageBuffer([]);
-              setReviewTags(
-                props.allReviewTags
-                  ? [
-                      ...checkedReviewTags,
-                      ...reviewTags.filter(
-                        (tag) =>
-                          checkedReviewTags.every(
-                            (checked) => checked !== tag
-                          ) && tag
-                      ),
-                    ]
-                  : checkedReviewTags
-              );
-            });
-          }}>
-          儲存
-        </button>
-      )}
+      <FlexDiv direction="column">
+        {props.isEdit ? (
+          <TextAreaReview
+            type="textarea"
+            placeholder="添加一點旅行後的心得吧！"
+            value={review}
+            readOnly={!reviewShowInput}
+            onChange={(e) => {
+              setReview(e.target.value);
+            }}
+            onClick={() => {
+              setReviewShowInput(true);
+            }}
+          />
+        ) : (
+          <p>{review}</p>
+        )}
+        {props.isEdit && (
+          <button
+            type="click"
+            onClick={async () => {
+              const uploadFirestore = new uploadReviewFirestore({
+                uid,
+                itineraryId: props.itineraryId,
+                scheduleId: props.scheduleId,
+                updateSchedule: {
+                  review_tags: checkedReviewTags,
+                  review: review,
+                },
+                imageBuffer,
+                gallery,
+              });
+              uploadFirestore.doUpload().then((newGallery) => {
+                setGallery(newGallery);
+                setImageBuffer([]);
+                setReviewShowInput(false);
+                setReviewTags(
+                  props.allReviewTags
+                    ? [
+                        ...checkedReviewTags,
+                        ...reviewTags.filter(
+                          (tag) =>
+                            checkedReviewTags.every(
+                              (checked) => checked !== tag
+                            ) && tag
+                        ),
+                      ]
+                    : checkedReviewTags
+                );
+              });
+            }}>
+            儲存
+          </button>
+        )}
+      </FlexDiv>
     </Container>
   );
 }
