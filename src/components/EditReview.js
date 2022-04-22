@@ -235,7 +235,7 @@ function AddReview(props) {
   };
 
   useEffect(() => {
-    if (props.reviewTags?.length > 0) {
+    if (props.showReviewTags?.length > 0) {
       setShowInput(false);
     } else {
       setShowInput(true);
@@ -277,7 +277,7 @@ function AddReview(props) {
         setImageBuffer={setImageBuffer}
       />
       <FlexDiv direction="column">
-        {props.isEdit ? (
+        {props.isEdit && props.isJournal ? (
           <TextAreaReview
             type="textarea"
             placeholder="添加一點旅行後的心得吧！"
@@ -303,7 +303,7 @@ function AddReview(props) {
                 scheduleId: props.scheduleId,
                 updateSchedule: {
                   review_tags: checkedReviewTags,
-                  review: review,
+                  review,
                 },
                 imageBuffer,
                 gallery,
@@ -325,6 +325,12 @@ function AddReview(props) {
                       ]
                     : checkedReviewTags
                 );
+                props.setUploadedReview({
+                  schedule_id: props.scheduleId,
+                  review_tags: checkedReviewTags,
+                  review,
+                  gallery: newGallery,
+                });
               });
             }}>
             儲存

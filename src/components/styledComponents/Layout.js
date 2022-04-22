@@ -17,6 +17,7 @@ const FlexDiv = styled.div`
   height: ${(props) => props.height};
   min-height: ${(props) => props.minHeight};
   padding: ${(props) => props.padding};
+  margin: ${(props) => props.margin};
 `;
 
 const FlexChildDiv = styled.div`

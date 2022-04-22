@@ -18,18 +18,28 @@ function TravelJournalDetail() {
   const { uid } = useContext(Context);
   const { journalID } = useParams();
   const [scheduleList, setScheduleList] = useState();
+  const [allSchedule, setAllSchedule] = useState();
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
   const [schedulesExpand, setSchedulesExpand] = useState();
   const [isEdit, setIsEdit] = useState(false);
   const [reviewTags, setReviewTags] = useState();
+  const [uploadedReview, setUploadedReview] = useState();
 
   useEffect(() => {
     async function fetchData() {
       try {
         const itineraryRes = await firestore.getItinerary(uid, journalID);
         setOverviews(itineraryRes.overviews);
-        setScheduleList(itineraryRes.schedules);
+        setAllSchedule(itineraryRes.schedules);
+        setScheduleList(
+          itineraryRes.schedules.filter(
+            (schedule) =>
+              schedule.end_time > itineraryRes.overviews.depart_times[day] &&
+              schedule.end_time <
+                itineraryRes.overviews.depart_times[day] + 24 * 60 * 60 * 1000
+          )
+        );
         const profile = await firestore.getProfile(uid);
         setReviewTags(profile.reviews);
       } catch (error) {
@@ -38,6 +48,16 @@ function TravelJournalDetail() {
     }
     fetchData();
   }, []);
+  useEffect(() => {
+    if (uploadedReview) {
+      const newScheduleList = scheduleList.map((schedule) =>
+        schedule.schedule_id === uploadedReview.schedule_id
+          ? { ...schedule, ...uploadedReview }
+          : schedule
+      );
+      setScheduleList(newScheduleList);
+    }
+  }, [uploadedReview]);
   return (
     <>
       {overviews && scheduleList ? (
@@ -80,7 +100,8 @@ function TravelJournalDetail() {
                     if (
                       schedule.review_tags ||
                       schedule.gallery ||
-                      schedule.reviews
+                      schedule.reviews ||
+                      isEdit
                     ) {
                       if (
                         schedulesExpand?.some((id) => id === schedule.place_id)
@@ -104,26 +125,76 @@ function TravelJournalDetail() {
                   schedule.gallery ||
                   schedule.reviews ? (
                     <span className="material-icons">expand_more</span>
-                  ) : null}
+                  ) : (
+                    isEdit && <span className="material-icons">add_circle</span>
+                  )}
                 </FlexDiv>
                 {schedulesExpand?.some((id) => id === schedule.place_id) && (
                   <AddReview
                     isEdit={isEdit}
                     key={schedule.schedule_id}
                     allReviewTags={reviewTags}
-                    showReviewTags={schedule.review_tags}
+                    showReviewTags={
+                      schedule.review_tags ||
+                      schedule.gallery ||
+                      schedule.reviews
+                        ? schedule.review_tags
+                        : reviewTags
+                    }
                     itineraryId={journalID}
                     scheduleId={schedule.schedule_id}
+                    setUploadedReview={setUploadedReview}
                     reviews={{
                       review_tags: schedule.review_tags,
                       review: schedule.review,
                       gallery: schedule.gallery,
                     }}
+                    isJournal
                   />
                 )}
               </FlexChildDiv>
             </Card>
           ))}
+          <FlexDiv justifyContent="flex-end" margin="30px 10px">
+            {overviews.depart_times.map((_, index, array) => {
+              let nextIndex;
+              if (index !== day) {
+                if (array[index]) {
+                  nextIndex = index;
+                } else {
+                  nextIndex = index - 2;
+                }
+              } else {
+                nextIndex = null;
+              }
+
+              return (
+                nextIndex !== null && (
+                  <FlexDiv
+                    as="button"
+                    alignItems="center"
+                    type="button"
+                    onClick={() => {
+                      setDay(nextIndex);
+                      setScheduleList(
+                        allSchedule.filter((schedule) => {
+                          return (
+                            schedule.end_time >
+                              overviews.depart_times[nextIndex] &&
+                            schedule.end_time <
+                              overviews.depart_times[nextIndex] +
+                                24 * 60 * 60 * 1000
+                          );
+                        })
+                      );
+                    }}>
+                    第{nextIndex + 1}天
+                    <span className="material-icons">trending_flat</span>
+                  </FlexDiv>
+                )
+              );
+            })}
+          </FlexDiv>
         </>
       ) : (
         <p>loading...</p>
