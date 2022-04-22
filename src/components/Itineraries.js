@@ -12,25 +12,74 @@ import {
 import { timestampToString } from '../utils/utilities';
 import { ReviewTags, ReviewGallery, uploadReviewFirestore } from './EditReview';
 
+function ScheduleCard(props) {
+  return (
+    <Card gap="20px" column>
+      <FlexDiv gap="20px">
+        <p>{timestampToString(props.schedule.start_time, 'time')}</p>
+        <div style={{ width: '200px', height: '150px' }}>
+          <img
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+            src={props.schedule.placeDetail.photos[0]}
+            alt={props.schedule.placeDetail.name}
+          />
+        </div>
+        <h3>{props.schedule.placeDetail.name}</h3>
+      </FlexDiv>
+      {props.children}
+    </Card>
+  );
+}
+
 function AddReview(props) {
   const { uid } = useContext(Context);
-  const [reviewTags, setReviewTags] = useOutletContext();
+  const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [imageBuffer, setImageBuffer] = useState();
   const [gallery, setGallery] = useState();
+  const [addTag, setAddTag] = useState();
+  const [imageBuffer, setImageBuffer] = useState();
+  const [showInput, setShowInput] = useState();
+
+  const addCheckedTag = (e) => {
+    e.preventDefault();
+    if (addTag) {
+      setReviewTags(reviewTags ? [...reviewTags, addTag] : [addTag]);
+      setCheckedReviewTags(
+        checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
+      );
+      firestore.editProfile(uid, {
+        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
+      });
+      setAddTag('');
+    }
+  };
 
   useEffect(() => {
+    if (props.reviewTags?.length > 0) {
+      setShowInput(false);
+    } else {
+      setShowInput(true);
+    }
+    setReviewTags(props.reviewTags);
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
   }, []);
   return (
     <Container>
       <ReviewTags
-        tags={reviewTags}
-        setTags={setReviewTags}
+        defaultTags={reviewTags}
+        inputTag={addTag}
+        setInputTag={setAddTag}
         checkedTags={checkedReviewTags}
         setCheckedTags={setCheckedReviewTags}
+        onSubmit={addCheckedTag}
         isEdit={props.isEdit}
+        showInput={showInput}
+        setShowInput={setShowInput}
       />
       <ReviewGallery
         isEdit={props.isEdit}
@@ -63,29 +112,6 @@ function AddReview(props) {
   );
 }
 
-function ScheduleCard(props) {
-  return (
-    <Card gap="20px" column>
-      <FlexDiv gap="20px">
-        <p>{timestampToString(props.schedule.start_time, 'time')}</p>
-        <div style={{ width: '200px', height: '150px' }}>
-          <img
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-            src={props.schedule.placeDetail.photos[0]}
-            alt={props.schedule.placeDetail.name}
-          />
-        </div>
-        <h3>{props.schedule.placeDetail.name}</h3>
-      </FlexDiv>
-      {props.children}
-    </Card>
-  );
-}
-
 function Itineraries() {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
@@ -94,6 +120,7 @@ function Itineraries() {
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
   const now = new Date().getTime();
+  const [reviewTags, setReviewTags] = useOutletContext();
 
   useEffect(() => {
     firestore
@@ -182,6 +209,7 @@ function Itineraries() {
                         key={schedule.schedule_id}
                         itineraryId={progressing.overview.itinerary_id}
                         scheduleId={schedule.schedule_id}
+                        reviewTags={reviewTags}
                         reviews={reviews}
                         isEdit
                       />

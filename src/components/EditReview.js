@@ -1,39 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { compressImages } from '../utils/utilities';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
-import { FlexDiv } from './styledComponents/Layout';
+import { FlexDiv, Container } from './styledComponents/Layout';
 
 function ReviewTags(props) {
-  const { uid } = useContext(Context);
-  const [addTag, setAddTag] = useState();
-  const [showInput, setShowInput] = useState();
-
-  const addCheckedTag = (e) => {
-    e.preventDefault();
-    if (addTag) {
-      props.setTags(props.tags ? [...props.tags, addTag] : [addTag]);
-      props.setCheckedTags(
-        props.checkedTags ? [...props.checkedTags, addTag] : [addTag]
-      );
-      firestore.editProfile(uid, {
-        reviews: [...props.tags, addTag],
-      });
-      setAddTag('');
-    }
-  };
-
-  useEffect(() => {
-    if (props.tags && props.tags.length > 0) {
-      setShowInput(false);
-    } else {
-      setShowInput(true);
-    }
-  }, [props.checkedTags, props.tags]);
   return (
     <FlexDiv alignItems="center" gap="10px">
       <FlexDiv gap="20px">
-        {props.tags?.map((tag) => (
+        {props.defaultTags?.map((tag) => (
           <label key={tag}>
             {tag}
             {props.isEdit && (
@@ -58,27 +34,29 @@ function ReviewTags(props) {
           </label>
         ))}
       </FlexDiv>
-      {props.isEdit && showInput ? (
-        <form onSubmit={addCheckedTag}>
-          <input
-            type="type"
-            placeholder="按 + 新增心得標籤"
-            value={addTag}
-            onChange={(e) => {
-              setAddTag(e.target.value);
-            }}
-          />
-          <button type="submit">+</button>
-        </form>
-      ) : (
-        <button
-          type="button"
-          onClick={() => {
-            setShowInput(true);
-          }}>
-          +
-        </button>
-      )}
+      {props.isEdit ? (
+        props.showInput ? (
+          <form onSubmit={props.onSubmit}>
+            <input
+              type="type"
+              placeholder="按 + 新增心得標籤"
+              value={props.inputTag}
+              onChange={(e) => {
+                props.setInputTag(e.target.value);
+              }}
+            />
+            <button type="submit">+</button>
+          </form>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              props.setShowInput(true);
+            }}>
+            +
+          </button>
+        )
+      ) : null}
     </FlexDiv>
   );
 }
@@ -230,4 +208,5 @@ class uploadReviewFirestore {
       .catch((error) => console.error(error));
   }
 }
+
 export { ReviewTags, ReviewGallery, uploadReviewFirestore };
