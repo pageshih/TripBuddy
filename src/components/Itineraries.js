@@ -9,200 +9,54 @@ import {
   Container,
   FlexDiv,
 } from './styledComponents/Layout';
-import { timestampToString, compressImages } from '../utils/utilities';
+import { timestampToString } from '../utils/utilities';
+import { ReviewTags, ReviewGallery, uploadReviewFirestore } from './EditReview';
 
-function AddImages(props) {
-  return (
-    <label
-      style={{
-        backgroundColor: 'lightgray',
-        fontSize: '13px',
-        padding: '1px 5px',
-      }}>
-      <input
-        type="file"
-        style={{ display: 'none' }}
-        accept="image/*"
-        multiple
-        onChange={async (e) => {
-          let addCompressed = await compressImages(e.target.files);
-          if (props.imageBuffer?.length > 0) {
-            addCompressed = [...props.imageBuffer, ...addCompressed];
-          }
-          props.setImageBuffer(addCompressed);
-        }}
-      />
-      上傳照片
-    </label>
-  );
-}
 function AddReview(props) {
   const { uid } = useContext(Context);
   const [reviewTags, setReviewTags] = useOutletContext();
-  const [addTag, setAddTag] = useState('');
-  const [showInput, setShowInput] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [imageBuffer, setImageBuffer] = useState();
   const [gallery, setGallery] = useState();
 
-  const addCheckedTag = (e) => {
-    e.preventDefault();
-    if (addTag) {
-      const newReviewTags = reviewTags ? [...reviewTags] : [];
-      const newCheckedTags = checkedReviewTags ? [...checkedReviewTags] : [];
-      setReviewTags([...newReviewTags, addTag]);
-      firestore.editProfile(uid, {
-        reviews: [...newReviewTags, addTag],
-      });
-      setCheckedReviewTags([...newCheckedTags, addTag]);
-      setAddTag('');
-    }
-  };
-  const uploadFirestore = async () => {
-    const addGallery =
-      imageBuffer &&
-      (await firebaseStorage.uploadImagesOfReviews(
-        {
-          userUID: uid,
-          scheduleId: props.scheduleId,
-          itineraryId: props.itineraryId,
-        },
-        imageBuffer
-      ));
-    const updateSchedule = [
-      {
-        schedule_id: props.scheduleId,
-        review_tags: checkedReviewTags,
-        gallery: gallery
-          ? addGallery
-            ? [...gallery, ...addGallery]
-            : gallery
-          : addGallery,
-      },
-    ];
-    firestore
-      .editSchedules(uid, props.itineraryId, updateSchedule, 'merge')
-      .then(() => {
-        setCheckedReviewTags([]);
-        setImageBuffer([]);
-        setGallery([...gallery, ...addGallery]);
-        alert('上傳成功！');
-      })
-      .catch((error) => console.error(error));
-  };
   useEffect(() => {
-    if (reviewTags && reviewTags.length > 0) {
-      setShowInput(false);
-      setCheckedReviewTags(props.reviews.review_tags);
-      setGallery(props.reviews.gallery);
-    } else {
-      setShowInput(true);
-    }
+    setGallery(props.reviews.gallery);
+    setCheckedReviewTags(props.reviews.review_tags);
   }, []);
   return (
     <Container>
-      <FlexDiv alignItems="center" gap="10px">
-        <div>
-          {reviewTags &&
-            reviewTags.map((tag) => (
-              <label key={tag}>
-                {tag}
-                <input
-                  value={tag}
-                  type="checkbox"
-                  checked={
-                    checkedReviewTags?.some((checked) => tag === checked) &&
-                    true
-                  }
-                  onChange={(e) => {
-                    let newCheckedTags;
-                    if (e.target.checked) {
-                      newCheckedTags = checkedReviewTags
-                        ? [...checkedReviewTags, e.target.value]
-                        : [e.target.value];
-                    } else {
-                      newCheckedTags = checkedReviewTags.filter(
-                        (tag) => e.target.value !== tag
-                      );
-                    }
-                    setCheckedReviewTags(newCheckedTags);
-                  }}
-                />
-              </label>
-            ))}
-        </div>
-        {showInput ? (
-          <form onSubmit={addCheckedTag}>
-            <input
-              type="type"
-              placeholder="按 + 新增心得標籤"
-              value={addTag}
-              onChange={(e) => {
-                setAddTag(e.target.value);
-              }}
-            />
-            <button type="submit">+</button>
-          </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setShowInput(true);
-            }}>
-            +
-          </button>
-        )}
-      </FlexDiv>
-      <FlexDiv gap="20px">
-        {gallery?.map((url, index) => (
-          <FlexDiv alignItems="flex-start" key={index}>
-            <div style={{ maxWidth: '300px', height: '200px' }}>
-              <img
-                src={url}
-                alt="schedulePhoto"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-            <button
-              onClick={() => {
-                const newGallery = gallery.filter(
-                  (_, newIndex) => index !== newIndex
-                );
-                setGallery(newGallery);
-              }}>
-              X
-            </button>
-          </FlexDiv>
-        ))}
-      </FlexDiv>
-      <div>
-        {imageBuffer?.length > 0 && <h4>圖片預覽</h4>}
-        {imageBuffer?.map((blob, index) => {
-          const blobUrl = URL.createObjectURL(blob);
-          return (
-            <FlexDiv alignItems="flex-start" key={blob.lastModified}>
-              <div style={{ maxWidth: '300px', height: '200px' }}>
-                <img
-                  src={blobUrl}
-                  alt={blob.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-              <button
-                onClick={() => {
-                  const newImagesBuffer = imageBuffer.filter(
-                    (_, newIndex) => index !== newIndex
-                  );
-                  setImageBuffer(newImagesBuffer);
-                }}>
-                X
-              </button>
-            </FlexDiv>
-          );
-        })}
-      </div>
-      <AddImages imageBuffer={imageBuffer} setImageBuffer={setImageBuffer} />
-      <button type="click" onClick={uploadFirestore}>
+      <ReviewTags
+        tags={reviewTags}
+        setTags={setReviewTags}
+        checkedTags={checkedReviewTags}
+        setCheckedTags={setCheckedReviewTags}
+        isEdit={props.isEdit}
+      />
+      <ReviewGallery
+        isEdit={props.isEdit}
+        gallery={gallery}
+        setGallery={setGallery}
+        imageBuffer={imageBuffer}
+        setImageBuffer={setImageBuffer}
+      />
+      <button
+        type="click"
+        onClick={async () => {
+          const uploadFirestore = new uploadReviewFirestore({
+            uid,
+            itineraryId: props.itineraryId,
+            scheduleId: props.scheduleId,
+            updateSchedule: {
+              review_tags: checkedReviewTags,
+            },
+            imageBuffer,
+            gallery,
+          });
+          uploadFirestore.doUpload().then((newGallery) => {
+            setGallery(newGallery);
+            setImageBuffer([]);
+          });
+        }}>
         儲存
       </button>
     </Container>
@@ -329,6 +183,7 @@ function Itineraries() {
                         itineraryId={progressing.overview.itinerary_id}
                         scheduleId={schedule.schedule_id}
                         reviews={reviews}
+                        isEdit
                       />
                     )}
                   </ScheduleCard>

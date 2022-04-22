@@ -19,6 +19,8 @@ function TravelJournalDetail() {
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
   const [schedulesExpand, setSchedulesExpand] = useState();
+  const [isEdit, setIsEdit] = useState();
+
   useEffect(() => {
     firestore
       .getItinerary(uid, journalID)
@@ -32,12 +34,15 @@ function TravelJournalDetail() {
     <>
       {overviews && scheduleList ? (
         <>
-          <h2>{overviews.title}</h2>
-          <p>
-            {timestampToString(overviews.start_date, 'date')} -{' '}
-            {timestampToString(overviews.end_date, 'date')}
-          </p>
-          <img src={overviews.cover_photo} alt={overviews.title} />
+          <Container>
+            <h2>{overviews.title}</h2>
+            <p>
+              {timestampToString(overviews.start_date, 'date')} -{' '}
+              {timestampToString(overviews.end_date, 'date')}
+            </p>
+            <img src={overviews.cover_photo} alt={overviews.title} />
+            <button type="button">編輯</button>
+          </Container>
           <h3>Day {day + 1}</h3>
           <p>{timestampToString(overviews.depart_times[day], 'date')}</p>
           <FlexDiv alignItems="center">
