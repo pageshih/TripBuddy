@@ -18,6 +18,7 @@ function TravelJournalDetail() {
   const [scheduleList, setScheduleList] = useState();
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
+  const [schedulesExpand, setSchedulesExpand] = useState();
   useEffect(() => {
     firestore
       .getItinerary(uid, journalID)
@@ -54,30 +55,63 @@ function TravelJournalDetail() {
             ))}
           </FlexDiv>
           {scheduleList.map((schedule) => (
-            <FlexDiv gap="20px" alignItems="center" key={schedule.place_id}>
+            <Card
+              gap="20px"
+              alignItems="center"
+              key={schedule.place_id}
+              onClick={() => {
+                if (
+                  schedule.review_tags ||
+                  schedule.gallery ||
+                  schedule.reviews
+                ) {
+                  if (schedulesExpand?.some((id) => id === schedule.place_id)) {
+                    setSchedulesExpand(
+                      schedulesExpand.filter((id) => id !== schedule.place_id)
+                    );
+                  } else {
+                    setSchedulesExpand(
+                      schedulesExpand
+                        ? [...schedulesExpand, schedule.place_id]
+                        : [schedule.place_id]
+                    );
+                  }
+                }
+              }}>
               <p>{timestampToString(schedule.start_time, 'time')}</p>
-              <FlexChildDiv>
-                <h3>{schedule.placeDetail.name}</h3>
-                <FlexDiv gap="20px">
-                  {schedule.review_tags?.map((tag) => (
-                    <p key={tag} style={{ backgroundColor: 'skyblue' }}>
-                      {tag}
-                    </p>
-                  ))}
+              <FlexChildDiv style={{ flexGrow: 1 }}>
+                <FlexDiv alignItems="center" justifyContent="space-between">
+                  <h3>{schedule.placeDetail.name}</h3>
+                  {schedule.review_tags ||
+                  schedule.gallery ||
+                  schedule.reviews ? (
+                    <span className="material-icons">expand_more</span>
+                  ) : null}
                 </FlexDiv>
-                <FlexDiv gap="20px">
-                  {schedule.gallery?.map((url, index) => (
-                    <CardImage
-                      src={url}
-                      alt="gallery"
-                      key={index}
-                      width="200px"
-                      height="200px"
-                    />
-                  ))}
-                </FlexDiv>
+                {schedulesExpand?.some((id) => id === schedule.place_id) && (
+                  <>
+                    <FlexDiv gap="20px">
+                      {schedule.review_tags?.map((tag) => (
+                        <p key={tag} style={{ backgroundColor: 'skyblue' }}>
+                          {tag}
+                        </p>
+                      ))}
+                    </FlexDiv>
+                    <FlexDiv gap="20px">
+                      {schedule.gallery?.map((url, index) => (
+                        <CardImage
+                          src={url}
+                          alt="gallery"
+                          key={index}
+                          width="200px"
+                          height="200px"
+                        />
+                      ))}
+                    </FlexDiv>
+                  </>
+                )}
               </FlexChildDiv>
-            </FlexDiv>
+            </Card>
           ))}
         </>
       ) : (
