@@ -10,7 +10,7 @@ import {
   FlexDiv,
 } from './styledComponents/Layout';
 import { timestampToString } from '../utils/utilities';
-import { ReviewTags, ReviewGallery, uploadReviewFirestore } from './EditReview';
+import { AddReview } from './EditReview';
 
 function ScheduleCard(props) {
   return (
@@ -32,83 +32,6 @@ function ScheduleCard(props) {
       </FlexDiv>
       {props.children}
     </Card>
-  );
-}
-
-function AddReview(props) {
-  const { uid } = useContext(Context);
-  const [reviewTags, setReviewTags] = useState();
-  const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [gallery, setGallery] = useState();
-  const [addTag, setAddTag] = useState();
-  const [imageBuffer, setImageBuffer] = useState();
-  const [showInput, setShowInput] = useState();
-
-  const addCheckedTag = (e) => {
-    e.preventDefault();
-    if (addTag) {
-      setReviewTags(reviewTags ? [...reviewTags, addTag] : [addTag]);
-      setCheckedReviewTags(
-        checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
-      );
-      firestore.editProfile(uid, {
-        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
-      });
-      setAddTag('');
-    }
-  };
-
-  useEffect(() => {
-    if (props.reviewTags?.length > 0) {
-      setShowInput(false);
-    } else {
-      setShowInput(true);
-    }
-    setReviewTags(props.reviewTags);
-    setGallery(props.reviews.gallery);
-    setCheckedReviewTags(props.reviews.review_tags);
-  }, []);
-  return (
-    <Container>
-      <ReviewTags
-        defaultTags={reviewTags}
-        inputTag={addTag}
-        setInputTag={setAddTag}
-        checkedTags={checkedReviewTags}
-        setCheckedTags={setCheckedReviewTags}
-        onSubmit={addCheckedTag}
-        isEdit={props.isEdit}
-        showInput={showInput}
-        setShowInput={setShowInput}
-      />
-      <ReviewGallery
-        isEdit={props.isEdit}
-        gallery={gallery}
-        setGallery={setGallery}
-        imageBuffer={imageBuffer}
-        setImageBuffer={setImageBuffer}
-      />
-      <button
-        type="click"
-        onClick={async () => {
-          const uploadFirestore = new uploadReviewFirestore({
-            uid,
-            itineraryId: props.itineraryId,
-            scheduleId: props.scheduleId,
-            updateSchedule: {
-              review_tags: checkedReviewTags,
-            },
-            imageBuffer,
-            gallery,
-          });
-          uploadFirestore.doUpload().then((newGallery) => {
-            setGallery(newGallery);
-            setImageBuffer([]);
-          });
-        }}>
-        儲存
-      </button>
-    </Container>
   );
 }
 
@@ -209,7 +132,8 @@ function Itineraries() {
                         key={schedule.schedule_id}
                         itineraryId={progressing.overview.itinerary_id}
                         scheduleId={schedule.schedule_id}
-                        reviewTags={reviewTags}
+                        allReviewTags={reviewTags}
+                        showReviewTags={schedule.review_tags}
                         reviews={reviews}
                         isEdit
                       />

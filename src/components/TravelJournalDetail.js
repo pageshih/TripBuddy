@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
@@ -11,87 +12,7 @@ import {
   FlexChildDiv,
 } from './styledComponents/Layout';
 import { timestampToString } from '../utils/utilities';
-import { ReviewTags, ReviewGallery, uploadReviewFirestore } from './EditReview';
-
-function EditReview(props) {
-  const { uid } = useContext(Context);
-  const [reviewTags, setReviewTags] = useState(props.reviewTags);
-  const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [gallery, setGallery] = useState();
-  const [addTag, setAddTag] = useState();
-  const [imageBuffer, setImageBuffer] = useState();
-  const [showInput, setShowInput] = useState();
-
-  const addCheckedTag = (e) => {
-    e.preventDefault();
-    if (addTag) {
-      setReviewTags(reviewTags ? [...reviewTags, addTag] : [addTag]);
-      setCheckedReviewTags(
-        checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
-      );
-      firestore.editProfile(uid, {
-        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
-      });
-      setAddTag('');
-    }
-  };
-
-  useEffect(() => {
-    if (props.reviewTags?.length > 0) {
-      setShowInput(false);
-    } else {
-      setShowInput(true);
-    }
-    setReviewTags(props.reviewTags);
-    setGallery(props.reviews.gallery);
-    setCheckedReviewTags(props.reviews.review_tags);
-  }, []);
-  return (
-    <Container>
-      <ReviewTags
-        defaultTags={reviewTags}
-        inputTag={addTag}
-        setInputTag={setAddTag}
-        checkedTags={checkedReviewTags}
-        setCheckedTags={setCheckedReviewTags}
-        onSubmit={addCheckedTag}
-        isEdit={props.isEdit}
-        showInput={showInput}
-        setShowInput={setShowInput}
-      />
-      <ReviewGallery
-        isEdit={props.isEdit}
-        gallery={gallery}
-        setGallery={setGallery}
-        imageBuffer={imageBuffer}
-        setImageBuffer={setImageBuffer}
-      />
-      {props.isEdit && (
-        <button
-          type="click"
-          onClick={async () => {
-            const uploadFirestore = new uploadReviewFirestore({
-              uid,
-              itineraryId: props.itineraryId,
-              scheduleId: props.scheduleId,
-              updateSchedule: {
-                review_tags: checkedReviewTags,
-              },
-              imageBuffer,
-              gallery,
-            });
-            uploadFirestore.doUpload().then((newGallery) => {
-              setGallery(newGallery);
-              setImageBuffer([]);
-              setReviewTags(checkedReviewTags);
-            });
-          }}>
-          儲存
-        </button>
-      )}
-    </Container>
-  );
-}
+import { AddReview } from './EditReview';
 
 function TravelJournalDetail() {
   const { uid } = useContext(Context);
@@ -101,22 +22,21 @@ function TravelJournalDetail() {
   const [day, setDay] = useState(0);
   const [schedulesExpand, setSchedulesExpand] = useState();
   const [isEdit, setIsEdit] = useState(false);
-  const [reviewTagsOfSchedules, setReviewTagsOfSchedules] = useState();
+  const [reviewTags, setReviewTags] = useState();
 
-  const expandCard = (schedule) => {};
   useEffect(() => {
-    firestore
-      .getItinerary(uid, journalID)
-      .then((res) => {
-        setOverviews(res.overviews);
-        setScheduleList(res.schedules);
-        const schedulesTags = res.schedules.reduce((acc, schedule) => {
-          acc[schedule.schedule_id] = schedule.review_tags;
-          return acc;
-        }, {});
-        setReviewTagsOfSchedules(schedulesTags);
-      })
-      .catch((error) => console.error(error));
+    async function fetchData() {
+      try {
+        const itineraryRes = await firestore.getItinerary(uid, journalID);
+        setOverviews(itineraryRes.overviews);
+        setScheduleList(itineraryRes.schedules);
+        const profile = await firestore.getProfile(uid);
+        setReviewTags(profile.reviews);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
   }, []);
   return (
     <>
@@ -187,10 +107,11 @@ function TravelJournalDetail() {
                   ) : null}
                 </FlexDiv>
                 {schedulesExpand?.some((id) => id === schedule.place_id) && (
-                  <EditReview
+                  <AddReview
                     isEdit={isEdit}
                     key={schedule.schedule_id}
-                    reviewTags={schedule.review_tags}
+                    allReviewTags={reviewTags}
+                    showReviewTags={schedule.review_tags}
                     itineraryId={journalID}
                     scheduleId={schedule.schedule_id}
                     reviews={{

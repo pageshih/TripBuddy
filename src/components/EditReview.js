@@ -209,4 +209,107 @@ class uploadReviewFirestore {
   }
 }
 
-export { ReviewTags, ReviewGallery, uploadReviewFirestore };
+function AddReview(props) {
+  const { uid } = useContext(Context);
+  const [reviewTags, setReviewTags] = useState();
+  const [checkedReviewTags, setCheckedReviewTags] = useState();
+  const [gallery, setGallery] = useState();
+  const [addTag, setAddTag] = useState();
+  const [imageBuffer, setImageBuffer] = useState();
+  const [showInput, setShowInput] = useState();
+
+  const addCheckedTag = (e) => {
+    e.preventDefault();
+    if (addTag) {
+      setReviewTags(reviewTags ? [...reviewTags, addTag] : [addTag]);
+      setCheckedReviewTags(
+        checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
+      );
+      firestore.editProfile(uid, {
+        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
+      });
+      setAddTag('');
+    }
+  };
+
+  useEffect(() => {
+    if (props.reviewTags?.length > 0) {
+      setShowInput(false);
+    } else {
+      setShowInput(true);
+    }
+    setReviewTags(
+      props.isEdit && props.allReviewTags
+        ? [
+            ...props.showReviewTags,
+            ...props.allReviewTags.filter(
+              (tag) =>
+                props.showReviewTags.every((recorded) => recorded !== tag) &&
+                tag
+            ),
+          ]
+        : props.showReviewTags
+    );
+    setGallery(props.reviews.gallery);
+    setCheckedReviewTags(props.reviews.review_tags);
+  }, [props.isEdit]);
+  return (
+    <Container>
+      <ReviewTags
+        defaultTags={reviewTags}
+        inputTag={addTag}
+        setInputTag={setAddTag}
+        checkedTags={checkedReviewTags}
+        setCheckedTags={setCheckedReviewTags}
+        onSubmit={addCheckedTag}
+        isEdit={props.isEdit}
+        showInput={showInput}
+        setShowInput={setShowInput}
+      />
+      <ReviewGallery
+        isEdit={props.isEdit}
+        gallery={gallery}
+        setGallery={setGallery}
+        imageBuffer={imageBuffer}
+        setImageBuffer={setImageBuffer}
+      />
+      {props.isEdit && (
+        <button
+          type="click"
+          onClick={async () => {
+            const uploadFirestore = new uploadReviewFirestore({
+              uid,
+              itineraryId: props.itineraryId,
+              scheduleId: props.scheduleId,
+              updateSchedule: {
+                review_tags: checkedReviewTags,
+              },
+              imageBuffer,
+              gallery,
+            });
+            uploadFirestore.doUpload().then((newGallery) => {
+              setGallery(newGallery);
+              setImageBuffer([]);
+              setReviewTags(
+                props.allReviewTags
+                  ? [
+                      ...checkedReviewTags,
+                      ...reviewTags.filter(
+                        (tag) =>
+                          checkedReviewTags.every(
+                            (checked) => checked !== tag
+                          ) && tag
+                      ),
+                    ]
+                  : checkedReviewTags
+              );
+            });
+          }}>
+          儲存
+        </button>
+      )}
+    </Container>
+  );
+}
+
+export { ReviewTags, ReviewGallery, AddReview, uploadReviewFirestore };
