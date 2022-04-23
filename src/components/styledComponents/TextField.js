@@ -80,5 +80,17 @@ const CheckboxCustom = (props) => {
     </label>
   );
 };
+const TextAreaReview = styled.textarea`
+  ${inputBase}
+  width:100%;
+  height: 100px;
+  margin: 10px 0;
+  &:read-only {
+    border-color: lightgray;
+    height: auto;
+    padding-bottom: 1.4em;
+    background-color: #fffced;
+  }
+`;
 
-export { TextField, TextInput, CheckboxCustom };
+export { TextField, TextInput, CheckboxCustom, TextAreaReview };

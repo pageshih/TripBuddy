@@ -17,6 +17,7 @@ const FlexDiv = styled.div`
   height: ${(props) => props.height};
   min-height: ${(props) => props.minHeight};
   padding: ${(props) => props.padding};
+  margin: ${(props) => props.margin};
 `;
 
 const FlexChildDiv = styled.div`
@@ -55,4 +56,30 @@ const Card = styled.li`
   position: ${(props) => props.position};
 `;
 
-export { FlexDiv, FlexChildDiv, CardWrapper, Card, Container, cardCss };
+const CardImage = (props) => (
+  <div
+    css={css`
+      width: ${props.width};
+      height: ${props.height};
+    `}>
+    <img
+      src={props.src}
+      alt={props.alt}
+      css={css`
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      `}
+    />
+  </div>
+);
+
+export {
+  FlexDiv,
+  FlexChildDiv,
+  CardWrapper,
+  Card,
+  Container,
+  cardCss,
+  CardImage,
+};
