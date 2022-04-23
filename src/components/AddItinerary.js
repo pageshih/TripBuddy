@@ -16,7 +16,7 @@ import {
   CardWrapper,
   cardCss,
 } from './styledComponents/Layout';
-import { timestampToString } from '../utils/utilities';
+import { timestampToString, timestampToDateInput } from '../utils/utilities';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -144,7 +144,7 @@ function AddOverView(props) {
       <FlexDiv gap="20px">
         <TextInput
           type="date"
-          value={startDate}
+          value={timestampToDateInput(startDate)}
           onChange={(e) => {
             setStartDate(e.target.value);
           }}
@@ -152,7 +152,7 @@ function AddOverView(props) {
         <p>到</p>
         <TextInput
           type="date"
-          value={endDate}
+          value={timestampToDateInput(endDate)}
           onChange={(e) => {
             setEndDate(e.target.value);
           }}
@@ -320,6 +320,82 @@ const ScheduleCard = (props) => {
     </Draggable>
   );
 };
+
+function EditableH2(props) {
+  const [isEdit, setIsEdit] = useState();
+  const [value, setValue] = useState();
+  useEffect(() => {
+    setValue(props.children);
+  }, []);
+  const submit = (e) => {
+    e.preventDefault();
+    setIsEdit(false);
+    props.onSubmit(value);
+  };
+  return (
+    <>
+      {isEdit ? (
+        <form onSubmit={submit}>
+          <input value={value} onChange={(e) => setValue(e.target.value)} />
+          <button type="submit">儲存</button>
+        </form>
+      ) : (
+        <h2 onClick={() => setIsEdit(true)}>{value}</h2>
+      )}
+    </>
+  );
+}
+
+function EditableDate(props) {
+  const [isEdit, setIsEdit] = useState();
+  const [startTimestamp, setStartTimestamp] = useState();
+  const [endTimestamp, setEndTimestamp] = useState();
+  useEffect(() => {
+    setStartTimestamp(props.start);
+    setEndTimestamp(props.end);
+  }, []);
+  const submit = (e) => {
+    e.preventDefault();
+    setIsEdit(false);
+    props.onSubmit(startTimestamp, endTimestamp);
+  };
+  return (
+    <>
+      {isEdit ? (
+        <form onSubmit={submit}>
+          <input
+            type="date"
+            value={timestampToDateInput(startTimestamp)}
+            onChange={(e) =>
+              setStartTimestamp(new Date(e.target.value).getTime())
+            }
+          />
+          <span> - </span>
+          <input
+            type="date"
+            value={timestampToDateInput(endTimestamp)}
+            onChange={(e) =>
+              setEndTimestamp(new Date(e.target.value).getTime())
+            }
+          />
+          <button id="submit" type="submit">
+            儲存
+          </button>
+        </form>
+      ) : (
+        <p
+          onClick={(e) => {
+            if (e.target.id !== 'submit') {
+              setIsEdit(true);
+            }
+          }}>
+          {timestampToString(startTimestamp, 'date')} -{' '}
+          {timestampToString(endTimestamp, 'date')}
+        </p>
+      )}
+    </>
+  );
+}
 
 function AddSchedule(props) {
   const [overviews, setOverviews] = useState();
@@ -491,10 +567,10 @@ function AddSchedule(props) {
     });
     updateTimeOfSchedule(newSchedules, true);
   };
-  const updateOverviews = (newOverviews) => {
-    setOverviews(newOverviews);
+  const updateOverviewsFields = (keyValuePair) => {
+    setOverviews({ ...overviews, ...keyValuePair });
     firestore
-      .editOverviews(uid, itineraryId, newOverviews)
+      .editOverviews(uid, itineraryId, keyValuePair)
       .then(() => console.log('updated overviews'))
       .catch((error) => console.error(error));
   };
@@ -587,11 +663,47 @@ function AddSchedule(props) {
             )}
             <FlexChildDiv grow="1" order="-1" padding="30px">
               <Container>
-                <h2>{overviews.title}</h2>
-                <p>
-                  {timestampToString(overviews.start_date, 'date')} -
-                  {timestampToString(overviews.end_date, 'date')}
-                </p>
+                <EditableH2
+                  onSubmit={(title) => {
+                    if (title !== overviews.title) {
+                      updateOverviewsFields({ title });
+                    }
+                  }}>
+                  {overviews.title}
+                </EditableH2>
+                <EditableDate
+                  start={overviews.start_date}
+                  end={overviews.end_date}
+                  onSubmit={(start, end) => {
+                    let updateDate;
+                    if (
+                      overviews.start_date !== start &&
+                      overviews.end_date !== end
+                    ) {
+                      updateDate = {
+                        start_date: start,
+                        end_date: end,
+                      };
+                    } else if (
+                      overviews.start_date !== start &&
+                      overviews.end_date === end
+                    ) {
+                      updateDate = {
+                        start_date: start,
+                      };
+                    } else if (
+                      overviews.start_date === start &&
+                      overviews.end_date !== end
+                    ) {
+                      updateDate = {
+                        end_date: end,
+                      };
+                    }
+                    if (updateDate) {
+                      updateOverviewsFields(updateDate);
+                    }
+                  }}
+                />
               </Container>
               <FlexDiv
                 alignItems="center"
@@ -625,12 +737,15 @@ function AddSchedule(props) {
                             Number(inputTime[1])
                           );
                           const updateTimes = [...overviews.depart_times];
-                          updateTimes[day] = newTime;
-                          updateOverviews({
-                            ...overviews,
-                            depart_times: updateTimes,
-                          });
-                          updateTimeOfSchedule(schedules, true, newTime);
+                          if (newTime !== updateTimes[day]) {
+                            updateTimes[day] = newTime;
+                            updateOverviewsFields({
+                              depart_times: updateTimes,
+                            });
+                            if (schedules.length > 0) {
+                              updateTimeOfSchedule(schedules, true, newTime);
+                            }
+                          }
                         }
                       }}>
                       儲存

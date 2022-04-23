@@ -12,6 +12,11 @@ const timestampToString = (timestamp, type) => {
   return timeType[type] || '';
 };
 
+function timestampToDateInput(timestamp) {
+  const d = new Date(timestamp);
+  return `${d.toISOString().slice(0, 10)}`;
+}
+
 const compressImages = async (files) => {
   const options = {
     maxSizeMB: 1,
@@ -24,4 +29,4 @@ const compressImages = async (files) => {
   return Promise.all(images);
 };
 
-export { timestampToString, compressImages };
+export { timestampToString, compressImages, timestampToDateInput };

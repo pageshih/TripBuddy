@@ -302,6 +302,15 @@ const firestore = {
       { merge: 'merge' }
     );
   },
+  updateOverviewsFields(userUID, itineraryId, updateData) {
+    return updateData(
+      doc(
+        collection(this.db, 'itineraries', userUID, 'overviews'),
+        itineraryId
+      ),
+      updateData
+    );
+  },
   getScheduleWithTime(userUID, itineraryId, timestamp) {
     const schedulesRef = collection(
       this.db,
