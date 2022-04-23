@@ -406,6 +406,16 @@ function AddSchedule(props) {
       newScheduleList,
     };
   };
+  const backToWaiting = (scheduleIndex, spotIndex) => {
+    const newSpotsList = Array.from(waitingSpots);
+    const newScheduleList = Array.from(schedules);
+    const [remove] = newScheduleList.splice(scheduleIndex, 1);
+    newSpotsList.push(remove.placeDetail);
+    return {
+      newSpotsList,
+      newScheduleList,
+    };
+  };
   const onDragEnd = (result) => {
     const startAndEnd = {
       startId: result.source.droppableId,
@@ -447,6 +457,12 @@ function AddSchedule(props) {
       startAndEnd.startId === 'scheduleArea' &&
       startAndEnd.endId === 'waitingSpotsArea'
     ) {
+      const { newSpotsList, newScheduleList } = backToWaiting(
+        startAndEnd.startIndex,
+        startAndEnd.endIndex
+      );
+      setWaitingSpots(newSpotsList);
+      setSchedules(newScheduleList);
     }
   };
   const updateDuration = (scheduleId, newDuration) => {
