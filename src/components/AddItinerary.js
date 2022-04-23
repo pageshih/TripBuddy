@@ -16,7 +16,11 @@ import {
   CardWrapper,
   cardCss,
 } from './styledComponents/Layout';
-import { timestampToString, timestampToDateInput } from '../utils/utilities';
+import {
+  timestampToString,
+  timestampToDateInput,
+  filterDaySchedules,
+} from '../utils/utilities';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -401,6 +405,7 @@ function AddSchedule(props) {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
+  const [allSchedules, setAllSchedules] = useState([]);
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
   const [edit, setEdit] = useState();
@@ -420,7 +425,10 @@ function AddSchedule(props) {
               timestampToString(res.overviews.depart_times[0], 'time')
             );
             res.schedules.sort((a, b) => a.start_time - b.start_time);
-            setSchedules(res.schedules);
+            setSchedules(
+              filterDaySchedules(res.schedules, res.overviews.depart_times, 0)
+            );
+            setAllSchedules(res.schedules);
           } else {
             alert('找不到行程資料');
           }
@@ -428,6 +436,14 @@ function AddSchedule(props) {
         .catch((error) => console.log(error));
     }
   }, [uid, itineraryId]);
+
+  useEffect(() => {
+    if ([day, overviews, allSchedules].every((item) => item !== undefined)) {
+      setSchedules(
+        filterDaySchedules(allSchedules, overviews.depart_times, day)
+      );
+    }
+  }, [day]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -623,6 +639,7 @@ function AddSchedule(props) {
         timestampToString(overviews.depart_times[prevDay + 1], 'time')
       );
     }
+    window.scrollTo(0, 0);
   };
   return (
     <DragDropContext onDragEnd={onDragEnd}>

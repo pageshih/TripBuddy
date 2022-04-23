@@ -17,6 +17,14 @@ function timestampToDateInput(timestamp) {
   return `${d.toISOString().slice(0, 10)}`;
 }
 
+function filterDaySchedules(allSchedules, departTimes, day) {
+  return allSchedules.filter(
+    (schedule) =>
+      schedule.end_time > departTimes[day] &&
+      schedule.end_time < departTimes[day] + 24 * 60 * 60 * 1000
+  );
+}
+
 const compressImages = async (files) => {
   const options = {
     maxSizeMB: 1,
@@ -29,4 +37,9 @@ const compressImages = async (files) => {
   return Promise.all(images);
 };
 
-export { timestampToString, compressImages, timestampToDateInput };
+export {
+  timestampToString,
+  compressImages,
+  timestampToDateInput,
+  filterDaySchedules,
+};
