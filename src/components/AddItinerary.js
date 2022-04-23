@@ -174,17 +174,18 @@ function AddOverView(props) {
     </Container>
   );
 }
-const SpotCard = (props) => {
-  const SpotStyledCard = styled(Card)`
-    background-color: white;
-    flex-direction: column;
-    gap: 20px;
-    flex-basis: 300px;
+const SpotStyledCard = styled(Card)`
+  position: relative;
+  background-color: white;
+  flex-direction: column;
+  gap: 20px;
+  flex-basis: 300px;
+  cursor: grab;
+  &:hover {
     cursor: grab;
-    &:hover {
-      cursor: grab;
-    }
-  `;
+  }
+`;
+const SpotCard = (props) => {
   return (
     <Draggable
       draggableId={props.id}
@@ -201,25 +202,26 @@ const SpotCard = (props) => {
     </Draggable>
   );
 };
+const ScheduleStyledCard = styled.div`
+  ${cardCss}
+  position: relative;
+  flex-grow: 1;
+  gap: 20px;
+  flex-basis: 500px;
+  cursor: grab;
+  background-color: white;
+  &:hover {
+    cursor: grab;
+  }
+`;
+const ScheduleWapper = styled.li`
+  padding: 30px;
+  display: flex;
+  gap: 20px;
+`;
 const ScheduleCard = (props) => {
   const [isEditDuration, setIsEditDuration] = useState();
   const [duration, setDuration] = useState(props.schedule.duration);
-  const ScheduleStyledCard = styled.div`
-    ${cardCss}
-    flex-grow: 1;
-    gap: 20px;
-    flex-basis: 500px;
-    cursor: grab;
-    background-color: white;
-    &:hover {
-      cursor: grab;
-    }
-  `;
-  const ScheduleWapper = styled.li`
-    padding: 30px;
-    display: flex;
-    gap: 20px;
-  `;
   const transportMode = [
     {
       BICYCLING: '騎自行車',
@@ -496,6 +498,23 @@ function AddSchedule(props) {
       .then(() => console.log('updated overviews'))
       .catch((error) => console.error(error));
   };
+  const deleteSchedule = (scheduleId) => {
+    updateTimeOfSchedule(
+      schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
+      true
+    );
+    firestore
+      .deleteSchedule(uid, itineraryId, scheduleId)
+      .then(() => alert('刪除成功！'))
+      .catch((error) => console.error(error));
+  };
+  const deleteSpot = (placeId) => {
+    setWaitingSpots(waitingSpots.filter((spot) => spot.place_id !== placeId));
+    firestore
+      .deleteWaitingSpots(uid, itineraryId, placeId)
+      .then(() => alert('刪除成功！'))
+      .catch((error) => console.error(error));
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
@@ -548,6 +567,16 @@ function AddSchedule(props) {
                             <p>{spot.formatted_address}</p>
                             <p>{spot.rating}</p>
                           </div>
+                          <button
+                            type="button"
+                            style={{
+                              position: 'absolute',
+                              right: '0',
+                              top: '0',
+                            }}
+                            onClick={() => deleteSpot(spot.place_id)}>
+                            X
+                          </button>
                         </SpotCard>
                       ))}
                       {provided.placeholder}
@@ -640,6 +669,18 @@ function AddSchedule(props) {
                             <h3>{schedule.placeDetail.name}</h3>
                             <p>{schedule.placeDetail.formatted_address}</p>
                           </div>
+                          <button
+                            type="button"
+                            style={{
+                              position: 'absolute',
+                              right: '0',
+                              top: '0',
+                            }}
+                            onClick={() =>
+                              deleteSchedule(schedule.schedule_id)
+                            }>
+                            X
+                          </button>
                         </ScheduleCard>
                       ))
                     ) : (

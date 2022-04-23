@@ -239,6 +239,36 @@ const firestore = {
     });
     return batch.commit();
   },
+  deleteSchedule(userUID, itineraryId, scheduleId) {
+    return deleteDoc(
+      doc(
+        collection(
+          this.db,
+          'itineraries',
+          userUID,
+          'details',
+          itineraryId,
+          'schedules'
+        ),
+        scheduleId
+      )
+    );
+  },
+  deleteWaitingSpots(userUID, itineraryId, placeId) {
+    return deleteDoc(
+      doc(
+        collection(
+          this.db,
+          'itineraries',
+          userUID,
+          'details',
+          itineraryId,
+          'waitingSpots'
+        ),
+        placeId
+      )
+    );
+  },
   setWaitingSpotsAndRemoveSchdule(userUID, itineraryId, scheduleId, placeData) {
     const batch = writeBatch(this.db);
     const itineraryDetailRef = doc(
