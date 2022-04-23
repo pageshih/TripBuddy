@@ -591,6 +591,39 @@ function AddSchedule(props) {
       .then(() => alert('刪除成功！'))
       .catch((error) => console.error(error));
   };
+  const updateDate = (start, end) => {
+    let updateDate;
+    if (overviews.start_date !== start && overviews.end_date !== end) {
+      updateDate = {
+        start_date: start,
+        end_date: end,
+      };
+    } else if (overviews.start_date !== start && overviews.end_date === end) {
+      updateDate = {
+        start_date: start,
+      };
+    } else if (overviews.start_date === start && overviews.end_date !== end) {
+      updateDate = {
+        end_date: end,
+      };
+    }
+    if (updateDate) {
+      updateOverviewsFields(updateDate);
+    }
+  };
+  const switchDay = (prevDay) => {
+    if (prevDay === overviews.depart_times.length - 1) {
+      setDay(prevDay - 1);
+      setDepartString(
+        timestampToString(overviews.depart_times[prevDay - 1], 'time')
+      );
+    } else {
+      setDay(prevDay + 1);
+      setDepartString(
+        timestampToString(overviews.depart_times[prevDay + 1], 'time')
+      );
+    }
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
@@ -674,37 +707,10 @@ function AddSchedule(props) {
                 <EditableDate
                   start={overviews.start_date}
                   end={overviews.end_date}
-                  onSubmit={(start, end) => {
-                    let updateDate;
-                    if (
-                      overviews.start_date !== start &&
-                      overviews.end_date !== end
-                    ) {
-                      updateDate = {
-                        start_date: start,
-                        end_date: end,
-                      };
-                    } else if (
-                      overviews.start_date !== start &&
-                      overviews.end_date === end
-                    ) {
-                      updateDate = {
-                        start_date: start,
-                      };
-                    } else if (
-                      overviews.start_date === start &&
-                      overviews.end_date !== end
-                    ) {
-                      updateDate = {
-                        end_date: end,
-                      };
-                    }
-                    if (updateDate) {
-                      updateOverviewsFields(updateDate);
-                    }
-                  }}
+                  onSubmit={updateDate}
                 />
               </Container>
+              <h3>Day {day + 1}</h3>
               <FlexDiv
                 alignItems="center"
                 gap="20px"
@@ -805,6 +811,23 @@ function AddSchedule(props) {
                   </CardWrapper>
                 )}
               </Droppable>
+              {day < overviews.depart_times.length && (
+                <FlexDiv justifyContent="flex-end" padding="5px 0">
+                  {
+                    <FlexDiv
+                      as="button"
+                      alignItems="center"
+                      type="button"
+                      onClick={() => switchDay(day)}>
+                      第
+                      {day === overviews.depart_times.length - 1
+                        ? day
+                        : day + 2}
+                      天<span className="material-icons">trending_flat</span>
+                    </FlexDiv>
+                  }
+                </FlexDiv>
+              )}
             </FlexChildDiv>
           </FlexDiv>
         </>

@@ -13,7 +13,7 @@ const timestampToString = (timestamp, type) => {
 };
 
 function timestampToDateInput(timestamp) {
-  const d = new Date(timestamp);
+  const d = timestamp ? new Date(timestamp) : new Date();
   return `${d.toISOString().slice(0, 10)}`;
 }
 
