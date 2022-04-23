@@ -344,7 +344,12 @@ function EditableH2(props) {
           <button type="submit">儲存</button>
         </form>
       ) : (
-        <h2 onClick={() => setIsEdit(true)}>{value}</h2>
+        <h2
+          onClick={() => {
+            if (!props.isBrowse) setIsEdit(true);
+          }}>
+          {value}
+        </h2>
       )}
     </>
   );
@@ -389,7 +394,7 @@ function EditableDate(props) {
       ) : (
         <p
           onClick={(e) => {
-            if (e.target.id !== 'submit') {
+            if (e.target.id !== 'submit' && !props.isBrowse) {
               setIsEdit(true);
             }
           }}>
@@ -714,6 +719,7 @@ function AddSchedule(props) {
             <FlexChildDiv grow="1" order="-1" padding="30px">
               <Container>
                 <EditableH2
+                  isBrowse={isBrowse}
                   onSubmit={(title) => {
                     if (title !== overviews.title) {
                       updateOverviewsFields({ title });
@@ -725,58 +731,21 @@ function AddSchedule(props) {
                   start={overviews.start_date}
                   end={overviews.end_date}
                   onSubmit={updateDate}
+                  isBrowse={isBrowse}
                 />
               </Container>
               <h3>Day {day + 1}</h3>
-              <FlexDiv
-                alignItems="center"
-                gap="20px"
-                onClick={(e) => {
-                  if (!isBrowse && e.target.id !== 'save') {
-                    setEdit('depart');
-                  }
-                }}>
+              <FlexDiv alignItems="center" gap="20px">
                 <p>出發時間</p>
-                {edit === 'depart' ? (
-                  <>
-                    <input
-                      type="text"
-                      value={departString}
-                      onChange={(e) => {
-                        setDepartString(e.target.value);
-                      }}
-                    />
-                    <button
-                      type="button"
-                      id="save"
-                      onClick={(e) => {
-                        if (e.target.id === 'save') {
-                          setEdit('save');
-                          const inputTime = departString.split(':');
-                          const newTime = new Date(
-                            overviews.depart_times[day]
-                          ).setHours(
-                            Number(inputTime[0]),
-                            Number(inputTime[1])
-                          );
-                          const updateTimes = [...overviews.depart_times];
-                          if (newTime !== updateTimes[day]) {
-                            updateTimes[day] = newTime;
-                            updateOverviewsFields({
-                              depart_times: updateTimes,
-                            });
-                            if (schedules.length > 0) {
-                              updateTimeOfSchedule(schedules, true, newTime);
-                            }
-                          }
-                        }
-                      }}>
-                      儲存
-                    </button>
-                  </>
-                ) : (
-                  <h2>{departString}</h2>
-                )}
+                <EditableH2
+                  isBrowse={isBrowse}
+                  onSubmit={(title) => {
+                    if (title !== overviews.title) {
+                      updateOverviewsFields({ title });
+                    }
+                  }}>
+                  {departString}
+                </EditableH2>
               </FlexDiv>
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (
@@ -807,22 +776,26 @@ function AddSchedule(props) {
                             <h3>{schedule.placeDetail.name}</h3>
                             <p>{schedule.placeDetail.formatted_address}</p>
                           </div>
-                          <button
-                            type="button"
-                            style={{
-                              position: 'absolute',
-                              right: '0',
-                              top: '0',
-                            }}
-                            onClick={() =>
-                              deleteSchedule(schedule.schedule_id)
-                            }>
-                            X
-                          </button>
+                          {!isBrowse && (
+                            <button
+                              type="button"
+                              style={{
+                                position: 'absolute',
+                                right: '0',
+                                top: '0',
+                              }}
+                              onClick={() =>
+                                deleteSchedule(schedule.schedule_id)
+                              }>
+                              X
+                            </button>
+                          )}
                         </ScheduleCard>
                       ))
                     ) : (
-                      <p>拖拉卡片以新增行程</p>
+                      <p>
+                        {isBrowse ? '點擊編輯新增行程' : '拖拉卡片以新增行程'}
+                      </p>
                     )}
                     {provided.placeholder}
                   </CardWrapper>
