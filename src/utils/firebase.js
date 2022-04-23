@@ -252,12 +252,14 @@ const firestore = {
       collection(itineraryDetailRef, 'schedules'),
       scheduleId
     );
-    const waitingSpotsRef = doc(
-      collection(itineraryDetailRef, 'waitingSpots'),
-      placeData.place_id
-    );
-    batch.set(waitingSpotsRef, placeData);
     batch.delete(scheduleRef);
+    if (placeData) {
+      const waitingSpotsRef = doc(
+        collection(itineraryDetailRef, 'waitingSpots'),
+        placeData.place_id
+      );
+      batch.set(waitingSpotsRef, placeData);
+    }
     return batch.commit();
   },
   editOverviews(userUID, itineraryId, newOverview) {

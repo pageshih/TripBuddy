@@ -410,18 +410,23 @@ function AddSchedule(props) {
     const newSpotsList = Array.from(waitingSpots);
     const newScheduleList = Array.from(schedules);
     const [remove] = newScheduleList.splice(scheduleIndex, 1);
-    newSpotsList.splice(spotIndex, 0, remove.placeDetail);
+    const isRepeatSpot = newSpotsList.some(
+      (spot) => spot.place_id === remove.place_id
+    );
+    if (!isRepeatSpot) {
+      newSpotsList.splice(spotIndex, 0, remove.placeDetail);
+    }
     firestore
       .setWaitingSpotsAndRemoveSchdule(
         uid,
         itineraryId,
         remove.schedule_id,
-        remove.placeDetail
+        !isRepeatSpot && remove.placeDetail
       )
       .then(() => console.log('removed'))
       .catch((error) => console.error(error));
     return {
-      newSpotsList,
+      newSpotsList: !isRepeatSpot && newSpotsList,
       newScheduleList,
     };
   };
@@ -435,7 +440,6 @@ function AddSchedule(props) {
     if (!result.destination) {
       return;
     }
-    console.log(result);
     if (
       startAndEnd.startId === 'waitingSpotsArea' &&
       startAndEnd.endId === 'scheduleArea'
@@ -469,8 +473,10 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
-      setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
+      if (newSpotsList) {
+        setWaitingSpots(newSpotsList);
+      }
     }
   };
   const updateDuration = (scheduleId, newDuration) => {
