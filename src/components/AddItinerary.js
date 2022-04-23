@@ -410,7 +410,16 @@ function AddSchedule(props) {
     const newSpotsList = Array.from(waitingSpots);
     const newScheduleList = Array.from(schedules);
     const [remove] = newScheduleList.splice(scheduleIndex, 1);
-    newSpotsList.push(remove.placeDetail);
+    newSpotsList.splice(spotIndex, 0, remove.placeDetail);
+    firestore
+      .setWaitingSpotsAndRemoveSchdule(
+        uid,
+        itineraryId,
+        remove.schedule_id,
+        remove.placeDetail
+      )
+      .then(() => console.log('removed'))
+      .catch((error) => console.error(error));
     return {
       newSpotsList,
       newScheduleList,
@@ -436,7 +445,6 @@ function AddSchedule(props) {
         startAndEnd.endIndex,
         'spot'
       );
-      console.log(newSpotsList, newScheduleList);
       setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
       updateTimeOfSchedule(newScheduleList);

@@ -76,10 +76,13 @@ const firestore = {
       merge: 'merge',
     });
   },
-  setSavedSpots(userUID, place) {
+  setSavedSpots(userUID, placeData) {
     return setDoc(
-      doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
-      place,
+      doc(
+        collection(this.db, 'savedSpots', userUID, 'places'),
+        placeData.place_id
+      ),
+      placeData,
       { merge: 'merge' }
     );
   },
@@ -234,6 +237,27 @@ const firestore = {
     updateDatas.forEach((data) => {
       batch.set(doc(schedulesRef, data.schedule_id), data, { merge });
     });
+    return batch.commit();
+  },
+  setWaitingSpotsAndRemoveSchdule(userUID, itineraryId, scheduleId, placeData) {
+    const batch = writeBatch(this.db);
+    const itineraryDetailRef = doc(
+      this.db,
+      'itineraries',
+      userUID,
+      'details',
+      itineraryId
+    );
+    const scheduleRef = doc(
+      collection(itineraryDetailRef, 'schedules'),
+      scheduleId
+    );
+    const waitingSpotsRef = doc(
+      collection(itineraryDetailRef, 'waitingSpots'),
+      placeData.place_id
+    );
+    batch.set(waitingSpotsRef, placeData);
+    batch.delete(scheduleRef);
     return batch.commit();
   },
   editOverviews(userUID, itineraryId, newOverview) {
