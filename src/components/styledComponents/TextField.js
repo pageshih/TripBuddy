@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { FlexDiv } from './Layout';
 
 const inputBase = css`
   padding: 10px;
@@ -39,47 +41,83 @@ const TextInput = styled.input`
   ${inputBase}
   width: 100%;
 `;
-
-const CheckboxDiv = styled.div`
+const checkboxCss = css`
   color: white;
   border: 1px solid lightgray;
   border-radius: 5px;
-  align-self: flex-start;
+  cursor: pointer;
+`;
+const CheckboxDiv = styled.div`
+  ${checkboxCss}
   position: absolute;
   top: -10px;
   left: -10px;
+  align-self: flex-start;
   background-color: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
       ? 'skyblue'
       : 'white'};
-  cursor: pointer;
+`;
+const CheckAllDiv = styled.div`
+  ${checkboxCss}
+  background-color: ${(props) => (props.checked ? 'skyblue' : 'white')};
 `;
 const CheckboxCustom = (props) => {
   return (
-    <label name={props.id}>
-      <CheckboxDiv
-        id={props.id}
-        selectedList={props.selectedList}
-        className="material-icons">
-        check
-      </CheckboxDiv>
+    <label name={props.selectAll !== undefined ? 'selectAll' : props.id}>
+      {props.selectAll !== undefined ? (
+        <CheckAllDiv checked={props.selectAll} className="material-icons">
+          check
+        </CheckAllDiv>
+      ) : (
+        <CheckboxDiv
+          id={props.id}
+          selectedList={props.selectedList}
+          className="material-icons">
+          check
+        </CheckboxDiv>
+      )}
       <input
         type="checkbox"
         style={{ display: 'none' }}
-        id={props.id}
+        id={props.selectAll !== undefined ? 'selectAll' : props.id}
         onChange={(e) => {
-          if (e.target.checked) {
-            props.setSelectedList([...props.selectedList, props.id]);
+          if (props.selectAll !== undefined) {
+            props.onChange(e);
           } else {
-            props.setSelectedList(
-              props.selectedList.filter((item) => item !== props.id)
-            );
+            if (e.target.checked) {
+              props.setSelectedList([...props.selectedList, props.id]);
+            } else {
+              props.setSelectedList(
+                props.selectedList.filter((item) => item !== props.id)
+              );
+            }
           }
         }}
       />
     </label>
   );
 };
+function SelectAllCheckBox(props) {
+  const [selectAll, setSelectAll] = useState(false);
+
+  const selectAllItems = (e) => {
+    if (e.target.checked) {
+      setSelectAll(true);
+      props.setAllChecked();
+    } else {
+      setSelectAll(false);
+      props.setAllUnchecked();
+    }
+  };
+  return (
+    <FlexDiv gap="10px" alignItems="center" padding={props.padding}>
+      <CheckboxCustom selectAll={selectAll} onChange={selectAllItems} />
+      <p>全選</p>
+    </FlexDiv>
+  );
+}
+
 const TextAreaReview = styled.textarea`
   ${inputBase}
   width:100%;
@@ -93,4 +131,10 @@ const TextAreaReview = styled.textarea`
   }
 `;
 
-export { TextField, TextInput, CheckboxCustom, TextAreaReview };
+export {
+  TextField,
+  TextInput,
+  CheckboxCustom,
+  TextAreaReview,
+  SelectAllCheckBox,
+};

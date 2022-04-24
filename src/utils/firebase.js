@@ -76,10 +76,13 @@ const firestore = {
       merge: 'merge',
     });
   },
-  setSavedSpots(userUID, place) {
+  setSavedSpots(userUID, placeData) {
     return setDoc(
-      doc(collection(this.db, 'savedSpots', userUID, 'places'), place.place_id),
-      place,
+      doc(
+        collection(this.db, 'savedSpots', userUID, 'places'),
+        placeData.place_id
+      ),
+      placeData,
       { merge: 'merge' }
     );
   },
@@ -236,6 +239,74 @@ const firestore = {
     });
     return batch.commit();
   },
+  deleteSchedule(userUID, itineraryId, scheduleId) {
+    return deleteDoc(
+      doc(
+        collection(
+          this.db,
+          'itineraries',
+          userUID,
+          'details',
+          itineraryId,
+          'schedules'
+        ),
+        scheduleId
+      )
+    );
+  },
+  setWaitingSpots(userUID, itineraryId, spots) {
+    const batch = writeBatch(this.db);
+    const waitingSpotRef = collection(
+      this.db,
+      'itineraries',
+      userUID,
+      'details',
+      itineraryId,
+      'waitingSpots'
+    );
+    spots.forEach((spot) => {
+      batch.set(doc(waitingSpotRef, spot.place_id), spot, { merge: 'merge' });
+    });
+    return batch.commit();
+  },
+  deleteWaitingSpots(userUID, itineraryId, placeId) {
+    return deleteDoc(
+      doc(
+        collection(
+          this.db,
+          'itineraries',
+          userUID,
+          'details',
+          itineraryId,
+          'waitingSpots'
+        ),
+        placeId
+      )
+    );
+  },
+  setWaitingSpotsAndRemoveSchdule(userUID, itineraryId, scheduleId, placeData) {
+    const batch = writeBatch(this.db);
+    const itineraryDetailRef = doc(
+      this.db,
+      'itineraries',
+      userUID,
+      'details',
+      itineraryId
+    );
+    const scheduleRef = doc(
+      collection(itineraryDetailRef, 'schedules'),
+      scheduleId
+    );
+    batch.delete(scheduleRef);
+    if (placeData) {
+      const waitingSpotsRef = doc(
+        collection(itineraryDetailRef, 'waitingSpots'),
+        placeData.place_id
+      );
+      batch.set(waitingSpotsRef, placeData);
+    }
+    return batch.commit();
+  },
   editOverviews(userUID, itineraryId, newOverview) {
     return setDoc(
       doc(
@@ -244,6 +315,15 @@ const firestore = {
       ),
       newOverview,
       { merge: 'merge' }
+    );
+  },
+  updateOverviewsFields(userUID, itineraryId, updateData) {
+    return updateData(
+      doc(
+        collection(this.db, 'itineraries', userUID, 'overviews'),
+        itineraryId
+      ),
+      updateData
     );
   },
   getScheduleWithTime(userUID, itineraryId, timestamp) {

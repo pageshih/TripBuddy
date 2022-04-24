@@ -8,12 +8,18 @@ import {
   Container,
   FlexDiv,
 } from './styledComponents/Layout';
-import { CheckboxCustom } from './styledComponents/TextField';
+import {
+  CheckboxCustom,
+  SelectAllCheckBox,
+} from './styledComponents/TextField';
 
 function SavedSpots(props) {
   const { uid } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
+  const [addAction, setAddAction] = useState();
+  const [createdItineraries, setCreatedItineraries] = useState();
+
   const navigate = useNavigate();
   const deleteSpots = () => {
     const isDelete = window.confirm('確定要刪除這些景點嗎？(此動作無法復原）');
@@ -33,42 +39,60 @@ function SavedSpots(props) {
     }
   };
   const addSelectSpotsToItinerary = () => {
-    const waitingSpots = savedSpots.filter(
-      (spot) =>
-        selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
-        spot
-    );
-    console.log(waitingSpots);
-    props.setWaitingSpots(waitingSpots);
-    navigate('/add');
+    if (selectedSpotList?.length > 0) {
+      const waitingSpots = savedSpots.filter(
+        (spot) =>
+          selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
+          spot
+      );
+
+      if (addAction === 'add') {
+        props.setWaitingSpots(waitingSpots);
+        navigate('/add');
+      } else {
+        firestore
+          .setWaitingSpots(uid, addAction, waitingSpots)
+          .then(() => navigate(`/add/${addAction}`))
+          .catch((error) => console.error(error));
+      }
+    } else {
+      alert('還沒有選擇景點喔！');
+    }
   };
   useEffect(() => {
     firestore
       .getSavedSpots(uid)
       .then((res) => setSavedSpots(res))
       .catch((error) => console.error(error));
+    firestore
+      .getItineraries(uid, new Date().getTime())
+      .then((res) => setCreatedItineraries(res))
+      .catch((error) => console.error(error));
   }, []);
   return (
     <>
       <FlexDiv gap="20px" justifyContent="flex-end" padding="20px">
-        <button
-          type="click"
-          onClick={() =>
-            setSelectedSpotList(savedSpots.map((spot) => spot.place_id))
-          }>
-          全選
-        </button>
-        <button type="click" onClick={() => setSelectedSpotList([])}>
-          取消全選
+        <select onChange={(e) => setAddAction(e.target.value)}>
+          <option value="">---選擇要加入景點的行程---</option>
+          <option value="add">建立一個新行程</option>
+          {createdItineraries?.map((itinerary) => (
+            <option value={itinerary.itinerary_id}>{itinerary.title}</option>
+          ))}
+        </select>
+        <button type="click" onClick={addSelectSpotsToItinerary}>
+          加入行程
         </button>
         <button type="click" onClick={deleteSpots}>
           刪除景點
         </button>
-        {/* <button>加入既定行程</button> */}
-        <button type="click" onClick={addSelectSpotsToItinerary}>
-          加入新建立的行程
-        </button>
       </FlexDiv>
+      <SelectAllCheckBox
+        padding="0 12px"
+        setAllChecked={() =>
+          setSelectedSpotList(savedSpots.map((spot) => spot.place_id))
+        }
+        setAllUnchecked={() => setSelectedSpotList([])}
+      />
       <CardWrapper column padding="20px" gap="20px">
         {savedSpots?.map((spot) => (
           <Card gap="20px" position="relative" key={spot.place_id}>
