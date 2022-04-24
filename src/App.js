@@ -14,6 +14,7 @@ import {
   AddSchedule,
 } from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
+import { EmptyMap } from './utils/googleMap';
 
 const Context = createContext();
 
@@ -22,6 +23,7 @@ function App() {
   const [waitingSpots, setWaitingSpots] = useState();
   const [goLogin, setGoLogin] = useState();
   const [isLogInOut, setIsLogInOut] = useState();
+  const [map, setMap] = useState();
   const cssReset = css`
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
     * {
@@ -78,10 +80,12 @@ function App() {
       );
     }
   }, [uid, setUid]);
+
   return (
     <>
       <Global styles={cssReset} />
-      <Context.Provider value={{ uid, setUid }}>
+      <Context.Provider value={{ uid, setUid, map, setMap }}>
+        <EmptyMap libraries={['places']} map={map} setMap={setMap} />
         <BrowserRouter>
           <Routes>
             <Route

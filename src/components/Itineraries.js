@@ -36,7 +36,7 @@ function ScheduleCard(props) {
 }
 
 function Itineraries() {
-  const { uid } = useContext(Context);
+  const { uid, map } = useContext(Context);
   const navigate = useNavigate();
   const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
@@ -66,9 +66,10 @@ function Itineraries() {
               (24 * 60 * 60 * 1000);
             if (countDownDay <= 0 && countDownDay + tripDays >= -1) {
               firestore
-                .getScheduleWithTime(uid, itinerary.itinerary_id, now)
+                .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
                 .then((scheduleProcessing) => {
                   if (scheduleProcessing) {
+                    console.log(scheduleProcessing);
                     setProgressing({
                       overview: itinerary,
                       schedule: scheduleProcessing,

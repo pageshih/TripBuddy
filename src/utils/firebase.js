@@ -77,39 +77,46 @@ const firestore = {
       merge: 'merge',
     });
   },
-  setSavedSpots(userUID, placeData) {
-    return setDoc(
-      doc(
-        collection(this.db, 'savedSpots', userUID, 'places'),
-        placeData.place_id
-      ),
-      placeData,
-      { merge: 'merge' }
-    );
+  setSavedSpots(userUID, placeDatas) {
+    const batch = writeBatch(this.db);
+    placeDatas.forEach((place) => {
+      batch.set(
+        doc(
+          collection(this.db, 'savedSpots', userUID, 'places'),
+          place.place_id
+        ),
+        place,
+        { merge: 'merge' }
+      );
+    });
+    return batch.commit();
+  },
+  updatePlaceData(spot, map) {
+    const now = new Date().getDate();
+    const expireDate = new Date().setDate(now - 3);
+    if (spot.created_time <= expireDate || !spot.created_time) {
+      return googleMap
+        .getPlaceDetails(map, spot.place_id)
+        .then((updated) => {
+          return updated;
+        })
+        .catch((error) => console.error(error));
+    } else {
+      return spot;
+    }
   },
   getSavedSpots(userUID, map) {
     return new Promise((resolve, reject) => {
       const placesRef = collection(this.db, 'savedSpots', userUID, 'places');
-      const now = new Date().getDate();
-      const expireDate = new Date().setDate(now - 3);
       getDocs(placesRef)
         .then((profileSnap) => {
           const spots = profileSnap.docs.map((doc) => doc.data());
-          const updateSpots = spots.map(async (spot) => {
-            try {
-              return spot.created_time <= expireDate
-                ? googleMap
-                    .getPlaceDetails(map, spot.place_id)
-                    .then((updated) => {
-                      this.setSavedSpots(userUID, updated);
-                      return updated;
-                    })
-                    .catch((error) => console.error(error))
-                : Promise.resolve(spot);
-            } catch (error) {
-              console.error(error);
-            }
+          const updateSpots = spots.map((spot) => {
+            return this.updatePlaceData(spot, map);
           });
+          this.setSavedSpots(userUID, updateSpots).catch((error) =>
+            console.error(error)
+          );
           Promise.all(updateSpots).then((res) => resolve(res));
         })
         .catch((error) => {
@@ -170,7 +177,7 @@ const firestore = {
       .then(() => Promise.resolve(itineraryOverviewRef.id))
       .catch((error) => Promise.reject(error));
   },
-  getItinerary(userUID, itineraryId, isEdit) {
+  getItinerary(userUID, itineraryId, map, isEdit) {
     const itineraryUserRef = doc(this.db, 'itineraries', userUID);
     const getOverviews = new Promise((resolve, reject) => {
       const overviewsRef = doc(
@@ -191,7 +198,11 @@ const firestore = {
           const docs = snapShots.docs.map((snapShot) => {
             return snapShot.data();
           });
-          resolve({ waitingSpots: docs });
+          const update = docs.map((spot) => this.updatePlaceData(spot, map));
+          Promise.all(update).then((res) => {
+            this.setWaitingSpots(userUID, itineraryId, res);
+            resolve({ waitingSpots: res });
+          });
         })
         .catch((error) => reject(error));
     });
@@ -202,10 +213,30 @@ const firestore = {
       );
       return getDocs(schedulesRef)
         .then((snapShots) => {
-          const docs = snapShots.docs.map((snapShot) => {
+          const schedules = snapShots.docs.map((snapShot) => {
             return snapShot.data();
           });
-          resolve({ schedules: docs });
+          if (isEdit) {
+            const update = schedules.map((schedule) =>
+              this.updatePlaceData(schedule.placeDetail, map)
+            );
+            Promise.all(update).then((spots) => {
+              spots.forEach((spot, index) => {
+                schedules[index].placeDetail = spot;
+              });
+              const dataToFirebase = spots.reduce((acc, spot, index) => {
+                const obj = {};
+                obj.placeDetail = spot;
+                obj.schedule_id = schedules[index].schedule_id;
+                acc.push(obj);
+                return acc;
+              }, []);
+              this.editSchedules(userUID, itineraryId, dataToFirebase, 'merge');
+              resolve({ schedules });
+            });
+          } else {
+            resolve({ schedules });
+          }
         })
         .catch((error) => reject(error));
     });
@@ -224,7 +255,7 @@ const firestore = {
       }, {})
     );
   },
-  setSchedule(userUID, itineraryId, scheduleData) {
+  addScheduleRemoveWaitingSpot(userUID, itineraryId, scheduleData) {
     const batch = writeBatch(this.db);
     const itineraryDetailRef = doc(
       this.db,
@@ -345,7 +376,7 @@ const firestore = {
       updateData
     );
   },
-  getScheduleWithTime(userUID, itineraryId, timestamp) {
+  getScheduleWithTime(userUID, itineraryId, timestamp, map) {
     const schedulesRef = collection(
       this.db,
       'itineraries',
@@ -356,8 +387,24 @@ const firestore = {
     );
     const q = query(schedulesRef, where('end_time', '>=', Number(timestamp)));
     return getDocs(q).then((snapShots) => {
-      const target = snapShots.docs.map((doc) => doc.data());
-      return Promise.resolve(target);
+      const target = snapShots.docs.map((schedules) => schedules.data());
+      const updated = target.map((schedule) =>
+        this.updatePlaceData(schedule.placeDetail, map)
+      );
+      return Promise.all(updated).then((res) => {
+        res.forEach((spot, index) => {
+          target[index].placeDetail = spot;
+        });
+        const dataToFirebase = res.reduce((acc, spot, index) => {
+          const obj = {};
+          obj.placeDetail = spot;
+          obj.schedule_id = target[index].schedule_id;
+          acc.push(obj);
+          return acc;
+        }, []);
+        this.editSchedules(userUID, itineraryId, dataToFirebase, 'merge');
+        return Promise.resolve(target);
+      });
     });
   },
   getItineraries(userUID, timestamp, isJournal) {

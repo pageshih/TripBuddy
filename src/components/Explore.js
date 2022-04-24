@@ -235,7 +235,7 @@ function Explore({ setWaitingSpots }) {
   }, [map]);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
-      firestore.setSavedSpots(uid, placeDetail);
+      firestore.setSavedSpots(uid, [placeDetail]);
       if (savedSpots?.length > 0) {
         setSavedSpots([...savedSpots, placeDetail]);
       } else {

@@ -417,12 +417,12 @@ function AddSchedule(props) {
   const [departString, setDepartString] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
   const { itineraryId } = useParams();
-  const { uid } = useContext(Context);
+  const { uid, map } = useContext(Context);
 
   useEffect(() => {
     if (uid && itineraryId) {
       firestore
-        .getItinerary(uid, itineraryId, true)
+        .getItinerary(uid, itineraryId, map, true)
         .then((res) => {
           if (res) {
             setWaitingSpots(res.waitingSpots);
@@ -495,7 +495,7 @@ function AddSchedule(props) {
     };
     setAllSchedules([...allSchedules, addData]);
     firestore
-      .setSchedule(uid, itineraryId, addData)
+      .addScheduleRemoveWaitingSpot(uid, itineraryId, addData)
       .then(() => console.log('success'))
       .catch((error) => console.error(error));
     newScheduleList.splice(scheduleIndex, 0, addData);

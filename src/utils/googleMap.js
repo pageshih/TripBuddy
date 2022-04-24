@@ -112,16 +112,14 @@ const googleMap = {
 function EmptyMap(props) {
   const ref = useRef();
   useEffect(() => {
-    console.log(ref.current);
     if (ref.current && !props.map) {
-      console.log('map');
       props.setMap(googleMap.initMap(ref.current));
     }
-  }, [ref.current, props.map]);
+  }, [ref, props]);
 
   return (
     <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>
-      <div ref={props.mapRef} />
+      <div ref={ref} />
     </Wrapper>
   );
 }

@@ -14,8 +14,7 @@ import {
 } from './styledComponents/TextField';
 
 function SavedSpots(props) {
-  const { uid } = useContext(Context);
-  const { map } = useOutletContext();
+  const { uid, map } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
   const [addAction, setAddAction] = useState();
