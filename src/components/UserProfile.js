@@ -37,9 +37,10 @@ function UserProfile(props) {
           setProfile(res);
           setReviewTags(res.reviews);
         })
-        .catch((res) => console.log(res.code, res.message));
+        .catch((error) => console.error(error));
     }
   }, [uid, setUid]);
+
   return (
     <>
       {profile && (
@@ -74,7 +75,7 @@ function UserProfile(props) {
               我的遊記
             </NavLink>
           </FlexDiv>
-          <Outlet context={[reviewTags, setReviewTags]} />
+          <Outlet context={{ reviewTags }} />
         </>
       )}
     </>

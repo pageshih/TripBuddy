@@ -1,3 +1,6 @@
+import { Wrapper } from '@googlemaps/react-wrapper';
+import { googleMapApiKey } from './apiKey';
+import { useEffect, useRef } from 'react';
 import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
 
@@ -33,7 +36,8 @@ const googleMap = {
     ],
   },
   initMap(ref, center, zoom) {
-    return new window.google.maps.Map(ref, { center, zoom });
+    const option = center && zoom ? { center, zoom } : {};
+    return new window.google.maps.Map(ref, option);
   },
   setMapStyle(map, styles) {
     map.setOptions({
@@ -70,6 +74,7 @@ const googleMap = {
             website: place.website || '未提供',
             rating: place.rating || '未提供',
             types: place.types || '未提供',
+            created_time: new Date().getTime(),
           };
           resolve(removeMethodsInPlaceDetail);
         } else {
@@ -104,5 +109,18 @@ const googleMap = {
     marker.setMap(null);
   },
 };
+function EmptyMap(props) {
+  const ref = useRef();
+  useEffect(() => {
+    if (ref.current && !props.map) {
+      props.setMap(googleMap.initMap(ref.current));
+    }
+  }, [ref, props]);
 
-export default googleMap;
+  return (
+    <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>
+      <div ref={ref} />
+    </Wrapper>
+  );
+}
+export { googleMap, EmptyMap };
