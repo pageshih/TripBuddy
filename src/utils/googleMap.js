@@ -1,6 +1,6 @@
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
+import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
 

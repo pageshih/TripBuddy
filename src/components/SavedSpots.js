@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {

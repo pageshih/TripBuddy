@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import { Context } from '../App';
