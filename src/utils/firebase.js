@@ -254,6 +254,21 @@ const firestore = {
       )
     );
   },
+  setWaitingSpots(userUID, itineraryId, spots) {
+    const batch = writeBatch(this.db);
+    const waitingSpotRef = collection(
+      this.db,
+      'itineraries',
+      userUID,
+      'details',
+      itineraryId,
+      'waitingSpots'
+    );
+    spots.forEach((spot) => {
+      batch.set(doc(waitingSpotRef, spot.place_id), spot, { merge: 'merge' });
+    });
+    return batch.commit();
+  },
   deleteWaitingSpots(userUID, itineraryId, placeId) {
     return deleteDoc(
       doc(
