@@ -13,10 +13,14 @@ const timestampToString = (timestamp, type) => {
 };
 
 function timestampToDateInput(timestamp) {
-  const d = timestamp ? new Date(timestamp) : new Date();
+  const d = new Date(timestamp);
   return `${d.toISOString().slice(0, 10)}`;
 }
 
+function setTimeToTimestamp(timestamp, timeString) {
+  const [hour, minute] = timeString.split(':');
+  return new Date(timestamp).setHours(hour, minute);
+}
 function filterDaySchedules(allSchedules, departTimes, day) {
   return allSchedules.filter(
     (schedule) =>
@@ -42,4 +46,5 @@ export {
   compressImages,
   timestampToDateInput,
   filterDaySchedules,
+  setTimeToTimestamp,
 };

@@ -20,6 +20,7 @@ import {
   timestampToString,
   timestampToDateInput,
   filterDaySchedules,
+  setTimeToTimestamp,
 } from '../utils/utilities';
 // import { style } from '@mui/system';
 
@@ -75,8 +76,8 @@ function AddOverView(props) {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
   const [title, setTitle] = useState();
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const [startDate, setStartDate] = useState(new Date().getTime());
+  const [endDate, setEndDate] = useState(new Date().getTime());
 
   // const addOverView = [
   //   {
@@ -330,7 +331,7 @@ function EditableH2(props) {
   const [value, setValue] = useState();
   useEffect(() => {
     setValue(props.children);
-  }, []);
+  }, [props.children]);
   const submit = (e) => {
     e.preventDefault();
     setIsEdit(false);
@@ -407,13 +408,13 @@ function EditableDate(props) {
 }
 
 function AddSchedule(props) {
+  const navigate = useNavigate();
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
   const [allSchedules, setAllSchedules] = useState([]);
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
-  const [edit, setEdit] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
   const { itineraryId } = useParams();
   const { uid } = useContext(Context);
@@ -479,9 +480,7 @@ function AddSchedule(props) {
     const newScheduleList = Array.from(schedules);
     const [remove] = newSpotsList.splice(spotIndex, 1);
     if (scheduleIndex > 0) {
-      console.log(newScheduleList);
       startTime = newScheduleList[scheduleIndex - 1].end_time;
-      console.log(scheduleIndex, startTime);
     } else {
       startTime = overviews.depart_times[day];
     }
@@ -494,6 +493,7 @@ function AddSchedule(props) {
       placeDetail: remove,
       schedule_id: 'unknown',
     };
+    setAllSchedules([...allSchedules, addData]);
     firestore
       .setSchedule(uid, itineraryId, addData)
       .then(() => console.log('success'))
@@ -515,6 +515,11 @@ function AddSchedule(props) {
     if (!isRepeatSpot) {
       newSpotsList.splice(spotIndex, 0, remove.placeDetail);
     }
+    setAllSchedules(
+      allSchedules.filter((schedule) => {
+        return remove.schedule_id !== schedule.schedule_id;
+      })
+    );
     firestore
       .setWaitingSpotsAndRemoveSchdule(
         uid,
@@ -602,14 +607,14 @@ function AddSchedule(props) {
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
-      .then(() => alert('刪除成功！'))
+      .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
   const deleteSpot = (placeId) => {
     setWaitingSpots(waitingSpots.filter((spot) => spot.place_id !== placeId));
     firestore
       .deleteWaitingSpots(uid, itineraryId, placeId)
-      .then(() => alert('刪除成功！'))
+      .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
   const updateDate = (start, end) => {
@@ -633,7 +638,7 @@ function AddSchedule(props) {
     }
   };
   const switchDay = (prevDay) => {
-    if (prevDay === overviews.depart_times.length - 1) {
+    if (prevDay === overviews.depart_times.length - 1 && prevDay > 0) {
       setDay(prevDay - 1);
       setDepartString(
         timestampToString(overviews.depart_times[prevDay - 1], 'time')
@@ -662,15 +667,20 @@ function AddSchedule(props) {
                 padding="30px"
                 style={{ backgroundColor: '#f7f7f7' }}
                 basis="360px">
-                <button
-                  style={{
-                    alignSelf: 'flex-end',
-                    backgroundColor: 'crimson',
-                    color: 'white',
-                  }}
-                  onClick={() => setIsBrowse(true)}>
-                  結束編輯
-                </button>
+                <FlexDiv justifyContent="flex-end" gap="20px">
+                  <button type="button" onClick={() => navigate('/explore')}>
+                    新增景點
+                  </button>
+                  <button
+                    style={{
+                      alignSelf: 'flex-end',
+                      backgroundColor: 'crimson',
+                      color: 'white',
+                    }}
+                    onClick={() => setIsBrowse(true)}>
+                    結束編輯
+                  </button>
+                </FlexDiv>
                 <p>待定景點</p>
                 <Droppable
                   droppableId="waitingSpotsArea"
@@ -718,6 +728,9 @@ function AddSchedule(props) {
             )}
             <FlexChildDiv grow="1" order="-1" padding="30px">
               <Container>
+                <button type="button" onClick={() => navigate('/itineraries')}>
+                  回首頁
+                </button>
                 <EditableH2
                   isBrowse={isBrowse}
                   onSubmit={(title) => {
@@ -739,9 +752,17 @@ function AddSchedule(props) {
                 <p>出發時間</p>
                 <EditableH2
                   isBrowse={isBrowse}
-                  onSubmit={(title) => {
-                    if (title !== overviews.title) {
-                      updateOverviewsFields({ title });
+                  onSubmit={(departTimes) => {
+                    if (departTimes !== departString) {
+                      console.log(departString);
+                      const newDepartTimestamp = setTimeToTimestamp(
+                        overviews.depart_times[day],
+                        departTimes
+                      );
+                      const newDepartTimes = Array.from(overviews.depart_times);
+                      newDepartTimes.splice(day, 1, newDepartTimestamp);
+                      updateOverviewsFields({ depart_times: newDepartTimes });
+                      updateTimeOfSchedule(schedules, true, newDepartTimestamp);
                     }
                   }}>
                   {departString}
