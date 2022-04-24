@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
-import googleMap from '../utils/googleMap';
+import { googleMap } from '../utils/googleMap';
 import { Context } from '../App';
 import { RoundButton, Button } from './styledComponents/Button';
 import {
@@ -221,13 +221,18 @@ function Explore({ setWaitingSpots }) {
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
+  const sideWindowRef = useRef();
 
   useEffect(() => {
-    firestore
-      .getSavedSpots(uid)
-      .then((res) => setSavedSpots(res))
-      .catch((error) => console.error(error));
-  }, []);
+    if (map) {
+      firestore
+        .getSavedSpots(uid, map)
+        .then((res) => {
+          setSavedSpots(res);
+        })
+        .catch((error) => console.error(error));
+    }
+  }, [map]);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
       firestore.setSavedSpots(uid, placeDetail);
@@ -236,6 +241,8 @@ function Explore({ setWaitingSpots }) {
       } else {
         setSavedSpots([placeDetail]);
       }
+      setShowSavedSpots(true);
+      sideWindowRef.current.scrollTop = sideWindowRef.current.scrollHeight;
     } else {
       alert('此景點已在候補清單中！');
     }
@@ -272,6 +279,7 @@ function Explore({ setWaitingSpots }) {
         <>
           <FlexDiv height="100vh">
             <FlexChildDiv
+              ref={sideWindowRef}
               basis={placeDetail || showSavedSpots ? '500px' : null}
               overflow="scroll"
               padding={placeDetail || showSavedSpots ? '15px 15px' : null}>

@@ -23,6 +23,7 @@ import {
   deleteDoc,
   writeBatch,
 } from 'firebase/firestore';
+import { googleMap } from './googleMap';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -86,12 +87,30 @@ const firestore = {
       { merge: 'merge' }
     );
   },
-  getSavedSpots(userUID) {
+  getSavedSpots(userUID, map) {
     return new Promise((resolve, reject) => {
       const placesRef = collection(this.db, 'savedSpots', userUID, 'places');
+      const now = new Date().getDate();
+      const expireDate = new Date().setDate(now - 3);
       getDocs(placesRef)
         .then((profileSnap) => {
-          resolve(profileSnap.docs.map((doc) => doc.data()));
+          const spots = profileSnap.docs.map((doc) => doc.data());
+          const updateSpots = spots.map(async (spot) => {
+            try {
+              return spot.created_time <= expireDate
+                ? googleMap
+                    .getPlaceDetails(map, spot.place_id)
+                    .then((updated) => {
+                      this.setSavedSpots(userUID, updated);
+                      return updated;
+                    })
+                    .catch((error) => console.error(error))
+                : Promise.resolve(spot);
+            } catch (error) {
+              console.error(error);
+            }
+          });
+          Promise.all(updateSpots).then((res) => resolve(res));
         })
         .catch((error) => {
           reject(error);

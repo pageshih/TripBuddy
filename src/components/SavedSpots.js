@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -15,6 +15,7 @@ import {
 
 function SavedSpots(props) {
   const { uid } = useContext(Context);
+  const { map } = useOutletContext();
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
   const [addAction, setAddAction] = useState();
@@ -60,15 +61,17 @@ function SavedSpots(props) {
     }
   };
   useEffect(() => {
-    firestore
-      .getSavedSpots(uid)
-      .then((res) => setSavedSpots(res))
-      .catch((error) => console.error(error));
-    firestore
-      .getItineraries(uid, new Date().getTime())
-      .then((res) => setCreatedItineraries(res))
-      .catch((error) => console.error(error));
-  }, []);
+    if (map) {
+      firestore
+        .getSavedSpots(uid, map)
+        .then((res) => setSavedSpots(res))
+        .catch((error) => console.error(error));
+      firestore
+        .getItineraries(uid, new Date().getTime())
+        .then((res) => setCreatedItineraries(res))
+        .catch((error) => console.error(error));
+    }
+  }, [map]);
   return (
     <>
       <FlexDiv gap="20px" justifyContent="flex-end" padding="20px">
@@ -76,7 +79,9 @@ function SavedSpots(props) {
           <option value="">---選擇要加入景點的行程---</option>
           <option value="add">建立一個新行程</option>
           {createdItineraries?.map((itinerary) => (
-            <option value={itinerary.itinerary_id}>{itinerary.title}</option>
+            <option key={itinerary.itinerary_id} value={itinerary.itinerary_id}>
+              {itinerary.title}
+            </option>
           ))}
         </select>
         <button type="click" onClick={addSelectSpotsToItinerary}>

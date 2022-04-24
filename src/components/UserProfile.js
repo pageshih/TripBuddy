@@ -1,10 +1,11 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled';
 import { firebaseAuth, firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv } from './styledComponents/Layout';
 import { Button } from './styledComponents/Button';
+import { EmptyMap, googleMap } from '../utils/googleMap';
 
 const ProfileImg = styled.img`
   border-radius: 50%;
@@ -19,6 +20,8 @@ function UserProfile(props) {
   const { uid, setUid } = useContext(Context);
   const [profile, setProfile] = useState();
   const [reviewTags, setReviewTags] = useState();
+  const [map, setMap] = useState();
+  const mapRef = useRef();
   const logout = () => {
     firebaseAuth
       .userSignOut()
@@ -37,13 +40,19 @@ function UserProfile(props) {
           setProfile(res);
           setReviewTags(res.reviews);
         })
-        .catch((res) => console.log(res.code, res.message));
+        .catch((error) => console.error(error));
     }
   }, [uid, setUid]);
+  useEffect(() => {
+    if (mapRef.current && !map) {
+      setMap(googleMap.initMap(mapRef.current));
+    }
+  }, [mapRef, map]);
   return (
     <>
       {profile && (
         <>
+          <EmptyMap libraries={['places']} mapRef={mapRef} />
           <FlexDiv alignItems="center" gap="10px">
             <ProfileImg src={profile.photo} alt="profilePhoto" size="48px" />
             <p>你好，{profile.name}</p>
@@ -74,7 +83,7 @@ function UserProfile(props) {
               我的遊記
             </NavLink>
           </FlexDiv>
-          <Outlet context={[reviewTags, setReviewTags]} />
+          <Outlet context={{ reviewTags, map }} />
         </>
       )}
     </>

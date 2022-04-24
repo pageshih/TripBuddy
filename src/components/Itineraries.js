@@ -43,7 +43,7 @@ function Itineraries() {
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
   const now = new Date().getTime();
-  const [reviewTags, setReviewTags] = useOutletContext();
+  const { reviewTags } = useOutletContext();
 
   useEffect(() => {
     firestore
