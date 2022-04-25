@@ -23,9 +23,9 @@ function UserProfile(props) {
     firebaseAuth
       .userSignOut()
       .then(() => {
-        alert('logout');
+        alert('您已登出');
+        props.setIsLogInOut(true);
         setUid(undefined);
-        props.setIsLogOut(true);
       })
       .catch((res) => console.log(res));
   };
