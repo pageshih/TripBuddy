@@ -18,6 +18,25 @@ import { EmptyMap } from './utils/googleMap';
 
 const Context = createContext();
 
+const LoginOrPage = (props) => {
+  useEffect(() => {
+    if (props.goLogin && !props.isLogInOut) {
+      alert('請先登入');
+    }
+  }, []);
+  return (
+    <>
+      {props.goLogin ? (
+        <Navigate to="/login" replace={true} />
+      ) : props.goLogin !== undefined ? (
+        props.element
+      ) : (
+        <p>loading...</p>
+      )}
+    </>
+  );
+};
+
 function App() {
   const [uid, setUid] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
@@ -45,28 +64,11 @@ function App() {
       margin: 0;
     }
   `;
-  const LoginOrPage = (props) => {
-    useEffect(() => {
-      if (goLogin && !isLogInOut) {
-        alert('請先登入');
-      }
-    }, []);
-    return (
-      <>
-        {goLogin ? (
-          <Navigate to="/login" replace={true} />
-        ) : goLogin !== undefined ? (
-          props.element
-        ) : (
-          <p>loading...</p>
-        )}
-      </>
-    );
-  };
+
   useEffect(() => {
     if (uid) {
       console.log(uid);
-    } else {
+    } else if (isLogInOut === undefined) {
       firebaseAuth.checkIsLogIn(
         (userImpl) => {
           if (userImpl) {
@@ -92,6 +94,8 @@ function App() {
               path="/"
               element={
                 <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
                   element={<UserProfile setIsLogInOut={setIsLogInOut} />}
                 />
               }>
@@ -113,6 +117,8 @@ function App() {
               path="/explore"
               element={
                 <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
                   element={<Explore setWaitingSpots={setWaitingSpots} />}
                 />
               }
@@ -122,6 +128,8 @@ function App() {
                 path=""
                 element={
                   <LoginOrPage
+                    goLogin={goLogin}
+                    isLogInOut={isLogInOut}
                     element={
                       <AddOverView
                         waitingSpots={waitingSpots}
@@ -133,16 +141,34 @@ function App() {
               />
               <Route
                 path=":itineraryId"
-                element={<LoginOrPage element={<AddSchedule />} />}
+                element={
+                  <LoginOrPage
+                    goLogin={goLogin}
+                    isLogInOut={isLogInOut}
+                    element={<AddSchedule />}
+                  />
+                }
               />
             </Route>
             <Route
               path=":itineraryId"
-              element={<LoginOrPage element={<AddSchedule browse />} />}
+              element={
+                <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
+                  element={<AddSchedule browse />}
+                />
+              }
             />
             <Route
               path="/travel-journals/:journalID"
-              element={<LoginOrPage element={<TravelJournalDetail />} />}
+              element={
+                <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
+                  element={<TravelJournalDetail />}
+                />
+              }
             />
           </Routes>
         </BrowserRouter>
