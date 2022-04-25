@@ -43,6 +43,7 @@ function App() {
   const [goLogin, setGoLogin] = useState();
   const [isLogInOut, setIsLogInOut] = useState();
   const [map, setMap] = useState();
+  const [directionService, setDirectionService] = useState();
   const cssReset = css`
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
     * {
@@ -86,8 +87,16 @@ function App() {
   return (
     <>
       <Global styles={cssReset} />
-      <Context.Provider value={{ uid, setUid, map, setMap }}>
-        <EmptyMap libraries={['places']} map={map} setMap={setMap} />
+      <Context.Provider
+        value={{
+          uid,
+          setUid,
+          map,
+          setMap,
+          directionService,
+          setDirectionService,
+        }}>
+        <EmptyMap libraries={['places']} />
         <BrowserRouter>
           <Routes>
             <Route

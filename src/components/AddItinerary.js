@@ -22,6 +22,7 @@ import {
   filterDaySchedules,
   setTimeToTimestamp,
 } from '../utils/utilities';
+import { googleMap } from '../utils/googleMap';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -229,16 +230,16 @@ const ScheduleCard = (props) => {
   const [duration, setDuration] = useState(props.schedule.duration);
   const transportMode = [
     {
-      BICYCLING: '騎自行車',
+      bicycling: '騎自行車',
     },
     {
-      DRIVING: '開車',
+      driving: '開車',
     },
     {
-      TRANSIT: '搭乘大眾運輸',
+      transit: '搭乘大眾運輸',
     },
     {
-      WALKING: '走路',
+      walking: '走路',
     },
   ];
   return (
@@ -251,75 +252,62 @@ const ScheduleCard = (props) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
-          {props.schedule.type === 'spot' ? (
-            <>
-              <FlexDiv
-                alignItems="center"
-                gap="5px"
-                onClick={(e) => {
-                  if (e.target.id !== 'duration') {
-                    setIsEditDuration(true);
-                  }
-                }}>
-                <p>停留</p>
-                {isEditDuration ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue >= 30 ? prevValue - 30 : 0
-                        );
-                      }}>
-                      -
-                    </button>
-                    <p>{duration}</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue < 1440 ? prevValue + 30 : 1440
-                        );
-                      }}>
-                      +
-                    </button>
-                    <span>分鐘</span>
-                    <button
-                      id="duration"
-                      type="button"
-                      style={{ marginLeft: '5px', backgroundColor: 'white' }}
-                      onClick={(e) => {
-                        if (e.target.id === 'duration') {
-                          setIsEditDuration(false);
-                          props.updateDuration(
-                            props.schedule.schedule_id,
-                            duration
-                          );
-                        }
-                      }}>
-                      儲存
-                    </button>
-                  </>
-                ) : (
-                  <p>
-                    {' '}
-                    {duration < 60 ? duration : duration / 60}{' '}
-                    {duration < 60 ? '分鐘' : '小時'}
-                  </p>
-                )}
-              </FlexDiv>
-              <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
-            </>
-          ) : (
-            <p>
-              {transportMode.map((transport) => {
-                return transport.mode === props.schedule.transport_mode
-                  ? transport.text
-                  : '沒有東西';
-              })}
-              <span>{props.schedule.duration}</span>
-            </p>
-          )}
+          <FlexDiv
+            alignItems="center"
+            gap="5px"
+            onClick={(e) => {
+              if (e.target.id !== 'duration') {
+                setIsEditDuration(true);
+              }
+            }}>
+            <p>停留</p>
+            {isEditDuration ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue >= 30 ? prevValue - 30 : 0
+                    );
+                  }}>
+                  -
+                </button>
+                <p>{duration}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue < 1440 ? prevValue + 30 : 1440
+                    );
+                  }}>
+                  +
+                </button>
+                <span>分鐘</span>
+                <button
+                  id="duration"
+                  type="button"
+                  style={{ marginLeft: '5px', backgroundColor: 'white' }}
+                  onClick={(e) => {
+                    if (e.target.id === 'duration') {
+                      setIsEditDuration(false);
+                      props.updateDuration(
+                        props.schedule.schedule_id,
+                        duration
+                      );
+                    }
+                  }}>
+                  儲存
+                </button>
+              </>
+            ) : (
+              <p>
+                {' '}
+                {duration < 60 ? duration : duration / 60}{' '}
+                {duration < 60 ? '分鐘' : '小時'}
+              </p>
+            )}
+          </FlexDiv>
+          <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
         </ScheduleWapper>
       )}
     </Draggable>
@@ -472,8 +460,9 @@ function AddSchedule(props) {
     if (isSetSchedule) {
       setSchedules(updatedList);
     }
+    return updatedList;
   };
-  const addSchedule = (spotIndex, scheduleIndex, type) => {
+  const addSchedule = (spotIndex, scheduleIndex) => {
     let startTime;
     let duration = 60;
     const newSpotsList = Array.from(waitingSpots);
@@ -484,14 +473,15 @@ function AddSchedule(props) {
     } else {
       startTime = overviews.depart_times[day];
     }
+
     const addData = {
       start_time: startTime,
       end_time: startTime + duration * 60 * 1000,
       place_id: remove.place_id,
       duration,
-      type,
       placeDetail: remove,
       schedule_id: 'unknown',
+      travel_mode: 'driving',
     };
     setAllSchedules([...allSchedules, addData]);
     firestore
@@ -499,7 +489,6 @@ function AddSchedule(props) {
       .then(() => console.log('success'))
       .catch((error) => console.error(error));
     newScheduleList.splice(scheduleIndex, 0, addData);
-
     return {
       newSpotsList,
       newScheduleList,
@@ -550,12 +539,21 @@ function AddSchedule(props) {
     ) {
       const { newSpotsList, newScheduleList } = addSchedule(
         startAndEnd.startIndex,
-        startAndEnd.endIndex,
-        'spot'
+        startAndEnd.endIndex
       );
       setWaitingSpots(newSpotsList);
       setSchedules(newScheduleList);
-      updateTimeOfSchedule(newScheduleList);
+      const updated = updateTimeOfSchedule(newScheduleList);
+      console.log(updated, startAndEnd.endIndex);
+      if (startAndEnd.endIndex === updated.length - 1) {
+        googleMap.getDirection({
+          origin: `place_id:${updated[startAndEnd.endIndex - 1].place_id}`,
+          destination: `place_id:${updated[startAndEnd.endIndex].place_id}`,
+          departure_time: Math.floor(
+            updated[startAndEnd.endIndex - 1].end_time / 1000
+          ),
+        });
+      }
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
