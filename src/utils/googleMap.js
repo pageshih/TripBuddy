@@ -109,7 +109,18 @@ const googleMap = {
   deleteMarker(marker) {
     marker.setMap(null);
   },
-  getDirection(parameter) {},
+  async getDirection(parameter) {
+    console.log(parameter);
+    const newDirection = new window.google.maps.DirectionsService();
+    const result = await newDirection.route(parameter);
+    console.log(result);
+    const route = result.routes[0].legs[0];
+    const returnObj = {
+      duration: route.duration,
+      distance: route.distance,
+    };
+    return Promise.resolve(returnObj);
+  },
 };
 function EmptyMap(props) {
   const ref = useRef();
@@ -117,9 +128,9 @@ function EmptyMap(props) {
   useEffect(() => {
     if (ref.current && !map) {
       setMap(googleMap.initMap(ref.current));
-      setDirectionService(new window.google.maps.DirectionsService());
     }
-  }, [ref, map, setMap, setDirectionService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current, map, setMap, setDirectionService]);
 
   return (
     <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>

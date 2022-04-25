@@ -211,10 +211,9 @@ const SpotCard = (props) => {
 const ScheduleStyledCard = styled.div`
   ${cardCss}
   position: relative;
-  flex-grow: 1;
   gap: 20px;
-  flex-basis: 500px;
-  cursor: grab;
+  height: 250px;
+  cursor: ${(props) => (props.cursorDefault ? 'default' : 'grab')};
   background-color: white;
   &:hover {
     cursor: grab;
@@ -225,23 +224,54 @@ const ScheduleWapper = styled.li`
   display: flex;
   gap: 20px;
 `;
+const transportMode = (schedule) => {
+  return {
+    BICYCLING: {
+      title: '騎自行車',
+      config: {
+        travelMode: 'BICYCLING',
+      },
+    },
+    DRIVING: {
+      title: '開車',
+      config: {
+        travelMode: 'DRIVING',
+        drivingOptions: {
+          departureTime: schedule ? new Date(schedule.end_time) : null,
+        },
+      },
+    },
+    TRANSIT: {
+      title: '搭乘大眾運輸',
+      config: {
+        travelMode: 'TRANSIT',
+        transitOptions: {
+          departureTime: schedule ? new Date(schedule.end_time) : null,
+        },
+      },
+    },
+    WALKING: {
+      title: '走路',
+      config: {
+        travelMode: 'WALKING',
+      },
+    },
+  };
+};
+function TransitCard(props) {
+  return (
+    <>
+      <p>
+        {transportMode()[props.travelMode].title +
+          props.transitDetail.duration.text}
+      </p>
+      <p>距離{props.transitDetail.distance.text}</p>
+    </>
+  );
+}
 const ScheduleCard = (props) => {
   const [isEditDuration, setIsEditDuration] = useState();
   const [duration, setDuration] = useState(props.schedule.duration);
-  const transportMode = [
-    {
-      bicycling: '騎自行車',
-    },
-    {
-      driving: '開車',
-    },
-    {
-      transit: '搭乘大眾運輸',
-    },
-    {
-      walking: '走路',
-    },
-  ];
   return (
     <Draggable
       draggableId={props.id}
@@ -307,7 +337,17 @@ const ScheduleCard = (props) => {
               </p>
             )}
           </FlexDiv>
-          <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
+          <FlexChildDiv grow="1" direction="column">
+            <ScheduleStyledCard cursorDefault={props.browse}>
+              {props.children}
+            </ScheduleStyledCard>
+            {props.schedule.transit_detail && (
+              <TransitCard
+                travelMode={props.schedule.travel_mode}
+                transitDetail={props.schedule.transit_detail}
+              />
+            )}
+          </FlexChildDiv>
         </ScheduleWapper>
       )}
     </Draggable>
@@ -444,7 +484,7 @@ function AddSchedule(props) {
     result.splice(endIndex, 0, removed);
     return result;
   };
-  const updateTimeOfSchedule = (list, isSetSchedule, newDepartTime) => {
+  const updateTimeOfSchedule = (list, options, newDepartTime) => {
     const updatedList = list.map((schedule, index, array) => {
       if (index === 0) {
         schedule.start_time = newDepartTime || overviews.depart_times[day];
@@ -456,11 +496,57 @@ function AddSchedule(props) {
       }
       return schedule;
     });
-    firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
-    if (isSetSchedule) {
+    if (options?.isSetSchedule) {
       setSchedules(updatedList);
     }
+    if (options?.isUploadFirebase) {
+      firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
+    }
     return updatedList;
+  };
+  //modify
+  const getTransportDetail = (
+    schedules,
+    { isUploadFirebase, isSetSchedule }
+  ) => {
+    const schedulesPromise = schedules.map((schedule, index, array) => {
+      if (index < array.length - 1) {
+        return googleMap.getDirection({
+          origin: schedule.placeDetail.geometry,
+          destination: array[index + 1].placeDetail.geometry,
+          ...transportMode(schedule)[schedule.travel_mode].config,
+        });
+      }
+    });
+    console.log(schedulesPromise);
+    return Promise.all(schedulesPromise).then((transitDetails) => {
+      const newSchedules = schedules.map((schedule, index) => {
+        //bug here
+        const newEndTime = {
+          end_time:
+            schedule.end_time + transitDetails[index].duration.value * 1000,
+        };
+        if (transitDetails[index]) {
+          return {
+            ...schedule,
+            transit_detail: transitDetails[index],
+            ...newEndTime,
+          };
+        } else {
+          return {
+            ...schedule,
+            ...newEndTime,
+          };
+        }
+      });
+      if (isSetSchedule) {
+        setSchedules(newSchedules);
+      }
+      if (isUploadFirebase) {
+        firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+      }
+      return Promise.resolve('updated!');
+    });
   };
   const addSchedule = (spotIndex, scheduleIndex) => {
     let startTime;
@@ -481,7 +567,7 @@ function AddSchedule(props) {
       duration,
       placeDetail: remove,
       schedule_id: 'unknown',
-      travel_mode: 'driving',
+      travel_mode: 'DRIVING',
     };
     setAllSchedules([...allSchedules, addData]);
     firestore
@@ -542,18 +628,13 @@ function AddSchedule(props) {
         startAndEnd.endIndex
       );
       setWaitingSpots(newSpotsList);
-      setSchedules(newScheduleList);
-      const updated = updateTimeOfSchedule(newScheduleList);
-      console.log(updated, startAndEnd.endIndex);
-      if (startAndEnd.endIndex === updated.length - 1) {
-        googleMap.getDirection({
-          origin: `place_id:${updated[startAndEnd.endIndex - 1].place_id}`,
-          destination: `place_id:${updated[startAndEnd.endIndex].place_id}`,
-          departure_time: Math.floor(
-            updated[startAndEnd.endIndex - 1].end_time / 1000
-          ),
-        });
-      }
+      const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
+      getTransportDetail(updatedTimeSchedules, {
+        isSetSchedule: true,
+        isUploadFirebase: true,
+      })
+        .then((res) => console.log(res))
+        .catch((error) => console.error(error));
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
@@ -563,7 +644,13 @@ function AddSchedule(props) {
         result.destination.index
       );
       if (startAndEnd.startId === 'scheduleArea') {
-        updateTimeOfSchedule(items, true);
+        const updatedTimeSchedules = updateTimeOfSchedule(items);
+        getTransportDetail(updatedTimeSchedules, {
+          isSetSchedule: true,
+          isUploadFirebase: true,
+        })
+          .then((res) => console.log(res))
+          .catch((error) => console.error(error));
       } else {
         setWaitingSpots(items);
       }
@@ -587,9 +674,15 @@ function AddSchedule(props) {
       if (schedule.schedule_id === scheduleId) {
         schedule.duration = newDuration;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time += schedule.transit_detail.duration.value * 1000;
+        }
       }
     });
-    updateTimeOfSchedule(newSchedules, true);
+    updateTimeOfSchedule(newSchedules, {
+      isSetSchedule: true,
+      isUploadFirebase: true,
+    });
   };
   const updateOverviewsFields = (keyValuePair) => {
     setOverviews({ ...overviews, ...keyValuePair });
@@ -601,7 +694,7 @@ function AddSchedule(props) {
   const deleteSchedule = (scheduleId) => {
     updateTimeOfSchedule(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      true
+      { isSetSchedule: true, isUploadFirebase: true }
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
