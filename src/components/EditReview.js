@@ -240,18 +240,25 @@ function AddReview(props) {
     } else {
       setShowInput(true);
     }
-    setReviewTags(
-      props.isEdit && props.allReviewTags
-        ? [
+    const newReviewTags = () => {
+      if (props.isEdit && props.allReviewTags) {
+        if (props.showReviewTags) {
+          return [
             ...props.showReviewTags,
             ...props.allReviewTags.filter(
               (tag) =>
                 props.showReviewTags.every((recorded) => recorded !== tag) &&
                 tag
             ),
-          ]
-        : props.showReviewTags
-    );
+          ];
+        } else {
+          return [...props.allReviewTags];
+        }
+      } else {
+        return props.showReviewTags;
+      }
+    };
+    setReviewTags(newReviewTags());
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
     setReview(props.reviews.review);
