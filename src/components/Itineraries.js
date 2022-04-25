@@ -69,7 +69,6 @@ function Itineraries() {
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
                 .then((scheduleProcessing) => {
                   if (scheduleProcessing) {
-                    console.log(scheduleProcessing);
                     setProgressing({
                       overview: itinerary,
                       schedule: scheduleProcessing,

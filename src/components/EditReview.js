@@ -310,7 +310,7 @@ function AddReview(props) {
                 scheduleId: props.scheduleId,
                 updateSchedule: {
                   review_tags: checkedReviewTags,
-                  review,
+                  review: review ? review : '',
                 },
                 imageBuffer,
                 gallery,
@@ -332,12 +332,14 @@ function AddReview(props) {
                       ]
                     : checkedReviewTags
                 );
-                props.setUploadedReview({
-                  schedule_id: props.scheduleId,
-                  review_tags: checkedReviewTags,
-                  review,
-                  gallery: newGallery,
-                });
+                if (props.setUploadedReview) {
+                  props.setUploadedReview({
+                    schedule_id: props.scheduleId,
+                    review_tags: checkedReviewTags,
+                    review,
+                    gallery: newGallery,
+                  });
+                }
               });
             }}>
             儲存
