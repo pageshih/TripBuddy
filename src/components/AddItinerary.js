@@ -452,7 +452,7 @@ function AddSchedule(props) {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
-  const [allSchedules, setAllSchedules] = useState([]);
+  const allSchedules = useRef();
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
@@ -472,9 +472,12 @@ function AddSchedule(props) {
             );
             res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(
-              filterDaySchedules(res.schedules, res.overviews.depart_times, 0)
+              filterDaySchedules(res.schedules, res.overviews.depart_times)[0]
             );
-            setAllSchedules(res.schedules);
+            allSchedules.current = filterDaySchedules(
+              res.schedules,
+              res.overviews.depart_times
+            );
           } else {
             alert('找不到行程資料');
           }
@@ -483,13 +486,6 @@ function AddSchedule(props) {
     }
   }, [uid, itineraryId]);
 
-  useEffect(() => {
-    if ([day, overviews, allSchedules].every((item) => item !== undefined)) {
-      setSchedules(
-        filterDaySchedules(allSchedules, overviews.depart_times, day)
-      );
-    }
-  }, [day]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -587,6 +583,7 @@ function AddSchedule(props) {
       }
       if (isSetSchedule) {
         setSchedules(newSchedules);
+        allSchedules.current[day] = newSchedules;
       }
       if (isUploadFirebase) {
         firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
@@ -630,8 +627,6 @@ function AddSchedule(props) {
       schedule_id: 'unknown',
       travel_mode: 'DRIVING',
     };
-
-    setAllSchedules([...allSchedules, addData]);
     firestore
       .addScheduleRemoveWaitingSpot(uid, itineraryId, addData)
       .then(() => console.log('success'))
@@ -652,11 +647,9 @@ function AddSchedule(props) {
     if (!isRepeatSpot) {
       newSpotsList.splice(spotIndex, 0, remove.placeDetail);
     }
-    setAllSchedules(
-      allSchedules.filter((schedule) => {
-        return remove.schedule_id !== schedule.schedule_id;
-      })
-    );
+    allSchedules.current[day] = allSchedules.current[day].filter((schedule) => {
+      return remove.schedule_id !== schedule.schedule_id;
+    });
     firestore
       .setWaitingSpotsAndRemoveSchdule(
         uid,
@@ -700,6 +693,7 @@ function AddSchedule(props) {
           .catch((error) => console.error(error));
       } else {
         setSchedules(updatedTimeSchedules);
+        allSchedules.current[day] = updatedTimeSchedules;
       }
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
@@ -733,7 +727,6 @@ function AddSchedule(props) {
         isSetSchedule: true,
         isUploadFirebase: true,
       });
-      setSchedules(newScheduleList);
       if (newSpotsList) {
         setWaitingSpots(newSpotsList);
       }
@@ -802,6 +795,7 @@ function AddSchedule(props) {
   };
   const switchDay = (nextDay) => {
     setDay(nextDay);
+    setSchedules(allSchedules.current[nextDay]);
     setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
     window.scrollTo(0, 0);
   };
