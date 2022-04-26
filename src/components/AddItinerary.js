@@ -489,10 +489,18 @@ function AddSchedule(props) {
       if (index === 0) {
         schedule.start_time = newDepartTime || overviews.depart_times[day];
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
+        }
       } else {
         const prevSchedule = array[index - 1];
         schedule.start_time = prevSchedule.end_time;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
+        }
       }
       return schedule;
     });
@@ -504,7 +512,6 @@ function AddSchedule(props) {
     }
     return updatedList;
   };
-  //modify
   const getTransportDetail = (
     schedules,
     { isUploadFirebase, isSetSchedule }
@@ -518,27 +525,39 @@ function AddSchedule(props) {
         });
       }
     });
-    console.log(schedulesPromise);
     return Promise.all(schedulesPromise).then((transitDetails) => {
-      const newSchedules = schedules.map((schedule, index) => {
-        //bug here
-        const newEndTime = {
-          end_time:
-            schedule.end_time + transitDetails[index].duration.value * 1000,
-        };
+      let newSchedules = schedules.map((schedule, index) => {
         if (transitDetails[index]) {
+          const transitDetail = {
+            duration: {
+              text: transitDetails[index].duration.text,
+              value: Number(
+                transitDetails[index].duration.text.match(/^\d+/)[0]
+              ),
+            },
+            distance: transitDetails[index].distance,
+          };
           return {
             ...schedule,
-            transit_detail: transitDetails[index],
-            ...newEndTime,
+            transit_detail: transitDetail,
           };
         } else {
           return {
             ...schedule,
-            ...newEndTime,
+            end_time: schedule.start_time + schedule.duration * 60 * 1000,
+            transit_detail: '',
           };
         }
       });
+      for (let i = 0; i < newSchedules.length - 1; i++) {
+        newSchedules[i].end_time =
+          newSchedules[i].start_time +
+          (newSchedules[i].duration +
+            newSchedules[i].transit_detail.duration.value) *
+            60 *
+            1000;
+        newSchedules[i + 1].start_time = newSchedules[i].end_time;
+      }
       if (isSetSchedule) {
         setSchedules(newSchedules);
       }
@@ -569,6 +588,7 @@ function AddSchedule(props) {
       schedule_id: 'unknown',
       travel_mode: 'DRIVING',
     };
+
     setAllSchedules([...allSchedules, addData]);
     firestore
       .addScheduleRemoveWaitingSpot(uid, itineraryId, addData)
@@ -629,12 +649,16 @@ function AddSchedule(props) {
       );
       setWaitingSpots(newSpotsList);
       const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
-      getTransportDetail(updatedTimeSchedules, {
-        isSetSchedule: true,
-        isUploadFirebase: true,
-      })
-        .then((res) => console.log(res))
-        .catch((error) => console.error(error));
+      if (schedules?.length > 0) {
+        getTransportDetail(updatedTimeSchedules, {
+          isSetSchedule: true,
+          isUploadFirebase: true,
+        })
+          .then((res) => console.log(res))
+          .catch((error) => console.error(error));
+      } else {
+        setSchedules(updatedTimeSchedules);
+      }
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
@@ -662,6 +686,11 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
+      const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
+      getTransportDetail(updatedTimeSchedules, {
+        isSetSchedule: true,
+        isUploadFirebase: true,
+      });
       setSchedules(newScheduleList);
       if (newSpotsList) {
         setWaitingSpots(newSpotsList);
@@ -675,7 +704,8 @@ function AddSchedule(props) {
         schedule.duration = newDuration;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
         if (schedule.transit_detail) {
-          schedule.end_time += schedule.transit_detail.duration.value * 1000;
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
         }
       }
     });
