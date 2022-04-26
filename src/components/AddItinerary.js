@@ -21,6 +21,7 @@ import {
   timestampToDateInput,
   filterDaySchedules,
   setTimeToTimestamp,
+  createDepartTimeAry,
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 // import { style } from '@mui/system';
@@ -225,6 +226,10 @@ const ScheduleWapper = styled.li`
   gap: 20px;
 `;
 const transportMode = (schedule) => {
+  const departureTime =
+    schedule?.end_time < new Date().getTime()
+      ? new Date()
+      : new Date(schedule?.end_time);
   return {
     BICYCLING: {
       title: '騎自行車',
@@ -237,7 +242,7 @@ const transportMode = (schedule) => {
       config: {
         travelMode: 'DRIVING',
         drivingOptions: {
-          departureTime: schedule ? new Date(schedule.end_time) : null,
+          departureTime: schedule ? departureTime : null,
         },
       },
     },
@@ -246,7 +251,7 @@ const transportMode = (schedule) => {
       config: {
         travelMode: 'TRANSIT',
         transitOptions: {
-          departureTime: schedule ? new Date(schedule.end_time) : null,
+          departureTime: schedule ? departureTime : null,
         },
       },
     },
@@ -693,15 +698,15 @@ function AddSchedule(props) {
         startAndEnd.endIndex
       );
       setWaitingSpots(newSpotsList);
-      const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
       if (schedules?.length > 0) {
-        getTransportDetail(updatedTimeSchedules, {
+        getTransportDetail(newScheduleList, {
           isSetSchedule: true,
           isUploadFirebase: true,
         })
           .then((res) => console.log(res))
           .catch((error) => console.error(error));
       } else {
+        const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
         setSchedules(updatedTimeSchedules);
         allSchedules.current[day] = updatedTimeSchedules;
       }
@@ -732,8 +737,8 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
-      const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
-      getTransportDetail(updatedTimeSchedules, {
+      // const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
+      getTransportDetail(newScheduleList, {
         isSetSchedule: true,
         isUploadFirebase: true,
       });
@@ -790,15 +795,25 @@ function AddSchedule(props) {
         start_date: start,
         end_date: end,
       };
+      updateDate.departTimes = createDepartTimeAry(updateDate);
     } else if (overviews.start_date !== start && overviews.end_date === end) {
       updateDate = {
         start_date: start,
       };
+      updateDate.departTimes = createDepartTimeAry({
+        ...updateDate,
+        end_date: overviews.end_date,
+      });
     } else if (overviews.start_date === start && overviews.end_date !== end) {
       updateDate = {
         end_date: end,
       };
+      updateDate.departTimes = createDepartTimeAry({
+        ...updateDate,
+        start_date: overviews.start_date,
+      });
     }
+    // fix here
     if (updateDate) {
       updateOverviewsFields(updateDate);
     }

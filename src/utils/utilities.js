@@ -32,7 +32,15 @@ function filterDaySchedules(allSchedules, departTimes) {
   }, {});
   return newAllSchedules;
 }
-
+const createDepartTimeAry = (dateObj) => {
+  let departTimes = [];
+  const millisecondsOfDay = 24 * 60 * 60 * 1000;
+  const totalaDays = Number(dateObj.end_date - dateObj.start_date);
+  for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
+    departTimes.push(dateObj.start_date + i * millisecondsOfDay);
+  }
+  return departTimes;
+};
 const compressImages = async (files) => {
   const options = {
     maxSizeMB: 1,
@@ -51,4 +59,5 @@ export {
   timestampToDateInput,
   filterDaySchedules,
   setTimeToTimestamp,
+  createDepartTimeAry,
 };

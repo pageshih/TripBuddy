@@ -86,13 +86,7 @@ function App() {
   return (
     <>
       <Global styles={cssReset} />
-      <Context.Provider
-        value={{
-          uid,
-          setUid,
-          map,
-          setMap,
-        }}>
+      <Context.Provider value={{ uid, setUid, map, setMap }}>
         <EmptyMap libraries={['places']} />
         <BrowserRouter>
           <Routes>

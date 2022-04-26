@@ -110,10 +110,8 @@ const googleMap = {
     marker.setMap(null);
   },
   async getDirection(parameter) {
-    console.log(parameter);
     const newDirection = new window.google.maps.DirectionsService();
     const result = await newDirection.route(parameter);
-    console.log(result);
     const route = result.routes[0].legs[0];
     const returnObj = {
       duration: route.duration,
@@ -124,13 +122,13 @@ const googleMap = {
 };
 function EmptyMap(props) {
   const ref = useRef();
-  const { map, setMap, setDirectionService } = useContext(Context);
+  const { map, setMap } = useContext(Context);
   useEffect(() => {
     if (ref.current && !map) {
       setMap(googleMap.initMap(ref.current));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, map, setMap, setDirectionService]);
+  }, [ref.current, map, setMap]);
 
   return (
     <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>
