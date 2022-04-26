@@ -422,7 +422,12 @@ function EditableDate(props) {
   const submit = (e) => {
     e.preventDefault();
     setIsEdit(false);
-    props.onSubmit(startTimestamp, endTimestamp);
+    props.onSubmit(
+      startTimestamp,
+      endTimestamp,
+      setEndTimestamp,
+      setStartTimestamp
+    );
   };
   return (
     <>
@@ -788,19 +793,19 @@ function AddSchedule(props) {
       .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
-  const updateDate = (start, end) => {
+  const updateDate = (start, end, setEndTimestamp, setStartTimestamp) => {
     let updateDate;
     if (overviews.start_date !== start && overviews.end_date !== end) {
       updateDate = {
         start_date: start,
         end_date: end,
       };
-      updateDate.departTimes = createDepartTimeAry(updateDate);
+      updateDate.depart_times = createDepartTimeAry(updateDate);
     } else if (overviews.start_date !== start && overviews.end_date === end) {
       updateDate = {
         start_date: start,
       };
-      updateDate.departTimes = createDepartTimeAry({
+      updateDate.depart_times = createDepartTimeAry({
         ...updateDate,
         end_date: overviews.end_date,
       });
@@ -808,14 +813,43 @@ function AddSchedule(props) {
       updateDate = {
         end_date: end,
       };
-      updateDate.departTimes = createDepartTimeAry({
+      updateDate.depart_times = createDepartTimeAry({
         ...updateDate,
         start_date: overviews.start_date,
       });
     }
     // fix here
     if (updateDate) {
-      updateOverviewsFields(updateDate);
+      allSchedules.current = Object.values(allSchedules.current)
+        .filter((day) => {
+          return day.length > 0;
+        })
+        .reduce((acc, day, index) => {
+          acc[index] = day;
+          return acc;
+        }, {});
+      const scheduleLengthOfOldDay = Object.keys(allSchedules.current);
+      if (scheduleLengthOfOldDay.length > updateDate.depart_times.length) {
+        alert('新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期');
+        setEndTimestamp(overviews.end_date);
+        setStartTimestamp(overviews.start_date);
+      } else {
+        updateOverviewsFields(updateDate);
+        setDepartString(
+          timestampToString(updateDate.depart_times[day], 'time')
+        );
+        for (let i = 0; i < updateDate.depart_times.length; i++) {
+          if (i < scheduleLengthOfOldDay.length) {
+            allSchedules.current[i] = updateTimeOfSchedule(
+              allSchedules.current[i],
+              { isUploadFirebase: true, isSetSchedule: true },
+              updateDate.depart_times[i]
+            );
+          } else {
+            allSchedules.current[i] = [];
+          }
+        }
+      }
     }
   };
   const switchDay = (nextDay) => {
