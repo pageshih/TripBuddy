@@ -25,7 +25,7 @@ function filterDaySchedules(allSchedules, departTimes, day) {
   return allSchedules.filter(
     (schedule) =>
       schedule.end_time > departTimes[day] &&
-      schedule.end_time < departTimes[day] + 24 * 60 * 60 * 1000
+      schedule.end_time < departTimes[day] + 18 * 60 * 60 * 1000
   );
 }
 

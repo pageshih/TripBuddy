@@ -800,18 +800,9 @@ function AddSchedule(props) {
       updateOverviewsFields(updateDate);
     }
   };
-  const switchDay = (prevDay) => {
-    if (prevDay === overviews.depart_times.length - 1 && prevDay > 0) {
-      setDay(prevDay - 1);
-      setDepartString(
-        timestampToString(overviews.depart_times[prevDay - 1], 'time')
-      );
-    } else {
-      setDay(prevDay + 1);
-      setDepartString(
-        timestampToString(overviews.depart_times[prevDay + 1], 'time')
-      );
-    }
+  const switchDay = (nextDay) => {
+    setDay(nextDay);
+    setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
     window.scrollTo(0, 0);
   };
   return (
@@ -986,23 +977,30 @@ function AddSchedule(props) {
                   </CardWrapper>
                 )}
               </Droppable>
-              {day < overviews.depart_times.length && (
-                <FlexDiv justifyContent="flex-end" padding="5px 0">
-                  {
-                    <FlexDiv
-                      as="button"
-                      alignItems="center"
-                      type="button"
-                      onClick={() => switchDay(day)}>
-                      第
-                      {day === overviews.depart_times.length - 1
-                        ? day
-                        : day + 2}
-                      天<span className="material-icons">trending_flat</span>
-                    </FlexDiv>
-                  }
-                </FlexDiv>
-              )}
+
+              <FlexDiv justifyContent="flex-end" padding="5px 0">
+                {day > 0 && (
+                  <FlexDiv
+                    as="button"
+                    alignItems="center"
+                    margin="auto auto auto 0"
+                    type="button"
+                    onClick={() => switchDay(day - 1)}>
+                    <span className="material-icons">navigate_before</span>第
+                    {day}天
+                  </FlexDiv>
+                )}
+                {day < overviews.depart_times.length - 1 && (
+                  <FlexDiv
+                    as="button"
+                    alignItems="center"
+                    type="button"
+                    onClick={() => switchDay(day + 1)}>
+                    第{day + 2}天
+                    <span className="material-icons">navigate_next</span>
+                  </FlexDiv>
+                )}
+              </FlexDiv>
             </FlexChildDiv>
           </FlexDiv>
         </>
