@@ -262,18 +262,27 @@ function TransitCard(props) {
   return (
     <>
       <FlexDiv alignItems="center" gap="10px">
-        <select
-          value={props.travelMode}
-          onChange={(e) =>
-            props.changeTrasitWay(props.scheduleId, e.target.value)
-          }>
-          {Object.keys(transportMode()).map((mode) => (
-            <option key={mode} value={mode}>
-              {transportMode()[mode].title}
-            </option>
-          ))}
-        </select>
-        <p>{props.transitDetail.duration.text}</p>
+        {props.isBrowse ? (
+          <p>
+            {transportMode()[props.travelMode].title}{' '}
+            {props.transitDetail.duration.text}
+          </p>
+        ) : (
+          <>
+            <select
+              value={props.travelMode}
+              onChange={(e) =>
+                props.changeTrasitWay(props.scheduleId, e.target.value)
+              }>
+              {Object.keys(transportMode()).map((mode) => (
+                <option key={mode} value={mode}>
+                  {transportMode()[mode].title}
+                </option>
+              ))}
+            </select>
+            <p>{props.transitDetail.duration.text}</p>
+          </>
+        )}
       </FlexDiv>
       <p>距離{props.transitDetail.distance.text}</p>
     </>
@@ -301,7 +310,7 @@ const ScheduleCard = (props) => {
               }
             }}>
             <p>停留</p>
-            {isEditDuration ? (
+            {!props.isBrowse && isEditDuration ? (
               <>
                 <button
                   type="button"
@@ -353,6 +362,7 @@ const ScheduleCard = (props) => {
             </ScheduleStyledCard>
             {props.schedule.transit_detail && (
               <TransitCard
+                isBrowse={props.isBrowse}
                 scheduleId={props.schedule.schedule_id}
                 travelMode={props.schedule.travel_mode}
                 transitDetail={props.schedule.transit_detail}
@@ -813,6 +823,8 @@ function AddSchedule(props) {
             ) : (
               <FlexChildDiv
                 padding="30px"
+                display="flex"
+                direction="column"
                 style={{ backgroundColor: '#f7f7f7' }}
                 basis="360px">
                 <FlexDiv justifyContent="flex-end" gap="20px">
@@ -836,6 +848,7 @@ function AddSchedule(props) {
                   {(provided) => (
                     <CardWrapper
                       column
+                      grow="1"
                       gap="20px"
                       maxWidth="300px"
                       ref={provided.innerRef}
@@ -927,6 +940,7 @@ function AddSchedule(props) {
                     {schedules?.length > 0 ? (
                       schedules.map((schedule, index) => (
                         <ScheduleCard
+                          isBrowse={isBrowse}
                           key={schedule.schedule_id}
                           index={index}
                           id={schedule.schedule_id}
