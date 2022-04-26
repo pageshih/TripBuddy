@@ -261,10 +261,20 @@ const transportMode = (schedule) => {
 function TransitCard(props) {
   return (
     <>
-      <p>
-        {transportMode()[props.travelMode].title +
-          props.transitDetail.duration.text}
-      </p>
+      <FlexDiv alignItems="center" gap="10px">
+        <select
+          value={props.travelMode}
+          onChange={(e) =>
+            props.changeTrasitWay(props.scheduleId, e.target.value)
+          }>
+          {Object.keys(transportMode()).map((mode) => (
+            <option key={mode} value={mode}>
+              {transportMode()[mode].title}
+            </option>
+          ))}
+        </select>
+        <p>{props.transitDetail.duration.text}</p>
+      </FlexDiv>
       <p>距離{props.transitDetail.distance.text}</p>
     </>
   );
@@ -343,8 +353,10 @@ const ScheduleCard = (props) => {
             </ScheduleStyledCard>
             {props.schedule.transit_detail && (
               <TransitCard
+                scheduleId={props.schedule.schedule_id}
                 travelMode={props.schedule.travel_mode}
                 transitDetail={props.schedule.transit_detail}
+                changeTrasitWay={props.changeTrasitWay}
               />
             )}
           </FlexChildDiv>
@@ -514,15 +526,27 @@ function AddSchedule(props) {
   };
   const getTransportDetail = (
     schedules,
-    { isUploadFirebase, isSetSchedule }
+    { isUploadFirebase, isSetSchedule },
+    scheduleId,
+    newMode
   ) => {
     const schedulesPromise = schedules.map((schedule, index, array) => {
       if (index < array.length - 1) {
-        return googleMap.getDirection({
-          origin: schedule.placeDetail.geometry,
-          destination: array[index + 1].placeDetail.geometry,
-          ...transportMode(schedule)[schedule.travel_mode].config,
-        });
+        if (scheduleId) {
+          return scheduleId === schedule.schedule_id
+            ? googleMap.getDirection({
+                origin: schedule.placeDetail.geometry,
+                destination: array[index + 1].placeDetail.geometry,
+                ...transportMode(schedule)[newMode].config,
+              })
+            : null;
+        } else {
+          return googleMap.getDirection({
+            origin: schedule.placeDetail.geometry,
+            destination: array[index + 1].placeDetail.geometry,
+            ...transportMode(schedule)[schedule.travel_mode].config,
+          });
+        }
       }
     });
     return Promise.all(schedulesPromise).then((transitDetails) => {
@@ -542,13 +566,16 @@ function AddSchedule(props) {
             transit_detail: transitDetail,
           };
         } else {
-          return {
-            ...schedule,
-            end_time: schedule.start_time + schedule.duration * 60 * 1000,
-            transit_detail: '',
-          };
+          return scheduleId
+            ? { ...schedule }
+            : {
+                ...schedule,
+                end_time: schedule.start_time + schedule.duration * 60 * 1000,
+                transit_detail: '',
+              };
         }
       });
+
       for (let i = 0; i < newSchedules.length - 1; i++) {
         newSchedules[i].end_time =
           newSchedules[i].start_time +
@@ -566,6 +593,21 @@ function AddSchedule(props) {
       }
       return Promise.resolve('updated!');
     });
+  };
+  const changeTrasitWay = (scheduleId, mode) => {
+    const newScheduleList = schedules.map((schedule) => {
+      if (schedule.schedule_id === scheduleId) {
+        return { ...schedule, travel_mode: mode };
+      } else {
+        return schedule;
+      }
+    });
+    getTransportDetail(
+      newScheduleList,
+      { isUploadFirebase: true, isSetSchedule: true },
+      scheduleId,
+      mode
+    );
   };
   const addSchedule = (spotIndex, scheduleIndex) => {
     let startTime;
@@ -903,6 +945,7 @@ function AddSchedule(props) {
                           key={schedule.schedule_id}
                           index={index}
                           id={schedule.schedule_id}
+                          changeTrasitWay={changeTrasitWay}
                           schedule={schedule}
                           updateDuration={updateDuration}
                           browse={isBrowse}>
