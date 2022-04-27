@@ -24,6 +24,7 @@ import {
   createDepartTimeAry,
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
+import { Pagination } from './Pagination';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -1051,30 +1052,11 @@ function AddSchedule(props) {
                   </CardWrapper>
                 )}
               </Droppable>
-
-              <FlexDiv justifyContent="flex-end" padding="5px 0">
-                {day > 0 && (
-                  <FlexDiv
-                    as="button"
-                    alignItems="center"
-                    margin="auto auto auto 0"
-                    type="button"
-                    onClick={() => switchDay(day - 1)}>
-                    <span className="material-icons">navigate_before</span>第
-                    {day}天
-                  </FlexDiv>
-                )}
-                {day < overviews.depart_times.length - 1 && (
-                  <FlexDiv
-                    as="button"
-                    alignItems="center"
-                    type="button"
-                    onClick={() => switchDay(day + 1)}>
-                    第{day + 2}天
-                    <span className="material-icons">navigate_next</span>
-                  </FlexDiv>
-                )}
-              </FlexDiv>
+              <Pagination
+                day={day}
+                switchDay={switchDay}
+                finalDay={overviews.depart_times.length - 1}
+              />
             </FlexChildDiv>
           </FlexDiv>
         </>
@@ -1082,6 +1064,7 @@ function AddSchedule(props) {
     </DragDropContext>
   );
 }
+
 function AddItinerary() {
   return <Outlet />;
 }
