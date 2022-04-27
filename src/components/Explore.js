@@ -18,6 +18,8 @@ import {
   SelectAllCheckBox,
 } from './styledComponents/Form';
 import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 
 function Map({
   setPlaceDetail,
@@ -216,6 +218,39 @@ function SavedSpotsList(props) {
   );
 }
 
+const SearchBtn = styled.button`
+  position: absolute;
+  background-color: transparent;
+  right: 0;
+  height: 100%;
+  &:hover {
+    box-shadow: none;
+  }
+`;
+function SearchBar() {
+  return (
+    <form
+      css={css`
+        position: absolute;
+        z-index: 8;
+        top: 11px;
+        left: 200px;
+        width: 500px;
+      `}>
+      <div
+        css={css`
+          position: relative;
+        `}>
+        <TextInput
+          css={css`
+            width: 100%;
+          `}
+        />
+        <SearchBtn className="material-icons">search</SearchBtn>
+      </div>
+    </form>
+  );
+}
 function Explore({ setWaitingSpots }) {
   const { uid } = useContext(Context);
   const [map, setMap] = useState();
@@ -282,7 +317,7 @@ function Explore({ setWaitingSpots }) {
           <FlexDiv height="100vh">
             <FlexChildDiv
               ref={sideWindowRef}
-              basis={placeDetail || showSavedSpots ? '500px' : null}
+              basis={placeDetail || showSavedSpots ? '400px' : null}
               overflow="scroll"
               padding={placeDetail || showSavedSpots ? '15px 15px' : null}>
               {!showSavedSpots && placeDetail && (
@@ -304,19 +339,22 @@ function Explore({ setWaitingSpots }) {
                 <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
               )}
             </FlexChildDiv>
-            <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
+            <FlexChildDiv grow="1" position="relative">
               <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
                 候補景點
               </RoundBtnOnMap>
-              <Map
-                setPlaceDetail={setPlaceDetail}
-                setMap={setMap}
-                map={map}
-                setMarker={setMarker}
-                marker={marker}
-                setShowSavedSpots={setShowSavedSpots}
-              />
-            </Wrapper>
+              <SearchBar />
+              <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
+                <Map
+                  setPlaceDetail={setPlaceDetail}
+                  setMap={setMap}
+                  map={map}
+                  setMarker={setMarker}
+                  marker={marker}
+                  setShowSavedSpots={setShowSavedSpots}
+                />
+              </Wrapper>
+            </FlexChildDiv>
           </FlexDiv>
         </>
       )}

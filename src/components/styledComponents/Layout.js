@@ -32,6 +32,7 @@ const FlexChildDiv = styled.div`
   padding: ${(props) => props.padding};
   display: ${(props) => props.display};
   flex-direction: ${(props) => props.direction};
+  position: ${(props) => props.position};
 `;
 const CardWrapper = styled.ul`
   display: flex;
