@@ -77,11 +77,11 @@ function TravelJournalDetail() {
           <p>{timestampToString(overviews.depart_times[day], 'date')}</p>
           <FlexDiv alignItems="center">
             {scheduleList.map((schedule, index, array) => (
-              <p key={index}>
+              <p key={schedule.schedule_id}>
                 {schedule.placeDetail.name}
                 {index < array.length - 1 && (
                   <span
-                    class="material-icons"
+                    className="material-icons"
                     style={{ verticalAlign: 'text-bottom' }}>
                     arrow_right_alt
                   </span>
@@ -90,7 +90,7 @@ function TravelJournalDetail() {
             ))}
           </FlexDiv>
           {scheduleList.map((schedule) => (
-            <Card gap="20px" alignItems="center" key={schedule.place_id}>
+            <Card gap="20px" alignItems="center" key={schedule.schedule_id}>
               <p>{timestampToString(schedule.start_time, 'time')}</p>
               <FlexChildDiv style={{ flexGrow: 1 }}>
                 <FlexDiv
@@ -156,7 +156,7 @@ function TravelJournalDetail() {
             </Card>
           ))}
           <FlexDiv justifyContent="flex-end" margin="30px 10px">
-            {overviews.depart_times.map((_, index, array) => {
+            {overviews.depart_times.map((timestamp, index, array) => {
               let nextIndex;
               if (index !== day) {
                 if (array[index]) {
@@ -171,6 +171,7 @@ function TravelJournalDetail() {
               return (
                 nextIndex !== null && (
                   <FlexDiv
+                    key={timestamp}
                     as="button"
                     alignItems="center"
                     type="button"
