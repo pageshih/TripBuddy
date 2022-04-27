@@ -799,56 +799,64 @@ function AddSchedule(props) {
       updateDate = {
         start_date: start,
         end_date: end,
+        depart_times: createDepartTimeAry({ start_date: start, end_date: end }),
       };
-      updateDate.depart_times = createDepartTimeAry(updateDate);
     } else if (overviews.start_date !== start && overviews.end_date === end) {
       updateDate = {
         start_date: start,
+        depart_times: createDepartTimeAry({
+          start_date: start,
+          end_date: overviews.end_date,
+        }),
       };
-      updateDate.depart_times = createDepartTimeAry({
-        ...updateDate,
-        end_date: overviews.end_date,
-      });
     } else if (overviews.start_date === start && overviews.end_date !== end) {
       updateDate = {
         end_date: end,
+        depart_times: createDepartTimeAry({
+          start_date: overviews.start_date,
+          end_date: end,
+        }),
       };
-      updateDate.depart_times = createDepartTimeAry({
-        ...updateDate,
-        start_date: overviews.start_date,
-      });
     }
-    // fix here
     if (updateDate) {
-      allSchedules.current = Object.values(allSchedules.current)
-        .filter((day) => {
-          return day.length > 0;
-        })
-        .reduce((acc, day, index) => {
-          acc[index] = day;
-          return acc;
-        }, {});
-      const scheduleLengthOfOldDay = Object.keys(allSchedules.current);
-      if (scheduleLengthOfOldDay.length > updateDate.depart_times.length) {
+      const dayScheduleHad = Object.values(allSchedules.current).filter(
+        (day) => day.length > 0
+      );
+      if (dayScheduleHad.length > updateDate.depart_times.length) {
         alert('新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期');
         setEndTimestamp(overviews.end_date);
         setStartTimestamp(overviews.start_date);
       } else {
         updateOverviewsFields(updateDate);
-        setDepartString(
-          timestampToString(updateDate.depart_times[day], 'time')
-        );
+        const oldDayKeys = Object.keys(allSchedules.current);
+        const removeDays = oldDayKeys.length - updateDate.depart_times.length;
+        let newAllSchedules = { ...allSchedules.current };
+        if (removeDays > 0) {
+          setDay(0);
+          newAllSchedules = dayScheduleHad.reduce((acc, day, index) => {
+            acc[index] = day;
+            return acc;
+          }, {});
+        }
         for (let i = 0; i < updateDate.depart_times.length; i++) {
-          if (i < scheduleLengthOfOldDay.length) {
-            allSchedules.current[i] = updateTimeOfSchedule(
-              allSchedules.current[i],
-              { isUploadFirebase: true, isSetSchedule: true },
+          if (i < oldDayKeys.length) {
+            newAllSchedules[i] = updateTimeOfSchedule(
+              newAllSchedules[i],
+              { isUploadFirebase: true },
               updateDate.depart_times[i]
             );
           } else {
-            allSchedules.current[i] = [];
+            newAllSchedules[i] = [];
           }
         }
+        allSchedules.current = newAllSchedules;
+        setDepartString(
+          timestampToString(
+            updateDate.depart_times[removeDays > 0 ? 0 : day],
+            'time'
+          )
+        );
+        setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
       }
     }
   };
