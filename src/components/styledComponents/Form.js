@@ -88,8 +88,8 @@ const CheckboxCustom = (props) => {
             if (e.target.checked) {
               props.setSelectedList([...props.selectedList, props.id]);
             } else {
-              props.setSelectedList(
-                props.selectedList.filter((item) => item !== props.id)
+              props.setSelectedList((prev) =>
+                prev.filter((item) => item !== props.id)
               );
             }
           }

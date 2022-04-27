@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
 import { Button } from './styledComponents/Button';
-import { TextField } from './styledComponents/TextField';
+import { TextField } from './styledComponents/Form';
 
 function Login(props) {
   const [email, setEmail] = useState('test@mail.com');

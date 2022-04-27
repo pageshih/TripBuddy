@@ -3,7 +3,7 @@ import { compressImages } from '../utils/utilities';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv, Container } from './styledComponents/Layout';
-import { TextAreaReview } from './styledComponents/TextField';
+import { TextAreaReview } from './styledComponents/Form';
 
 function ReviewTags(props) {
   return (

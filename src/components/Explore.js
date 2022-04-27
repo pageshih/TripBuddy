@@ -16,7 +16,7 @@ import {
   CheckboxCustom,
   TextInput,
   SelectAllCheckBox,
-} from './styledComponents/TextField';
+} from './styledComponents/Form';
 import styled from '@emotion/styled';
 
 function Map({

@@ -8,6 +8,7 @@ const timestampToString = (timestamp, type) => {
       minute: '2-digit',
       hour12: false,
     }),
+    simpleDate: new Date(timestamp).toLocaleDateString().slice(5),
   };
   return timeType[type] || '';
 };

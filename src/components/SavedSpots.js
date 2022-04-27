@@ -8,10 +8,7 @@ import {
   Container,
   FlexDiv,
 } from './styledComponents/Layout';
-import {
-  CheckboxCustom,
-  SelectAllCheckBox,
-} from './styledComponents/TextField';
+import { CheckboxCustom, SelectAllCheckBox } from './styledComponents/Form';
 
 function SavedSpots(props) {
   const { uid, map } = useContext(Context);
