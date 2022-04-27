@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import {
@@ -11,14 +11,15 @@ import {
   CardImage,
   FlexChildDiv,
 } from './styledComponents/Layout';
-import { timestampToString } from '../utils/utilities';
+import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import { AddReview } from './EditReview';
+import { Pagination } from './Pagination';
 
 function TravelJournalDetail() {
   const { uid } = useContext(Context);
   const { journalID } = useParams();
   const [scheduleList, setScheduleList] = useState();
-  const [allSchedule, setAllSchedule] = useState();
+  const allSchedules = useRef();
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
   const [schedulesExpand, setSchedulesExpand] = useState();
@@ -31,7 +32,10 @@ function TravelJournalDetail() {
       try {
         const itineraryRes = await firestore.getItinerary(uid, journalID);
         setOverviews(itineraryRes.overviews);
-        setAllSchedule(itineraryRes.schedules);
+        allSchedules.current = filterDaySchedules(
+          itineraryRes.schedules,
+          itineraryRes.overviews.depart_times
+        );
         setScheduleList(
           itineraryRes.schedules.filter(
             (schedule) =>
@@ -58,6 +62,12 @@ function TravelJournalDetail() {
       setScheduleList(newScheduleList);
     }
   }, [uploadedReview]);
+
+  const switchDay = (nextDay) => {
+    setDay(nextDay);
+    setScheduleList(allSchedules.current[nextDay]);
+    window.scrollTo(0, 0);
+  };
   return (
     <>
       {overviews && scheduleList ? (
@@ -155,47 +165,11 @@ function TravelJournalDetail() {
               </FlexChildDiv>
             </Card>
           ))}
-          <FlexDiv justifyContent="flex-end" margin="30px 10px">
-            {overviews.depart_times.map((timestamp, index, array) => {
-              let nextIndex;
-              if (index !== day) {
-                if (array[index]) {
-                  nextIndex = index;
-                } else {
-                  nextIndex = index - 2;
-                }
-              } else {
-                nextIndex = null;
-              }
-
-              return (
-                nextIndex !== null && (
-                  <FlexDiv
-                    key={timestamp}
-                    as="button"
-                    alignItems="center"
-                    type="button"
-                    onClick={() => {
-                      setDay(nextIndex);
-                      setScheduleList(
-                        allSchedule.filter((schedule) => {
-                          return (
-                            schedule.end_time >
-                              overviews.depart_times[nextIndex] &&
-                            schedule.end_time <
-                              overviews.depart_times[nextIndex] +
-                                24 * 60 * 60 * 1000
-                          );
-                        })
-                      );
-                    }}>
-                    第{nextIndex + 1}天
-                    <span className="material-icons">trending_flat</span>
-                  </FlexDiv>
-                )
-              );
-            })}
-          </FlexDiv>
+          <Pagination
+            day={day}
+            switchDay={switchDay}
+            finalDay={overviews.depart_times.length - 1}
+          />
         </>
       ) : (
         <p>loading...</p>
