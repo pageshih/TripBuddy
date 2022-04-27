@@ -117,7 +117,7 @@ const firestore = {
           });
           Promise.all(updateSpots).then((res) => {
             resolve(res);
-            this.setSavedSpots(userUID, updateSpots).catch((error) =>
+            this.setSavedSpots(userUID, res).catch((error) =>
               console.error(error)
             );
           });
