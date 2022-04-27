@@ -1,6 +1,7 @@
 import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useContext } from 'react';
+import { Context } from '../App';
 import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
 
@@ -108,14 +109,26 @@ const googleMap = {
   deleteMarker(marker) {
     marker.setMap(null);
   },
+  async getDirection(parameter) {
+    const newDirection = new window.google.maps.DirectionsService();
+    const result = await newDirection.route(parameter);
+    const route = result.routes[0].legs[0];
+    const returnObj = {
+      duration: route.duration,
+      distance: route.distance,
+    };
+    return Promise.resolve(returnObj);
+  },
 };
 function EmptyMap(props) {
   const ref = useRef();
+  const { map, setMap } = useContext(Context);
   useEffect(() => {
-    if (ref.current && !props.map) {
-      props.setMap(googleMap.initMap(ref.current));
+    if (ref.current && !map) {
+      setMap(googleMap.initMap(ref.current));
     }
-  }, [ref, props]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current, map, setMap]);
 
   return (
     <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>

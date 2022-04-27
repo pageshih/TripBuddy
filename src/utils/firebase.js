@@ -24,6 +24,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
+import { createDepartTimeAry } from './utilities';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -147,15 +148,9 @@ const firestore = {
       itineraryDetailRef,
       'waitingSpots'
     );
-    let departTimes = [];
-    const millisecondsOfDay = 24 * 60 * 60 * 1000;
-    const totalaDays = Number(basicInfo.end_date - basicInfo.start_date);
-    for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
-      departTimes.push(basicInfo.start_date + i * millisecondsOfDay);
-    }
     const overview = {
       ...basicInfo,
-      depart_times: departTimes,
+      depart_times: createDepartTimeAry(basicInfo),
       itinerary_id: itineraryOverviewRef.id,
       cover_photo: 'https://picsum.photos/200/300',
     };

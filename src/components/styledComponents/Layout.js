@@ -30,11 +30,14 @@ const FlexChildDiv = styled.div`
   height: ${(props) => props.height};
   overflow: ${(props) => props.overflow};
   padding: ${(props) => props.padding};
+  display: ${(props) => props.display};
+  flex-direction: ${(props) => props.direction};
 `;
 const CardWrapper = styled.ul`
   display: flex;
   gap: ${(props) => props.gap};
   flex-direction: ${(props) => props.column && 'column'};
+  flex-grow: ${(props) => props.grow};
   max-width: ${(props) => props.maxWidth};
   background-color: ${(props) => props.backgroundColor};
   padding: ${(props) => props.padding};

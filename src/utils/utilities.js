@@ -21,14 +21,26 @@ function setTimeToTimestamp(timestamp, timeString) {
   const [hour, minute] = timeString.split(':');
   return new Date(timestamp).setHours(hour, minute);
 }
-function filterDaySchedules(allSchedules, departTimes, day) {
-  return allSchedules.filter(
-    (schedule) =>
-      schedule.end_time > departTimes[day] &&
-      schedule.end_time < departTimes[day] + 24 * 60 * 60 * 1000
-  );
+function filterDaySchedules(allSchedules, departTimes) {
+  const newAllSchedules = departTimes.reduce((acc, _, index) => {
+    acc[index] = allSchedules.filter(
+      (schedule) =>
+        schedule.end_time > departTimes[index] &&
+        schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
+    );
+    return acc;
+  }, {});
+  return newAllSchedules;
 }
-
+const createDepartTimeAry = (dateObj) => {
+  let departTimes = [];
+  const millisecondsOfDay = 24 * 60 * 60 * 1000;
+  const totalaDays = Number(dateObj.end_date - dateObj.start_date);
+  for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
+    departTimes.push(dateObj.start_date + i * millisecondsOfDay);
+  }
+  return departTimes;
+};
 const compressImages = async (files) => {
   const options = {
     maxSizeMB: 1,
@@ -47,4 +59,5 @@ export {
   timestampToDateInput,
   filterDaySchedules,
   setTimeToTimestamp,
+  createDepartTimeAry,
 };

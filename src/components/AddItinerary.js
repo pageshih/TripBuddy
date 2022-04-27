@@ -21,7 +21,9 @@ import {
   timestampToDateInput,
   filterDaySchedules,
   setTimeToTimestamp,
+  createDepartTimeAry,
 } from '../utils/utilities';
+import { googleMap } from '../utils/googleMap';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -210,10 +212,9 @@ const SpotCard = (props) => {
 const ScheduleStyledCard = styled.div`
   ${cardCss}
   position: relative;
-  flex-grow: 1;
   gap: 20px;
-  flex-basis: 500px;
-  cursor: grab;
+  height: 250px;
+  cursor: ${(props) => (props.cursorDefault ? 'default' : 'grab')};
   background-color: white;
   &:hover {
     cursor: grab;
@@ -224,23 +225,77 @@ const ScheduleWapper = styled.li`
   display: flex;
   gap: 20px;
 `;
+const transportMode = (schedule) => {
+  const departureTime =
+    schedule?.end_time < new Date().getTime()
+      ? new Date()
+      : new Date(schedule?.end_time);
+  return {
+    BICYCLING: {
+      title: '騎自行車',
+      config: {
+        travelMode: 'BICYCLING',
+      },
+    },
+    DRIVING: {
+      title: '開車',
+      config: {
+        travelMode: 'DRIVING',
+        drivingOptions: {
+          departureTime: schedule ? departureTime : null,
+        },
+      },
+    },
+    TRANSIT: {
+      title: '搭乘大眾運輸',
+      config: {
+        travelMode: 'TRANSIT',
+        transitOptions: {
+          departureTime: schedule ? departureTime : null,
+        },
+      },
+    },
+    WALKING: {
+      title: '走路',
+      config: {
+        travelMode: 'WALKING',
+      },
+    },
+  };
+};
+function TransitCard(props) {
+  return (
+    <>
+      <FlexDiv alignItems="center" gap="10px">
+        {props.isBrowse ? (
+          <p>
+            {transportMode()[props.travelMode].title}{' '}
+            {props.transitDetail.duration.text}
+          </p>
+        ) : (
+          <>
+            <select
+              value={props.travelMode}
+              onChange={(e) =>
+                props.changeTrasitWay(props.scheduleId, e.target.value)
+              }>
+              {Object.keys(transportMode()).map((mode) => (
+                <option key={mode} value={mode}>
+                  {transportMode()[mode].title}
+                </option>
+              ))}
+            </select>
+            <p>{props.transitDetail.duration.text}</p>
+          </>
+        )}
+      </FlexDiv>
+      <p>距離{props.transitDetail.distance.text}</p>
+    </>
+  );
+}
 const ScheduleCard = (props) => {
   const [isEditDuration, setIsEditDuration] = useState();
   const [duration, setDuration] = useState(props.schedule.duration);
-  const transportMode = [
-    {
-      BICYCLING: '騎自行車',
-    },
-    {
-      DRIVING: '開車',
-    },
-    {
-      TRANSIT: '搭乘大眾運輸',
-    },
-    {
-      WALKING: '走路',
-    },
-  ];
   return (
     <Draggable
       draggableId={props.id}
@@ -251,75 +306,75 @@ const ScheduleCard = (props) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
-          {props.schedule.type === 'spot' ? (
-            <>
-              <FlexDiv
-                alignItems="center"
-                gap="5px"
-                onClick={(e) => {
-                  if (e.target.id !== 'duration') {
-                    setIsEditDuration(true);
-                  }
-                }}>
-                <p>停留</p>
-                {isEditDuration ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue >= 30 ? prevValue - 30 : 0
-                        );
-                      }}>
-                      -
-                    </button>
-                    <p>{duration}</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue < 1440 ? prevValue + 30 : 1440
-                        );
-                      }}>
-                      +
-                    </button>
-                    <span>分鐘</span>
-                    <button
-                      id="duration"
-                      type="button"
-                      style={{ marginLeft: '5px', backgroundColor: 'white' }}
-                      onClick={(e) => {
-                        if (e.target.id === 'duration') {
-                          setIsEditDuration(false);
-                          props.updateDuration(
-                            props.schedule.schedule_id,
-                            duration
-                          );
-                        }
-                      }}>
-                      儲存
-                    </button>
-                  </>
-                ) : (
-                  <p>
-                    {' '}
-                    {duration < 60 ? duration : duration / 60}{' '}
-                    {duration < 60 ? '分鐘' : '小時'}
-                  </p>
-                )}
-              </FlexDiv>
-              <ScheduleStyledCard>{props.children}</ScheduleStyledCard>
-            </>
-          ) : (
-            <p>
-              {transportMode.map((transport) => {
-                return transport.mode === props.schedule.transport_mode
-                  ? transport.text
-                  : '沒有東西';
-              })}
-              <span>{props.schedule.duration}</span>
-            </p>
-          )}
+          <FlexDiv
+            alignItems="center"
+            gap="5px"
+            onClick={(e) => {
+              if (e.target.id !== 'duration') {
+                setIsEditDuration(true);
+              }
+            }}>
+            <p>停留</p>
+            {!props.isBrowse && isEditDuration ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue >= 30 ? prevValue - 30 : 0
+                    );
+                  }}>
+                  -
+                </button>
+                <p>{duration}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue < 1440 ? prevValue + 30 : 1440
+                    );
+                  }}>
+                  +
+                </button>
+                <span>分鐘</span>
+                <button
+                  id="duration"
+                  type="button"
+                  style={{ marginLeft: '5px', backgroundColor: 'white' }}
+                  onClick={(e) => {
+                    if (e.target.id === 'duration') {
+                      setIsEditDuration(false);
+                      props.updateDuration(
+                        props.schedule.schedule_id,
+                        duration
+                      );
+                    }
+                  }}>
+                  儲存
+                </button>
+              </>
+            ) : (
+              <p>
+                {' '}
+                {duration < 60 ? duration : duration / 60}{' '}
+                {duration < 60 ? '分鐘' : '小時'}
+              </p>
+            )}
+          </FlexDiv>
+          <FlexChildDiv grow="1" direction="column">
+            <ScheduleStyledCard cursorDefault={props.browse}>
+              {props.children}
+            </ScheduleStyledCard>
+            {props.schedule.transit_detail && (
+              <TransitCard
+                isBrowse={props.isBrowse}
+                scheduleId={props.schedule.schedule_id}
+                travelMode={props.schedule.travel_mode}
+                transitDetail={props.schedule.transit_detail}
+                changeTrasitWay={props.changeTrasitWay}
+              />
+            )}
+          </FlexChildDiv>
         </ScheduleWapper>
       )}
     </Draggable>
@@ -367,7 +422,12 @@ function EditableDate(props) {
   const submit = (e) => {
     e.preventDefault();
     setIsEdit(false);
-    props.onSubmit(startTimestamp, endTimestamp);
+    props.onSubmit(
+      startTimestamp,
+      endTimestamp,
+      setEndTimestamp,
+      setStartTimestamp
+    );
   };
   return (
     <>
@@ -412,7 +472,7 @@ function AddSchedule(props) {
   const [overviews, setOverviews] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
-  const [allSchedules, setAllSchedules] = useState([]);
+  const allSchedules = useRef();
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
@@ -432,9 +492,12 @@ function AddSchedule(props) {
             );
             res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(
-              filterDaySchedules(res.schedules, res.overviews.depart_times, 0)
+              filterDaySchedules(res.schedules, res.overviews.depart_times)[0]
             );
-            setAllSchedules(res.schedules);
+            allSchedules.current = filterDaySchedules(
+              res.schedules,
+              res.overviews.depart_times
+            );
           } else {
             alert('找不到行程資料');
           }
@@ -443,37 +506,131 @@ function AddSchedule(props) {
     }
   }, [uid, itineraryId]);
 
-  useEffect(() => {
-    if ([day, overviews, allSchedules].every((item) => item !== undefined)) {
-      setSchedules(
-        filterDaySchedules(allSchedules, overviews.depart_times, day)
-      );
-    }
-  }, [day]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     return result;
   };
-  const updateTimeOfSchedule = (list, isSetSchedule, newDepartTime) => {
+  const updateTimeOfSchedule = (
+    list,
+    { isUploadFirebase, isSetSchedule },
+    newDepartTime
+  ) => {
     const updatedList = list.map((schedule, index, array) => {
       if (index === 0) {
         schedule.start_time = newDepartTime || overviews.depart_times[day];
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
+        }
       } else {
         const prevSchedule = array[index - 1];
         schedule.start_time = prevSchedule.end_time;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
+        }
       }
       return schedule;
     });
-    firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
     if (isSetSchedule) {
       setSchedules(updatedList);
     }
+    if (isUploadFirebase) {
+      firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
+    }
+    return updatedList;
   };
-  const addSchedule = (spotIndex, scheduleIndex, type) => {
+  const getTransportDetail = (
+    schedules,
+    { isUploadFirebase, isSetSchedule },
+    scheduleId,
+    newMode
+  ) => {
+    const schedulesPromise = schedules.map((schedule, index, array) => {
+      if (index < array.length - 1) {
+        if (scheduleId) {
+          return scheduleId === schedule.schedule_id
+            ? googleMap.getDirection({
+                origin: schedule.placeDetail.geometry,
+                destination: array[index + 1].placeDetail.geometry,
+                ...transportMode(schedule)[newMode].config,
+              })
+            : null;
+        } else {
+          return googleMap.getDirection({
+            origin: schedule.placeDetail.geometry,
+            destination: array[index + 1].placeDetail.geometry,
+            ...transportMode(schedule)[schedule.travel_mode].config,
+          });
+        }
+      }
+    });
+    return Promise.all(schedulesPromise).then((transitDetails) => {
+      let newSchedules = schedules.map((schedule, index) => {
+        if (transitDetails[index]) {
+          const transitDetail = {
+            duration: {
+              text: transitDetails[index].duration.text,
+              value: Number(
+                transitDetails[index].duration.text.match(/^\d+/)[0]
+              ),
+            },
+            distance: transitDetails[index].distance,
+          };
+          return {
+            ...schedule,
+            transit_detail: transitDetail,
+          };
+        } else {
+          return scheduleId
+            ? { ...schedule }
+            : {
+                ...schedule,
+                end_time: schedule.start_time + schedule.duration * 60 * 1000,
+                transit_detail: '',
+              };
+        }
+      });
+
+      for (let i = 0; i < newSchedules.length - 1; i++) {
+        newSchedules[i].end_time =
+          newSchedules[i].start_time +
+          (newSchedules[i].duration +
+            newSchedules[i].transit_detail.duration.value) *
+            60 *
+            1000;
+        newSchedules[i + 1].start_time = newSchedules[i].end_time;
+      }
+      if (isSetSchedule) {
+        setSchedules(newSchedules);
+        allSchedules.current[day] = newSchedules;
+      }
+      if (isUploadFirebase) {
+        firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+      }
+      return Promise.resolve('updated!');
+    });
+  };
+  const changeTrasitWay = (scheduleId, mode) => {
+    const newScheduleList = schedules.map((schedule) => {
+      if (schedule.schedule_id === scheduleId) {
+        return { ...schedule, travel_mode: mode };
+      } else {
+        return schedule;
+      }
+    });
+    getTransportDetail(
+      newScheduleList,
+      { isUploadFirebase: true, isSetSchedule: true },
+      scheduleId,
+      mode
+    );
+  };
+  const addSchedule = (spotIndex, scheduleIndex) => {
     let startTime;
     let duration = 60;
     const newSpotsList = Array.from(waitingSpots);
@@ -484,22 +641,21 @@ function AddSchedule(props) {
     } else {
       startTime = overviews.depart_times[day];
     }
+
     const addData = {
       start_time: startTime,
       end_time: startTime + duration * 60 * 1000,
       place_id: remove.place_id,
       duration,
-      type,
       placeDetail: remove,
       schedule_id: 'unknown',
+      travel_mode: 'DRIVING',
     };
-    setAllSchedules([...allSchedules, addData]);
     firestore
       .addScheduleRemoveWaitingSpot(uid, itineraryId, addData)
       .then(() => console.log('success'))
       .catch((error) => console.error(error));
     newScheduleList.splice(scheduleIndex, 0, addData);
-
     return {
       newSpotsList,
       newScheduleList,
@@ -515,11 +671,9 @@ function AddSchedule(props) {
     if (!isRepeatSpot) {
       newSpotsList.splice(spotIndex, 0, remove.placeDetail);
     }
-    setAllSchedules(
-      allSchedules.filter((schedule) => {
-        return remove.schedule_id !== schedule.schedule_id;
-      })
-    );
+    allSchedules.current[day] = allSchedules.current[day].filter((schedule) => {
+      return remove.schedule_id !== schedule.schedule_id;
+    });
     firestore
       .setWaitingSpotsAndRemoveSchdule(
         uid,
@@ -550,12 +704,21 @@ function AddSchedule(props) {
     ) {
       const { newSpotsList, newScheduleList } = addSchedule(
         startAndEnd.startIndex,
-        startAndEnd.endIndex,
-        'spot'
+        startAndEnd.endIndex
       );
       setWaitingSpots(newSpotsList);
-      setSchedules(newScheduleList);
-      updateTimeOfSchedule(newScheduleList);
+      if (schedules?.length > 0) {
+        getTransportDetail(newScheduleList, {
+          isSetSchedule: true,
+          isUploadFirebase: true,
+        })
+          .then((res) => console.log(res))
+          .catch((error) => console.error(error));
+      } else {
+        const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
+        setSchedules(updatedTimeSchedules);
+        allSchedules.current[day] = updatedTimeSchedules;
+      }
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
@@ -565,7 +728,13 @@ function AddSchedule(props) {
         result.destination.index
       );
       if (startAndEnd.startId === 'scheduleArea') {
-        updateTimeOfSchedule(items, true);
+        const updatedTimeSchedules = updateTimeOfSchedule(items);
+        getTransportDetail(updatedTimeSchedules, {
+          isSetSchedule: true,
+          isUploadFirebase: true,
+        })
+          .then((res) => console.log(res))
+          .catch((error) => console.error(error));
       } else {
         setWaitingSpots(items);
       }
@@ -577,7 +746,10 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
-      setSchedules(newScheduleList);
+      getTransportDetail(newScheduleList, {
+        isSetSchedule: true,
+        isUploadFirebase: true,
+      });
       if (newSpotsList) {
         setWaitingSpots(newSpotsList);
       }
@@ -589,9 +761,16 @@ function AddSchedule(props) {
       if (schedule.schedule_id === scheduleId) {
         schedule.duration = newDuration;
         schedule.end_time = schedule.start_time + schedule.duration * 60 * 1000;
+        if (schedule.transit_detail) {
+          schedule.end_time +=
+            schedule.transit_detail.duration.value * 60 * 1000;
+        }
       }
     });
-    updateTimeOfSchedule(newSchedules, true);
+    updateTimeOfSchedule(newSchedules, {
+      isSetSchedule: true,
+      isUploadFirebase: true,
+    });
   };
   const updateOverviewsFields = (keyValuePair) => {
     setOverviews({ ...overviews, ...keyValuePair });
@@ -603,7 +782,7 @@ function AddSchedule(props) {
   const deleteSchedule = (scheduleId) => {
     updateTimeOfSchedule(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      true
+      { isSetSchedule: true, isUploadFirebase: true }
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
@@ -617,38 +796,77 @@ function AddSchedule(props) {
       .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
-  const updateDate = (start, end) => {
+  const updateDate = (start, end, setEndTimestamp, setStartTimestamp) => {
     let updateDate;
     if (overviews.start_date !== start && overviews.end_date !== end) {
       updateDate = {
         start_date: start,
         end_date: end,
+        depart_times: createDepartTimeAry({ start_date: start, end_date: end }),
       };
     } else if (overviews.start_date !== start && overviews.end_date === end) {
       updateDate = {
         start_date: start,
+        depart_times: createDepartTimeAry({
+          start_date: start,
+          end_date: overviews.end_date,
+        }),
       };
     } else if (overviews.start_date === start && overviews.end_date !== end) {
       updateDate = {
         end_date: end,
+        depart_times: createDepartTimeAry({
+          start_date: overviews.start_date,
+          end_date: end,
+        }),
       };
     }
     if (updateDate) {
-      updateOverviewsFields(updateDate);
+      const dayScheduleHad = Object.values(allSchedules.current).filter(
+        (day) => day.length > 0
+      );
+      if (dayScheduleHad.length > updateDate.depart_times.length) {
+        alert('新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期');
+        setEndTimestamp(overviews.end_date);
+        setStartTimestamp(overviews.start_date);
+      } else {
+        updateOverviewsFields(updateDate);
+        const oldDayKeys = Object.keys(allSchedules.current);
+        const removeDays = oldDayKeys.length - updateDate.depart_times.length;
+        let newAllSchedules = { ...allSchedules.current };
+        if (removeDays > 0) {
+          setDay(0);
+          newAllSchedules = dayScheduleHad.reduce((acc, day, index) => {
+            acc[index] = day;
+            return acc;
+          }, {});
+        }
+        for (let i = 0; i < updateDate.depart_times.length; i++) {
+          if (i < oldDayKeys.length) {
+            newAllSchedules[i] = updateTimeOfSchedule(
+              newAllSchedules[i],
+              { isUploadFirebase: true },
+              updateDate.depart_times[i]
+            );
+          } else {
+            newAllSchedules[i] = [];
+          }
+        }
+        allSchedules.current = newAllSchedules;
+        setDepartString(
+          timestampToString(
+            updateDate.depart_times[removeDays > 0 ? 0 : day],
+            'time'
+          )
+        );
+        setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
+      }
     }
   };
-  const switchDay = (prevDay) => {
-    if (prevDay === overviews.depart_times.length - 1 && prevDay > 0) {
-      setDay(prevDay - 1);
-      setDepartString(
-        timestampToString(overviews.depart_times[prevDay - 1], 'time')
-      );
-    } else {
-      setDay(prevDay + 1);
-      setDepartString(
-        timestampToString(overviews.depart_times[prevDay + 1], 'time')
-      );
-    }
+  const switchDay = (nextDay) => {
+    setDay(nextDay);
+    setSchedules(allSchedules.current[nextDay]);
+    setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
     window.scrollTo(0, 0);
   };
   return (
@@ -665,6 +883,8 @@ function AddSchedule(props) {
             ) : (
               <FlexChildDiv
                 padding="30px"
+                display="flex"
+                direction="column"
                 style={{ backgroundColor: '#f7f7f7' }}
                 basis="360px">
                 <FlexDiv justifyContent="flex-end" gap="20px">
@@ -688,6 +908,7 @@ function AddSchedule(props) {
                   {(provided) => (
                     <CardWrapper
                       column
+                      grow="1"
                       gap="20px"
                       maxWidth="300px"
                       ref={provided.innerRef}
@@ -754,7 +975,6 @@ function AddSchedule(props) {
                   isBrowse={isBrowse}
                   onSubmit={(departTimes) => {
                     if (departTimes !== departString) {
-                      console.log(departString);
                       const newDepartTimestamp = setTimeToTimestamp(
                         overviews.depart_times[day],
                         departTimes
@@ -762,7 +982,14 @@ function AddSchedule(props) {
                       const newDepartTimes = Array.from(overviews.depart_times);
                       newDepartTimes.splice(day, 1, newDepartTimestamp);
                       updateOverviewsFields({ depart_times: newDepartTimes });
-                      updateTimeOfSchedule(schedules, true, newDepartTimestamp);
+                      updateTimeOfSchedule(
+                        schedules,
+                        { isUploadFirebase: true, isSetSchedule: true },
+                        newDepartTimestamp
+                      );
+                      setDepartString(
+                        timestampToString(newDepartTimestamp, 'time')
+                      );
                     }
                   }}>
                   {departString}
@@ -779,9 +1006,11 @@ function AddSchedule(props) {
                     {schedules?.length > 0 ? (
                       schedules.map((schedule, index) => (
                         <ScheduleCard
+                          isBrowse={isBrowse}
                           key={schedule.schedule_id}
                           index={index}
                           id={schedule.schedule_id}
+                          changeTrasitWay={changeTrasitWay}
                           schedule={schedule}
                           updateDuration={updateDuration}
                           browse={isBrowse}>
@@ -822,23 +1051,30 @@ function AddSchedule(props) {
                   </CardWrapper>
                 )}
               </Droppable>
-              {day < overviews.depart_times.length && (
-                <FlexDiv justifyContent="flex-end" padding="5px 0">
-                  {
-                    <FlexDiv
-                      as="button"
-                      alignItems="center"
-                      type="button"
-                      onClick={() => switchDay(day)}>
-                      第
-                      {day === overviews.depart_times.length - 1
-                        ? day
-                        : day + 2}
-                      天<span className="material-icons">trending_flat</span>
-                    </FlexDiv>
-                  }
-                </FlexDiv>
-              )}
+
+              <FlexDiv justifyContent="flex-end" padding="5px 0">
+                {day > 0 && (
+                  <FlexDiv
+                    as="button"
+                    alignItems="center"
+                    margin="auto auto auto 0"
+                    type="button"
+                    onClick={() => switchDay(day - 1)}>
+                    <span className="material-icons">navigate_before</span>第
+                    {day}天
+                  </FlexDiv>
+                )}
+                {day < overviews.depart_times.length - 1 && (
+                  <FlexDiv
+                    as="button"
+                    alignItems="center"
+                    type="button"
+                    onClick={() => switchDay(day + 1)}>
+                    第{day + 2}天
+                    <span className="material-icons">navigate_next</span>
+                  </FlexDiv>
+                )}
+              </FlexDiv>
             </FlexChildDiv>
           </FlexDiv>
         </>
