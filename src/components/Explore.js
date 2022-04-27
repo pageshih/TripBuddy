@@ -198,7 +198,9 @@ function SavedSpotsList(props) {
           <option value="">---請選擇要加入景點的行程---</option>
           <option value="add">新行程</option>
           {createdItineraries?.map((itinerary) => (
-            <option value={itinerary.itinerary_id}>{itinerary.title}</option>
+            <option value={itinerary.itinerary_id} key={itinerary.itinerary_id}>
+              {itinerary.title}
+            </option>
           ))}
         </TextInput>
         <Button styled="primary" onClick={addSelectSpotsToItinerary}>

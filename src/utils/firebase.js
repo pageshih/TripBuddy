@@ -94,7 +94,7 @@ const firestore = {
   },
   updatePlaceData(spot, map) {
     const now = new Date().getDate();
-    const expireDate = new Date().setDate(now - 3);
+    const expireDate = new Date().setDate(now - 2);
     if (spot.created_time <= expireDate || !spot.created_time) {
       return googleMap
         .getPlaceDetails(map, spot.place_id)
@@ -103,7 +103,7 @@ const firestore = {
         })
         .catch((error) => console.error(error));
     } else {
-      return spot;
+      return Promise.resolve(spot);
     }
   },
   getSavedSpots(userUID, map) {
@@ -115,10 +115,12 @@ const firestore = {
           const updateSpots = spots.map((spot) => {
             return this.updatePlaceData(spot, map);
           });
-          this.setSavedSpots(userUID, updateSpots).catch((error) =>
-            console.error(error)
-          );
-          Promise.all(updateSpots).then((res) => resolve(res));
+          Promise.all(updateSpots).then((res) => {
+            resolve(res);
+            this.setSavedSpots(userUID, updateSpots).catch((error) =>
+              console.error(error)
+            );
+          });
         })
         .catch((error) => {
           reject(error);
