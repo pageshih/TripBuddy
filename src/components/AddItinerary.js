@@ -512,7 +512,11 @@ function AddSchedule(props) {
     result.splice(endIndex, 0, removed);
     return result;
   };
-  const updateTimeOfSchedule = (list, options, newDepartTime) => {
+  const updateTimeOfSchedule = (
+    list,
+    { isUploadFirebase, isSetSchedule },
+    newDepartTime
+  ) => {
     const updatedList = list.map((schedule, index, array) => {
       if (index === 0) {
         schedule.start_time = newDepartTime || overviews.depart_times[day];
@@ -532,10 +536,10 @@ function AddSchedule(props) {
       }
       return schedule;
     });
-    if (options?.isSetSchedule) {
+    if (isSetSchedule) {
       setSchedules(updatedList);
     }
-    if (options?.isUploadFirebase) {
+    if (isUploadFirebase) {
       firestore.editSchedules(uid, itineraryId, updatedList, 'merge');
     }
     return updatedList;
@@ -742,7 +746,6 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
-      // const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
       getTransportDetail(newScheduleList, {
         isSetSchedule: true,
         isUploadFirebase: true,
@@ -972,7 +975,6 @@ function AddSchedule(props) {
                   isBrowse={isBrowse}
                   onSubmit={(departTimes) => {
                     if (departTimes !== departString) {
-                      console.log(departString);
                       const newDepartTimestamp = setTimeToTimestamp(
                         overviews.depart_times[day],
                         departTimes
@@ -980,7 +982,14 @@ function AddSchedule(props) {
                       const newDepartTimes = Array.from(overviews.depart_times);
                       newDepartTimes.splice(day, 1, newDepartTimestamp);
                       updateOverviewsFields({ depart_times: newDepartTimes });
-                      updateTimeOfSchedule(schedules, true, newDepartTimestamp);
+                      updateTimeOfSchedule(
+                        schedules,
+                        { isUploadFirebase: true, isSetSchedule: true },
+                        newDepartTimestamp
+                      );
+                      setDepartString(
+                        timestampToString(newDepartTimestamp, 'time')
+                      );
                     }
                   }}>
                   {departString}
