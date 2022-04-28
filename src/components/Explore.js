@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
-import { googleMap } from '../utils/googleMap';
+import { googleMap, SearchBar } from '../utils/googleMap';
 import { Context } from '../App';
 import { RoundButton, Button } from './styledComponents/Button';
 import {
@@ -14,13 +14,10 @@ import {
 } from './styledComponents/Layout';
 import {
   CheckboxCustom,
-  inputBase,
   TextInput,
   SelectAllCheckBox,
 } from './styledComponents/Form';
 import styled from '@emotion/styled';
-/** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
 
 function Map({
   setPlaceDetail,
@@ -214,70 +211,6 @@ function SavedSpotsList(props) {
   );
 }
 
-const searchIcon = css`
-  position: absolute;
-  background-color: transparent;
-  right: 6px;
-  top: calc(50% - 12px);
-`;
-function SearchBar(props) {
-  const ref = useRef();
-  const [input, setInput] = useState();
-
-  useEffect(() => {
-    if (ref.current) {
-      const autocomplete = googleMap.initAutocomplete(ref.current);
-      autocomplete.addListener('place_changed', () => {
-        const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
-        console.log(place);
-        if (place.geometry && place.name) {
-          props.setPlaceDetail(place);
-          props.setMarker(
-            googleMap.setSelectedMarker(props.map, place.geometry, place.name)
-          );
-          props.map.panTo(place.geometry);
-          props.setShowSavedSpots(false);
-        }
-      });
-    }
-  }, []);
-  useEffect(() => {
-    if (props.inputValue) {
-      setInput(props.inputValue);
-    }
-  }, [props.inputValue]);
-
-  return (
-    <div
-      css={css`
-        position: absolute;
-        z-index: 8;
-        width: 500px;
-        padding: 20px;
-      `}>
-      <div
-        css={css`
-          position: relative;
-        `}>
-        <input
-          onFocus={(e) => e.target.select()}
-          css={css`
-            ${inputBase}
-            width: 100%;
-          `}
-          ref={ref}
-        />
-        <div
-          css={css`
-            ${searchIcon}
-          `}
-          className="material-icons">
-          search
-        </div>
-      </div>
-    </div>
-  );
-}
 function Explore({ setWaitingSpots }) {
   const { uid } = useContext(Context);
   const [map, setMap] = useState();
@@ -286,7 +219,6 @@ function Explore({ setWaitingSpots }) {
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
   const sideWindowRef = useRef();
-  const [searchInputValue, setSearchInputValue] = useState('');
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -376,8 +308,6 @@ function Explore({ setWaitingSpots }) {
                 map={map}
                 setMarker={setMarker}
                 setShowSavedSpots={setShowSavedSpots}
-                inputValue={searchInputValue}
-                setInputValue={setSearchInputValue}
               />
               <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
                 <Map
@@ -387,7 +317,6 @@ function Explore({ setWaitingSpots }) {
                   setMarker={setMarker}
                   marker={marker}
                   setShowSavedSpots={setShowSavedSpots}
-                  setSearchInputValue={setSearchInputValue}
                 />
               </Wrapper>
             </FlexChildDiv>

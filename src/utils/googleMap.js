@@ -4,6 +4,9 @@ import { useEffect, useRef, useContext } from 'react';
 import { Context } from '../App';
 import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
+import { inputBase } from '../components/styledComponents/Form';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 
 const googleMap = {
   center: {
@@ -177,4 +180,57 @@ function EmptyMap(props) {
     </Wrapper>
   );
 }
-export { googleMap, EmptyMap };
+
+const searchBarStyles = {
+  searchIcon: {
+    position: 'absolute',
+    backgroundColor: 'transparent',
+    right: '26px',
+    top: 'calc(50% - 12px)',
+  },
+  container: {
+    position: 'absolute',
+    zIndex: '8',
+    width: '500px',
+    padding: '20px',
+  },
+  input: {
+    width: '100%',
+  },
+};
+function SearchBar(props) {
+  const ref = useRef();
+
+  useEffect(() => {
+    if (ref.current) {
+      const autocomplete = googleMap.initAutocomplete(ref.current);
+      autocomplete.addListener('place_changed', () => {
+        const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
+        if (place.geometry && place.name) {
+          props.setPlaceDetail(place);
+          props.setMarker(
+            googleMap.setSelectedMarker(props.map, place.geometry, place.name)
+          );
+          props.map.panTo(place.geometry);
+          props.setShowSavedSpots(false);
+        }
+      });
+    }
+  }, []);
+
+  return (
+    <div css={props.css?.container || searchBarStyles.container}>
+      <input
+        onFocus={(e) => e.target.select()}
+        css={[inputBase, props.css?.input || searchBarStyles.input]}
+        ref={ref}
+      />
+      <div
+        css={props.css?.searchIcon || searchBarStyles.searchIcon}
+        className="material-icons">
+        search
+      </div>
+    </div>
+  );
+}
+export { googleMap, EmptyMap, SearchBar };
