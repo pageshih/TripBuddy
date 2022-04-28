@@ -24,11 +24,13 @@ function setTimeToTimestamp(timestamp, timeString) {
 }
 function filterDaySchedules(allSchedules, departTimes) {
   const newAllSchedules = departTimes.reduce((acc, _, index) => {
-    acc[index] = allSchedules.filter(
-      (schedule) =>
-        schedule.end_time > departTimes[index] &&
-        schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
-    );
+    acc[index] = allSchedules
+      .filter(
+        (schedule) =>
+          schedule.end_time > departTimes[index] &&
+          schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
+      )
+      .sort((a, b) => a.start_time - b.start_time);
     return acc;
   }, {});
   return newAllSchedules;

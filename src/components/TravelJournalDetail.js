@@ -36,14 +36,7 @@ function TravelJournalDetail() {
           itineraryRes.schedules,
           itineraryRes.overviews.depart_times
         );
-        setScheduleList(
-          itineraryRes.schedules.filter(
-            (schedule) =>
-              schedule.end_time > itineraryRes.overviews.depart_times[day] &&
-              schedule.end_time <
-                itineraryRes.overviews.depart_times[day] + 24 * 60 * 60 * 1000
-          )
-        );
+        setScheduleList(allSchedules.current[day]);
         const profile = await firestore.getProfile(uid);
         setReviewTags(profile.reviews);
       } catch (error) {
@@ -114,18 +107,20 @@ function TravelJournalDetail() {
                       isEdit
                     ) {
                       if (
-                        schedulesExpand?.some((id) => id === schedule.place_id)
+                        schedulesExpand?.some(
+                          (id) => id === schedule.schedule_id
+                        )
                       ) {
                         setSchedulesExpand(
                           schedulesExpand.filter(
-                            (id) => id !== schedule.place_id
+                            (id) => id !== schedule.schedule_id
                           )
                         );
                       } else {
                         setSchedulesExpand(
                           schedulesExpand
-                            ? [...schedulesExpand, schedule.place_id]
-                            : [schedule.place_id]
+                            ? [...schedulesExpand, schedule.schedule_id]
+                            : [schedule.schedule_id]
                         );
                       }
                     }
@@ -134,12 +129,26 @@ function TravelJournalDetail() {
                   {schedule.review_tags ||
                   schedule.gallery ||
                   schedule.reviews ? (
-                    <span className="material-icons">expand_more</span>
+                    <span className="material-icons">
+                      {schedulesExpand?.every(
+                        (id) => id !== schedule.schedule_id
+                      )
+                        ? 'expand_more'
+                        : 'expand_less'}
+                    </span>
                   ) : (
-                    isEdit && <span className="material-icons">add_circle</span>
+                    isEdit && (
+                      <span className="material-icons">
+                        {schedulesExpand?.every(
+                          (id) => id !== schedule.schedule_id
+                        )
+                          ? 'add_circle'
+                          : 'cancel'}
+                      </span>
+                    )
                   )}
                 </FlexDiv>
-                {schedulesExpand?.some((id) => id === schedule.place_id) && (
+                {schedulesExpand?.some((id) => id === schedule.schedule_id) && (
                   <AddReview
                     isEdit={isEdit}
                     key={schedule.schedule_id}
