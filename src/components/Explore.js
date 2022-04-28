@@ -14,6 +14,7 @@ import {
 } from './styledComponents/Layout';
 import {
   CheckboxCustom,
+  inputBase,
   TextInput,
   SelectAllCheckBox,
 } from './styledComponents/Form';
@@ -30,15 +31,10 @@ function Map({
   setShowSavedSpots,
 }) {
   const ref = useRef();
-  const center = {
-    lat: 25.038621247241373,
-    lng: 121.53236932147014,
-  };
-  const zoom = 16;
 
   useEffect(() => {
     if (ref.current && !map) {
-      setMap(googleMap.initMap(ref.current, center, zoom));
+      setMap(googleMap.initMap(ref.current));
     } else {
       googleMap.setMapStyle(map, 'default');
     }
@@ -218,37 +214,68 @@ function SavedSpotsList(props) {
   );
 }
 
-const SearchBtn = styled.button`
+const searchIcon = css`
   position: absolute;
   background-color: transparent;
-  right: 0;
-  height: 100%;
-  &:hover {
-    box-shadow: none;
-  }
+  right: 6px;
+  top: calc(50% - 12px);
 `;
-function SearchBar() {
+function SearchBar(props) {
+  const ref = useRef();
+  const [input, setInput] = useState();
+
+  useEffect(() => {
+    if (ref.current) {
+      const autocomplete = googleMap.initAutocomplete(ref.current);
+      autocomplete.addListener('place_changed', () => {
+        const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
+        console.log(place);
+        if (place.geometry && place.name) {
+          props.setPlaceDetail(place);
+          props.setMarker(
+            googleMap.setSelectedMarker(props.map, place.geometry, place.name)
+          );
+          props.map.panTo(place.geometry);
+          props.setShowSavedSpots(false);
+        }
+      });
+    }
+  }, []);
+  useEffect(() => {
+    if (props.inputValue) {
+      setInput(props.inputValue);
+    }
+  }, [props.inputValue]);
+
   return (
-    <form
+    <div
       css={css`
         position: absolute;
         z-index: 8;
-        top: 11px;
-        left: 200px;
         width: 500px;
+        padding: 20px;
       `}>
       <div
         css={css`
           position: relative;
         `}>
-        <TextInput
+        <input
+          onFocus={(e) => e.target.select()}
           css={css`
+            ${inputBase}
             width: 100%;
           `}
+          ref={ref}
         />
-        <SearchBtn className="material-icons">search</SearchBtn>
+        <div
+          css={css`
+            ${searchIcon}
+          `}
+          className="material-icons">
+          search
+        </div>
       </div>
-    </form>
+    </div>
   );
 }
 function Explore({ setWaitingSpots }) {
@@ -259,9 +286,10 @@ function Explore({ setWaitingSpots }) {
   const [savedSpots, setSavedSpots] = useState();
   const [showSavedSpots, setShowSavedSpots] = useState(false);
   const sideWindowRef = useRef();
+  const [searchInputValue, setSearchInputValue] = useState('');
 
   useEffect(() => {
-    if (map) {
+    if (map && !savedSpots && uid) {
       firestore
         .getSavedSpots(uid, map)
         .then((res) => {
@@ -269,7 +297,7 @@ function Explore({ setWaitingSpots }) {
         })
         .catch((error) => console.error(error));
     }
-  }, [map]);
+  }, [map, savedSpots, uid]);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
       firestore.setSavedSpots(uid, [placeDetail]);
@@ -343,7 +371,14 @@ function Explore({ setWaitingSpots }) {
               <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
                 候補景點
               </RoundBtnOnMap>
-              <SearchBar />
+              <SearchBar
+                setPlaceDetail={setPlaceDetail}
+                map={map}
+                setMarker={setMarker}
+                setShowSavedSpots={setShowSavedSpots}
+                inputValue={searchInputValue}
+                setInputValue={setSearchInputValue}
+              />
               <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
                 <Map
                   setPlaceDetail={setPlaceDetail}
@@ -352,6 +387,7 @@ function Explore({ setWaitingSpots }) {
                   setMarker={setMarker}
                   marker={marker}
                   setShowSavedSpots={setShowSavedSpots}
+                  setSearchInputValue={setSearchInputValue}
                 />
               </Wrapper>
             </FlexChildDiv>
