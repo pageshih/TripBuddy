@@ -157,11 +157,9 @@ const googleMap = {
       },
       fields: this.placesRequestFields,
       types: ['establishment'],
+      ...options,
     };
-    return new window.google.maps.places.Autocomplete(
-      ref,
-      options ? options : defaultOptions
-    );
+    return new window.google.maps.places.Autocomplete(ref, defaultOptions);
   },
 };
 function EmptyMap(props) {
@@ -203,30 +201,36 @@ function SearchBar(props) {
 
   useEffect(() => {
     if (ref.current) {
-      const autocomplete = googleMap.initAutocomplete(ref.current);
+      const autocomplete = googleMap.initAutocomplete(
+        ref.current,
+        props.center,
+        props.option
+      );
       autocomplete.addListener('place_changed', () => {
         const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
         if (place.geometry && place.name) {
           props.setPlaceDetail(place);
-          props.setMarker(
-            googleMap.setSelectedMarker(props.map, place.geometry, place.name)
-          );
-          props.map.panTo(place.geometry);
-          props.setShowSavedSpots(false);
+          if (props.setMarker && props.map && props.setShowSavedSpots) {
+            props.setMarker(
+              googleMap.setSelectedMarker(props.map, place.geometry, place.name)
+            );
+            props.map.panTo(place.geometry);
+            props.setShowSavedSpots(false);
+          }
         }
       });
     }
   }, []);
 
   return (
-    <div css={props.css?.container || searchBarStyles.container}>
+    <div css={[searchBarStyles.container, props.css?.container]}>
       <input
         onFocus={(e) => e.target.select()}
-        css={[inputBase, props.css?.input || searchBarStyles.input]}
+        css={[inputBase, searchBarStyles.input, props.css?.input]}
         ref={ref}
       />
       <div
-        css={props.css?.searchIcon || searchBarStyles.searchIcon}
+        css={[searchBarStyles.searchIcon, props.css?.searchIcon]}
         className="material-icons">
         search
       </div>

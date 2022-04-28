@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState, useReducer } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import {
@@ -14,9 +14,12 @@ import {
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import { AddReview } from './EditReview';
 import { Pagination } from './Pagination';
+import { Modal } from './styledComponents/Modal';
+import { SearchBar } from '../utils/googleMap';
+import { Button } from './styledComponents/Button';
 
 function TravelJournalDetail() {
-  const { uid } = useContext(Context);
+  const { uid, map } = useContext(Context);
   const { journalID } = useParams();
   const [scheduleList, setScheduleList] = useState();
   const allSchedules = useRef();
@@ -26,6 +29,17 @@ function TravelJournalDetail() {
   const [isEdit, setIsEdit] = useState(false);
   const [reviewTags, setReviewTags] = useState();
   const [uploadedReview, setUploadedReview] = useState();
+  const [showAddSchedule, setShowAddSchedule] = useState();
+  // const [addSchesule, setAddSchedule] = useState({});
+  // const addScheduleReducer = (state, action) => {
+  //   switch(action.type){
+  //     case 'changePlace':
+  //       return {
+  //         placeDetail:
+  //       }
+  //   }
+  // };
+  // const [addSchedule, dispatchAddSchedule] = useReducer(addScheduleReducer, addSchesule);
 
   useEffect(() => {
     async function fetchData() {
@@ -65,6 +79,50 @@ function TravelJournalDetail() {
     <>
       {overviews && scheduleList ? (
         <>
+          {showAddSchedule && (
+            <Modal close={() => setShowAddSchedule(false)}>
+              <FlexDiv direction="column" height="100%">
+                <SearchBar
+                  setPlaceDetail={setPlaceDetail}
+                  map={map}
+                  css={{
+                    container: { position: 'relative', width: '100%' },
+                  }}
+                  option={{
+                    fields: ['name', 'place_id', 'formatted_address'],
+                  }}
+                />
+                {placeDetail && (
+                  <>
+                    <h2>{placeDetail.name}</h2>
+                    <p>{placeDetail.formatted_address}</p>
+                  </>
+                )}
+                <FlexChildDiv
+                  display="flex"
+                  direction="column"
+                  gap="20px"
+                  padding="20px"
+                  grow="1">
+                  <select>
+                    <option value="" disabled>
+                      ---請選擇日期---
+                    </option>
+                    {overviews.depart_times.map((timestamp) => (
+                      <option value={timestamp} key={timestamp}>
+                        {timestampToString(timestamp, 'date')}
+                      </option>
+                    ))}
+                  </select>
+                  <input type="time" />
+                  <Button styled="primary" margin="auto 0 0 0">
+                    新增
+                  </Button>
+                </FlexChildDiv>
+              </FlexDiv>
+            </Modal>
+          )}
+
           <Container>
             <h2>{overviews.title}</h2>
             <p>
@@ -77,7 +135,7 @@ function TravelJournalDetail() {
             </button>
           </Container>
           <h3>Day {day + 1}</h3>
-          <p>{timestampToString(overviews.depart_times[day], 'date')}</p>
+          <p>{timestampToString(overviews.depart_times[day], 'simpleDate')}</p>
           <FlexDiv alignItems="center">
             {scheduleList.map((schedule, index, array) => (
               <p key={schedule.schedule_id}>
@@ -91,6 +149,17 @@ function TravelJournalDetail() {
                 )}
               </p>
             ))}
+          </FlexDiv>
+          <FlexDiv alignItems="center" gap="10px" justifyContent="flex-end">
+            <p>有計畫外的行程？</p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddSchedule(true);
+                console.log(showAddSchedule);
+              }}>
+              加入行程
+            </button>
           </FlexDiv>
           {scheduleList.map((schedule) => (
             <Card gap="20px" alignItems="center" key={schedule.schedule_id}>
