@@ -103,7 +103,7 @@ const firestore = {
         })
         .catch((error) => console.error(error));
     } else {
-      return Promise.resolve(spot);
+      return spot;
     }
   },
   getSavedSpots(userUID, map) {
