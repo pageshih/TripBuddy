@@ -97,7 +97,7 @@ const googleMap = {
       const placeService = new window.google.maps.places.PlacesService(map);
       const placeRequest = {
         placeId,
-        fields: fields ? fields : this.requestFields,
+        fields: fields ? fields : this.placesRequestFields,
       };
       placeService.getDetails(placeRequest, (place, status) => {
         if (
