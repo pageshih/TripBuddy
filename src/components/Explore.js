@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
-import { googleMap } from '../utils/googleMap';
+import { googleMap, SearchBar } from '../utils/googleMap';
 import { Context } from '../App';
 import { RoundButton, Button } from './styledComponents/Button';
 import {
@@ -28,15 +28,10 @@ function Map({
   setShowSavedSpots,
 }) {
   const ref = useRef();
-  const center = {
-    lat: 25.038621247241373,
-    lng: 121.53236932147014,
-  };
-  const zoom = 16;
 
   useEffect(() => {
     if (ref.current && !map) {
-      setMap(googleMap.initMap(ref.current, center, zoom));
+      setMap(googleMap.initMap(ref.current));
     } else {
       googleMap.setMapStyle(map, 'default');
     }
@@ -226,7 +221,7 @@ function Explore({ setWaitingSpots }) {
   const sideWindowRef = useRef();
 
   useEffect(() => {
-    if (map) {
+    if (map && !savedSpots && uid) {
       firestore
         .getSavedSpots(uid, map)
         .then((res) => {
@@ -234,7 +229,7 @@ function Explore({ setWaitingSpots }) {
         })
         .catch((error) => console.error(error));
     }
-  }, [map]);
+  }, [map, savedSpots, uid]);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
       firestore.setSavedSpots(uid, [placeDetail]);
@@ -282,7 +277,7 @@ function Explore({ setWaitingSpots }) {
           <FlexDiv height="100vh">
             <FlexChildDiv
               ref={sideWindowRef}
-              basis={placeDetail || showSavedSpots ? '500px' : null}
+              basis={placeDetail || showSavedSpots ? '400px' : null}
               overflow="scroll"
               padding={placeDetail || showSavedSpots ? '15px 15px' : null}>
               {!showSavedSpots && placeDetail && (
@@ -304,19 +299,27 @@ function Explore({ setWaitingSpots }) {
                 <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
               )}
             </FlexChildDiv>
-            <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
+            <FlexChildDiv grow="1" position="relative">
               <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
                 候補景點
               </RoundBtnOnMap>
-              <Map
+              <SearchBar
                 setPlaceDetail={setPlaceDetail}
-                setMap={setMap}
                 map={map}
                 setMarker={setMarker}
-                marker={marker}
                 setShowSavedSpots={setShowSavedSpots}
               />
-            </Wrapper>
+              <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
+                <Map
+                  setPlaceDetail={setPlaceDetail}
+                  setMap={setMap}
+                  map={map}
+                  setMarker={setMarker}
+                  marker={marker}
+                  setShowSavedSpots={setShowSavedSpots}
+                />
+              </Wrapper>
+            </FlexChildDiv>
           </FlexDiv>
         </>
       )}

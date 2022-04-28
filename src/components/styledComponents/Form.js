@@ -137,4 +137,5 @@ export {
   CheckboxCustom,
   TextAreaReview,
   SelectAllCheckBox,
+  inputBase,
 };
