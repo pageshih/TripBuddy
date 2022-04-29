@@ -209,7 +209,11 @@ function SearchBar(props) {
       autocomplete.addListener('place_changed', () => {
         const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
         if (place.geometry && place.name) {
-          props.setPlaceDetail(place);
+          if (props.setPlaceDetail) {
+            props.setPlaceDetail(place);
+          } else if (props.dispatch) {
+            props.dispatch(place);
+          }
           if (props.setMarker && props.map && props.setShowSavedSpots) {
             props.setMarker(
               googleMap.setSelectedMarker(props.map, place.geometry, place.name)
@@ -228,6 +232,7 @@ function SearchBar(props) {
         onFocus={(e) => e.target.select()}
         css={[inputBase, searchBarStyles.input, props.css?.input]}
         ref={ref}
+        placeholder={props.placeholder}
       />
       <div
         css={[searchBarStyles.searchIcon, props.css?.searchIcon]}

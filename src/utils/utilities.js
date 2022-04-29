@@ -17,6 +17,10 @@ function timestampToDateInput(timestamp) {
   const d = new Date(timestamp);
   return `${d.toISOString().slice(0, 10)}`;
 }
+function timestampToTimeInput(timestamp) {
+  const d = new Date(timestamp);
+  return `${d.toTimeString().slice(0, 8)}`;
+}
 
 function setTimeToTimestamp(timestamp, timeString) {
   const [hour, minute] = timeString.split(':');
@@ -63,4 +67,5 @@ export {
   filterDaySchedules,
   setTimeToTimestamp,
   createDepartTimeAry,
+  timestampToTimeInput,
 };
