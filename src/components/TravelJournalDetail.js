@@ -21,6 +21,7 @@ import { Pagination } from './Pagination';
 import { Modal } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
 import { Button } from './styledComponents/Button';
+import { css } from '@emotion/react';
 
 function TravelJournalDetail() {
   const { uid, map } = useContext(Context);
@@ -37,7 +38,6 @@ function TravelJournalDetail() {
   const initialSchedule = {
     start_time: undefined,
     end_time: 0,
-    schedule_id: '',
     duration: 30,
     placeDetail: undefined,
     place_id: '',
@@ -58,11 +58,13 @@ function TravelJournalDetail() {
           start_time: action.playload,
         };
       case 'choseTime':
+        const startTime = new Date(
+          state.start_time > 0 ? state.start_time : overviews.start_date
+        ).setHours(Number(action.playload[0]), Number(action.playload[1]));
         return {
           ...state,
-          start_time: new Date(
-            state.start_time > 0 ? state.start_time : overviews.start_date
-          ).setHours(Number(action.playload[0]), Number(action.playload[1])),
+          start_time: startTime,
+          end_time: startTime + state.duration * 60 * 1000,
         };
       case 'addDuration':
         return {
@@ -70,6 +72,8 @@ function TravelJournalDetail() {
           duration: action.playload,
           end_time: state.start_time + action.playload * 60 * 1000,
         };
+      case 'reset':
+        return initialSchedule;
       default:
         return state;
     }
@@ -79,6 +83,40 @@ function TravelJournalDetail() {
     initialSchedule
   );
 
+  const uploadNewSchedule = () => {
+    if (addSchedule.start_time && addSchedule.placeDetail) {
+      firestore
+        .addSchedule(uid, overviews.itinerary_id, addSchedule)
+        .then((newSchedule) => {
+          setShowAddSchedule(false);
+          alert('已加入行程');
+          overviews.depart_times.forEach((timestamp, index, array) => {
+            if (index < array.length - 1 && array.length !== 1) {
+              if (
+                newSchedule.start_time > timestamp &&
+                newSchedule.start_time < array[index + 1]
+              ) {
+                allSchedules.current[index].push(newSchedule);
+                allSchedules.current[index].sort(
+                  (a, b) => a.start_time - b.start_time
+                );
+              }
+            } else if (
+              index === array.length &&
+              newSchedule.start_time > timestamp
+            ) {
+              allSchedules.current[index].push(newSchedule);
+              allSchedules.current[index].sort(
+                (a, b) => a.start_time - b.start_time
+              );
+            }
+            setScheduleList([...allSchedules.current[day]]);
+            dispatchAddSchedule({ type: 'reset' });
+          });
+        })
+        .catch((error) => console.error(error));
+    }
+  };
   useEffect(() => {
     async function fetchData() {
       try {
@@ -88,7 +126,7 @@ function TravelJournalDetail() {
           itineraryRes.schedules,
           itineraryRes.overviews.depart_times
         );
-        setScheduleList(allSchedules.current[day]);
+        setScheduleList([...allSchedules.current[day]]);
         const profile = await firestore.getProfile(uid);
         setReviewTags(profile.reviews);
       } catch (error) {
@@ -104,7 +142,7 @@ function TravelJournalDetail() {
           ? { ...schedule, ...uploadedReview }
           : schedule
       );
-      setScheduleList(newScheduleList);
+      setScheduleList([...newScheduleList]);
     }
   }, [uploadedReview]);
 
@@ -133,14 +171,20 @@ function TravelJournalDetail() {
                     container: { position: 'relative', width: '100%' },
                   }}
                   option={{
-                    fields: ['name', 'place_id', 'formatted_address'],
+                    fields: ['name', 'place_id', 'formatted_address', 'photos'],
                   }}
                 />
                 {addSchedule.placeDetail && (
-                  <>
-                    <h2>{addSchedule.placeDetail.name}</h2>
+                  <Card column>
+                    <CardImage
+                      width="150px"
+                      height="100px"
+                      src={addSchedule.placeDetail.photos[0]}
+                      alt={addSchedule.placeDetail.name}
+                    />
+                    <h4>{addSchedule.placeDetail.name}</h4>
                     <p>{addSchedule.placeDetail.formatted_address}</p>
-                  </>
+                  </Card>
                 )}
                 <FlexChildDiv
                   display="flex"
@@ -196,7 +240,10 @@ function TravelJournalDetail() {
                     />
                     <span>分鐘</span>
                   </FlexDiv>
-                  <Button styled="primary" margin="auto 0 0 0">
+                  <Button
+                    styled="primary"
+                    margin="auto 0 0 0"
+                    onClick={uploadNewSchedule}>
                     新增
                   </Button>
                 </FlexChildDiv>

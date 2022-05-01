@@ -252,7 +252,7 @@ const firestore = {
       }, {})
     );
   },
-  addScheduleRemoveWaitingSpot(userUID, itineraryId, scheduleData) {
+  addSchedule(userUID, itineraryId, scheduleData, isRemoveWaitingSpot) {
     const batch = writeBatch(this.db);
     const itineraryDetailRef = doc(
       this.db,
@@ -262,14 +262,16 @@ const firestore = {
       itineraryId
     );
     const scheduleRef = doc(collection(itineraryDetailRef, 'schedules'));
-    const waitingSpotRef = doc(
-      collection(itineraryDetailRef, 'waitingSpots'),
-      scheduleData.place_id
-    );
     scheduleData.schedule_id = scheduleRef.id;
     batch.set(scheduleRef, scheduleData);
-    batch.delete(waitingSpotRef);
-    return batch.commit();
+    if (isRemoveWaitingSpot) {
+      const waitingSpotRef = doc(
+        collection(itineraryDetailRef, 'waitingSpots'),
+        scheduleData.place_id
+      );
+      batch.delete(waitingSpotRef);
+    }
+    return batch.commit().then(() => Promise.resolve(scheduleData));
   },
   editSchedules(userUID, itineraryId, updateDatas, merge) {
     const batch = writeBatch(this.db);

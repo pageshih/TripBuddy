@@ -69,7 +69,7 @@ const googleMap = {
         periods: place?.opening_hours?.periods || ['未提供'],
         weekday_text: place?.opening_hours?.weekday_text || ['未提供'],
       },
-      photos: place?.photos.map((item) => item.getUrl()) || '未提供',
+      photos: place?.photos?.map((item) => item.getUrl()) || '未提供',
       reviews: place?.reviews || '未提供',
       website: place?.website || '未提供',
       rating: place?.rating || '未提供',
