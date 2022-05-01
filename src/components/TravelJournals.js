@@ -7,7 +7,7 @@ import {
   CardWrapper,
   Container,
   FlexDiv,
-  CardImage,
+  Image,
 } from './styledComponents/Layout';
 import { timestampToString } from '../utils/utilities';
 
@@ -35,7 +35,7 @@ function TravelJournals() {
               onClick={() =>
                 navigate(`/travel-journals/${journal.itinerary_id}`)
               }>
-              <CardImage
+              <Image
                 src={journal.cover_photo}
                 alt={journal.title}
                 width="300px"

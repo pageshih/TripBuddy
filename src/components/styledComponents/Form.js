@@ -2,12 +2,17 @@ import { useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv } from './Layout';
 
 const inputBase = css`
-  padding: 10px;
+  padding: 10px 20px;
   border-radius: 5px;
-  border: 1px solid gray;
+  font-size: 16px;
+  border: 1px solid ${palatte.gray['400']};
+  ${mediaQuery[0]} {
+    font-size: 14px;
+  }
 `;
 const labelBase = css`
   margin-bottom: 5px;
@@ -40,6 +45,10 @@ function TextField({ children, placeholder, value, onChange, type }) {
 const TextInput = styled.input`
   ${inputBase}
   width: 100%;
+  &:focus {
+    outline: none;
+    border: 2px solid ${palatte.primary.basic};
+  }
 `;
 const checkboxCss = css`
   color: white;

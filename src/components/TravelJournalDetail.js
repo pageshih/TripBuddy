@@ -8,7 +8,7 @@ import {
   CardWrapper,
   Container,
   FlexDiv,
-  CardImage,
+  Image,
   FlexChildDiv,
 } from './styledComponents/Layout';
 import {
@@ -176,7 +176,7 @@ function TravelJournalDetail() {
                 />
                 {addSchedule.placeDetail && (
                   <Card column>
-                    <CardImage
+                    <Image
                       width="150px"
                       height="100px"
                       src={addSchedule.placeDetail.photos[0]}
