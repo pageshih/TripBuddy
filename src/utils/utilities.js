@@ -17,6 +17,10 @@ function timestampToDateInput(timestamp) {
   const d = new Date(timestamp);
   return `${d.toISOString().slice(0, 10)}`;
 }
+function timestampToTimeInput(timestamp) {
+  const d = new Date(timestamp);
+  return `${d.toTimeString().slice(0, 8)}`;
+}
 
 function setTimeToTimestamp(timestamp, timeString) {
   const [hour, minute] = timeString.split(':');
@@ -24,11 +28,13 @@ function setTimeToTimestamp(timestamp, timeString) {
 }
 function filterDaySchedules(allSchedules, departTimes) {
   const newAllSchedules = departTimes.reduce((acc, _, index) => {
-    acc[index] = allSchedules.filter(
-      (schedule) =>
-        schedule.end_time > departTimes[index] &&
-        schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
-    );
+    acc[index] = allSchedules
+      .filter(
+        (schedule) =>
+          schedule.end_time > departTimes[index] &&
+          schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
+      )
+      .sort((a, b) => a.start_time - b.start_time);
     return acc;
   }, {});
   return newAllSchedules;
@@ -61,4 +67,5 @@ export {
   filterDaySchedules,
   setTimeToTimestamp,
   createDepartTimeAry,
+  timestampToTimeInput,
 };

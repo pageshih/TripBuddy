@@ -658,7 +658,7 @@ function AddSchedule(props) {
       travel_mode: 'DRIVING',
     };
     firestore
-      .addScheduleRemoveWaitingSpot(uid, itineraryId, addData)
+      .addSchedule(uid, itineraryId, addData, true)
       .then(() => console.log('success'))
       .catch((error) => console.error(error));
     newScheduleList.splice(scheduleIndex, 0, addData);
