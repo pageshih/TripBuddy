@@ -60,6 +60,11 @@ function UserProfile(props) {
     justify-content: space-between;
     gap: 40px;
     box-shadow: ${styles.shadow};
+    ${mediaQuery[0]} {
+      background-color: transparent;
+      box-shadow: none;
+      padding: 0;
+    }
   `;
   const decoOfPage = css`
     width: 100%;
@@ -76,7 +81,25 @@ function UserProfile(props) {
     text-decoration: none;
     background-color: ${palatte.gray['400']};
     box-shadow: 0px -2px 2px 2px ${palatte.shadow};
+    span {
+      display: none;
+    }
+    ${mediaQuery[0]} {
+      flex-grow: 1;
+      display: block;
+      border-radius: 0;
+      box-shadow: none;
+      text-align: center;
+      border-right: 1px solid ${palatte.gray['100']};
+      span {
+        display: block;
+        font-size: 48px;
+        color: ${palatte.white};
+        text-align: center;
+      }
+    }
   `;
+
   return (
     <>
       {profile && (
@@ -85,7 +108,9 @@ function UserProfile(props) {
             padding="80px 2px 0px 2px"
             backgroundColor={palatte.secondary['100']}
             mediaQuery={css`
-              padding: 14px 0px 0px 0px;
+              ${mediaQuery[0]} {
+                padding: 14px 0px 0px 0px;
+              }
             `}>
             <FlexDiv
               direction="column"
@@ -94,12 +119,42 @@ function UserProfile(props) {
               margin="0 auto"
               padding="0 20px"
               mediaQuery={css`
-                padding: 14px 20px 14px 40px;
+                ${mediaQuery[0]} {
+                  padding: 14px 20px 14px 40px;
+                }
               `}>
-              <FlexDiv justifyContent="space-between" alignItems="flex-start">
-                <Logo underline mediaQuery="small" />
+              <FlexDiv
+                justifyContent="space-between"
+                alignItems="flex-start"
+                mediaQuery={css`
+                  align-items: center;
+                `}>
+                <Logo
+                  underline
+                  mediaQuery={css`
+                    ${mediaQuery[0]} {
+                      display: none;
+                    }
+                  `}
+                />
+                <Logo
+                  small
+                  mediaQuery={css`
+                    display: none;
+                    ${mediaQuery[0]} {
+                      display: flex;
+                    }
+                  `}
+                />
                 <div css={userProfileWrapper}>
-                  <FlexChildDiv gap="20px" alignItems="center">
+                  <FlexChildDiv
+                    gap="20px"
+                    alignItems="center"
+                    mediaQuery={css`
+                      ${mediaQuery[0]} {
+                        display: none;
+                      }
+                    `}>
                     <ProfileImg src={profile.photo} alt="profilePhoto" />
                     <p
                       css={css`
@@ -121,8 +176,14 @@ function UserProfile(props) {
               <FlexDiv
                 gap="15px"
                 mediaQuery={css`
-                  position: fixed;
-                  bottom: 0;
+                  ${mediaQuery[0]} {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    gap: 0;
+                    z-index: 10;
+                  }
                 `}>
                 <NavLink
                   css={navLink}
@@ -130,7 +191,20 @@ function UserProfile(props) {
                     return activeStyle(isActive);
                   }}
                   to={`/itineraries`}>
-                  我的行程
+                  <span className="material-icons">event_note</span>
+                  所有行程
+                </NavLink>
+                <NavLink
+                  css={css`
+                    display: none;
+                    ${navLink}
+                  `}
+                  style={({ isActive }) => {
+                    return activeStyle(isActive);
+                  }}
+                  to={`/explore`}>
+                  <span className="material-icons">explore</span>
+                  探索景點
                 </NavLink>
                 <NavLink
                   css={navLink}
@@ -138,6 +212,7 @@ function UserProfile(props) {
                     return activeStyle(isActive);
                   }}
                   to={`/saved-spots`}>
+                  <span className="material-icons">add_location</span>
                   候補景點
                 </NavLink>
                 <NavLink
@@ -146,7 +221,8 @@ function UserProfile(props) {
                     return activeStyle(isActive);
                   }}
                   to={`/travel-journals`}>
-                  我的遊記
+                  <span className="material-icons">article</span>
+                  旅行回憶
                 </NavLink>
               </FlexDiv>
             </FlexDiv>

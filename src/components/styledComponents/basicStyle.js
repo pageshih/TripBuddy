@@ -89,8 +89,12 @@ const Logo = (props) => {
   `;
   return (
     <>
-      {props.small || props.mediaQuery === 'small' ? (
-        <FlexDiv alignItems="center" gap="10px" height="fit-content">
+      {props.small && (
+        <FlexDiv
+          alignItems="center"
+          gap="10px"
+          height="fit-content"
+          mediaQuery={props.mediaQuery}>
           <div
             css={css`
               ${ellipse}
@@ -105,9 +109,14 @@ const Logo = (props) => {
             TripBuddy
           </h1>
         </FlexDiv>
-      ) : null}
-      {props.underline && !props.mediaQuery && (
-        <FlexDiv alignItems="flex-end" gap="20px">
+      )}
+      {props.underline && (
+        <FlexDiv
+          alignItems="flex-end"
+          gap="20px"
+          mediaQuery={css`
+            ${props.mediaQuery}
+          `}>
           <FlexDiv alignItems="center">
             <div css={ellipse}></div>
             <Container position="relative">
@@ -118,7 +127,7 @@ const Logo = (props) => {
           <p css={LogoNameCh}>伴旅</p>
         </FlexDiv>
       )}
-      {!props.underline && (
+      {!props.underline && !props.small && (
         <FlexDiv
           direction="column"
           alignItems="center"

@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 
 const layout = (props) => css`
+  display: ${props.display};
   margin: ${props.margin};
   padding: ${props.padding};
   height: ${props.height};
@@ -40,6 +41,7 @@ const Container = styled('div')`
 const FlexDiv = styled('div')`
   ${layout}
   ${flexParent}
+  ${(props) => props.css}
   ${(props) => props.mediaQuery}
 `;
 
@@ -47,6 +49,7 @@ const FlexChildDiv = styled('div')`
   ${flexChild}
   ${flexParent}
   ${layout}
+  ${(props) => props.css}
   ${(props) => props.mediaQuery}
 `;
 const CardWrapper = styled.ul`
