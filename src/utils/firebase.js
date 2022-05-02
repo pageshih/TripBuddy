@@ -34,8 +34,20 @@ const firebaseAuth = {
   signIn(email, password) {
     return signInWithEmailAndPassword(this.auth, email, password);
   },
-  signUp(email, password) {
-    return createUserWithEmailAndPassword(this.auth, email, password);
+  signUp(email, password, name) {
+    return createUserWithEmailAndPassword(this.auth, email, password)
+      .then((res) => {
+        firestore.editProfile(res.user.uid, {
+          name,
+          uid: res.user.uid,
+          photo: 'https://picsum.photos/50',
+          reviews: [],
+        });
+        return Promise.resolve(res.user.uid);
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   },
   userSignOut() {
     return signOut(this.auth);
