@@ -4,6 +4,8 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 // import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 // import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -11,7 +13,7 @@ import {
   SelectAllCheckBox,
   CheckboxCustom,
 } from './styledComponents/Form';
-import { Button } from './styledComponents/Button';
+import { Button, RoundButtonSmall } from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -28,6 +30,7 @@ import {
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
+import { palatte, styles, H2, H3, P } from './styledComponents/basicStyle';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -407,12 +410,16 @@ function EditableH2(props) {
           <button type="submit">儲存</button>
         </form>
       ) : (
-        <h2
+        <H2
+          as={props.as}
+          addCss={props.addCss}
+          color={props.color}
+          textAlign="center"
           onClick={() => {
             if (!props.isBrowse) setIsEdit(true);
           }}>
           {value}
-        </h2>
+        </H2>
       )}
     </>
   );
@@ -460,7 +467,12 @@ function EditableDate(props) {
           </button>
         </form>
       ) : (
-        <p
+        <P
+          color={palatte.white}
+          addCss={css`
+            font-weight: 700;
+          `}
+          textAlign="center"
           onClick={(e) => {
             if (e.target.id !== 'submit' && !props.isBrowse) {
               setIsEdit(true);
@@ -468,8 +480,169 @@ function EditableDate(props) {
           }}>
           {timestampToString(startTimestamp, 'date')} -{' '}
           {timestampToString(endTimestamp, 'date')}
-        </p>
+        </P>
       )}
+    </>
+  );
+}
+
+function Overview(props) {
+  const navigate = useNavigate();
+
+  const roundBtn = css`
+    font-size: 20px;
+    padding: 5px;
+    width: fit-content;
+    height: fit-content;
+    color: ${palatte.white};
+    background-color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.6);
+      color: ${palatte.gray['100']};
+    }
+  `;
+
+  return (
+    <>
+      <Container position="relative" margin="0 0 30px 0">
+        <Container
+          addCss={styles.containerSetting}
+          padding="40px 20px 50px 20px">
+          <FlexDiv justifyContent="space-between">
+            <RoundButtonSmall
+              addCss={roundBtn}
+              className="material-icons"
+              type="button"
+              onClick={() => navigate('/itineraries')}>
+              navigate_before
+            </RoundButtonSmall>
+            <RoundButtonSmall
+              addCss={roundBtn}
+              className="material-icons"
+              type="button"
+              onClick={() => props.setIsBrowse(false)}>
+              edit
+            </RoundButtonSmall>
+          </FlexDiv>
+          <FlexDiv direction="column" gap="10px" alignItems="center">
+            <EditableH2
+              color={palatte.white}
+              isBrowse={props.isBrowse}
+              onSubmit={(title) => {
+                if (title !== props.overviews.title) {
+                  props.updateOverviewsFields({ title });
+                }
+              }}>
+              {props.overviews.title}
+            </EditableH2>
+            <EditableDate
+              start={props.overviews.start_date}
+              end={props.overviews.end_date}
+              onSubmit={props.updateDate}
+              isBrowse={props.isBrowse}
+            />
+            <H3 color={palatte.white}>Day {props.day + 1}</H3>
+          </FlexDiv>
+        </Container>
+        <Image
+          src={props.overviews.cover_photo}
+          alt="cover"
+          blur
+          addCss={css`
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            z-index: -1;
+          `}
+        />
+      </Container>
+      <FlexDiv
+        addCss={styles.containerSetting}
+        width="100%"
+        justifyContent="space-between"
+        alignItems="flex-end">
+        <FlexDiv alignItems="flex-start" direction="column">
+          <FlexDiv
+            justifyContent="space-between"
+            gap="50px"
+            addCss={css`
+              & > * {
+                color: ${palatte.gray['700']};
+              }
+            `}>
+            <p>出發時間</p>
+            <p>
+              {timestampToString(
+                props.overviews.depart_times[props.day],
+                'simpleDate'
+              )}
+            </p>
+          </FlexDiv>
+          <EditableH2
+            as="p"
+            addCss={css`
+              color: ${palatte.info.basic};
+              font-weight: 700;
+              font-size: 36px;
+            `}
+            isBrowse={props.isBrowse}
+            onSubmit={(departTimes) => {
+              if (departTimes !== props.departString) {
+                const newDepartTimestamp = setTimeToTimestamp(
+                  props.overviews.depart_times[props.day],
+                  departTimes
+                );
+                const newDepartTimes = Array.from(props.overviews.depart_times);
+                newDepartTimes.splice(props.day, 1, newDepartTimestamp);
+                props.updateOverviewsFields({ depart_times: newDepartTimes });
+                props.updateTimeOfSchedule(
+                  props.schedules,
+                  { isUploadFirebase: true, isSetSchedule: true },
+                  newDepartTimestamp
+                );
+                props.setDepartString(
+                  timestampToString(newDepartTimestamp, 'time')
+                );
+              }
+            }}>
+            {props.departString}
+          </EditableH2>
+        </FlexDiv>
+        {!props.isBrowse && (
+          <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
+            <SelectAllCheckBox
+              setAllChecked={() =>
+                props.setSelectedSchedulesId(
+                  props.schedules.map((schedule) => schedule.schedule_id)
+                )
+              }
+              setAllUnchecked={() => props.setSelectedSchedulesId([])}
+            />
+            <select
+              value={props.changeTime}
+              onChange={(e) => props.setChangeTime(Number(e.target.value))}>
+              <option value="" disabled>
+                修改所選行程的日期
+              </option>
+              {props.overviews.depart_times.map((timestamp) => (
+                <option value={timestamp} key={timestamp}>
+                  {timestampToString(timestamp, 'date')}
+                </option>
+              ))}
+            </select>
+            <button type="button" onClick={props.changeSchedulesTime}>
+              移動行程
+            </button>
+          </FlexDiv>
+        )}
+        <Pagination
+          day={props.day}
+          switchDay={props.switchDay}
+          finalDay={props.overviews.depart_times.length - 1}
+        />
+      </FlexDiv>
     </>
   );
 }
@@ -918,18 +1091,13 @@ function AddSchedule(props) {
       setSelectedSchedulesId([]);
     }
   };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
         <>
           <FlexDiv minHeight="100vh">
-            {isBrowse ? (
-              <button
-                style={{ alignSelf: 'flex-start', margin: '50px 30px 0 0' }}
-                onClick={() => setIsBrowse(false)}>
-                編輯
-              </button>
-            ) : (
+            {!isBrowse && (
               <FlexChildDiv
                 padding="30px"
                 display="flex"
@@ -996,92 +1164,30 @@ function AddSchedule(props) {
                 </Droppable>
               </FlexChildDiv>
             )}
-            <FlexChildDiv direction="column" grow="1" order="-1" padding="30px">
-              <Container position="relative">
-                <Image position="absolute" src={overviews.coverphoto} />
-                <button type="button" onClick={() => navigate('/itineraries')}>
-                  回首頁
-                </button>
-                <EditableH2
-                  isBrowse={isBrowse}
-                  onSubmit={(title) => {
-                    if (title !== overviews.title) {
-                      updateOverviewsFields({ title });
-                    }
-                  }}>
-                  {overviews.title}
-                </EditableH2>
-                <EditableDate
-                  start={overviews.start_date}
-                  end={overviews.end_date}
-                  onSubmit={updateDate}
-                  isBrowse={isBrowse}
-                />
-              </Container>
-              <h3>
-                {timestampToString(overviews.depart_times[day], 'simpleDate')}{' '}
-                Day {day + 1}
-              </h3>
-              <FlexDiv alignItems="center" gap="20px">
-                <p>出發時間</p>
-                <EditableH2
-                  isBrowse={isBrowse}
-                  onSubmit={(departTimes) => {
-                    if (departTimes !== departString) {
-                      const newDepartTimestamp = setTimeToTimestamp(
-                        overviews.depart_times[day],
-                        departTimes
-                      );
-                      const newDepartTimes = Array.from(overviews.depart_times);
-                      newDepartTimes.splice(day, 1, newDepartTimestamp);
-                      updateOverviewsFields({ depart_times: newDepartTimes });
-                      updateTimeOfSchedule(
-                        schedules,
-                        { isUploadFirebase: true, isSetSchedule: true },
-                        newDepartTimestamp
-                      );
-                      setDepartString(
-                        timestampToString(newDepartTimestamp, 'time')
-                      );
-                    }
-                  }}>
-                  {departString}
-                </EditableH2>
-              </FlexDiv>
-              {!isBrowse && (
-                <FlexDiv
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap="20px">
-                  <SelectAllCheckBox
-                    setAllChecked={() =>
-                      setSelectedSchedulesId(
-                        schedules.map((schedule) => schedule.schedule_id)
-                      )
-                    }
-                    setAllUnchecked={() => setSelectedSchedulesId([])}
-                  />
-                  <select
-                    value={changeTime}
-                    onChange={(e) => setChangeTime(Number(e.target.value))}>
-                    <option value="" disabled>
-                      修改所選行程的日期
-                    </option>
-                    {overviews.depart_times.map((timestamp) => (
-                      <option value={timestamp} key={timestamp}>
-                        {timestampToString(timestamp, 'date')}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="button" onClick={changeSchedulesTime}>
-                    移動行程
-                  </button>
-                </FlexDiv>
-              )}
+            <FlexChildDiv direction="column" grow="1" gap="20px" order="-1">
+              <Overview
+                isBrowse={isBrowse}
+                setIsBrowse={setIsBrowse}
+                overviews={overviews}
+                updateDate={updateDate}
+                updateOverviewsFields={updateOverviewsFields}
+                updateTimeOfSchedule={updateTimeOfSchedule}
+                schedules={schedules}
+                day={day}
+                departString={departString}
+                setDepartString={setDepartString}
+                setSelectedSchedulesId={setSelectedSchedulesId}
+                changeTime={changeTime}
+                setChangeTime={setChangeTime}
+                changeSchedulesTime={changeSchedulesTime}
+                switchDay={switchDay}
+              />
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (
-                  <CardWrapper
-                    column
+                  <FlexDiv
+                    addCss={styles.containerSetting}
+                    width="100%"
+                    direction="column"
                     gap="20px"
                     backgroundColor="#f0f0f0"
                     ref={provided.innerRef}
@@ -1138,14 +1244,9 @@ function AddSchedule(props) {
                       </p>
                     )}
                     {provided.placeholder}
-                  </CardWrapper>
+                  </FlexDiv>
                 )}
               </Droppable>
-              <Pagination
-                day={day}
-                switchDay={switchDay}
-                finalDay={overviews.depart_times.length - 1}
-              />
             </FlexChildDiv>
           </FlexDiv>
         </>

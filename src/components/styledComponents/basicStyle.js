@@ -50,6 +50,12 @@ const styles = {
   shadow: `2px 2px 2px 2px ${palatte.shadow}`,
   container_maxWidth: '1090px',
   container_padding: '20px',
+  containerSetting: css`
+    max-width: 1090px;
+    margin: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  `,
 };
 const Logo = (props) => {
   const logoName = css`
@@ -151,22 +157,22 @@ const Logo = (props) => {
 const heading = (props) => css`
   font-weight: medium;
   color: ${props.color};
+  text-align: ${props.textAlign};
+  margin: ${props.margin};
+  ${props.addCss};
 `;
 const H2 = styled.h2`
   ${heading}
-  font-size: ${(props) => props.fontSize || '56px'};
-  margin: ${(props) => props.margin};
+  font-size: ${(props) => props.fontSize || '52px'};
 `;
 const H3 = styled.h3`
   ${heading}
-  margin: ${(props) => props.margin};
-  font-size: ${(props) => props.fontSize || '48px'};
+  font-size: ${(props) => props.fontSize || '40px'};
 `;
 
 const H4 = styled.h4`
   ${heading}
   font-size: ${(props) => props.fontSize || '32px'};
-  margin: ${(props) => props.margin};
   ${mediaQuery[0]} {
     font-size: 24px;
   }
@@ -174,7 +180,6 @@ const H4 = styled.h4`
 const H5 = styled.h5`
   ${heading}
   font-size: ${(props) => props.fontSize || '28px'};
-  margin: ${(props) => props.margin};
   ${mediaQuery[0]} {
     font-size: 20px;
   }
@@ -182,16 +187,17 @@ const H5 = styled.h5`
 const H6 = styled.h6`
   ${heading}
   font-size: ${(props) => props.fontSize || '24px'};
-  margin: ${(props) => props.margin};
 `;
 const P = styled.p`
   font-size: ${(props) => props.fontSize || '16px'};
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};
+  text-align: ${(props) => props.textAlign};
   ${mediaQuery[0]} {
     font-size: ${(props) => props.mobileFontSize || '14px'};
     margin: ${(props) => props.margin};
   }
+  ${(props) => props.addCss}
 `;
 
 export { palatte, Logo, H2, H3, H4, H5, H6, P, styles, mediaQuery };

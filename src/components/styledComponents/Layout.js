@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { palatte } from './basicStyle';
 
 const layout = (props) => css`
   display: ${props.display};
@@ -63,6 +64,7 @@ const Image = (props) => (
       min-height: ${props.minHeight};
       max-height: ${props.maxHeight};
       ${props.addCss}
+      posision: relative;
     `}>
     <img
       src={props.src}
@@ -71,9 +73,22 @@ const Image = (props) => (
         width: 100%;
         height: 100%;
         object-fit: cover;
+        filter: ${props.blur && 'blur(3px)'};
       `}
     />
     {props.children}
+    {props.blur && (
+      <div
+        css={css`
+          position: absolute;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: ${palatte.gray['700']};
+          opacity: 0.4;
+        `}
+      />
+    )}
   </div>
 );
 
