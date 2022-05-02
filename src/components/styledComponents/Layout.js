@@ -1,71 +1,70 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { palatte } from './basicStyle';
 
-const Container = styled.div`
-  max-width: ${(props) => props.maxWidth};
-  margin: ${(props) => props.margin};
+const layout = (props) => css`
+  display: ${props.display};
+  margin: ${props.margin};
+  padding: ${props.padding};
+  height: ${props.height};
+  width: ${props.width};
+  max-width: ${props.maxWidth};
+  min-width: ${props.minWidth};
+  height: ${props.height};
+  max-height: ${props.maxHeight};
+  min-height: ${props.minHeight};
+  overflow: ${props.overflow};
+  position: ${props.position};
+  background-color: ${props.backgroundColor};
 `;
-
-const FlexDiv = styled.div`
+const flexParent = (props) => css`
   display: flex;
-  flex-wrap: ${(props) => props.wrap};
-  align-items: ${(props) => props.alignItems};
-  justify-content: ${(props) => props.justifyContent};
-  flex-direction: ${(props) => props.direction};
-  gap: ${(props) => props.gap};
-  height: ${(props) => props.height};
-  min-height: ${(props) => props.minHeight};
-  padding: ${(props) => props.padding};
-  margin: ${(props) => props.margin};
+  flex-wrap: ${props.wrap};
+  align-items: ${props.alignItems};
+  justify-content: ${props.justifyContent};
+  flex-direction: ${props.direction};
+  gap: ${props.gap};
+`;
+const flexChild = (props) => css`
+  flex: ${props.flex};
+  flex-grow: ${props.grow};
+  flex-shrink: ${props.shrink};
+  flex-basis: ${props.basis};
+  align-self: ${props.alignSelf};
+  order: ${props.order};
+`;
+const Container = styled('div')`
+  ${layout}
+  ${(props) => props.addCss}
 `;
 
-const FlexChildDiv = styled.div`
-  flex: ${(props) => props.flex};
-  flex-grow: ${(props) => props.grow};
-  flex-shrink: ${(props) => props.shrink};
-  flex-basis: ${(props) => props.basis};
-  align-self: ${(props) => props.alignSelf};
-  order: ${(props) => props.order};
-  height: ${(props) => props.height};
-  overflow: ${(props) => props.overflow};
-  padding: ${(props) => props.padding};
-  display: ${(props) => props.display};
-  flex-direction: ${(props) => props.direction};
-  position: ${(props) => props.position};
-  gap: ${(props) => props.gap};
-`;
-const CardWrapper = styled.ul`
-  display: flex;
-  gap: ${(props) => props.gap};
-  flex-direction: ${(props) => props.column && 'column'};
-  flex-grow: ${(props) => props.grow};
-  max-width: ${(props) => props.maxWidth};
-  background-color: ${(props) => props.backgroundColor};
-  padding: ${(props) => props.padding};
-`;
-const cardCss = css`
-  border: 1px solid lightgray;
-  padding: 10px;
-  display: flex;
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0px 0px 5px lightgray;
-  }
-`;
-const Card = styled.li`
-  ${cardCss}
-  gap: ${(props) => props.gap};
-  flex-basis: ${(props) => props.basis};
-  flex-direction: ${(props) => props.column && 'column'};
-  position: ${(props) => props.position};
+const FlexDiv = styled('div')`
+  ${layout}
+  ${flexParent}
+  ${(props) => props.css}
+  ${(props) => props.addCss}
 `;
 
-const CardImage = (props) => (
+const FlexChildDiv = styled('div')`
+  ${flexChild}
+  ${flexParent}
+  ${layout}
+  ${(props) => props.css}
+  ${(props) => props.addCss}
+`;
+
+const Image = (props) => (
   <div
     css={css`
       width: ${props.width};
       height: ${props.height};
+      min-width: ${props.minWidth};
+      max-width: ${props.maxWidth};
+      min-height: ${props.minHeight};
+      max-height: ${props.maxHeight};
+      ${props.addCss}
+      posision: relative;
     `}>
     <img
       src={props.src}
@@ -74,17 +73,23 @@ const CardImage = (props) => (
         width: 100%;
         height: 100%;
         object-fit: cover;
+        filter: ${props.blur && 'blur(3px)'};
       `}
     />
+    {props.children}
+    {props.blur && (
+      <div
+        css={css`
+          position: absolute;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: ${palatte.gray['700']};
+          opacity: 0.4;
+        `}
+      />
+    )}
   </div>
 );
 
-export {
-  FlexDiv,
-  FlexChildDiv,
-  CardWrapper,
-  Card,
-  Container,
-  cardCss,
-  CardImage,
-};
+export { FlexDiv, FlexChildDiv, Container, Image };

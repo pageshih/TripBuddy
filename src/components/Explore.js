@@ -6,12 +6,8 @@ import { firestore } from '../utils/firebase';
 import { googleMap, SearchBar } from '../utils/googleMap';
 import { Context } from '../App';
 import { RoundButton, Button } from './styledComponents/Button';
-import {
-  FlexDiv,
-  FlexChildDiv,
-  Card,
-  CardWrapper,
-} from './styledComponents/Layout';
+import { FlexDiv, FlexChildDiv } from './styledComponents/Layout';
+import { Card, CardWrapper } from './styledComponents/Cards';
 import {
   CheckboxCustom,
   TextInput,

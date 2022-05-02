@@ -2,12 +2,8 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
-import {
-  Card,
-  CardWrapper,
-  Container,
-  FlexDiv,
-} from './styledComponents/Layout';
+import { FlexDiv } from './styledComponents/Layout';
+import { Card, CardWrapper } from './styledComponents/Cards';
 import { CheckboxCustom, SelectAllCheckBox } from './styledComponents/Form';
 
 function SavedSpots(props) {

@@ -1,9 +1,32 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
-import { Button } from './styledComponents/Button';
-import { TextField } from './styledComponents/Form';
+import {
+  Logo,
+  P,
+  styles,
+  palatte,
+  mediaQuery,
+} from './styledComponents/basicStyle';
+import { Button, ButtonOutline } from './styledComponents/Button';
+import { TextInput } from './styledComponents/Form';
+import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
+
+const ContainerTopLine = styled.div`
+  display: flex;
+  border-top: ${styles.border};
+  padding-top: 20px;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+  ${mediaQuery[0]} {
+    gap: 15px;
+  }
+`;
 
 function Login(props) {
   const [email, setEmail] = useState('test@mail.com');
@@ -22,24 +45,94 @@ function Login(props) {
     props?.setIsLogInOut(false);
   }, [props]);
   return (
-    <>
-      <TextField
-        placeholder={'email@example.com'}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}>
-        帳號
-      </TextField>
-      <TextField
-        placeholder={'密碼至少6個字'}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        type={password}>
-        密碼
-      </TextField>
-      <Button primary onClick={signIn}>
-        Login
-      </Button>
-    </>
+    <FlexDiv
+      css={css`
+        ${mediaQuery[0]} {
+          display: block;
+          position: relative;
+          background-color: ${palatte.secondary['100']};
+          height: 100vh;
+        }
+      `}>
+      <Image
+        src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        alt="TripBuddy"
+        width="52%"
+        height="100vh"
+        addCss={css`
+          ${mediaQuery[0]} {
+            height: 200px;
+            width: 100%;
+          }
+        `}
+      />
+      <FlexChildDiv
+        grow="1"
+        height="100vh"
+        justifyContent="center"
+        alignItems="center"
+        addCss={css`
+          ${mediaQuery[0]} {
+            position: absolute;
+            top: 120px;
+            width: 100%;
+            height: fit-content;
+            align-items: flex-start;
+            padding: 0 20px;
+          }
+        `}>
+        <FlexChildDiv
+          direction="column"
+          gap="60px"
+          basis="450px"
+          padding="30px"
+          addCss={css`
+            ${mediaQuery[0]} {
+              background-color: ${palatte.white};
+              flex-basis: 400px;
+              padding: 40px 30px;
+              border-radius: 30px;
+              box-shadow: ${styles.shadow};
+              gap: 40px;
+            }
+          `}>
+          <Logo />
+          <FlexDiv
+            direction="column"
+            gap="30px"
+            addCss={css`
+              gap: 20px;
+            `}>
+            <FlexDiv
+              direction="column"
+              gap="20px"
+              addCss={css`
+                gap: 15px;
+              `}>
+              <TextInput
+                placeholder={'email@example.com'}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextInput
+                placeholder={'密碼至少6個字'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={password}
+              />
+            </FlexDiv>
+            <Button styled="primary" onClick={signIn}>
+              Login
+            </Button>
+            <ContainerTopLine>
+              <P color={palatte.gray['700']}>還沒有帳號嗎？</P>
+              <ButtonOutline styled="primary">Email 註冊</ButtonOutline>
+              <ButtonOutline styled="primary">使用 Google 登入</ButtonOutline>
+            </ContainerTopLine>
+          </FlexDiv>
+        </FlexChildDiv>
+      </FlexChildDiv>
+    </FlexDiv>
   );
 }
 

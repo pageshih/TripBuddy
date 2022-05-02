@@ -15,6 +15,7 @@ import {
 } from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
+import { palatte } from './components/styledComponents/basicStyle';
 
 const Context = createContext();
 
@@ -45,8 +46,11 @@ function App() {
   const [map, setMap] = useState();
   const cssReset = css`
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+    @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
     * {
       box-sizing: border-box;
+      color: ${palatte.dark};
+      font-family: 'Noto Sans TC', sans-serif;
     }
     body {
       margin: 0;
@@ -54,13 +58,19 @@ function App() {
     button {
       border: none;
       cursor: pointer;
-      &:hover {
-        box-shadow: 1px 1px 3px 1px lightgray;
-      }
     }
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p {
       margin: 0;
     }
   `;

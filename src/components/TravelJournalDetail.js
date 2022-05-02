@@ -4,13 +4,12 @@ import { useContext, useEffect, useRef, useState, useReducer } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import {
-  Card,
-  CardWrapper,
   Container,
   FlexDiv,
-  CardImage,
+  Image,
   FlexChildDiv,
 } from './styledComponents/Layout';
+import { Card } from './styledComponents/Cards';
 import {
   timestampToString,
   filterDaySchedules,
@@ -176,7 +175,7 @@ function TravelJournalDetail() {
                 />
                 {addSchedule.placeDetail && (
                   <Card column>
-                    <CardImage
+                    <Image
                       width="150px"
                       height="100px"
                       src={addSchedule.placeDetail.photos[0]}
