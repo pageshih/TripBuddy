@@ -20,7 +20,12 @@ import {
   FlexChildDiv,
   Image,
 } from './styledComponents/Layout';
-import { Card, CardWrapper, cardCss } from './styledComponents/Cards';
+import {
+  Card,
+  CardWrapper,
+  cardCss,
+  ScheduleCard,
+} from './styledComponents/Cards';
 import {
   timestampToString,
   timestampToDateInput,
@@ -301,7 +306,7 @@ function TransitCard(props) {
     </FlexDiv>
   );
 }
-const ScheduleCard = (props) => {
+const ScheduleCardDrag = (props) => {
   const [isEditDuration, setIsEditDuration] = useState();
   const [duration, setDuration] = useState(props.schedule.duration);
   return (
@@ -1194,7 +1199,7 @@ function AddSchedule(props) {
                     {...provided.droppableProps}>
                     {schedules?.length > 0 ? (
                       schedules.map((schedule, index) => (
-                        <ScheduleCard
+                        <ScheduleCardDrag
                           isBrowse={isBrowse}
                           key={schedule.schedule_id}
                           index={index}
@@ -1236,7 +1241,7 @@ function AddSchedule(props) {
                               X
                             </button>
                           )}
-                        </ScheduleCard>
+                        </ScheduleCardDrag>
                       ))
                     ) : (
                       <p>
