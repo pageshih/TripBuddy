@@ -52,34 +52,35 @@ const TextInput = styled.input`
 `;
 const checkboxCss = css`
   color: white;
-  border: 1px solid lightgray;
-  border-radius: 5px;
+  border: 1px solid ${palatte.primary.basic};
+  border-radius: 6px;
   cursor: pointer;
 `;
 const CheckboxDiv = styled.div`
   ${checkboxCss}
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  align-self: flex-start;
   background-color: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
-      ? 'skyblue'
-      : 'white'};
+      ? palatte.primary.basic
+      : palatte.white};
 `;
 const CheckAllDiv = styled.div`
   ${checkboxCss}
-  background-color: ${(props) => (props.checked ? 'skyblue' : 'white')};
+  background-color: ${(props) =>
+    props.checked ? palatte.primary.basic : palatte.white};
 `;
 const CheckboxCustom = (props) => {
   return (
     <label name={props.selectAll !== undefined ? 'selectAll' : props.id}>
       {props.selectAll !== undefined ? (
-        <CheckAllDiv checked={props.selectAll} className="material-icons">
+        <CheckAllDiv
+          css={props.addCss}
+          checked={props.selectAll}
+          className="material-icons">
           check
         </CheckAllDiv>
       ) : (
         <CheckboxDiv
+          css={props.addCss}
           id={props.id}
           selectedList={props.selectedList}
           className="material-icons">

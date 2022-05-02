@@ -1,39 +1,13 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
-import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
-import {
-  Card,
-  CardWrapper,
-  Container,
-  FlexDiv,
-} from './styledComponents/Layout';
-import { timestampToString } from '../utils/utilities';
+import { styles, palatte, H4 } from './styledComponents/basicStyle';
+import { FlexDiv, Container } from './styledComponents/Layout';
+import { Card, ScheduleCard } from './styledComponents/Cards';
 import { AddReview } from './EditReview';
-
-function ScheduleCard(props) {
-  return (
-    <Card gap="20px" column>
-      <FlexDiv gap="20px">
-        <p>{timestampToString(props.schedule.start_time, 'time')}</p>
-        <div style={{ width: '200px', height: '150px' }}>
-          <img
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-            src={props.schedule.placeDetail.photos[0]}
-            alt={props.schedule.placeDetail.name}
-          />
-        </div>
-        <h3>{props.schedule.placeDetail.name}</h3>
-      </FlexDiv>
-      {props.children}
-    </Card>
-  );
-}
 
 function Itineraries() {
   const { uid, map } = useContext(Context);
@@ -88,61 +62,71 @@ function Itineraries() {
       })
       .catch((error) => console.error(error));
   }, []);
+  const foldContainer = css`
+    display: flex;
+    gap: 50px;
+    flex-direction: column;
+    border-radius: 10px;
+    background-color: ${palatte.gray['100']};
+    padding: 40px 60px;
+  `;
 
   return (
-    <CardWrapper column gap="20px" padding="20px">
+    <Container
+      padding={`0 ${styles.container_padding} 100px ${styles.container_padding}`}
+      maxWidth={styles.container_maxWidth}
+      margin="0 auto">
       {!empty ? (
         <Container>
-          {progressing?.overview && <h2>進行中的行程</h2>}
-          {progressing?.overview && (
-            <div key={progressing.overview.itinerary_id}>
-              <Card
-                gap="20px"
-                onClick={() => {
-                  navigate(`/${progressing.overview.itinerary_id}`);
-                }}>
-                <div
-                  style={{
-                    width: '200px',
-                    height: '200px',
-                    overflow: 'hidden',
-                  }}>
-                  <img
-                    src={progressing.overview.cover_photo}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                    alt="cover"
-                  />
-                </div>
-                <h1>{progressing.overview.title}</h1>
-              </Card>
-              {progressing.schedule?.map((schedule) => {
-                const reviews = {
-                  review_tags: schedule.review_tags,
-                  gallery: schedule.gallery,
-                };
-                return (
-                  <ScheduleCard schedule={schedule} key={schedule.schedule_id}>
-                    {Math.floor((schedule.start_time - now) / (60 * 1000)) <=
-                      0 && (
-                      <AddReview
-                        key={schedule.schedule_id}
-                        itineraryId={progressing.overview.itinerary_id}
-                        scheduleId={schedule.schedule_id}
-                        allReviewTags={reviewTags}
-                        showReviewTags={schedule.review_tags}
-                        reviews={reviews}
-                        isEdit
-                      />
-                    )}
-                  </ScheduleCard>
-                );
-              })}
-            </div>
-          )}
+          <div css={foldContainer}>
+            {progressing?.overview && (
+              <FlexDiv justifyContent="space-between" align-items="center">
+                <H4>進行中的 {progressing.overview.title}</H4>
+                <span className="material-icons">expand_more</span>
+              </FlexDiv>
+            )}
+            {progressing?.overview && (
+              <FlexDiv
+                as="ul"
+                direction="column"
+                gap="30px"
+                key={progressing.overview.itinerary_id}>
+                {progressing.schedule?.map((schedule) => {
+                  const reviews = {
+                    review_tags: schedule.review_tags,
+                    gallery: schedule.gallery,
+                  };
+                  return (
+                    <ScheduleCard
+                      as="li"
+                      address={schedule.placeDetail.formatted_address}
+                      duration={schedule.duration}
+                      transit={{
+                        travelMode: schedule.travel_mode,
+                        detail: schedule.transit_detail,
+                      }}
+                      schedule={schedule}
+                      key={schedule.schedule_id}
+                      onClick={() =>
+                        navigate(`/${progressing.overview.itinerary_id}`)
+                      }>
+                      {schedule.end_time > now && schedule.start_time < now && (
+                        <AddReview
+                          key={schedule.schedule_id}
+                          itineraryId={progressing.overview.itinerary_id}
+                          scheduleId={schedule.schedule_id}
+                          allReviewTags={reviewTags}
+                          showReviewTags={schedule.review_tags}
+                          reviews={reviews}
+                          isEdit
+                        />
+                      )}
+                    </ScheduleCard>
+                  );
+                })}
+              </FlexDiv>
+            )}
+          </div>
           {coming?.length > 0 && <h2>即將到來的行程</h2>}
           {coming?.map((itinerary) => (
             <Card
@@ -210,7 +194,7 @@ function Itineraries() {
           )}
         </>
       )}
-    </CardWrapper>
+    </Container>
   );
 }
 

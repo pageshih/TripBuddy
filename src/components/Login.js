@@ -59,7 +59,7 @@ function Login(props) {
         alt="TripBuddy"
         width="52%"
         height="100vh"
-        mediaQuery={css`
+        addCss={css`
           ${mediaQuery[0]} {
             height: 200px;
             width: 100%;
@@ -71,7 +71,7 @@ function Login(props) {
         height="100vh"
         justifyContent="center"
         alignItems="center"
-        mediaQuery={css`
+        addCss={css`
           ${mediaQuery[0]} {
             position: absolute;
             top: 120px;
@@ -86,7 +86,7 @@ function Login(props) {
           gap="60px"
           basis="450px"
           padding="30px"
-          mediaQuery={css`
+          addCss={css`
             ${mediaQuery[0]} {
               background-color: ${palatte.white};
               flex-basis: 400px;
@@ -100,13 +100,13 @@ function Login(props) {
           <FlexDiv
             direction="column"
             gap="30px"
-            mediaQuery={css`
+            addCss={css`
               gap: 20px;
             `}>
             <FlexDiv
               direction="column"
               gap="20px"
-              mediaQuery={css`
+              addCss={css`
                 gap: 15px;
               `}>
               <TextInput

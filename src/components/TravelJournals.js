@@ -2,13 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import {
-  Card,
-  CardWrapper,
-  Container,
-  FlexDiv,
-  Image,
-} from './styledComponents/Layout';
+import { Image } from './styledComponents/Layout';
+import { Card, CardWrapper } from './styledComponents/Cards';
+
 import { timestampToString } from '../utils/utilities';
 
 function TravelJournals() {

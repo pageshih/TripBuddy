@@ -4,6 +4,9 @@ import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv, Container } from './styledComponents/Layout';
 import { TextAreaReview } from './styledComponents/Form';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
+import { palatte } from './styledComponents/basicStyle';
 
 function ReviewTags(props) {
   return (
@@ -263,8 +266,28 @@ function AddReview(props) {
     setCheckedReviewTags(props.reviews.review_tags);
     setReview(props.reviews.review);
   }, [props.isEdit]);
+  const reviewContainer = css`
+    border-radius: 30px;
+    background-color: ${palatte.white};
+    border: 1px solid ${palatte.primary.basic};
+    padding: 30px 40px 40px 40px;
+    position: relative;
+  `;
+  const dialogTriangle = css`
+    width: 20px;
+    height: 20px;
+    background-color: ${palatte.white};
+    border-top: 1px solid ${palatte.primary.basic};
+    border-right: 1px solid ${palatte.primary.basic};
+    transform: rotate(-45deg);
+    position: absolute;
+    top: -10px;
+    left: 60px;
+  `;
+
   return (
-    <Container>
+    <Container css={reviewContainer}>
+      <div css={dialogTriangle}></div>
       <ReviewTags
         defaultTags={reviewTags}
         inputTag={addTag}

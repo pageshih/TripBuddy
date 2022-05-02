@@ -12,14 +12,8 @@ import {
   CheckboxCustom,
 } from './styledComponents/Form';
 import { Button } from './styledComponents/Button';
-import {
-  Container,
-  FlexDiv,
-  FlexChildDiv,
-  Card,
-  CardWrapper,
-  cardCss,
-} from './styledComponents/Layout';
+import { Container, FlexDiv, FlexChildDiv } from './styledComponents/Layout';
+import { Card, CardWrapper, cardCss } from './styledComponents/Cards';
 import {
   timestampToString,
   timestampToDateInput,

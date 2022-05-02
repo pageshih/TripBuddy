@@ -35,14 +35,14 @@ const flexChild = (props) => css`
 `;
 const Container = styled('div')`
   ${layout}
-  ${(props) => props.mediaQuery}
+  ${(props) => props.addCss}
 `;
 
 const FlexDiv = styled('div')`
   ${layout}
   ${flexParent}
   ${(props) => props.css}
-  ${(props) => props.mediaQuery}
+  ${(props) => props.addCss}
 `;
 
 const FlexChildDiv = styled('div')`
@@ -50,32 +50,7 @@ const FlexChildDiv = styled('div')`
   ${flexParent}
   ${layout}
   ${(props) => props.css}
-  ${(props) => props.mediaQuery}
-`;
-const CardWrapper = styled.ul`
-  display: flex;
-  gap: ${(props) => props.gap};
-  flex-direction: ${(props) => props.column && 'column'};
-  flex-grow: ${(props) => props.grow};
-  max-width: ${(props) => props.maxWidth};
-  background-color: ${(props) => props.backgroundColor};
-  padding: ${(props) => props.padding};
-`;
-const cardCss = css`
-  border: 1px solid lightgray;
-  padding: 10px;
-  display: flex;
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0px 0px 5px lightgray;
-  }
-`;
-const Card = styled.li`
-  ${cardCss}
-  gap: ${(props) => props.gap};
-  flex-basis: ${(props) => props.basis};
-  flex-direction: ${(props) => props.column && 'column'};
-  position: ${(props) => props.position};
+  ${(props) => props.addCss}
 `;
 
 const Image = (props) => (
@@ -83,7 +58,11 @@ const Image = (props) => (
     css={css`
       width: ${props.width};
       height: ${props.height};
-      ${props.mediaQuery}
+      min-width: ${props.minWidth};
+      max-width: ${props.maxWidth};
+      min-height: ${props.minHeight};
+      max-height: ${props.maxHeight};
+      ${props.addCss}
     `}>
     <img
       src={props.src}
@@ -97,4 +76,4 @@ const Image = (props) => (
   </div>
 );
 
-export { FlexDiv, FlexChildDiv, CardWrapper, Card, Container, cardCss, Image };
+export { FlexDiv, FlexChildDiv, Container, Image };

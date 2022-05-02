@@ -4,13 +4,12 @@ import { useContext, useEffect, useRef, useState, useReducer } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import {
-  Card,
-  CardWrapper,
   Container,
   FlexDiv,
   Image,
   FlexChildDiv,
 } from './styledComponents/Layout';
+import { Card } from './styledComponents/Cards';
 import {
   timestampToString,
   filterDaySchedules,

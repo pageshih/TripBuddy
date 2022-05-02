@@ -48,6 +48,8 @@ const mediaQuery = breakpoints.map(
 const styles = {
   border: `1px solid ${palatte.gray['400']}`,
   shadow: `2px 2px 2px 2px ${palatte.shadow}`,
+  container_maxWidth: '1090px',
+  container_padding: '20px',
 };
 const Logo = (props) => {
   const logoName = css`
@@ -94,7 +96,7 @@ const Logo = (props) => {
           alignItems="center"
           gap="10px"
           height="fit-content"
-          mediaQuery={props.mediaQuery}>
+          addCss={props.addCss}>
           <div
             css={css`
               ${ellipse}
@@ -114,8 +116,8 @@ const Logo = (props) => {
         <FlexDiv
           alignItems="flex-end"
           gap="20px"
-          mediaQuery={css`
-            ${props.mediaQuery}
+          addCss={css`
+            ${props.addCss}
           `}>
           <FlexDiv alignItems="center">
             <div css={ellipse}></div>
@@ -132,7 +134,7 @@ const Logo = (props) => {
           direction="column"
           alignItems="center"
           gap="12px"
-          mediaQuery={css`
+          css={css`
             gap: 5px;
           `}>
           <FlexDiv alignItems="center" gap="10px">
@@ -153,29 +155,42 @@ const heading = (props) => css`
 const H2 = styled.h2`
   ${heading}
   font-size: ${(props) => props.fontSize || '56px'};
+  margin: ${(props) => props.margin};
 `;
 const H3 = styled.h3`
   ${heading}
+  margin: ${(props) => props.margin};
   font-size: ${(props) => props.fontSize || '48px'};
 `;
 
 const H4 = styled.h4`
   ${heading}
   font-size: ${(props) => props.fontSize || '32px'};
+  margin: ${(props) => props.margin};
+  ${mediaQuery[0]} {
+    font-size: 24px;
+  }
 `;
 const H5 = styled.h5`
   ${heading}
   font-size: ${(props) => props.fontSize || '28px'};
+  margin: ${(props) => props.margin};
+  ${mediaQuery[0]} {
+    font-size: 20px;
+  }
 `;
 const H6 = styled.h6`
   ${heading}
   font-size: ${(props) => props.fontSize || '24px'};
+  margin: ${(props) => props.margin};
 `;
 const P = styled.p`
   font-size: ${(props) => props.fontSize || '16px'};
   color: ${(props) => props.color};
+  margin: ${(props) => props.margin};
   ${mediaQuery[0]} {
     font-size: ${(props) => props.mobileFontSize || '14px'};
+    margin: ${(props) => props.margin};
   }
 `;
 

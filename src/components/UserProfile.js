@@ -85,6 +85,8 @@ function UserProfile(props) {
       display: none;
     }
     ${mediaQuery[0]} {
+      font-size: 14px;
+      padding: 10px;
       flex-grow: 1;
       display: block;
       border-radius: 0;
@@ -93,9 +95,10 @@ function UserProfile(props) {
       border-right: 1px solid ${palatte.gray['100']};
       span {
         display: block;
-        font-size: 48px;
+        font-size: 32px;
         color: ${palatte.white};
         text-align: center;
+        margin-bottom: 3px;
       }
     }
   `;
@@ -107,7 +110,7 @@ function UserProfile(props) {
           <Container
             padding="80px 2px 0px 2px"
             backgroundColor={palatte.secondary['100']}
-            mediaQuery={css`
+            addCss={css`
               ${mediaQuery[0]} {
                 padding: 14px 0px 0px 0px;
               }
@@ -115,10 +118,10 @@ function UserProfile(props) {
             <FlexDiv
               direction="column"
               gap="25px"
-              maxWidth="1090px"
+              maxWidth={styles.container_maxWidth}
               margin="0 auto"
-              padding="0 20px"
-              mediaQuery={css`
+              padding={`0 ${styles.container_padding}`}
+              addCss={css`
                 ${mediaQuery[0]} {
                   padding: 14px 20px 14px 40px;
                 }
@@ -126,12 +129,12 @@ function UserProfile(props) {
               <FlexDiv
                 justifyContent="space-between"
                 alignItems="flex-start"
-                mediaQuery={css`
+                addCss={css`
                   align-items: center;
                 `}>
                 <Logo
                   underline
-                  mediaQuery={css`
+                  addCss={css`
                     ${mediaQuery[0]} {
                       display: none;
                     }
@@ -139,7 +142,7 @@ function UserProfile(props) {
                 />
                 <Logo
                   small
-                  mediaQuery={css`
+                  addCss={css`
                     display: none;
                     ${mediaQuery[0]} {
                       display: flex;
@@ -150,7 +153,7 @@ function UserProfile(props) {
                   <FlexChildDiv
                     gap="20px"
                     alignItems="center"
-                    mediaQuery={css`
+                    addCss={css`
                       ${mediaQuery[0]} {
                         display: none;
                       }
@@ -175,7 +178,7 @@ function UserProfile(props) {
               </FlexDiv>
               <FlexDiv
                 gap="15px"
-                mediaQuery={css`
+                addCss={css`
                   ${mediaQuery[0]} {
                     position: fixed;
                     bottom: 0;
