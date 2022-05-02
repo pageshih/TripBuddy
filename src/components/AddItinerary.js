@@ -12,7 +12,12 @@ import {
   CheckboxCustom,
 } from './styledComponents/Form';
 import { Button } from './styledComponents/Button';
-import { Container, FlexDiv, FlexChildDiv } from './styledComponents/Layout';
+import {
+  Container,
+  FlexDiv,
+  FlexChildDiv,
+  Image,
+} from './styledComponents/Layout';
 import { Card, CardWrapper, cardCss } from './styledComponents/Cards';
 import {
   timestampToString,
@@ -991,8 +996,9 @@ function AddSchedule(props) {
                 </Droppable>
               </FlexChildDiv>
             )}
-            <FlexChildDiv grow="1" order="-1" padding="30px">
-              <Container>
+            <FlexChildDiv direction="column" grow="1" order="-1" padding="30px">
+              <Container position="relative">
+                <Image position="absolute" src={overviews.coverphoto} />
                 <button type="button" onClick={() => navigate('/itineraries')}>
                   回首頁
                 </button>

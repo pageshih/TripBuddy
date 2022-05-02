@@ -2,45 +2,45 @@ import { useContext, useEffect, useState } from 'react';
 import { compressImages } from '../utils/utilities';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
-import { FlexDiv, Container } from './styledComponents/Layout';
-import { TextAreaReview } from './styledComponents/Form';
+import { FlexDiv, Container, Image } from './styledComponents/Layout';
+import {
+  TextAreaReview,
+  ReviewTag,
+  inputBaseSmall,
+  AddImages,
+  uploadImageStyle,
+} from './styledComponents/Form';
+import { RoundButtonSmall, Button } from './styledComponents/Button';
+import { palatte, P } from './styledComponents/basicStyle';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte } from './styledComponents/basicStyle';
 
 function ReviewTags(props) {
   return (
     <FlexDiv alignItems="center" gap="10px">
-      <FlexDiv gap="20px">
+      <FlexDiv gap="12px">
         {props.defaultTags?.map((tag) => (
-          <label key={tag}>
+          <ReviewTag
+            key={tag}
+            isEdit={props.isEdit}
+            tag={tag}
+            selectedList={props.checkedTags}
+            setSelectedList={props.setCheckedTags}>
             {tag}
-            {props.isEdit && (
-              <input
-                value={tag}
-                type="checkbox"
-                checked={
-                  props.checkedTags?.some((checked) => tag === checked) && true
-                }
-                onChange={(e) => {
-                  const setChecked = (prev) => {
-                    if (e.target.checked) {
-                      return prev ? [...prev, tag] : [tag];
-                    } else {
-                      return prev.filter((tag) => e.target.value !== tag);
-                    }
-                  };
-                  props.setCheckedTags((prev) => setChecked(prev));
-                }}
-              />
-            )}
-          </label>
+          </ReviewTag>
         ))}
       </FlexDiv>
       {props.isEdit ? (
         props.showInput ? (
-          <form onSubmit={props.onSubmit}>
+          <form
+            onSubmit={props.onSubmit}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 5px;
+            `}>
             <input
+              css={inputBaseSmall}
               type="type"
               placeholder="按 + 新增心得標籤"
               value={props.inputTag}
@@ -48,114 +48,130 @@ function ReviewTags(props) {
                 props.setInputTag(e.target.value);
               }}
             />
-            <button type="submit">+</button>
+            <RoundButtonSmall className="material-icons" type="submit">
+              add_circle
+            </RoundButtonSmall>
           </form>
         ) : (
-          <button
+          <RoundButtonSmall
             type="button"
+            className="material-icons"
             onClick={() => {
               props.setShowInput(true);
             }}>
-            +
-          </button>
+            add_circle
+          </RoundButtonSmall>
         )
       ) : null}
     </FlexDiv>
   );
 }
 
-function AddImages(props) {
-  return (
-    <label
-      style={{
-        backgroundColor: 'lightgray',
-        fontSize: '13px',
-        padding: '1px 5px',
-      }}>
-      <input
-        type="file"
-        style={{ display: 'none' }}
-        accept="image/*"
-        multiple
-        onChange={async (e) => {
-          let addCompressed = await compressImages(e.target.files);
-          if (props.imageBuffer?.length > 0) {
-            addCompressed = [...props.imageBuffer, ...addCompressed];
-          }
-          props.setImageBuffer(addCompressed);
-        }}
-      />
-      上傳照片
-    </label>
-  );
-}
-
 function ReviewGallery(props) {
+  const closeBtn = css`
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background-color: ${palatte.white};
+    border-radius: 50%;
+  `;
+  const previewBtn = css`
+    width: 60px;
+    height: 40px;
+    padding: 5px 10px;
+    border: 5px solid ${palatte.primary['300']};
+    border-radius: 30px;
+    background-color: ${palatte.white};
+    position: absolute;
+    top: 20px;
+    right: -10px;
+    & span {
+      display: none;
+    }
+    &:hover {
+      & p {
+        display: none;
+      }
+      & span {
+        font-size: 20px;
+        display: block;
+        color: ${palatte.danger.basic};
+      }
+    }
+  `;
   return (
-    <>
+    <FlexDiv gap="20px">
       <FlexDiv gap="20px">
         {props.gallery?.map((url, index) => (
-          <FlexDiv alignItems="flex-start" key={index}>
-            <div style={{ maxWidth: '300px', height: '200px' }}>
-              <img
-                src={url}
-                alt="schedulePhoto"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
+          <FlexDiv alignItems="flex-start" key={index} position="relative">
+            <Image
+              addCss={uploadImageStyle}
+              width="250px"
+              height="200px"
+              src={url}
+              alt="schedulePhoto"
+            />
             {props.isEdit && (
-              <button
+              <RoundButtonSmall
+                addCss={closeBtn}
+                close
+                className="material-icons"
                 onClick={() => {
                   const newGallery = props.gallery.filter(
                     (_, newIndex) => index !== newIndex
                   );
                   props.setGallery(newGallery);
                 }}>
-                X
-              </button>
+                cancel
+              </RoundButtonSmall>
             )}
           </FlexDiv>
         ))}
       </FlexDiv>
-      <div>
-        {props.imageBuffer?.length > 0 && <h4>圖片預覽</h4>}
-        <FlexDiv gap="20px">
-          {props.imageBuffer?.map((blob, index) => {
-            const blobUrl = URL.createObjectURL(blob);
-            return (
-              <FlexDiv alignItems="flex-start" key={blob.lastModified}>
-                <div style={{ maxWidth: '300px', height: '200px' }}>
-                  <img
-                    src={blobUrl}
-                    alt={blob.name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    const newImagesBuffer = props.imageBuffer.filter(
-                      (_, newIndex) => index !== newIndex
-                    );
-                    props.setImageBuffer(newImagesBuffer);
-                  }}>
-                  X
-                </button>
-              </FlexDiv>
-            );
-          })}
-          {props.isEdit && (
-            <AddImages
-              imageBuffer={props.imageBuffer}
-              setImageBuffer={props.setImageBuffer}
-            />
-          )}
-        </FlexDiv>
-      </div>
-    </>
+      <FlexDiv gap="20px" position="relative">
+        {props.imageBuffer?.map((blob, index) => {
+          const blobUrl = URL.createObjectURL(blob);
+          return (
+            <FlexDiv
+              alignItems="flex-start"
+              key={blob.lastModified}
+              position="relative">
+              <Image
+                addCss={css`
+                  ${uploadImageStyle}
+                  border-radius: 10px;
+                  border: 8px solid ${palatte.primary['300']};
+                `}
+                width="250px"
+                height="200px"
+                src={blobUrl}
+                alt={blob.name}
+              />
+              <RoundButtonSmall
+                addCss={previewBtn}
+                close
+                onClick={() => {
+                  const newImagesBuffer = props.imageBuffer.filter(
+                    (_, newIndex) => index !== newIndex
+                  );
+                  props.setImageBuffer(newImagesBuffer);
+                }}>
+                <P fontSize="14px" color={palatte.primary.basic}>
+                  預覽
+                </P>
+                <span className="material-icons">cancel</span>
+              </RoundButtonSmall>
+            </FlexDiv>
+          );
+        })}
+        {props.isEdit && (
+          <AddImages
+            imageBuffer={props.imageBuffer}
+            setImageBuffer={props.setImageBuffer}
+          />
+        )}
+      </FlexDiv>
+    </FlexDiv>
   );
 }
 
@@ -286,7 +302,7 @@ function AddReview(props) {
   `;
 
   return (
-    <Container css={reviewContainer}>
+    <FlexDiv direction="column" gap="15px" css={reviewContainer}>
       <div css={dialogTriangle}></div>
       <ReviewTags
         defaultTags={reviewTags}
@@ -324,7 +340,12 @@ function AddReview(props) {
           <p>{review}</p>
         )}
         {props.isEdit && (
-          <button
+          <Button
+            addCss={css`
+              align-self: flex-end;
+            `}
+            styled="primary"
+            width="fit-content"
             type="click"
             onClick={async () => {
               const uploadFirestore = new uploadReviewFirestore({
@@ -365,11 +386,11 @@ function AddReview(props) {
                 }
               });
             }}>
-            儲存
-          </button>
+            儲存心得
+          </Button>
         )}
       </FlexDiv>
-    </Container>
+    </FlexDiv>
   );
 }
 

@@ -73,6 +73,7 @@ const Image = (props) => (
         object-fit: cover;
       `}
     />
+    {props.children}
   </div>
 );
 

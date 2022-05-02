@@ -49,6 +49,7 @@ const Button = styled.button`
   ${mediaQuery[0]} {
     font-size: 14px;
   }
+  ${(props) => props.addCss}
 `;
 const ButtonOutline = styled(Button)`
   color: ${({ styled }) => colorMap.button[styled + 'Outline']};
@@ -90,8 +91,10 @@ const RoundButtonSmall = styled.button`
   width: ${(props) => props.size || '24px'};
   height: ${(props) => props.size || '24px'};
   &:hover {
-    color: ${(props) => (props.close ? palatte.danger : palatte.gray['500'])};
+    color: ${(props) =>
+      props.close ? palatte.danger.basic : palatte.gray['500']};
   }
+  ${(props) => props.addCss}
 `;
 
 export {
