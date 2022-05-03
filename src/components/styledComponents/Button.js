@@ -97,6 +97,20 @@ const RoundButtonSmall = styled.button`
   ${(props) => props.addCss}
 `;
 
+const RoundButtonSmallOutline = styled(RoundButtonSmall)`
+  border: 1px solid ${palatte.gray['600']};
+  font-size: 22px;
+  width: ${(props) => props.size || '26px'};
+  height: ${(props) => props.size || '26px'};
+  border-color: ${(props) => props.color && palatte[props.color].basic};
+  color: ${(props) => props.color && palatte[props.color].basic};
+  &:hover {
+    background-color: ${(props) =>
+      props.color ? palatte[props.color].basic : palatte.gray['700']};
+    color: ${palatte.white};
+  }
+`;
+
 export {
   Button,
   ButtonOutline,
@@ -104,4 +118,5 @@ export {
   ButtonSmallIcon,
   RoundButton,
   RoundButtonSmall,
+  RoundButtonSmallOutline,
 };

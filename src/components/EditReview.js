@@ -10,20 +10,16 @@ import {
   AddImages,
   uploadImageStyle,
 } from './styledComponents/Form';
-import { RoundButtonSmall, Button } from './styledComponents/Button';
+import {
+  RoundButtonSmall,
+  Button,
+  RoundButtonSmallOutline,
+} from './styledComponents/Button';
 import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 
 function ReviewTags(props) {
-  const [showInput, setShowInput] = useState();
-  useEffect(() => {
-    if (!props.defaultTags) {
-      setShowInput(true);
-    } else {
-      setShowInput(false);
-    }
-  }, []);
   return (
     <FlexDiv
       alignItems="center"
@@ -43,7 +39,7 @@ function ReviewTags(props) {
         ))}
       </FlexDiv>
       {props.isEdit ? (
-        showInput ? (
+        props.showInput ? (
           <form
             onSubmit={props.onSubmit}
             css={css`
@@ -54,22 +50,38 @@ function ReviewTags(props) {
             <input
               css={inputBaseSmall}
               type="type"
-              placeholder="按 + 新增心得標籤"
+              placeholder="新增心得標籤"
               value={props.inputTag}
               onChange={(e) => {
                 props.setInputTag(e.target.value);
               }}
             />
-            <RoundButtonSmall className="material-icons" type="submit">
-              add_circle
-            </RoundButtonSmall>
+            <RoundButtonSmallOutline
+              className="material-icons"
+              type="submit"
+              color="primary"
+              addCss={css`
+                border-radius: 10px;
+              `}>
+              done
+            </RoundButtonSmallOutline>
+            <RoundButtonSmallOutline
+              className="material-icons"
+              type="button"
+              color="danger"
+              addCss={css`
+                border-radius: 10px;
+              `}
+              onClick={() => props.setShowInput(false)}>
+              close
+            </RoundButtonSmallOutline>
           </form>
         ) : (
           <RoundButtonSmall
             type="button"
             className="material-icons"
             onClick={() => {
-              setShowInput(true);
+              props.setShowInput(true);
             }}>
             add_circle
           </RoundButtonSmall>
@@ -247,7 +259,7 @@ function AddReview(props) {
   const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [gallery, setGallery] = useState();
-  const [addTag, setAddTag] = useState();
+  const [addTag, setAddTag] = useState('');
   const [imageBuffer, setImageBuffer] = useState();
   const [showInput, setShowInput] = useState();
   const [review, setReview] = useState();
@@ -268,7 +280,7 @@ function AddReview(props) {
   };
 
   useEffect(() => {
-    if (props.showReviewTags?.length > 0) {
+    if (props.allReviewTags?.length > 0) {
       setShowInput(false);
     } else {
       setShowInput(true);

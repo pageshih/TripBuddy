@@ -128,14 +128,12 @@ function Itineraries() {
         {!empty ? (
           <>
             <FlexDiv direction="column" gap="70px">
-              <div css={foldContainer}>
-                {progressing?.overview && (
+              {progressing?.overview && (
+                <div css={foldContainer}>
                   <FlexDiv justifyContent="space-between" align-items="center">
                     <H4>進行中的 {progressing.overview.title}</H4>
                     <span className="material-icons">expand_more</span>
                   </FlexDiv>
-                )}
-                {progressing?.overview && (
                   <FlexDiv
                     as="ul"
                     direction="column"
@@ -211,8 +209,8 @@ function Itineraries() {
                           />
                         )}
                   </FlexDiv>
-                )}
-              </div>
+                </div>
+              )}
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>即將到來的行程</H4>

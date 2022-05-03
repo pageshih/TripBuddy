@@ -75,7 +75,7 @@ function UserProfile(props) {
     box-shadow: 0px -2px 2px 2px ${palatte.shadow};
   `;
   const navLink = css`
-    font-size: 20px;
+    font-size: 18px;
     padding: 10px 20px;
     border-radius: 10px 10px 0 0;
     color: ${palatte.white};
@@ -133,7 +133,9 @@ function UserProfile(props) {
                   justifyContent="space-between"
                   alignItems="flex-start"
                   addCss={css`
-                    align-items: center;
+                    ${mediaQuery[0]} {
+                      align-items: center;
+                    }
                   `}>
                   <Logo
                     underline

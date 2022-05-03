@@ -448,13 +448,12 @@ const firestore = {
       userUID,
       'overviews'
     );
+    console.log(timestamp);
+    const resetTime = new Date(timestamp).setHours(0, 0, 0, 0);
+    console.log(resetTime);
     const q = query(
       overviewsRef,
-      where(
-        'end_date',
-        isJournal ? '<=' : '>=',
-        Number(timestamp - 24 * 60 * 60 * 1000)
-      )
+      where('end_date', isJournal ? '<=' : '>=', resetTime)
     );
     return getDocs(q).then((snapShots) => {
       const itineraries = snapShots.docs.map((doc) => doc.data());
