@@ -16,6 +16,14 @@ import { palatte, P } from './styledComponents/basicStyle';
 import { css, jsx } from '@emotion/react';
 
 function ReviewTags(props) {
+  const [showInput, setShowInput] = useState();
+  useEffect(() => {
+    if (!props.defaultTags) {
+      setShowInput(true);
+    } else {
+      setShowInput(false);
+    }
+  }, []);
   return (
     <FlexDiv alignItems="center" gap="10px">
       <FlexDiv gap="12px">
@@ -31,7 +39,7 @@ function ReviewTags(props) {
         ))}
       </FlexDiv>
       {props.isEdit ? (
-        props.showInput ? (
+        showInput ? (
           <form
             onSubmit={props.onSubmit}
             css={css`
@@ -57,7 +65,7 @@ function ReviewTags(props) {
             type="button"
             className="material-icons"
             onClick={() => {
-              props.setShowInput(true);
+              setShowInput(true);
             }}>
             add_circle
           </RoundButtonSmall>
@@ -101,33 +109,35 @@ function ReviewGallery(props) {
   `;
   return (
     <FlexDiv gap="20px">
-      <FlexDiv gap="20px">
-        {props.gallery?.map((url, index) => (
-          <FlexDiv alignItems="flex-start" key={index} position="relative">
-            <Image
-              addCss={uploadImageStyle}
-              width="250px"
-              height="200px"
-              src={url}
-              alt="schedulePhoto"
-            />
-            {props.isEdit && (
-              <RoundButtonSmall
-                addCss={closeBtn}
-                close
-                className="material-icons"
-                onClick={() => {
-                  const newGallery = props.gallery.filter(
-                    (_, newIndex) => index !== newIndex
-                  );
-                  props.setGallery(newGallery);
-                }}>
-                cancel
-              </RoundButtonSmall>
-            )}
-          </FlexDiv>
-        ))}
-      </FlexDiv>
+      {props.gallery && (
+        <FlexDiv gap="20px">
+          {props.gallery?.map((url, index) => (
+            <FlexDiv alignItems="flex-start" key={index} position="relative">
+              <Image
+                addCss={uploadImageStyle}
+                width="250px"
+                height="200px"
+                src={url}
+                alt="schedulePhoto"
+              />
+              {props.isEdit && (
+                <RoundButtonSmall
+                  addCss={closeBtn}
+                  close
+                  className="material-icons"
+                  onClick={() => {
+                    const newGallery = props.gallery.filter(
+                      (_, newIndex) => index !== newIndex
+                    );
+                    props.setGallery(newGallery);
+                  }}>
+                  cancel
+                </RoundButtonSmall>
+              )}
+            </FlexDiv>
+          ))}
+        </FlexDiv>
+      )}
       <FlexDiv gap="20px" position="relative">
         {props.imageBuffer?.map((blob, index) => {
           const blobUrl = URL.createObjectURL(blob);

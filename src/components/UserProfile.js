@@ -113,6 +113,7 @@ function UserProfile(props) {
               padding="80px 2px 0px 2px"
               backgroundColor={palatte.secondary['100']}
               addCss={css`
+                overflow: hidden;
                 ${mediaQuery[0]} {
                   padding: 14px 0px 0px 0px;
                 }
