@@ -51,6 +51,17 @@ function Login(props) {
       navigate(`/itineraries`);
     });
   };
+  const logInWithGoogle = () => {
+    firebaseAuth
+      .googleLogIn()
+      .then((uid) => {
+        console.log(uid);
+        setUid(uid);
+        props.setIsLogInOut(true);
+        navigate(`/itineraries`);
+      })
+      .catch((error) => alert(error.message));
+  };
   useEffect(() => {
     props?.setIsLogInOut(false);
   }, [props]);
@@ -150,7 +161,9 @@ function Login(props) {
                 onClick={() => setIsSignUp((prev) => !prev)}>
                 {isSignUp ? 'Email 登入' : 'Email 註冊'}
               </ButtonOutline>
-              <ButtonOutline styled="primary">使用 Google 登入</ButtonOutline>
+              <ButtonOutline styled="primary" onClick={logInWithGoogle}>
+                使用 Google 登入
+              </ButtonOutline>
             </ContainerTopLine>
           </FlexDiv>
         </FlexChildDiv>

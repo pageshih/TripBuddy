@@ -4,6 +4,8 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
@@ -31,8 +33,13 @@ const app = initializeApp(firebaseConfig);
 
 const firebaseAuth = {
   auth: getAuth(app),
+  provider: new GoogleAuthProvider(),
   signIn(email, password) {
-    return signInWithEmailAndPassword(this.auth, email, password);
+    return signInWithEmailAndPassword(this.auth, email, password).catch(
+      (error) => {
+        alert(error.message);
+      }
+    );
   },
   signUp(email, password, name) {
     return createUserWithEmailAndPassword(this.auth, email, password)
@@ -41,6 +48,22 @@ const firebaseAuth = {
           name,
           uid: res.user.uid,
           photo: 'https://picsum.photos/50',
+          reviews: [],
+        });
+        return Promise.resolve(res.user.uid);
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  },
+  googleLogIn() {
+    return signInWithPopup(this.auth, this.provider)
+      .then((res) => {
+        console.log(res);
+        firestore.editProfile(res.user.uid, {
+          name: res.user.displayName,
+          uid: res.user.uid,
+          photo: res.user.photoURL,
           reviews: [],
         });
         return Promise.resolve(res.user.uid);
