@@ -11,7 +11,7 @@ import {
   uploadImageStyle,
 } from './styledComponents/Form';
 import { RoundButtonSmall, Button } from './styledComponents/Button';
-import { palatte, P } from './styledComponents/basicStyle';
+import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 
@@ -25,7 +25,11 @@ function ReviewTags(props) {
     }
   }, []);
   return (
-    <FlexDiv alignItems="center" gap="10px">
+    <FlexDiv
+      alignItems="center"
+      gap="10px"
+      overflowY="scroll"
+      padding="0 0 10px 0">
       <FlexDiv gap="12px">
         {props.defaultTags?.map((tag) => (
           <ReviewTag
@@ -108,7 +112,7 @@ function ReviewGallery(props) {
     }
   `;
   return (
-    <FlexDiv gap="20px">
+    <FlexDiv gap="20px" overflowY="scroll">
       {props.gallery && (
         <FlexDiv gap="20px">
           {props.gallery?.map((url, index) => (
@@ -298,6 +302,14 @@ function AddReview(props) {
     border: 1px solid ${palatte.primary.basic};
     padding: 30px 40px 40px 40px;
     position: relative;
+    ${mediaQuery[0]} {
+      position: fixed;
+      border-radius: 0;
+      width: 100%;
+      bottom: 75px;
+      left: 0;
+      z-index: 10;
+    }
   `;
   const dialogTriangle = css`
     width: 20px;
@@ -309,11 +321,19 @@ function AddReview(props) {
     position: absolute;
     top: -10px;
     left: 60px;
+    ${mediaQuery[0]} {
+      display: none;
+    }
   `;
 
   return (
-    <FlexDiv direction="column" gap="15px" css={reviewContainer}>
+    <FlexDiv
+      direction="column"
+      gap="15px"
+      css={reviewContainer}
+      display={props.display}>
       <div css={dialogTriangle}></div>
+      <H6>你覺得這個景點如何？</H6>
       <ReviewTags
         defaultTags={reviewTags}
         inputTag={addTag}
@@ -353,6 +373,10 @@ function AddReview(props) {
           <Button
             addCss={css`
               align-self: flex-end;
+              ${mediaQuery[0]} {
+                width: 100%;
+                font-size: 16px;
+              }
             `}
             styled="primary"
             width="fit-content"

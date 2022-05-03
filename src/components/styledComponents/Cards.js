@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { styles, palatte, H4, H5, P } from './basicStyle';
+import { styles, palatte, H4, H5, P, mediaQuery } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom } from './Form';
@@ -37,6 +37,11 @@ const Card = styled.div`
   flex-basis: ${(props) => props.basis};
   flex-direction: ${(props) => props.column && 'column'};
   position: ${(props) => props.position};
+  ${mediaQuery[0]} {
+    flex-direction: column;
+    border-radius: 10px;
+  }
+  ${(props) => props.addCss}
 `;
 const TimeTag = styled.div`
   font-weight: 700;
@@ -82,24 +87,46 @@ function ScheduleCard(props) {
           position: absolute;
           top: -15px;
           left: 30px;
+          ${mediaQuery[0]} {
+            left: -10px;
+          }
         `}>
         {props.isEdit && <CheckboxCustom />}
         <TimeTag>
           {timestampToString(props.schedule.start_time, 'time')}
         </TimeTag>
       </FlexDiv>
-      <Card gap="40px" onClick={props.onClick}>
+      <Card
+        gap="40px"
+        onClick={props.onClick}
+        addCss={css`
+          ${mediaQuery[0]} {
+            gap: 0px;
+          }
+        `}>
         <Image
           src={props.schedule.placeDetail.photos[0]}
           alt={props.schedule.placeDetail.name}
           minWidth="330px"
           height="200px"
+          addCss={css`
+            ${mediaQuery[0]} {
+              width: 100%;
+            }
+          `}
         />
         <FlexChildDiv
           shrink="1"
           direction="column"
           gap="15px"
-          padding="5px 5px 5px 0">
+          padding="5px 5px 5px 0"
+          addCss={css`
+            ${mediaQuery[0]} {
+              width: 100%;
+              padding: 20px;
+              gap: 10px;
+            }
+          `}>
           <H5 margin="0 0 10px 0">{props.schedule.placeDetail.name}</H5>
           {props.address && (
             <FlexDiv gap="2px">
@@ -162,7 +189,6 @@ const OverviewCard = (props) => {
     height: 300px;
     flex-direction: column;
     border-width: 2px;
-
     align-items: center;
     justify-content: center;
     margin: 0 0 4px 0;
@@ -170,6 +196,7 @@ const OverviewCard = (props) => {
   const text = css`
     z-index: 1;
     & > * {
+      z-index: 1;
       color: ${palatte.white};
     }
     & span {

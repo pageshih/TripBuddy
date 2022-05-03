@@ -188,6 +188,9 @@ const H5 = styled.h5`
 const H6 = styled.h6`
   ${heading}
   font-size: ${(props) => props.fontSize || '24px'};
+  ${mediaQuery[0]} {
+    font-size: 18px;
+  }
 `;
 const P = styled.p`
   font-size: ${(props) => props.fontSize || '16px'};

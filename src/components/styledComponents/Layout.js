@@ -63,8 +63,8 @@ const Image = (props) => (
       max-width: ${props.maxWidth};
       min-height: ${props.minHeight};
       max-height: ${props.maxHeight};
+      position: relative;
       ${props.addCss}
-      posision: relative;
     `}>
     <img
       src={props.src}

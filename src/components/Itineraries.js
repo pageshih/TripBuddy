@@ -4,7 +4,13 @@ import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { css, jsx } from '@emotion/react';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
-import { styles, palatte, H4, P } from './styledComponents/basicStyle';
+import {
+  styles,
+  palatte,
+  H4,
+  P,
+  mediaQuery,
+} from './styledComponents/basicStyle';
 import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
 import { AddReview } from './EditReview';
@@ -18,7 +24,12 @@ const ExploreSpot = (props) => {
       gap="20px"
       width="250px"
       margin="30px 0"
-      alignSelf="center">
+      alignSelf="center"
+      addCss={css`
+        ${mediaQuery[0]} {
+          display: none;
+        }
+      `}>
       {props.nothing ? (
         <P textAlign="center" color={palatte.gray['700']}>
           沒有行程可以顯示
@@ -45,6 +56,7 @@ function Itineraries() {
   const [future, setFuture] = useState();
   const now = new Date().getTime();
   const { reviewTags } = useOutletContext();
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     firestore
@@ -96,10 +108,16 @@ function Itineraries() {
     border-radius: 10px;
     background-color: ${palatte.gray['100']};
     padding: 40px 60px;
+    ${mediaQuery[0]} {
+      padding: 20px;
+    }
   `;
   const itinerariesContainer = css`
     flex-direction: column;
     gap: 40px;
+    ${mediaQuery[0]} {
+      padding: 0 20px;
+    }
   `;
   return (
     <>
@@ -147,17 +165,32 @@ function Itineraries() {
                               }>
                               {schedule.end_time > now &&
                                 schedule.start_time < now && (
-                                  <AddReview
-                                    key={schedule.schedule_id}
-                                    itineraryId={
-                                      progressing.overview.itinerary_id
-                                    }
-                                    scheduleId={schedule.schedule_id}
-                                    allReviewTags={reviewTags}
-                                    showReviewTags={schedule.review_tags}
-                                    reviews={reviews}
-                                    isEdit
-                                  />
+                                  <>
+                                    <Button
+                                      styled="primary"
+                                      addCss={css`
+                                        display: none;
+                                        ${mediaQuery[0]} {
+                                          display: block;
+                                        }
+                                      `}
+                                      onClick={() =>
+                                        setShowReview((prev) => !prev)
+                                      }>
+                                      添加心得
+                                    </Button>
+                                    <AddReview
+                                      key={schedule.schedule_id}
+                                      itineraryId={
+                                        progressing.overview.itinerary_id
+                                      }
+                                      scheduleId={schedule.schedule_id}
+                                      allReviewTags={reviewTags}
+                                      showReviewTags={schedule.review_tags}
+                                      reviews={reviews}
+                                      isEdit
+                                    />
+                                  </>
                                 )}
                             </ScheduleCard>
                           );
