@@ -15,6 +15,8 @@ const layout = (props) => css`
   max-height: ${props.maxHeight};
   min-height: ${props.minHeight};
   overflow: ${props.overflow};
+  overflow-x: ${props.overflowX};
+  overflow-y: ${props.overflowY};
   position: ${props.position};
   background-color: ${props.backgroundColor};
 `;
@@ -42,7 +44,6 @@ const Container = styled('div')`
 const FlexDiv = styled('div')`
   ${layout}
   ${flexParent}
-  ${(props) => props.css}
   ${(props) => props.addCss}
 `;
 
@@ -50,7 +51,6 @@ const FlexChildDiv = styled('div')`
   ${flexChild}
   ${flexParent}
   ${layout}
-  ${(props) => props.css}
   ${(props) => props.addCss}
 `;
 

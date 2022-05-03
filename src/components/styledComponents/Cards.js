@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { styles, palatte, H5, P } from './basicStyle';
+import { styles, palatte, H4, H5, P } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom } from './Form';
@@ -156,4 +156,69 @@ function ScheduleCard(props) {
   );
 }
 
-export { Card, cardCss, CardWrapper, TimeTag, ScheduleCard };
+const OverviewCard = (props) => {
+  const container = css`
+    flex-basis: ${props.row ? '300px' : 'calc(50% - 60px)'};
+    height: 300px;
+    flex-direction: column;
+    border-width: 2px;
+
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 4px 0;
+  `;
+  const text = css`
+    z-index: 1;
+    & > * {
+      color: ${palatte.white};
+    }
+    & span {
+      font-size: 20px;
+    }
+  `;
+  const image = css`
+    position: absolute;
+    top: 0;
+  `;
+  const darken = css`
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    background-color: ${palatte.shadow};
+    &:hover {
+      background-color: ${palatte.darkerShadow};
+    }
+  `;
+  return (
+    <Card as={props.as} css={container} onClick={props.onClick}>
+      <FlexDiv direction="column" gap="20px" alignItems="center">
+        <H5
+          fontSize="36px"
+          color={palatte.white}
+          addCss={css`
+            z-index: 1;
+          `}>
+          {props.title}
+        </H5>
+        <FlexDiv addCss={text} gap="3px" alignItems="center">
+          <span className="material-icons">schedule</span>
+          <P>
+            {timestampToString(props.startDate, 'date')} -{' '}
+            {timestampToString(props.endDate, 'date')}
+          </P>
+        </FlexDiv>
+      </FlexDiv>
+      <Image
+        src={props.src}
+        alt={props.alt}
+        width="100%"
+        height="100%"
+        addCss={image}
+      />
+      <div css={darken} />
+    </Card>
+  );
+};
+
+export { Card, cardCss, CardWrapper, TimeTag, ScheduleCard, OverviewCard };

@@ -13,6 +13,7 @@ import {
   palatte,
   mediaQuery,
 } from './styledComponents/basicStyle';
+import Footer from './styledComponents/Footer';
 
 const ProfileImg = styled.img`
   border-radius: 50%;
@@ -107,131 +108,135 @@ function UserProfile(props) {
     <>
       {profile && (
         <>
-          <Container
-            padding="80px 2px 0px 2px"
-            backgroundColor={palatte.secondary['100']}
-            addCss={css`
-              ${mediaQuery[0]} {
-                padding: 14px 0px 0px 0px;
-              }
-            `}>
-            <FlexDiv
-              direction="column"
-              gap="25px"
-              maxWidth={styles.container_maxWidth}
-              margin="0 auto"
-              padding={`0 ${styles.container_padding}`}
+          <Container minHeight="calc(100vh - 50px)">
+            <Container
+              padding="80px 2px 0px 2px"
+              backgroundColor={palatte.secondary['100']}
               addCss={css`
                 ${mediaQuery[0]} {
-                  padding: 14px 20px 14px 40px;
+                  padding: 14px 0px 0px 0px;
                 }
               `}>
               <FlexDiv
-                justifyContent="space-between"
-                alignItems="flex-start"
+                direction="column"
+                gap="25px"
+                maxWidth={styles.container_maxWidth}
+                margin="0 auto"
+                padding={`0 ${styles.container_padding}`}
                 addCss={css`
-                  align-items: center;
+                  ${mediaQuery[0]} {
+                    padding: 14px 20px 14px 40px;
+                  }
                 `}>
-                <Logo
-                  underline
+                <FlexDiv
+                  justifyContent="space-between"
+                  alignItems="flex-start"
                   addCss={css`
-                    ${mediaQuery[0]} {
-                      display: none;
-                    }
-                  `}
-                />
-                <Logo
-                  small
-                  addCss={css`
-                    display: none;
-                    ${mediaQuery[0]} {
-                      display: flex;
-                    }
-                  `}
-                />
-                <div css={userProfileWrapper}>
-                  <FlexChildDiv
-                    gap="20px"
-                    alignItems="center"
+                    align-items: center;
+                  `}>
+                  <Logo
+                    underline
                     addCss={css`
                       ${mediaQuery[0]} {
                         display: none;
                       }
-                    `}>
-                    <ProfileImg src={profile.photo} alt="profilePhoto" />
-                    <p
-                      css={css`
-                        white-space: nowrap;
+                    `}
+                  />
+                  <Logo
+                    small
+                    addCss={css`
+                      display: none;
+                      ${mediaQuery[0]} {
+                        display: flex;
+                      }
+                    `}
+                  />
+                  <div css={userProfileWrapper}>
+                    <FlexChildDiv
+                      gap="20px"
+                      alignItems="center"
+                      addCss={css`
+                        ${mediaQuery[0]} {
+                          display: none;
+                        }
                       `}>
-                      你好，{profile.name}
-                    </p>
-                  </FlexChildDiv>
-                  <FlexDiv alignItems="center" gap="10px">
-                    <ButtonSmall styled="danger" onClick={logout}>
-                      登出
-                    </ButtonSmall>
-                    <RoundButtonSmall className="material-icons">
-                      settings
-                    </RoundButtonSmall>
-                  </FlexDiv>
-                </div>
+                      <ProfileImg src={profile.photo} alt="profilePhoto" />
+                      <p
+                        css={css`
+                          white-space: nowrap;
+                        `}>
+                        你好，{profile.name}
+                      </p>
+                    </FlexChildDiv>
+                    <FlexDiv alignItems="center" gap="10px">
+                      <ButtonSmall styled="danger" onClick={logout}>
+                        登出
+                      </ButtonSmall>
+                      <RoundButtonSmall className="material-icons">
+                        settings
+                      </RoundButtonSmall>
+                    </FlexDiv>
+                  </div>
+                </FlexDiv>
+                <FlexDiv
+                  gap="15px"
+                  addCss={css`
+                    ${mediaQuery[0]} {
+                      position: fixed;
+                      bottom: 0;
+                      left: 0;
+                      width: 100%;
+                      gap: 0;
+                      z-index: 10;
+                    }
+                  `}>
+                  <NavLink
+                    css={navLink}
+                    style={({ isActive }) => {
+                      return activeStyle(isActive);
+                    }}
+                    to={`/itineraries`}>
+                    <span className="material-icons">event_note</span>
+                    所有行程
+                  </NavLink>
+                  <NavLink
+                    css={css`
+                      display: none;
+                      ${navLink}
+                    `}
+                    style={({ isActive }) => {
+                      return activeStyle(isActive);
+                    }}
+                    to={`/explore`}>
+                    <span className="material-icons">explore</span>
+                    探索景點
+                  </NavLink>
+                  <NavLink
+                    css={navLink}
+                    style={({ isActive }) => {
+                      return activeStyle(isActive);
+                    }}
+                    to={`/saved-spots`}>
+                    <span className="material-icons">add_location</span>
+                    候補景點
+                  </NavLink>
+                  <NavLink
+                    css={navLink}
+                    style={({ isActive }) => {
+                      return activeStyle(isActive);
+                    }}
+                    to={`/travel-journals`}>
+                    <span className="material-icons">article</span>
+                    旅行回憶
+                  </NavLink>
+                </FlexDiv>
               </FlexDiv>
-              <FlexDiv
-                gap="15px"
-                addCss={css`
-                  ${mediaQuery[0]} {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    gap: 0;
-                    z-index: 10;
-                  }
-                `}>
-                <NavLink
-                  css={navLink}
-                  style={({ isActive }) => {
-                    return activeStyle(isActive);
-                  }}
-                  to={`/itineraries`}>
-                  <span className="material-icons">event_note</span>
-                  所有行程
-                </NavLink>
-                <NavLink
-                  css={css`
-                    display: none;
-                    ${navLink}
-                  `}
-                  style={({ isActive }) => {
-                    return activeStyle(isActive);
-                  }}
-                  to={`/explore`}>
-                  <span className="material-icons">explore</span>
-                  探索景點
-                </NavLink>
-                <NavLink
-                  css={navLink}
-                  style={({ isActive }) => {
-                    return activeStyle(isActive);
-                  }}
-                  to={`/saved-spots`}>
-                  <span className="material-icons">add_location</span>
-                  候補景點
-                </NavLink>
-                <NavLink
-                  css={navLink}
-                  style={({ isActive }) => {
-                    return activeStyle(isActive);
-                  }}
-                  to={`/travel-journals`}>
-                  <span className="material-icons">article</span>
-                  旅行回憶
-                </NavLink>
-              </FlexDiv>
-            </FlexDiv>
-            <div css={decoOfPage}></div>
+              <div css={decoOfPage}></div>
+            </Container>
+
+            <Outlet context={{ reviewTags }} />
           </Container>
-          <Outlet context={{ reviewTags }} />
+          {uid !== undefined && <Footer />}
         </>
       )}
     </>
