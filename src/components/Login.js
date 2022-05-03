@@ -32,6 +32,8 @@ function Login(props) {
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
   const { setUid } = useContext(Context);
+  const [isSignUp, setIsSignUp] = useState();
+  const [userName, setUserName] = useState('');
   const navigate = useNavigate();
   const signIn = () => {
     firebaseAuth.signIn(email, password).then((res) => {
@@ -40,6 +42,25 @@ function Login(props) {
       props.setIsLogInOut(true);
       navigate(`/itineraries`);
     });
+  };
+  const signUp = () => {
+    firebaseAuth.signUp(email, password, userName).then((uid) => {
+      console.log(uid);
+      setUid(uid);
+      props.setIsLogInOut(true);
+      navigate(`/itineraries`);
+    });
+  };
+  const logInWithGoogle = () => {
+    firebaseAuth
+      .googleLogIn()
+      .then((uid) => {
+        console.log(uid);
+        setUid(uid);
+        props.setIsLogInOut(true);
+        navigate(`/itineraries`);
+      })
+      .catch((error) => alert(error.message));
   };
   useEffect(() => {
     props?.setIsLogInOut(false);
@@ -109,6 +130,13 @@ function Login(props) {
               addCss={css`
                 gap: 15px;
               `}>
+              {isSignUp && (
+                <TextInput
+                  placeholder={'請輸入用戶名稱'}
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+              )}
               <TextInput
                 placeholder={'email@example.com'}
                 value={email}
@@ -118,16 +146,24 @@ function Login(props) {
                 placeholder={'密碼至少6個字'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                type={password}
+                type="password"
               />
             </FlexDiv>
-            <Button styled="primary" onClick={signIn}>
-              Login
+            <Button styled="primary" onClick={isSignUp ? signUp : signIn}>
+              {isSignUp ? '註冊' : ' Email 登入'}
             </Button>
             <ContainerTopLine>
-              <P color={palatte.gray['700']}>還沒有帳號嗎？</P>
-              <ButtonOutline styled="primary">Email 註冊</ButtonOutline>
-              <ButtonOutline styled="primary">使用 Google 登入</ButtonOutline>
+              <P color={palatte.gray['700']}>
+                {isSignUp ? '已經有帳號了嗎？' : '還沒有帳號嗎？'}
+              </P>
+              <ButtonOutline
+                styled="primary"
+                onClick={() => setIsSignUp((prev) => !prev)}>
+                {isSignUp ? 'Email 登入' : 'Email 註冊'}
+              </ButtonOutline>
+              <ButtonOutline styled="primary" onClick={logInWithGoogle}>
+                使用 Google 登入
+              </ButtonOutline>
             </ContainerTopLine>
           </FlexDiv>
         </FlexChildDiv>

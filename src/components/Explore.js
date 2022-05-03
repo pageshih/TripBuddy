@@ -163,7 +163,7 @@ function SavedSpotsList(props) {
         setAllUnchecked={() => setSelectedSpotList([])}
       />
 
-      <CardWrapper column gap="20px" padding="15px 5px 15px 7px">
+      <FlexDiv direction="column" gap="20px" padding="15px 5px 15px 7px">
         {props.savedSpots.map((spot) => (
           <Card column gap="20px" position="relative" key={spot.place_id}>
             <CheckboxCustom
@@ -177,7 +177,7 @@ function SavedSpotsList(props) {
                 style={{ width: '100%', objectFit: 'cover' }}
                 alt="spot"
               />
-              <FlexChildDiv>
+              <FlexChildDiv direction="column" padding="10px">
                 <h3>{spot.name}</h3>
                 <p>{spot.formatted_address}</p>
                 <p>{spot.rating}</p>
@@ -202,7 +202,7 @@ function SavedSpotsList(props) {
           onClick={() => props.removeFromSavedSpots(selectedSpotList)}>
           刪除景點
         </Button>
-      </CardWrapper>
+      </FlexDiv>
     </>
   );
 }
@@ -272,6 +272,7 @@ function Explore({ setWaitingSpots }) {
         <>
           <FlexDiv height="100vh">
             <FlexChildDiv
+              direction="column"
               ref={sideWindowRef}
               basis={placeDetail || showSavedSpots ? '400px' : null}
               overflow="scroll"
