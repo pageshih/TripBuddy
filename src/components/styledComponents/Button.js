@@ -83,6 +83,7 @@ const RoundButton = styled.button`
     color: ${colorMap.button.round};
   }
 `;
+const roundBtnWhite = (props) => css``;
 const RoundButtonSmall = styled.button`
   color: ${palatte.gray['700']};
   background-color: transparent;
@@ -95,6 +96,21 @@ const RoundButtonSmall = styled.button`
       props.close ? palatte.danger.basic : palatte.gray['500']};
   }
   ${(props) => props.addCss}
+`;
+const RoundButtonSmallWhite = styled(RoundButtonSmall)`
+  font-size: ${(props) => props.size || '20px'};
+  padding: 5px;
+  width: ${(props) =>
+    props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
+  height: ${(props) =>
+    props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
+  color: ${palatte.gray['100']};
+  background-color: rgba(161, 163, 184, 0.5);
+  text-align: center;
+  &:hover {
+    background-color: rgba(161, 163, 184, 0.3);
+    color: ${palatte.white};
+  }
 `;
 
 const RoundButtonSmallOutline = styled(RoundButtonSmall)`
@@ -119,4 +135,5 @@ export {
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,
+  RoundButtonSmallWhite,
 };

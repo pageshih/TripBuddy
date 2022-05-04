@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv } from './Layout';
+import { RoundButtonSmallWhite } from './Button';
 import { compressImages } from '../../utils/utilities';
 
 const inputBase = css`
@@ -258,7 +258,7 @@ const UploadImageBg = styled.div`
   ${(props) => props.addCss};
 `;
 
-const UploadBtn = (props) => (
+const UploadText = (props) => (
   <FlexDiv direction="column">
     <span
       className="material-icons"
@@ -271,24 +271,55 @@ const UploadBtn = (props) => (
   </FlexDiv>
 );
 
+const FileInputHidden = (props) => (
+  <input
+    type="file"
+    css={css`
+      display: none;
+    `}
+    accept="image/*"
+    multiple={props.multiple}
+    onChange={async (e) => {
+      let addCompressed = await compressImages(e.target.files);
+      if (props.multiple) {
+        if (props.imageBuffer?.length > 0) {
+          addCompressed = [...props.imageBuffer, ...addCompressed];
+        }
+        props.setImageBuffer(addCompressed);
+      } else {
+        console.log(e.target.files);
+      }
+    }}
+  />
+);
+
 function AddImages(props) {
   return (
     <UploadImageBg as="label" isScroll={props.isScroll}>
-      <input
-        type="file"
-        style={{ display: 'none' }}
-        accept="image/*"
+      <FileInputHidden
         multiple
-        onChange={async (e) => {
-          let addCompressed = await compressImages(e.target.files);
-          if (props.imageBuffer?.length > 0) {
-            addCompressed = [...props.imageBuffer, ...addCompressed];
-          }
-          props.setImageBuffer(addCompressed);
-        }}
+        setImageBuffer={props.setImageBuffer}
+        imageBuffer={props.imageBuffer}
       />
-      <UploadBtn />
+      <UploadText />
     </UploadImageBg>
+  );
+}
+function AddImageRoundBtn(props) {
+  return (
+    <RoundButtonSmallWhite
+      as="label"
+      size={props.size}
+      className="material-icons"
+      css={css`
+        cursor: pointer;
+      `}>
+      <FileInputHidden
+        setImageBuffer={props.setImageBuffer}
+        imageBuffer={props.imageBuffer}
+      />
+      insert_photo
+    </RoundButtonSmallWhite>
   );
 }
 
@@ -303,4 +334,5 @@ export {
   inputBaseSmall,
   AddImages,
   uploadImageStyle,
+  AddImageRoundBtn,
 };
