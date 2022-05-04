@@ -59,7 +59,6 @@ const firebaseAuth = {
   googleLogIn() {
     return signInWithPopup(this.auth, this.provider)
       .then((res) => {
-        console.log(res);
         firestore.editProfile(res.user.uid, {
           name: res.user.displayName,
           uid: res.user.uid,
@@ -104,7 +103,6 @@ const firebaseStorage = {
       }
       return acc;
     }, '');
-    console.log(basicPath);
     const uploadPromises = files.map((file) => {
       const imageRef = ref(this.storage, `${basicPath}/${file.name}`);
       return uploadBytes(imageRef, file)
@@ -466,9 +464,7 @@ const firestore = {
       userUID,
       'overviews'
     );
-    console.log(timestamp);
     const resetTime = new Date(timestamp).setHours(0, 0, 0, 0);
-    console.log(resetTime);
     const q = query(
       overviewsRef,
       where('end_date', isJournal ? '<=' : '>=', resetTime)

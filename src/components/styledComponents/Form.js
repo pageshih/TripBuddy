@@ -289,7 +289,6 @@ const FileInputHidden = (props) => (
         }
         props.setImageBuffer(addCompressed);
       } else {
-        console.log(addCompressed);
         props.setImageBuffer(addCompressed);
       }
     }}
