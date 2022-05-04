@@ -12,8 +12,9 @@ import {
   TextInput,
   SelectAllCheckBox,
   CheckboxCustom,
+  AddImageRoundBtn,
 } from './styledComponents/Form';
-import { Button, RoundButtonSmall } from './styledComponents/Button';
+import { Button, RoundButtonSmallWhite } from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -32,6 +33,7 @@ import {
   filterDaySchedules,
   setTimeToTimestamp,
   createDepartTimeAry,
+  updateItineraryCoverPhoto,
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
@@ -493,42 +495,39 @@ function EditableDate(props) {
 
 function Overview(props) {
   const navigate = useNavigate();
-
-  const roundBtn = css`
-    font-size: 20px;
-    padding: 5px;
-    width: fit-content;
-    height: fit-content;
-    color: ${palatte.white};
-    background-color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.6);
-      color: ${palatte.gray['100']};
-    }
-  `;
-
+  const { uid } = useContext(Context);
+  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
+    const upload = new updateItineraryCoverPhoto({
+      uid,
+      itineraryId: props.overviews.itinerary_id,
+      imageBuffer,
+    });
+    upload.uploadFirestore().then((cover_photo) => {
+      setIsShowModal(false);
+      props.updateOverviewsFields({ cover_photo });
+    });
+  };
   return (
     <>
       <Container position="relative" margin="0 0 30px 0">
-        <Container
-          addCss={styles.containerSetting}
-          padding="40px 20px 50px 20px">
+        <Container addCss={props.container} padding="40px 20px 50px 20px">
           <FlexDiv justifyContent="space-between">
-            <RoundButtonSmall
-              addCss={roundBtn}
+            <RoundButtonSmallWhite
               className="material-icons"
               type="button"
               onClick={() => navigate('/itineraries')}>
               navigate_before
-            </RoundButtonSmall>
-            <RoundButtonSmall
-              addCss={roundBtn}
-              className="material-icons"
-              type="button"
-              onClick={() => props.setIsBrowse(false)}>
-              edit
-            </RoundButtonSmall>
+            </RoundButtonSmallWhite>
+            {props.isBrowse ? (
+              <RoundButtonSmallWhite
+                className="material-icons"
+                type="button"
+                onClick={() => props.setIsBrowse(false)}>
+                edit
+              </RoundButtonSmallWhite>
+            ) : (
+              <AddImageRoundBtn upload={uploadCoverPhoto} />
+            )}
           </FlexDiv>
           <FlexDiv direction="column" gap="10px" alignItems="center">
             <EditableH2
@@ -563,92 +562,91 @@ function Overview(props) {
           `}
         />
       </Container>
-      <FlexDiv
-        addCss={styles.containerSetting}
-        width="100%"
-        justifyContent="space-between"
-        alignItems="flex-end">
-        <FlexDiv alignItems="flex-start" direction="column">
-          <FlexDiv
-            justifyContent="space-between"
-            gap="50px"
-            addCss={css`
-              & > * {
-                color: ${palatte.gray['700']};
-              }
-            `}>
-            <p>出發時間</p>
-            <p>
-              {timestampToString(
-                props.overviews.depart_times[props.day],
-                'simpleDate'
-              )}
-            </p>
-          </FlexDiv>
-          <EditableH2
-            as="p"
-            addCss={css`
-              color: ${palatte.info.basic};
-              font-weight: 700;
-              font-size: 36px;
-            `}
-            isBrowse={props.isBrowse}
-            onSubmit={(departTimes) => {
-              if (departTimes !== props.departString) {
-                const newDepartTimestamp = setTimeToTimestamp(
-                  props.overviews.depart_times[props.day],
-                  departTimes
-                );
-                const newDepartTimes = Array.from(props.overviews.depart_times);
-                newDepartTimes.splice(props.day, 1, newDepartTimestamp);
-                props.updateOverviewsFields({ depart_times: newDepartTimes });
-                props.updateTimeOfSchedule(
-                  props.schedules,
-                  { isUploadFirebase: true, isSetSchedule: true },
-                  newDepartTimestamp
-                );
-                props.setDepartString(
-                  timestampToString(newDepartTimestamp, 'time')
-                );
-              }
-            }}>
-            {props.departString}
-          </EditableH2>
-        </FlexDiv>
-        {!props.isBrowse && (
-          <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
-            <SelectAllCheckBox
-              setAllChecked={() =>
-                props.setSelectedSchedulesId(
-                  props.schedules.map((schedule) => schedule.schedule_id)
-                )
-              }
-              setAllUnchecked={() => props.setSelectedSchedulesId([])}
-            />
-            <select
-              value={props.changeTime}
-              onChange={(e) => props.setChangeTime(Number(e.target.value))}>
-              <option value="" disabled>
-                修改所選行程的日期
-              </option>
-              {props.overviews.depart_times.map((timestamp) => (
-                <option value={timestamp} key={timestamp}>
-                  {timestampToString(timestamp, 'date')}
-                </option>
-              ))}
-            </select>
-            <button type="button" onClick={props.changeSchedulesTime}>
-              移動行程
-            </button>
-          </FlexDiv>
-        )}
-        <Pagination
-          day={props.day}
-          switchDay={props.switchDay}
-          finalDay={props.overviews.depart_times.length - 1}
-        />
-      </FlexDiv>
     </>
+  );
+}
+
+function DepartController(props) {
+  return (
+    <FlexDiv alignItems="flex-start" direction="column">
+      <FlexDiv
+        justifyContent="space-between"
+        gap="50px"
+        addCss={css`
+          & > * {
+            color: ${palatte.gray['700']};
+          }
+        `}>
+        <p>出發時間</p>
+        <p>
+          {timestampToString(
+            props.overviews.depart_times[props.day],
+            'simpleDate'
+          )}
+        </p>
+      </FlexDiv>
+      <EditableH2
+        as="p"
+        addCss={css`
+          color: ${palatte.info.basic};
+          font-weight: 700;
+          font-size: 36px;
+        `}
+        isBrowse={props.isBrowse}
+        onSubmit={(departTimes) => {
+          if (departTimes !== props.departString) {
+            const newDepartTimestamp = setTimeToTimestamp(
+              props.overviews.depart_times[props.day],
+              departTimes
+            );
+            const newDepartTimes = Array.from(props.overviews.depart_times);
+            newDepartTimes.splice(props.day, 1, newDepartTimestamp);
+            props.updateOverviewsFields({ depart_times: newDepartTimes });
+            props.updateTimeOfSchedule(
+              props.schedules,
+              { isUploadFirebase: true, isSetSchedule: true },
+              newDepartTimestamp
+            );
+            props.setDepartString(
+              timestampToString(newDepartTimestamp, 'time')
+            );
+          }
+        }}>
+        {props.departString}
+      </EditableH2>
+    </FlexDiv>
+  );
+}
+
+function MoveScheduleController(props) {
+  return (
+    <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
+      <SelectAllCheckBox
+        setAllChecked={() =>
+          props.setSelectedSchedulesId(
+            props.schedules.map((schedule) => schedule.schedule_id)
+          )
+        }
+        setAllUnchecked={() => props.setSelectedSchedulesId([])}
+        selectAll={props.selectAll}
+        setSelectAll={props.setSelectAll}
+      />
+      <select
+        value={props.changeTime}
+        onChange={(e) => props.setChangeTime(Number(e.target.value))}>
+        <option value="" disabled>
+          修改所選行程的日期
+        </option>
+        {props.overviews.depart_times.map((timestamp) => (
+          <option value={timestamp} key={timestamp}>
+            {timestampToString(timestamp, 'date')}
+          </option>
+        ))}
+      </select>
+      <button type="button" onClick={props.changeSchedulesTime}>
+        移動行程
+      </button>
+    </FlexDiv>
   );
 }
 
@@ -664,6 +662,7 @@ function AddSchedule(props) {
   const [departString, setDepartString] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [changeTime, setChangeTime] = useState();
 
   useEffect(() => {
@@ -1050,6 +1049,8 @@ function AddSchedule(props) {
     setDay(nextDay);
     setSchedules(allSchedules.current[nextDay]);
     setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
+    setSelectAll(false);
+    setSelectedSchedulesId([]);
     window.scrollTo(0, 0);
   };
   const changeSchedulesTime = async () => {
@@ -1097,18 +1098,27 @@ function AddSchedule(props) {
     }
   };
 
+  const container = css`
+    ${styles.containerSetting}
+    max-width: ${!props.isBrowse && '1280px'};
+  `;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
         <>
-          <FlexDiv minHeight="100vh">
+          <Container minHeight="100vh">
             {!isBrowse && (
               <FlexChildDiv
                 padding="30px"
                 display="flex"
                 direction="column"
                 style={{ backgroundColor: '#f7f7f7' }}
-                basis="360px">
+                addCss={css`
+                  position: fixed;
+                  right: 0;
+                  height: 100vh;
+                  width: 360px;
+                `}>
                 <FlexDiv justifyContent="flex-end" gap="20px">
                   <button type="button" onClick={() => navigate('/explore')}>
                     新增景點
@@ -1169,32 +1179,63 @@ function AddSchedule(props) {
                 </Droppable>
               </FlexChildDiv>
             )}
-            <FlexChildDiv direction="column" grow="1" gap="20px" order="-1">
+            <FlexDiv
+              direction="column"
+              gap="20px"
+              width={!isBrowse ? 'calc(100% - 360px)' : null}>
               <Overview
+                container={container}
                 isBrowse={isBrowse}
                 setIsBrowse={setIsBrowse}
                 overviews={overviews}
                 updateDate={updateDate}
                 updateOverviewsFields={updateOverviewsFields}
-                updateTimeOfSchedule={updateTimeOfSchedule}
-                schedules={schedules}
                 day={day}
-                departString={departString}
-                setDepartString={setDepartString}
-                setSelectedSchedulesId={setSelectedSchedulesId}
-                changeTime={changeTime}
-                setChangeTime={setChangeTime}
-                changeSchedulesTime={changeSchedulesTime}
-                switchDay={switchDay}
               />
+              <FlexDiv
+                addCss={container}
+                width="100%"
+                justifyContent="space-between"
+                alignItems="flex-end">
+                <DepartController
+                  overviews={overviews}
+                  day={day}
+                  isBrowse={isBrowse}
+                  departString={departString}
+                  setDepartString={setDepartString}
+                  updateTimeOfSchedule={updateTimeOfSchedule}
+                  updateOverviewsFields={updateOverviewsFields}
+                  schedules={schedules}
+                />
+                {!props.isBrowse && (
+                  <MoveScheduleController
+                    overviews={overviews}
+                    changeTime={changeTime}
+                    setChangeTime={setChangeTime}
+                    schedules={schedules}
+                    setSelectedSchedulesId={setSelectedSchedulesId}
+                    switchDay={switchDay}
+                    setSelectAll={setSelectAll}
+                    selectAll={selectAll}
+                    changeSchedulesTime={changeSchedulesTime}
+                  />
+                )}
+                <Pagination
+                  day={day}
+                  switchDay={switchDay}
+                  finalDay={overviews.depart_times.length - 1}
+                />
+              </FlexDiv>
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (
                   <FlexDiv
-                    addCss={styles.containerSetting}
+                    addCss={container}
                     width="100%"
                     direction="column"
                     gap="20px"
                     backgroundColor="#f0f0f0"
+                    // overflowY="scroll"
+                    // height="calc(100vh - 500px)"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
                     {schedules?.length > 0 ? (
@@ -1252,8 +1293,8 @@ function AddSchedule(props) {
                   </FlexDiv>
                 )}
               </Droppable>
-            </FlexChildDiv>
-          </FlexDiv>
+            </FlexDiv>
+          </Container>
         </>
       )}
     </DragDropContext>

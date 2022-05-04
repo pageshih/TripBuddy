@@ -96,6 +96,21 @@ const RoundButtonSmall = styled.button`
   }
   ${(props) => props.addCss}
 `;
+const RoundButtonSmallWhite = styled(RoundButtonSmall)`
+  font-size: ${(props) => props.size || '20px'};
+  padding: 5px;
+  width: ${(props) =>
+    props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
+  height: ${(props) =>
+    props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
+  color: ${palatte.gray['100']};
+  background-color: rgba(161, 163, 184, 0.5);
+  text-align: center;
+  &:hover {
+    background-color: rgba(161, 163, 184, 0.3);
+    color: ${palatte.white};
+  }
+`;
 
 const RoundButtonSmallOutline = styled(RoundButtonSmall)`
   border: 1px solid ${palatte.gray['600']};
@@ -119,4 +134,5 @@ export {
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,
+  RoundButtonSmallWhite,
 };

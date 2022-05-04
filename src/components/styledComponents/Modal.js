@@ -1,12 +1,16 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { palatte } from './basicStyle';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
+  padding: 30px;
   width: 100%;
   height: 100vh;
   position: fixed;
+  top: 0;
+  left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,11 +18,14 @@ const FadeBg = styled.div`
 `;
 
 const CenterContainer = styled.div`
-  flex-basis: 350px;
-  height: 400px;
-  background-color: #fff;
+  flex-basis: ${(props) => props.width || '350px'};
+  height: ${(props) => props.height || '400px'};
+  max-width: ${(props) => props.maxWidth || '350px'};
+  max-height: ${(props) => props.maxHeight || '400px'};
+  background-color: ${palatte.white};
   border-radius: 10px;
   position: relative;
+  padding: 20px;
 `;
 
 const CloseBtn = styled.button`
@@ -32,6 +39,7 @@ const CloseBtn = styled.button`
   font-size: 16px;
   color: white;
   background-color: darkgray;
+  z-index: 1;
   &:hover {
     background-color: crimson;
   }
@@ -45,7 +53,11 @@ function Modal(props) {
           props.close();
         }
       }}>
-      <CenterContainer>
+      <CenterContainer
+        width={props.width}
+        height={props.height}
+        maxHeight={props.maxHeight}
+        maxWidth={props.maxWidth}>
         <CloseBtn
           type="button"
           onClick={props.close}
