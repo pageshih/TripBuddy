@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { compressImages } from '../utils/utilities';
 import { firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
@@ -20,13 +20,30 @@ import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
 import { css, jsx } from '@emotion/react';
 
 function ReviewTags(props) {
+  const tagContainer = useRef();
+  const [isShowShadow, setIsShowShadow] = useState();
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (
+        entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
+      ) {
+        setIsShowShadow(true);
+      } else {
+        setIsShowShadow(false);
+      }
+    });
+    resizeObserver.observe(tagContainer.current, { box: 'border-box' });
+    return function cleanup() {
+      resizeObserver.disconnect();
+    };
+  }, []);
   return (
-    <FlexDiv
-      alignItems="center"
-      gap="10px"
-      overflowY="scroll"
-      padding="0 0 10px 0">
-      <FlexDiv gap="12px">
+    <FlexDiv alignItems="center" gap="10px" padding="0 0 10px 0">
+      <FlexDiv
+        gap="12px"
+        overflowY="scroll"
+        ref={tagContainer}
+        position="relative">
         {props.defaultTags?.map((tag) => (
           <ReviewTag
             key={tag}
@@ -38,68 +55,108 @@ function ReviewTags(props) {
           </ReviewTag>
         ))}
       </FlexDiv>
-      {props.isEdit ? (
-        props.showInput ? (
-          <form
-            onSubmit={props.onSubmit}
+      <FlexDiv position="relative">
+        {isShowShadow && (
+          <div
             css={css`
-              display: flex;
-              align-items: center;
-              gap: 5px;
-            `}>
-            <input
-              css={inputBaseSmall}
-              type="type"
-              placeholder="新增心得標籤"
-              value={props.inputTag}
-              onChange={(e) => {
-                props.setInputTag(e.target.value);
-              }}
-            />
-            <RoundButtonSmallOutline
-              className="material-icons"
-              type="submit"
-              color="primary"
-              addCss={css`
-                border-radius: 10px;
+              position: absolute;
+              top: -6px;
+              left: -18px;
+              width: 10px;
+              height: 38px;
+              background: linear-gradient(
+                90deg,
+                rgba(0, 0, 0, 0),
+                ${palatte.shadow}
+              );
+            `}></div>
+        )}
+        {props.isEdit ? (
+          props.showInput ? (
+            <form
+              onSubmit={props.onSubmit}
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 5px;
               `}>
-              done
-            </RoundButtonSmallOutline>
-            <RoundButtonSmallOutline
-              className="material-icons"
+              <input
+                css={inputBaseSmall}
+                type="type"
+                placeholder="新增心得標籤"
+                value={props.inputTag}
+                onChange={(e) => {
+                  props.setInputTag(e.target.value);
+                }}
+              />
+              <RoundButtonSmallOutline
+                className="material-icons"
+                type="submit"
+                color="primary"
+                addCss={css`
+                  border-radius: 10px;
+                `}>
+                done
+              </RoundButtonSmallOutline>
+              <RoundButtonSmallOutline
+                className="material-icons"
+                type="button"
+                color="danger"
+                addCss={css`
+                  border-radius: 10px;
+                `}
+                onClick={() => props.setShowInput(false)}>
+                close
+              </RoundButtonSmallOutline>
+            </form>
+          ) : (
+            <RoundButtonSmall
               type="button"
-              color="danger"
-              addCss={css`
-                border-radius: 10px;
-              `}
-              onClick={() => props.setShowInput(false)}>
-              close
-            </RoundButtonSmallOutline>
-          </form>
-        ) : (
-          <RoundButtonSmall
-            type="button"
-            className="material-icons"
-            onClick={() => {
-              props.setShowInput(true);
-            }}>
-            add_circle
-          </RoundButtonSmall>
-        )
-      ) : null}
+              className="material-icons"
+              onClick={() => {
+                props.setShowInput(true);
+              }}>
+              add_circle
+            </RoundButtonSmall>
+          )
+        ) : null}
+      </FlexDiv>
     </FlexDiv>
   );
 }
 
 function ReviewGallery(props) {
+  const galleryContainer = useRef();
+  const [isShowShadow, setIsShowShadow] = useState();
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (
+        entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
+      ) {
+        setIsShowShadow(true);
+      } else {
+        setIsShowShadow(false);
+      }
+    });
+    resizeObserver.observe(galleryContainer.current, { box: 'border-box' });
+    return function cleanup() {
+      resizeObserver.disconnect();
+    };
+  }, []);
   const closeBtn = css`
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 4px;
+    top: 7px;
     background-color: ${palatte.white};
     border-radius: 50%;
+    color: ${palatte.gray['300']};
   `;
-  const previewBtn = css`
+  const image = css`
+    ${uploadImageStyle}
+    box-shadow: 2px 2px 2px 2px ${palatte.shadow};
+    margin-bottom: 4px;
+  `;
+  const preview = css`
     width: 60px;
     height: 40px;
     padding: 5px 10px;
@@ -107,8 +164,8 @@ function ReviewGallery(props) {
     border-radius: 30px;
     background-color: ${palatte.white};
     position: absolute;
-    top: 20px;
-    right: -10px;
+    bottom: 4px;
+    left: 0px;
     & span {
       display: none;
     }
@@ -124,79 +181,83 @@ function ReviewGallery(props) {
     }
   `;
   return (
-    <FlexDiv gap="20px" overflowY="scroll">
-      {props.gallery && (
-        <FlexDiv gap="20px">
-          {props.gallery?.map((url, index) => (
-            <FlexDiv alignItems="flex-start" key={index} position="relative">
-              <Image
-                addCss={uploadImageStyle}
-                width="250px"
-                height="200px"
-                src={url}
-                alt="schedulePhoto"
-              />
-              {props.isEdit && (
+    <FlexDiv gap="20px">
+      <Container ref={galleryContainer} overflowY="scroll">
+        {props.gallery && (
+          <FlexDiv gap="20px">
+            {props.gallery?.map((url, index) => (
+              <Container key={index} position="relative">
+                <Image
+                  addCss={image}
+                  width="250px"
+                  height="200px"
+                  src={url}
+                  alt="schedulePhoto"
+                />
+                {props.isEdit && (
+                  <RoundButtonSmall
+                    addCss={closeBtn}
+                    close
+                    className="material-icons"
+                    onClick={() => {
+                      const newGallery = props.gallery.filter(
+                        (_, newIndex) => index !== newIndex
+                      );
+                      props.setGallery(newGallery);
+                    }}>
+                    cancel
+                  </RoundButtonSmall>
+                )}
+              </Container>
+            ))}
+          </FlexDiv>
+        )}
+        <FlexDiv gap="20px" position="relative">
+          {props.imageBuffer?.map((blob, index) => {
+            const blobUrl = URL.createObjectURL(blob);
+            return (
+              <Container key={blob.lastModified} position="relative">
+                <Image
+                  addCss={css`
+                    ${image}
+                    border-radius: 10px;
+                    border: 8px solid ${palatte.primary['300']};
+                  `}
+                  width="250px"
+                  height="200px"
+                  src={blobUrl}
+                  alt={blob.name}
+                />
+                <P
+                  fontSize="14px"
+                  addCss={preview}
+                  color={palatte.primary.basic}>
+                  預覽
+                </P>
                 <RoundButtonSmall
-                  addCss={closeBtn}
-                  close
                   className="material-icons"
+                  close
+                  addCss={closeBtn}
                   onClick={() => {
-                    const newGallery = props.gallery.filter(
+                    const newImagesBuffer = props.imageBuffer.filter(
                       (_, newIndex) => index !== newIndex
                     );
-                    props.setGallery(newGallery);
+                    props.setImageBuffer(newImagesBuffer);
                   }}>
                   cancel
                 </RoundButtonSmall>
-              )}
-            </FlexDiv>
-          ))}
+              </Container>
+            );
+          })}
         </FlexDiv>
+      </Container>
+      {props.isEdit && (
+        <AddImages
+          imageBuffer={props.imageBuffer}
+          setImageBuffer={props.setImageBuffer}
+          isScroll={isShowShadow}
+        />
       )}
-      <FlexDiv gap="20px" position="relative">
-        {props.imageBuffer?.map((blob, index) => {
-          const blobUrl = URL.createObjectURL(blob);
-          return (
-            <FlexDiv
-              alignItems="flex-start"
-              key={blob.lastModified}
-              position="relative">
-              <Image
-                addCss={css`
-                  ${uploadImageStyle}
-                  border-radius: 10px;
-                  border: 8px solid ${palatte.primary['300']};
-                `}
-                width="250px"
-                height="200px"
-                src={blobUrl}
-                alt={blob.name}
-              />
-              <RoundButtonSmall
-                addCss={previewBtn}
-                close
-                onClick={() => {
-                  const newImagesBuffer = props.imageBuffer.filter(
-                    (_, newIndex) => index !== newIndex
-                  );
-                  props.setImageBuffer(newImagesBuffer);
-                }}>
-                <P fontSize="14px" color={palatte.primary.basic}>
-                  預覽
-                </P>
-                <span className="material-icons">cancel</span>
-              </RoundButtonSmall>
-            </FlexDiv>
-          );
-        })}
-        {props.isEdit && (
-          <AddImages
-            imageBuffer={props.imageBuffer}
-            setImageBuffer={props.setImageBuffer}
-          />
-        )}
-      </FlexDiv>
     </FlexDiv>
   );
 }
@@ -384,6 +445,7 @@ function AddReview(props) {
         {props.isEdit && (
           <Button
             addCss={css`
+              margin-top: 10px;
               align-self: flex-end;
               ${mediaQuery[0]} {
                 width: 100%;

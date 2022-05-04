@@ -210,28 +210,49 @@ const ReviewTag = (props) => {
   );
 };
 const uploadImageStyle = css`
-  width: 250px;
+  flex-basis: 250px;
   height: 200px;
   border-radius: 20px;
   overflow: hidden;
 `;
-const uploadImageBg = (props) => css`
+const UploadImageBg = styled.div`
   ${uploadImageStyle};
-  background-color: ${palatte.gray['200']};
+  background-color: ${(props) =>
+    props.isScroll ? 'transparent' : palatte.gray['200']};
   display: flex;
   justify-content: center;
   align-items: center;
+  ${(props) =>
+    props.isScroll &&
+    css`
+      flex-basis: 150px;
+      align-self: center;
+      position: relative;
+      overflow: visible;
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 10px;
+        height: calc(100% + 10px);
+        left: -30px;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0), ${palatte.shadow});
+      }
+    `}
   & * {
     text-align: center;
     color: ${palatte.gray['700']};
   }
+
   &:hover {
     cursor: pointer;
-    background-color: ${palatte.gray['300']};
+    background-color: ${(props) =>
+      props.isScroll ? 'transparent' : palatte.gray['300']};
     * {
       color: ${palatte.gray['800']};
     }
   }
+  ${(props) => props.addCss};
 `;
 
 const UploadBtn = (props) => (
@@ -249,7 +270,7 @@ const UploadBtn = (props) => (
 
 function AddImages(props) {
   return (
-    <label css={uploadImageBg}>
+    <UploadImageBg as="label" isScroll={props.isScroll}>
       <input
         type="file"
         style={{ display: 'none' }}
@@ -264,7 +285,7 @@ function AddImages(props) {
         }}
       />
       <UploadBtn />
-    </label>
+    </UploadImageBg>
   );
 }
 

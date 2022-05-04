@@ -192,6 +192,14 @@ const OverviewCard = (props) => {
     align-items: center;
     justify-content: center;
     margin: 0 0 4px 0;
+    & > .darken {
+      background-color: ${palatte.shadow};
+    }
+    &:hover {
+      & > .darken {
+        background-color: ${palatte.darkerShadow};
+      }
+    }
   `;
   const text = css`
     z-index: 1;
@@ -212,10 +220,6 @@ const OverviewCard = (props) => {
     height: 100%;
     position: absolute;
     top: 0;
-    background-color: ${palatte.shadow};
-    &:hover {
-      background-color: ${palatte.darkerShadow};
-    }
   `;
   return (
     <Card as={props.as} css={container} onClick={props.onClick}>
@@ -243,7 +247,7 @@ const OverviewCard = (props) => {
         height="100%"
         addCss={image}
       />
-      <div css={darken} />
+      <div className="darken" css={darken} />
     </Card>
   );
 };

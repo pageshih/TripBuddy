@@ -19,6 +19,7 @@ const layout = (props) => css`
   overflow-y: ${props.overflowY};
   position: ${props.position};
   background-color: ${props.backgroundColor};
+  box-shadow: ${props.boxShadow};
 `;
 const flexParent = (props) => css`
   display: flex;
