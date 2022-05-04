@@ -1,4 +1,5 @@
 import imageCompression from 'browser-image-compression';
+import { firebaseStorage, firestore } from './firebase';
 
 const timestampToString = (timestamp, type) => {
   const timeType = {
@@ -60,6 +61,87 @@ const compressImages = async (files) => {
   return Promise.all(images);
 };
 
+class uploadReviewFirestore {
+  constructor({
+    uid,
+    itineraryId,
+    scheduleId,
+    updateSchedule,
+    imageBuffer,
+    gallery,
+  }) {
+    this.updateSchedule = updateSchedule;
+    this.uid = uid;
+    this.itineraryId = itineraryId;
+    this.imageBuffer = imageBuffer;
+    this.scheduleId = scheduleId;
+    this.gallery = gallery;
+  }
+  async uploadStorage() {
+    return this.imageBuffer
+      ? await firebaseStorage.uploadImagesOfReviews(
+          {
+            userUID: this.uid,
+            scheduleId: this.scheduleId,
+            itineraryId: this.itineraryId,
+          },
+          this.imageBuffer
+        )
+      : [];
+  }
+  async doUpload() {
+    const newGallery = this.gallery
+      ? [...this.gallery, ...(await this.uploadStorage())]
+      : [...(await this.uploadStorage())];
+    return firestore
+      .editSchedules(
+        this.uid,
+        this.itineraryId,
+        [
+          {
+            ...this.updateSchedule,
+            schedule_id: this.scheduleId,
+            gallery: newGallery,
+          },
+        ],
+        'merge'
+      )
+      .then(() => {
+        alert('上傳成功！');
+        return Promise.resolve(newGallery);
+      })
+      .catch((error) => console.error(error));
+  }
+}
+
+class updateItineraryCoverPhoto {
+  constructor({ uid, itineraryId, imageBuffer }) {
+    this.uid = uid;
+    this.itineraryId = itineraryId;
+    this.imageBuffer = imageBuffer;
+  }
+  async uploadStorage() {
+    return this.imageBuffer
+      ? await firebaseStorage.uploadImages(
+          [this.uid, this.itineraryId],
+          this.imageBuffer
+        )
+      : [];
+  }
+  async uploadFirestore() {
+    const urlAry = await this.uploadStorage();
+    return firestore
+      .editOverviews(this.uid, this.itineraryId, {
+        cover_photo: urlAry[0],
+      })
+      .then(() => {
+        alert('封面圖已更新！');
+        return Promise.resolve(urlAry[0]);
+      })
+      .catch((error) => console.error(error));
+  }
+}
+
 export {
   timestampToString,
   compressImages,
@@ -68,4 +150,6 @@ export {
   setTimeToTimestamp,
   createDepartTimeAry,
   timestampToTimeInput,
+  updateItineraryCoverPhoto,
+  uploadReviewFirestore,
 };

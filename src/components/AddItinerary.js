@@ -14,11 +14,7 @@ import {
   CheckboxCustom,
   AddImageRoundBtn,
 } from './styledComponents/Form';
-import {
-  Button,
-  RoundButtonSmall,
-  RoundButtonSmallWhite,
-} from './styledComponents/Button';
+import { Button, RoundButtonSmallWhite } from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -37,6 +33,7 @@ import {
   filterDaySchedules,
   setTimeToTimestamp,
   createDepartTimeAry,
+  updateItineraryCoverPhoto,
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
@@ -498,7 +495,18 @@ function EditableDate(props) {
 
 function Overview(props) {
   const navigate = useNavigate();
-
+  const { uid } = useContext(Context);
+  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
+    const upload = new updateItineraryCoverPhoto({
+      uid,
+      itineraryId: props.overviews.itinerary_id,
+      imageBuffer,
+    });
+    upload.uploadFirestore().then((cover_photo) => {
+      setIsShowModal(false);
+      props.updateOverviewsFields({ cover_photo });
+    });
+  };
   return (
     <>
       <Container position="relative" margin="0 0 30px 0">
@@ -518,7 +526,7 @@ function Overview(props) {
                 edit
               </RoundButtonSmallWhite>
             ) : (
-              <AddImageRoundBtn />
+              <AddImageRoundBtn upload={uploadCoverPhoto} />
             )}
           </FlexDiv>
           <FlexDiv direction="column" gap="10px" alignItems="center">
@@ -1174,7 +1182,7 @@ function AddSchedule(props) {
             <FlexDiv
               direction="column"
               gap="20px"
-              width={!isBrowse && 'calc(100% - 360px)'}>
+              width={!isBrowse ? 'calc(100% - 360px)' : null}>
               <Overview
                 container={container}
                 isBrowse={isBrowse}

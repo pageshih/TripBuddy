@@ -95,6 +95,24 @@ const firebaseStorage = {
     });
     return Promise.all(uploadPromises);
   },
+  uploadImages(pathAry, files) {
+    const basicPath = pathAry.reduce((acc, path, index, array) => {
+      if (index < array.length - 1) {
+        acc += `${path}/`;
+      } else {
+        acc += path;
+      }
+      return acc;
+    }, '');
+    console.log(basicPath);
+    const uploadPromises = files.map((file) => {
+      const imageRef = ref(this.storage, `${basicPath}/${file.name}`);
+      return uploadBytes(imageRef, file)
+        .then((uploadResult) => getDownloadURL(uploadResult.ref))
+        .then((url) => url);
+    });
+    return Promise.all(uploadPromises);
+  },
 };
 const firestore = {
   db: getFirestore(app),

@@ -83,7 +83,6 @@ const RoundButton = styled.button`
     color: ${colorMap.button.round};
   }
 `;
-const roundBtnWhite = (props) => css``;
 const RoundButtonSmall = styled.button`
   color: ${palatte.gray['700']};
   background-color: transparent;

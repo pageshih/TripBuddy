@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, mediaQuery } from './basicStyle';
-import { FlexDiv } from './Layout';
-import { RoundButtonSmallWhite } from './Button';
+import { palatte, mediaQuery, P } from './basicStyle';
+import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
+import { RoundButtonSmallWhite, Button, ButtonOutline } from './Button';
 import { compressImages } from '../../utils/utilities';
+import { Modal } from './Modal';
 
 const inputBase = css`
   padding: 10px 20px;
@@ -287,7 +289,8 @@ const FileInputHidden = (props) => (
         }
         props.setImageBuffer(addCompressed);
       } else {
-        console.log(e.target.files);
+        console.log(addCompressed);
+        props.setImageBuffer(addCompressed);
       }
     }}
   />
@@ -306,20 +309,72 @@ function AddImages(props) {
   );
 }
 function AddImageRoundBtn(props) {
+  const [imageBuffer, setImageBuffer] = useState([]);
+  const [isShowModal, setIsShowModal] = useState();
+
+  useEffect(() => {
+    if (imageBuffer.length > 0) {
+      setIsShowModal(true);
+    } else {
+      setIsShowModal(false);
+    }
+  }, [imageBuffer]);
+
   return (
-    <RoundButtonSmallWhite
-      as="label"
-      size={props.size}
-      className="material-icons"
-      css={css`
-        cursor: pointer;
-      `}>
-      <FileInputHidden
-        setImageBuffer={props.setImageBuffer}
-        imageBuffer={props.imageBuffer}
-      />
-      insert_photo
-    </RoundButtonSmallWhite>
+    <>
+      <RoundButtonSmallWhite
+        as="label"
+        size={props.size}
+        className="material-icons"
+        css={css`
+          cursor: pointer;
+        `}>
+        <FileInputHidden
+          setImageBuffer={setImageBuffer}
+          imageBuffer={imageBuffer}
+        />
+        insert_photo
+      </RoundButtonSmallWhite>
+      {isShowModal && (
+        <Modal
+          width="fit-content"
+          height="fit-content"
+          maxWidth="1000px"
+          maxHeight="100vh"
+          close={() => setIsShowModal(false)}>
+          <Image
+            src={
+              imageBuffer.length > 0
+                ? URL.createObjectURL(imageBuffer[0])
+                : null
+            }
+            alt="preview-cover-photo"
+          />
+          <FlexDiv
+            width="400px"
+            gap="20px"
+            margin="20px auto"
+            alignItems="center"
+            direction="column">
+            <P fontSize="20px" textAlign="center">
+              確定要將封面更換成這張圖嗎？
+            </P>
+            <FlexChildDiv width="100%" justifyContent="center" gap="20px">
+              <ButtonOutline
+                styled="danger"
+                onClick={() => setIsShowModal(false)}>
+                取消
+              </ButtonOutline>
+              <Button
+                styled="primary"
+                onClick={() => props.upload(imageBuffer, setIsShowModal)}>
+                確定
+              </Button>
+            </FlexChildDiv>
+          </FlexDiv>
+        </Modal>
+      )}
+    </>
   );
 }
 
