@@ -12,8 +12,7 @@ const inputBase = css`
   font-size: 16px;
   border: 1px solid ${palatte.gray['400']};
   &:focus {
-    outline: none;
-    border: 2px solid ${palatte.primary.basic};
+    outline-color: ${palatte.primary.basic};
   }
   ${mediaQuery[0]} {
     font-size: 14px;
@@ -146,35 +145,36 @@ const TextAreaReview = styled.textarea`
     background-color: #fffced;
   }
 `;
-
-const ReviewTagText = styled.p`
-  padding: 5px 15px 8px 15px;
-  font-size: 14px;
+const ReviewTagContainer = styled.div`
+  padding: 3px 15px 5px 15px;
   background-color: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
       ? palatte.secondary.basic
       : palatte.white};
-  color: ${(props) =>
-    props.selectedList?.some((item) => item === props.id)
-      ? palatte.gray['900']
-      : palatte.gray['500']};
   border-radius: 20px;
   border: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
       ? 'none'
       : `1px solid${palatte.gray['500']}`};
+  & > * {
+    font-size: 14px;
+    color: ${(props) =>
+      props.selectedList?.some((item) => item === props.id)
+        ? palatte.gray['900']
+        : palatte.gray['500']};
+  }
   &:hover {
     background-color: ${(props) =>
       props.selectedList?.some((item) => item === props.id)
         ? palatte.secondary['500']
         : palatte.gray['600']};
-    color: ${(props) =>
-      props.selectedList?.some((item) => item === props.id)
-        ? palatte.gray['800']
-        : palatte.white};
-    font-weight: 700;
-  }
-  &:hover {
+    & > * {
+      color: ${(props) =>
+        props.selectedList?.some((item) => item === props.id)
+          ? palatte.gray['800']
+          : palatte.white};
+      font-weight: 700;
+    }
     cursor: pointer;
   }
 `;
@@ -182,12 +182,9 @@ const ReviewTagText = styled.p`
 const ReviewTag = (props) => {
   return (
     <label name={props.tag}>
-      <ReviewTagText
-        id={props.tag}
-        selectedList={props.selectedList}
-        className="material-icons">
-        {props.children}
-      </ReviewTagText>
+      <ReviewTagContainer id={props.tag} selectedList={props.selectedList}>
+        <p className="material-icons">{props.children}</p>
+      </ReviewTagContainer>
       <input
         type="checkbox"
         value={props.tag}
@@ -213,28 +210,49 @@ const ReviewTag = (props) => {
   );
 };
 const uploadImageStyle = css`
-  width: 250px;
+  flex-basis: 250px;
   height: 200px;
   border-radius: 20px;
   overflow: hidden;
 `;
-const uploadImageBg = (props) => css`
+const UploadImageBg = styled.div`
   ${uploadImageStyle};
-  background-color: ${palatte.gray['200']};
+  background-color: ${(props) =>
+    props.isScroll ? 'transparent' : palatte.gray['200']};
   display: flex;
   justify-content: center;
   align-items: center;
+  ${(props) =>
+    props.isScroll &&
+    css`
+      flex-basis: 150px;
+      align-self: center;
+      position: relative;
+      overflow: visible;
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 10px;
+        height: calc(100% + 10px);
+        left: -30px;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0), ${palatte.shadow});
+      }
+    `}
   & * {
     text-align: center;
     color: ${palatte.gray['700']};
   }
+
   &:hover {
     cursor: pointer;
-    background-color: ${palatte.gray['300']};
+    background-color: ${(props) =>
+      props.isScroll ? 'transparent' : palatte.gray['300']};
     * {
       color: ${palatte.gray['800']};
     }
   }
+  ${(props) => props.addCss};
 `;
 
 const UploadBtn = (props) => (
@@ -252,7 +270,7 @@ const UploadBtn = (props) => (
 
 function AddImages(props) {
   return (
-    <label css={uploadImageBg}>
+    <UploadImageBg as="label" isScroll={props.isScroll}>
       <input
         type="file"
         style={{ display: 'none' }}
@@ -267,7 +285,7 @@ function AddImages(props) {
         }}
       />
       <UploadBtn />
-    </label>
+    </UploadImageBg>
   );
 }
 

@@ -40,6 +40,7 @@ const palatte = {
   dark: '#0D060F',
   white: '#FFFFFF',
   shadow: 'rgba(43, 45, 66, 0.2)',
+  darkerShadow: 'rgba(43, 45, 66, 0.7)',
 };
 const breakpoints = [992];
 const mediaQuery = breakpoints.map(
@@ -187,6 +188,9 @@ const H5 = styled.h5`
 const H6 = styled.h6`
   ${heading}
   font-size: ${(props) => props.fontSize || '24px'};
+  ${mediaQuery[0]} {
+    font-size: 18px;
+  }
 `;
 const P = styled.p`
   font-size: ${(props) => props.fontSize || '16px'};

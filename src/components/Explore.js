@@ -106,16 +106,17 @@ function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
       </Button>
       <h3>評論</h3>
       <ul>
-        {placeDetail.reviews.map((review) => (
-          <li key={review.time}>
-            <FlexDiv>
-              <a href={review.author_url}>{review.author_name}</a>
-            </FlexDiv>
-            <p>{review.relative_time_description}</p>
-            <p>評分：{review.rating}</p>
-            <p>{review.text}</p>
-          </li>
-        ))}
+        {placeDetail.reviews !== '未提供' &&
+          placeDetail.reviews.map((review) => (
+            <li key={review.time}>
+              <FlexDiv>
+                <a href={review.author_url}>{review.author_name}</a>
+              </FlexDiv>
+              <p>{review.relative_time_description}</p>
+              <p>評分：{review.rating}</p>
+              <p>{review.text}</p>
+            </li>
+          ))}
       </ul>
     </>
   );
@@ -305,6 +306,7 @@ function Explore({ setWaitingSpots }) {
                 map={map}
                 setMarker={setMarker}
                 setShowSavedSpots={setShowSavedSpots}
+                option="default"
               />
               <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
                 <Map

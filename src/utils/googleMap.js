@@ -201,15 +201,20 @@ function SearchBar(props) {
 
   useEffect(() => {
     if (ref.current) {
+      const option =
+        props.option === 'default'
+          ? googleMap.placesRequestFields
+          : props.option;
       const autocomplete = googleMap.initAutocomplete(
         ref.current,
         props.center,
-        props.option
+        option
       );
       autocomplete.addListener('place_changed', () => {
         const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
         if (place.geometry && place.name) {
           if (props.setPlaceDetail) {
+            console.log(place);
             props.setPlaceDetail(place);
           } else if (props.dispatch) {
             props.dispatch(place);

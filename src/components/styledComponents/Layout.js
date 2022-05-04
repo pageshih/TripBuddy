@@ -15,8 +15,11 @@ const layout = (props) => css`
   max-height: ${props.maxHeight};
   min-height: ${props.minHeight};
   overflow: ${props.overflow};
+  overflow-x: ${props.overflowX};
+  overflow-y: ${props.overflowY};
   position: ${props.position};
   background-color: ${props.backgroundColor};
+  box-shadow: ${props.boxShadow};
 `;
 const flexParent = (props) => css`
   display: flex;
@@ -42,7 +45,6 @@ const Container = styled('div')`
 const FlexDiv = styled('div')`
   ${layout}
   ${flexParent}
-  ${(props) => props.css}
   ${(props) => props.addCss}
 `;
 
@@ -50,7 +52,6 @@ const FlexChildDiv = styled('div')`
   ${flexChild}
   ${flexParent}
   ${layout}
-  ${(props) => props.css}
   ${(props) => props.addCss}
 `;
 
@@ -63,8 +64,8 @@ const Image = (props) => (
       max-width: ${props.maxWidth};
       min-height: ${props.minHeight};
       max-height: ${props.maxHeight};
+      position: relative;
       ${props.addCss}
-      posision: relative;
     `}>
     <img
       src={props.src}
