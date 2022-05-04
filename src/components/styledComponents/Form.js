@@ -230,7 +230,7 @@ const UploadImageBg = styled.div`
   ${(props) =>
     props.isScroll &&
     css`
-      flex-basis: 150px;
+      max-width: fit-content;
       align-self: center;
       position: relative;
       overflow: visible;

@@ -181,12 +181,12 @@ function ReviewGallery(props) {
     }
   `;
   return (
-    <FlexDiv gap="20px">
-      <Container ref={galleryContainer} overflowY="scroll">
+    <FlexDiv gap="15px">
+      <FlexDiv gap="15px" ref={galleryContainer} overflowY="scroll">
         {props.gallery && (
-          <FlexDiv gap="20px">
+          <FlexDiv gap="15px">
             {props.gallery?.map((url, index) => (
-              <Container key={index} position="relative">
+              <Container key={index} position="relative" margin="0 5px 0 0">
                 <Image
                   addCss={image}
                   width="250px"
@@ -212,45 +212,50 @@ function ReviewGallery(props) {
             ))}
           </FlexDiv>
         )}
-        <FlexDiv gap="20px" position="relative">
-          {props.imageBuffer?.map((blob, index) => {
-            const blobUrl = URL.createObjectURL(blob);
-            return (
-              <Container key={blob.lastModified} position="relative">
-                <Image
-                  addCss={css`
-                    ${image}
-                    border-radius: 10px;
-                    border: 8px solid ${palatte.primary['300']};
-                  `}
-                  width="250px"
-                  height="200px"
-                  src={blobUrl}
-                  alt={blob.name}
-                />
-                <P
-                  fontSize="14px"
-                  addCss={preview}
-                  color={palatte.primary.basic}>
-                  預覽
-                </P>
-                <RoundButtonSmall
-                  className="material-icons"
-                  close
-                  addCss={closeBtn}
-                  onClick={() => {
-                    const newImagesBuffer = props.imageBuffer.filter(
-                      (_, newIndex) => index !== newIndex
-                    );
-                    props.setImageBuffer(newImagesBuffer);
-                  }}>
-                  cancel
-                </RoundButtonSmall>
-              </Container>
-            );
-          })}
-        </FlexDiv>
-      </Container>
+        {props.imageBuffer?.length > 0 && (
+          <FlexDiv gap="15px">
+            {props.imageBuffer.map((blob, index) => {
+              const blobUrl = URL.createObjectURL(blob);
+              return (
+                <Container
+                  key={blob.lastModified}
+                  position="relative"
+                  margin="0 5px 0 0">
+                  <Image
+                    addCss={css`
+                      ${image}
+                      border-radius: 10px;
+                      border: 8px solid ${palatte.primary['300']};
+                    `}
+                    width="250px"
+                    height="200px"
+                    src={blobUrl}
+                    alt={blob.name}
+                  />
+                  <P
+                    fontSize="14px"
+                    addCss={preview}
+                    color={palatte.primary.basic}>
+                    預覽
+                  </P>
+                  <RoundButtonSmall
+                    className="material-icons"
+                    close
+                    addCss={closeBtn}
+                    onClick={() => {
+                      const newImagesBuffer = props.imageBuffer.filter(
+                        (_, newIndex) => index !== newIndex
+                      );
+                      props.setImageBuffer(newImagesBuffer);
+                    }}>
+                    cancel
+                  </RoundButtonSmall>
+                </Container>
+              );
+            })}
+          </FlexDiv>
+        )}
+      </FlexDiv>
       {props.isEdit && (
         <AddImages
           imageBuffer={props.imageBuffer}
@@ -408,7 +413,7 @@ function AddReview(props) {
                 itineraryId: props.itineraryId,
                 scheduleId: props.scheduleId,
                 updateSchedule: {
-                  review_tags: checkedReviewTags,
+                  review_tags: checkedReviewTags ? checkedReviewTags : [],
                   review: review ? review : '',
                 },
                 imageBuffer,
@@ -418,10 +423,13 @@ function AddReview(props) {
                 setGallery(newGallery);
                 setImageBuffer([]);
                 setReviewShowInput(false);
+                const checkTagList = checkedReviewTags
+                  ? [...checkedReviewTags]
+                  : [];
                 setReviewTags(
                   props.allReviewTags
                     ? [
-                        ...checkedReviewTags,
+                        ...checkTagList,
                         ...reviewTags.filter(
                           (tag) =>
                             checkedReviewTags.every(
@@ -429,7 +437,7 @@ function AddReview(props) {
                             ) && tag
                         ),
                       ]
-                    : checkedReviewTags
+                    : checkTagList
                 );
                 if (props.setUploadedReview) {
                   props.setUploadedReview({
