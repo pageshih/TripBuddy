@@ -624,6 +624,8 @@ function Overview(props) {
                 )
               }
               setAllUnchecked={() => props.setSelectedSchedulesId([])}
+              selectAll={props.selectAll}
+              setSelectAll={props.setSelectAll}
             />
             <select
               value={props.changeTime}
@@ -664,6 +666,7 @@ function AddSchedule(props) {
   const [departString, setDepartString] = useState();
   const [isBrowse, setIsBrowse] = useState(props.browse);
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const [changeTime, setChangeTime] = useState();
 
   useEffect(() => {
@@ -1050,6 +1053,8 @@ function AddSchedule(props) {
     setDay(nextDay);
     setSchedules(allSchedules.current[nextDay]);
     setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
+    setSelectAll(false);
+    setSelectedSchedulesId([]);
     window.scrollTo(0, 0);
   };
   const changeSchedulesTime = async () => {
@@ -1186,6 +1191,8 @@ function AddSchedule(props) {
                 setChangeTime={setChangeTime}
                 changeSchedulesTime={changeSchedulesTime}
                 switchDay={switchDay}
+                setSelectAll={setSelectAll}
+                selectAll={selectAll}
               />
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (

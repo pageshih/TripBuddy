@@ -95,6 +95,11 @@ const CheckboxCustom = (props) => {
       <input
         type="checkbox"
         style={{ display: 'none' }}
+        checked={
+          props.selectAll ||
+          props.selectedList?.some((id) => id === props.id) ||
+          false
+        }
         id={props.selectAll !== undefined ? 'selectAll' : props.id}
         onChange={(e) => {
           if (props.selectAll !== undefined) {
@@ -114,20 +119,18 @@ const CheckboxCustom = (props) => {
   );
 };
 function SelectAllCheckBox(props) {
-  const [selectAll, setSelectAll] = useState(false);
-
   const selectAllItems = (e) => {
     if (e.target.checked) {
-      setSelectAll(true);
+      props.setSelectAll(true);
       props.setAllChecked();
     } else {
-      setSelectAll(false);
+      props.setSelectAll(false);
       props.setAllUnchecked();
     }
   };
   return (
     <FlexDiv gap="10px" alignItems="center" padding={props.padding}>
-      <CheckboxCustom selectAll={selectAll} onChange={selectAllItems} />
+      <CheckboxCustom selectAll={props.selectAll} onChange={selectAllItems} />
       <p>全選</p>
     </FlexDiv>
   );
