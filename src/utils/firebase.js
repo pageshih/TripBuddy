@@ -9,7 +9,13 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -94,22 +100,28 @@ const firebaseStorage = {
     });
     return Promise.all(uploadPromises);
   },
-  uploadImages(pathAry, files) {
-    const basicPath = pathAry.reduce((acc, path, index, array) => {
-      if (index < array.length - 1) {
-        acc += `${path}/`;
-      } else {
-        acc += path;
-      }
+  getPath(pathAry) {
+    return pathAry.reduce((acc, path, index, array) => {
+      acc += `${path}/`;
       return acc;
     }, '');
+  },
+  uploadImages(pathAry, files, customFileName) {
+    const basicPath = this.getPath(pathAry);
     const uploadPromises = files.map((file) => {
-      const imageRef = ref(this.storage, `${basicPath}/${file.name}`);
+      const imageRef = ref(
+        this.storage,
+        `${basicPath}${customFileName || file.name}`
+      );
       return uploadBytes(imageRef, file)
         .then((uploadResult) => getDownloadURL(uploadResult.ref))
         .then((url) => url);
     });
     return Promise.all(uploadPromises);
+  },
+  clearImageRoot(pathAry) {
+    const imageRootRef = ref(this.storage, `${this.getPath(pathAry)}/*`);
+    return deleteObject(imageRootRef);
   },
 };
 const firestore = {

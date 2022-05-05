@@ -124,7 +124,8 @@ class updateItineraryCoverPhoto {
     return this.imageBuffer
       ? await firebaseStorage.uploadImages(
           [this.uid, this.itineraryId],
-          this.imageBuffer
+          this.imageBuffer,
+          'cover_photo'
         )
       : [];
   }

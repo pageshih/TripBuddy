@@ -286,7 +286,7 @@ function AddReview(props) {
         checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
       );
       firestore.editProfile(uid, {
-        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
+        review_tags: reviewTags ? [...reviewTags, addTag] : [addTag],
       });
       setAddTag('');
     }

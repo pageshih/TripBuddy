@@ -83,16 +83,48 @@ const RoundButton = styled.button`
     color: ${colorMap.button.round};
   }
 `;
+
+const buttonSmallColorMap = {
+  primary: {
+    default: {
+      backgroundColor: palatte.primary.basic,
+      color: palatte.white,
+    },
+    hover: {
+      backgroundColor: palatte.primary['800'],
+      color: palatte.white,
+    },
+  },
+};
 const RoundButtonSmall = styled.button`
-  color: ${palatte.gray['700']};
-  background-color: transparent;
-  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${(props) =>
+    props.styled
+      ? buttonSmallColorMap[props.styled].default.color
+      : palatte.gray['700']};
+  background-color: ${(props) =>
+    props.styled
+      ? buttonSmallColorMap[props.styled].default.backgroundColor
+      : 'transparent'};
+  padding: ${(props) => props.padding || '0px'};
   border-radius: 50%;
   width: ${(props) => props.size || '24px'};
   height: ${(props) => props.size || '24px'};
   &:hover {
     color: ${(props) =>
-      props.close ? palatte.danger.basic : palatte.gray['500']};
+      props.close
+        ? palatte.danger.basic
+        : props.styled
+        ? buttonSmallColorMap[props.styled].hover.color
+        : palatte.gray['500']};
+    background-color: ${(props) =>
+      props.styled
+        ? buttonSmallColorMap[props.styled].hover.backgroundColor
+        : null};
+    box-shadow: ${(props) =>
+      props.styled ? `1px 1px 1px 1px ${palatte.shadow}` : null};
   }
   ${(props) => props.addCss}
 `;
@@ -126,6 +158,47 @@ const RoundButtonSmallOutline = styled(RoundButtonSmall)`
   }
 `;
 
+const capsule = (props) => css`
+  padding: 5px 5px 6px 5px;
+  border-radius: 30px;
+  background-color: ${props.styled
+    ? buttonSmallColorMap[props.styled].default.backgroundColor
+    : 'inherit'};
+  color: ${props.styled
+    ? buttonSmallColorMap[props.styled].default.color
+    : 'inherit'};
+  &:hover {
+    background-color: ${palatte.gray['700']};
+    color: ${palatte.gray['100']};
+  }
+`;
+const CapsuleButton = styled.button`
+  ${capsule}
+  padding: 5px 10px 5px 15px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 16px;
+  line-height: 0.9;
+  & span {
+    font-size: 20px;
+    color: ${palatte.white};
+    opacity: 0.7;
+  }
+  &:hover {
+    & span {
+      opacity: 1;
+      color: ${palatte.danger.basic};
+    }
+  }
+`;
+const ReviewTagRemoveButton = (props) => (
+  <CapsuleButton styled={props.styled}>
+    {props.children}
+    <span className="material-icons">cancel</span>
+  </CapsuleButton>
+);
+
 export {
   Button,
   ButtonOutline,
@@ -135,4 +208,5 @@ export {
   RoundButtonSmall,
   RoundButtonSmallOutline,
   RoundButtonSmallWhite,
+  ReviewTagRemoveButton,
 };

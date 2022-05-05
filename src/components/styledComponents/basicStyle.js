@@ -156,7 +156,7 @@ const Logo = (props) => {
 };
 
 const heading = (props) => css`
-  font-weight: medium;
+  font-weight: ${props.fontWeight || 700};
   color: ${props.color};
   text-align: ${props.textAlign};
   margin: ${props.margin};
@@ -193,6 +193,7 @@ const H6 = styled.h6`
   }
 `;
 const P = styled.p`
+  font-weight: 400;
   font-size: ${(props) => props.fontSize || '16px'};
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};

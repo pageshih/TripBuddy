@@ -526,7 +526,12 @@ function Overview(props) {
                 edit
               </RoundButtonSmallWhite>
             ) : (
-              <AddImageRoundBtn upload={uploadCoverPhoto} />
+              <AddImageRoundBtn
+                upload={uploadCoverPhoto}
+                white
+                icon="insert_photo"
+                confirmMessage="確定要將封面更換成這張圖嗎？"
+              />
             )}
           </FlexDiv>
           <FlexDiv direction="column" gap="10px" alignItems="center">
