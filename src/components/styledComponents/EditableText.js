@@ -3,7 +3,12 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { headingComponents, palatte, headingFontSize } from './basicStyle';
+import {
+  headingComponents,
+  palatte,
+  headingFontSize,
+  mediaQuery,
+} from './basicStyle';
 import { TextInput } from './Form';
 
 const EditableHeading = (props) => {
@@ -48,6 +53,9 @@ const EditableHeading = (props) => {
     font-size: ${props.fontSize || headingFontSize.desktop[props.level]};
     &:focus {
       outline: 2px solid ${palatte.primary.basic};
+    }
+    ${mediaQuery[0]} {
+      font-size: ${headingFontSize.mobile[props.level]};
     }
     ${props.addCss}
   `;

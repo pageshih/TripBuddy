@@ -78,11 +78,11 @@ function UserSetting(props) {
 
   return (
     <Modal
-      width="70%"
-      height="70%"
+      minWidth="70%"
+      height="90%"
       padding="20px 40px"
       close={() => props.setIsShowSetting(false)}>
-      <FlexDiv direction="column" padding="20px 0" gap="30px" height="100%">
+      <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
         <FlexDiv
           gap="20px"
           alignItems="center"
@@ -141,7 +141,7 @@ function UserSetting(props) {
             設置
           </H5>
         </FlexDiv>
-        <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="scroll">
+        <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="auto">
           <Accordion
             titleElement={
               <SettingTitle
@@ -149,11 +149,7 @@ function UserSetting(props) {
                 subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
               />
             }>
-            <FlexDiv
-              direction="column"
-              gap="15px"
-              overflowY="scroll"
-              height="100%">
+            <FlexDiv direction="column" gap="15px" height="100%">
               <form
                 css={css`
                   flex-grow: 1;

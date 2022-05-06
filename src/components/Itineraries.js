@@ -214,7 +214,7 @@ function Itineraries() {
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>即將到來的行程</H4>
-                  <FlexDiv as="ul" gap="30px" overflowY="scroll">
+                  <FlexDiv as="ul" gap="30px" overflowX="auto">
                     {coming?.map((itinerary) => (
                       <OverviewCard
                         src={itinerary.cover_photo}
@@ -235,7 +235,7 @@ function Itineraries() {
               {future?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>其他行程</H4>
-                  <FlexDiv as="ul" gap="60px" overflowY="scroll">
+                  <FlexDiv as="ul" gap="60px" overflowX="auto">
                     {future?.map((itinerary) => (
                       <OverviewCard
                         as="li"

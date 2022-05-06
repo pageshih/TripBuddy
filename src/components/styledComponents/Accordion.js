@@ -4,20 +4,26 @@ import { css } from '@emotion/react';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
 
+const ExpandIcon = styled.span`
+  color: ${palatte.gray['700']};
+  align-self: flex-start;
+  transform: ${(props) => (props.isExpand ? 'rotateZ(180deg)' : null)};
+  transition: transform 0.4s ease;
+`;
+const AccordionContainer = styled(FlexDiv)`
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: ${palatte.gray['100']};
+  gap: 20px;
+  width: 100%;
+  ${(props) => props.addCss}
+`;
+
 function Accordion(props) {
   const [isExpand, setIsExpand] = useState(false);
   return (
-    <FlexDiv
-      direction="column"
-      padding="20px"
-      borderRadius="10px"
-      backgroundColor={palatte.gray['100']}
-      gap="20px"
-      addCss={css`
-        width: 100%;
-        transition-duration: 0.1s;
-        ${props.addCss}
-      `}>
+    <AccordionContainer>
       <FlexDiv
         justifyContent="space-between"
         addCss={css`
@@ -27,16 +33,12 @@ function Accordion(props) {
         <FlexDiv direction="column" grow="1" gap="3px">
           {props.titleElement}
         </FlexDiv>
-        <span
-          className="material-icons"
-          css={css`
-            color: ${palatte.gray['500']};
-          `}>
-          {isExpand ? 'expand_less' : 'expand_more'}
-        </span>
+        <ExpandIcon className="material-icons" isExpand={isExpand}>
+          expand_more
+        </ExpandIcon>
       </FlexDiv>
       {isExpand && props.children}
-    </FlexDiv>
+    </AccordionContainer>
   );
 }
 

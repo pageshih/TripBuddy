@@ -20,6 +20,8 @@ const FadeBg = styled.div`
 const CenterContainer = styled.div`
   max-width: ${(props) => props.maxWidth};
   max-height: ${(props) => props.maxHeight};
+  min-width: ${(props) => props.minWidth};
+  min-height: ${(props) => props.minHeight};
   flex-basis: ${(props) => props.width || '350px'};
   height: ${(props) => props.height || '400px'};
   background-color: ${palatte.white};
@@ -57,6 +59,8 @@ function Modal(props) {
         padding={props.padding}
         width={props.width}
         height={props.height}
+        minWidth={props.minWidth}
+        minHeight={props.minHeight}
         maxHeight={props.maxHeight}
         maxWidth={props.maxWidth}>
         <CloseBtn
