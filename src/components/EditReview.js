@@ -320,7 +320,7 @@ function AddReview(props) {
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
     setReview(props.reviews.review);
-  }, [props.isEdit]);
+  }, [props.isEdit, props.allReviewTags]);
   const reviewContainer = css`
     border-radius: 30px;
     background-color: ${palatte.white};

@@ -71,12 +71,12 @@ function Itineraries() {
             future: [],
           };
           overviews.forEach(async (itinerary) => {
-            const countDownDay = Math.floor(
-              (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
-            );
+            const countDownDay =
+              new Date(itinerary.start_date).getDate() -
+              new Date(now).getDate();
             const tripDays =
-              (itinerary.end_date - itinerary.start_date) /
-              (24 * 60 * 60 * 1000);
+              new Date(itinerary.end_date).getDate() -
+              new Date(itinerary.start_date).getDate();
             if (countDownDay <= 0 && countDownDay + tripDays >= -1) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)

@@ -204,5 +204,12 @@ const P = styled.p`
   }
   ${(props) => props.addCss}
 `;
+const Loader = styled.div`
+  width: ${(props) => props.size};
+  height: ${(props) => props.size};
+  border-radius: 50%;
+  border: 10px solid ${(props) => props.color || palatte.gray['400']};
+  border-top: none;
+`;
 
-export { palatte, Logo, H2, H3, H4, H5, H6, P, styles, mediaQuery };
+export { palatte, Logo, H2, H3, H4, H5, H6, P, styles, mediaQuery, Loader };

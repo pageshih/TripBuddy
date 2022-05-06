@@ -167,36 +167,35 @@ const capsule = (props) => css`
   color: ${props.styled
     ? buttonSmallColorMap[props.styled].default.color
     : 'inherit'};
-  &:hover {
-    background-color: ${palatte.gray['700']};
-    color: ${palatte.gray['100']};
-  }
 `;
-const CapsuleButton = styled.button`
+const CapsuleTag = styled.div`
   ${capsule}
   padding: 5px 10px 5px 15px;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   font-size: 16px;
   line-height: 0.9;
-  & span {
-    font-size: 20px;
-    color: ${palatte.white};
-    opacity: 0.7;
-  }
-  &:hover {
-    & span {
-      opacity: 1;
-      color: ${palatte.danger.basic};
-    }
-  }
 `;
 const ReviewTagRemoveButton = (props) => (
-  <CapsuleButton styled={props.styled}>
+  <CapsuleTag styled={props.styled}>
     {props.children}
-    <span className="material-icons">cancel</span>
-  </CapsuleButton>
+    <RoundButtonSmall
+      size="20px"
+      addCss={css`
+        font-size: 20px;
+        color: ${palatte.white};
+        opacity: 0.7;
+        &:hover {
+          opacity: 1;
+          color: ${palatte.white};
+        }
+      `}
+      onClick={props.onClick}
+      className="material-icons">
+      cancel
+    </RoundButtonSmall>
+  </CapsuleTag>
 );
 
 export {

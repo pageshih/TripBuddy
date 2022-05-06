@@ -583,12 +583,7 @@ function DepartController(props) {
           }
         `}>
         <p>出發時間</p>
-        <p>
-          {timestampToString(
-            props.overviews.depart_times[props.day],
-            'simpleDate'
-          )}
-        </p>
+        <p>{timestampToString(props.departTimes[props.day], 'simpleDate')}</p>
       </FlexDiv>
       <EditableH2
         as="p"
@@ -598,13 +593,13 @@ function DepartController(props) {
           font-size: 36px;
         `}
         isBrowse={props.isBrowse}
-        onSubmit={(departTimes) => {
-          if (departTimes !== props.departString) {
+        onSubmit={(newDepartString) => {
+          if (newDepartString !== props.departString) {
             const newDepartTimestamp = setTimeToTimestamp(
-              props.overviews.depart_times[props.day],
-              departTimes
+              props.departTimes[props.day],
+              newDepartString
             );
-            const newDepartTimes = Array.from(props.overviews.depart_times);
+            const newDepartTimes = Array.from(props.departTimes);
             newDepartTimes.splice(props.day, 1, newDepartTimestamp);
             props.updateOverviewsFields({ depart_times: newDepartTimes });
             props.updateTimeOfSchedule(
@@ -642,7 +637,7 @@ function MoveScheduleController(props) {
         <option value="" disabled>
           修改所選行程的日期
         </option>
-        {props.overviews.depart_times.map((timestamp) => (
+        {props.departTimes?.map((timestamp) => (
           <option value={timestamp} key={timestamp}>
             {timestampToString(timestamp, 'date')}
           </option>
@@ -693,7 +688,7 @@ function AddSchedule(props) {
             alert('找不到行程資料');
           }
         })
-        .catch((error) => console.log(error));
+        .catch((error) => console.error(error));
     }
   }, [uid, itineraryId]);
 
@@ -836,7 +831,7 @@ function AddSchedule(props) {
       duration,
       placeDetail: remove,
       schedule_id: 'unknown',
-      travel_mode: 'DRIVING',
+      travel_mode: overviews.default_travel_mode,
     };
     firestore
       .addSchedule(uid, itineraryId, addData, true)
@@ -1203,7 +1198,7 @@ function AddSchedule(props) {
                 justifyContent="space-between"
                 alignItems="flex-end">
                 <DepartController
-                  overviews={overviews}
+                  departTimes={overviews.depart_times}
                   day={day}
                   isBrowse={isBrowse}
                   departString={departString}
@@ -1214,7 +1209,7 @@ function AddSchedule(props) {
                 />
                 {!props.isBrowse && (
                   <MoveScheduleController
-                    overviews={overviews}
+                    departTimes={overviews.depart_times}
                     changeTime={changeTime}
                     setChangeTime={setChangeTime}
                     schedules={schedules}
@@ -1228,7 +1223,7 @@ function AddSchedule(props) {
                 <Pagination
                   day={day}
                   switchDay={switchDay}
-                  finalDay={overviews.depart_times.length - 1}
+                  finalDay={overviews?.depart_times?.length - 1}
                 />
               </FlexDiv>
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>

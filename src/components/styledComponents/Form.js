@@ -166,10 +166,11 @@ const ReviewTagContainer = styled.div`
       ? palatte.secondary.basic
       : palatte.white};
   border-radius: 20px;
-  border: ${(props) =>
+  outline: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
       ? 'none'
       : `1px solid${palatte.gray['500']}`};
+  outline-offset: -1px;
   & > * {
     font-size: 14px;
     color: ${(props) =>

@@ -25,10 +25,12 @@ import {
   P,
   H5,
   H6,
+  Loader,
 } from './styledComponents/basicStyle';
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
+import loadingSvg from '../images/Dual Ball-1s-200px.svg';
 
 const activeStyle = (isActive) => {
   return {
@@ -47,10 +49,7 @@ function UserSetting(props) {
   const { uid } = useContext(Context);
   const [addTag, setAddTag] = useState('');
   const addTagInput = useRef();
-  const updateProfile = async (newProfile) => {
-    await firestore.editProfile(uid, newProfile);
-    props.setProfile({ ...props.profile, ...newProfile });
-  };
+  const [travelMode, setTravelMode] = useState();
   const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
     try {
       const urlAry = await firebaseStorage.uploadImages(
@@ -58,13 +57,19 @@ function UserSetting(props) {
         imageBuffer,
         'profile_photo'
       );
-      updateProfile({ photo: urlAry[0] });
+      await firestore.editProfile(uid, { photo: urlAry[0] });
+      props.setProfile({ ...props.profile, photo: urlAry[0] });
       alert('大頭貼已更新！');
       setIsShowModal(false);
     } catch (error) {
       console.log(error);
     }
   };
+  useEffect(() => {
+    firestore.getItinerariesSetting(uid).then((res) => {
+      setTravelMode(res.default_travel_mode);
+    });
+  }, []);
 
   return (
     <Modal
@@ -72,7 +77,7 @@ function UserSetting(props) {
       height="70%"
       padding="20px 40px"
       close={() => props.setIsShowSetting(false)}>
-      <FlexDiv direction="column" padding="20px 0" gap="30px">
+      <FlexDiv direction="column" padding="20px 0" gap="30px" height="100%">
         <FlexDiv
           gap="20px"
           alignItems="center"
@@ -126,103 +131,130 @@ function UserSetting(props) {
             設置
           </H5>
         </FlexDiv>
-        <Accordion
-          titleElement={
-            <SettingTitle
-              title="紀錄心得標籤"
-              subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
-            />
-          }>
-          <FlexDiv
-            direction="column"
-            gap="15px"
-            overflowY="scroll"
-            height="100%">
-            <form
-              css={css`
-                flex-grow: 1;
-                position: relative;
-              `}
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const newReviewTags = props.profile.review_tags
-                  ? [...props.profile.review_tags, addTag]
-                  : [addTag];
-                await updateProfile({ review_tags: newReviewTags });
-                setAddTag('');
-              }}>
-              <TextInput
-                placeholder="新增標籤"
-                value={addTag}
-                ref={addTagInput}
-                onChange={(e) => setAddTag(e.target.value)}
+        <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="scroll">
+          <Accordion
+            titleElement={
+              <SettingTitle
+                title="紀錄心得標籤"
+                subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
               />
-              <FlexDiv
-                gap="5px"
-                addCss={css`
-                  position: absolute;
-                  right: 12px;
-                  top: calc(50% - 12px);
-                `}>
-                <RoundButtonSmall
-                  className="material-icons"
-                  type="submit"
+            }>
+            <FlexDiv
+              direction="column"
+              gap="15px"
+              overflowY="scroll"
+              height="100%">
+              <form
+                css={css`
+                  flex-grow: 1;
+                  position: relative;
+                `}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const newReviewTags = props.reviewTags
+                    ? [...props.reviewTags, addTag]
+                    : [addTag];
+                  await firestore.editProfile(uid, {
+                    review_tags: newReviewTags,
+                  });
+                  props.setReviewTags(newReviewTags);
+                  setAddTag('');
+                }}>
+                <TextInput
+                  placeholder="新增標籤"
+                  value={addTag}
+                  ref={addTagInput}
+                  onChange={(e) => setAddTag(e.target.value)}
+                />
+                <FlexDiv
+                  gap="5px"
                   addCss={css`
-                    color: ${palatte.gray['500']};
-                    &:hover {
-                      color: ${palatte.primary.basic};
-                    }
+                    position: absolute;
+                    right: 12px;
+                    top: calc(50% - 12px);
                   `}>
-                  done
-                </RoundButtonSmall>
-                <RoundButtonSmall
-                  className="material-icons"
-                  type="button"
-                  addCss={css`
-                    color: ${palatte.gray['500']};
-                    &:hover {
-                      color: ${palatte.danger.basic};
-                    }
-                  `}
-                  onClick={() => {
-                    setAddTag('');
-                    addTagInput.current.focus();
-                  }}>
-                  close
-                </RoundButtonSmall>
+                  <RoundButtonSmall
+                    className="material-icons"
+                    type="submit"
+                    addCss={css`
+                      color: ${palatte.gray['500']};
+                      &:hover {
+                        color: ${palatte.primary.basic};
+                      }
+                    `}>
+                    done
+                  </RoundButtonSmall>
+                  <RoundButtonSmall
+                    className="material-icons"
+                    type="button"
+                    addCss={css`
+                      color: ${palatte.gray['500']};
+                      &:hover {
+                        color: ${palatte.danger.basic};
+                      }
+                    `}
+                    onClick={() => {
+                      setAddTag('');
+                      addTagInput.current.focus();
+                    }}>
+                    close
+                  </RoundButtonSmall>
+                </FlexDiv>
+              </form>
+              <FlexDiv gap="5px">
+                {props.reviewTags?.length > 0 ? (
+                  props.reviewTags.map((tag) => (
+                    <ReviewTagRemoveButton
+                      styled="primary"
+                      key={tag}
+                      onClick={async () => {
+                        const newReviewTags = props.reviewTags.filter(
+                          (originTag) => originTag !== tag
+                        );
+                        await firestore.editProfile(uid, {
+                          review_tags: newReviewTags,
+                        });
+                        props.setReviewTags(newReviewTags);
+                      }}>
+                      {tag}
+                    </ReviewTagRemoveButton>
+                  ))
+                ) : (
+                  <P color={palatte.gray['500']}>尚未添加心得標籤</P>
+                )}
               </FlexDiv>
-            </form>
-            <FlexDiv gap="5px">
-              {props.profile.review_tags?.length > 0 ? (
-                props.profile.review_tags.map((tag) => (
-                  <ReviewTagRemoveButton styled="primary" key={tag}>
-                    {tag}
-                  </ReviewTagRemoveButton>
-                ))
-              ) : (
-                <P color={palatte.gray['500']}>尚未添加心得標籤</P>
-              )}
             </FlexDiv>
-          </FlexDiv>
-        </Accordion>
-        <Accordion
-          titleElement={
-            <SettingTitle
-              title="預設交通方式"
-              subTitle="編輯行程會自動以選定的交通方式計算到景點的時間與距離"
-            />
-          }>
-          <Select
-            value={props.profile.default_travel_mode}
-            onChange={(e) => {
-              updateProfile({ default_travel_mode: e.target.value });
-            }}>
-            <option value="DRIVING">開車</option>
-            <option value="TRANSIT">大眾運輸</option>
-            <option value="WALKING">走路</option>
-            <option value="BICYCLING">騎自行車</option>
-          </Select>
-        </Accordion>
+          </Accordion>
+          <Accordion
+            titleElement={
+              <SettingTitle
+                title="預設交通方式"
+                subTitle="編輯行程會自動以選定的交通方式計算到景點的時間與距離"
+              />
+            }>
+            <Select
+              value={travelMode}
+              onChange={(e) => {
+                const newTravelMode = e.target.value;
+                setTravelMode('loading');
+                firestore
+                  .setItinerariesSetting(uid, {
+                    default_travel_mode: newTravelMode,
+                  })
+                  .then(() => {
+                    setTravelMode(newTravelMode);
+                  });
+              }}>
+              <option value="loading" disabled hidden>
+                ...
+              </option>
+              <option value="DRIVING">開車</option>
+              <option value="TRANSIT">大眾運輸</option>
+              <option value="WALKING">走路</option>
+              <option value="BICYCLING">騎自行車</option>
+            </Select>
+          </Accordion>
+        </FlexChildDiv>
       </FlexDiv>
     </Modal>
   );
@@ -235,7 +267,7 @@ function UserProfile(props) {
 
   const userProfileWrapper = css`
     border-radius: 30px;
-    padding: 30px 25px 30px 30px;
+    padding: 25px 20px 25px 25px;
     background-color: ${palatte.secondary.basic};
     display: flex;
     align-items: center;
@@ -289,8 +321,9 @@ function UserProfile(props) {
       firestore
         .getProfile(uid)
         .then((res) => {
-          setProfile(res);
           setReviewTags(res.review_tags);
+          delete res.review_tags;
+          setProfile(res);
         })
         .catch((error) => console.error(error));
     }
@@ -317,6 +350,8 @@ function UserProfile(props) {
                 setIsShowSetting={setIsShowSetting}
                 setProfile={setProfile}
                 profile={profile}
+                reviewTags={reviewTags}
+                setReviewTags={setReviewTags}
               />
             )}
             <Container
@@ -375,8 +410,11 @@ function UserProfile(props) {
                       `}>
                       <Image
                         round
-                        shadow
-                        size="48px"
+                        size="60px"
+                        addCss={css`
+                          box-shadow: 2px 2px 1px 1px ${palatte.shadow};
+                          border: 1px solid ${palatte.gray['100']};
+                        `}
                         src={profile.photo}
                         alt="profilePhoto"
                       />
