@@ -23,38 +23,42 @@ function ReviewTags(props) {
   const tagContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
   useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (
-        entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
-      ) {
-        setIsShowShadow(true);
-      } else {
-        setIsShowShadow(false);
-      }
-    });
-    resizeObserver.observe(tagContainer.current, { box: 'border-box' });
-    return function cleanup() {
-      resizeObserver.disconnect();
-    };
-  }, []);
+    if (tagContainer.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        if (
+          entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
+        ) {
+          setIsShowShadow(true);
+        } else {
+          setIsShowShadow(false);
+        }
+      });
+      resizeObserver.observe(tagContainer.current, { box: 'border-box' });
+      return function cleanup() {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [tagContainer]);
   return (
     <FlexDiv alignItems="center" gap="10px" padding="0 0 10px 0">
-      <FlexDiv
-        gap="12px"
-        overflowY="scroll"
-        ref={tagContainer}
-        position="relative">
-        {props.defaultTags?.map((tag) => (
-          <ReviewTag
-            key={tag}
-            isEdit={props.isEdit}
-            tag={tag}
-            selectedList={props.checkedTags}
-            setSelectedList={props.setCheckedTags}>
-            {tag}
-          </ReviewTag>
-        ))}
-      </FlexDiv>
+      {props.defaultTags && (
+        <FlexDiv
+          gap="12px"
+          overflowY="auto"
+          ref={tagContainer}
+          position="relative">
+          {props.defaultTags?.map((tag) => (
+            <ReviewTag
+              key={tag}
+              isEdit={props.isEdit}
+              tag={tag}
+              selectedList={props.checkedTags}
+              setSelectedList={props.setCheckedTags}>
+              {tag}
+            </ReviewTag>
+          ))}
+        </FlexDiv>
+      )}
       <FlexDiv position="relative">
         {isShowShadow && (
           <div
@@ -129,20 +133,22 @@ function ReviewGallery(props) {
   const galleryContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
   useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (
-        entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
-      ) {
-        setIsShowShadow(true);
-      } else {
-        setIsShowShadow(false);
-      }
-    });
-    resizeObserver.observe(galleryContainer.current, { box: 'border-box' });
-    return function cleanup() {
-      resizeObserver.disconnect();
-    };
-  }, []);
+    if (galleryContainer.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        if (
+          entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
+        ) {
+          setIsShowShadow(true);
+        } else {
+          setIsShowShadow(false);
+        }
+      });
+      resizeObserver.observe(galleryContainer.current, { box: 'border-box' });
+      return function cleanup() {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [galleryContainer]);
   const closeBtn = css`
     position: absolute;
     right: 4px;
@@ -182,80 +188,82 @@ function ReviewGallery(props) {
   `;
   return (
     <FlexDiv gap="15px">
-      <FlexDiv gap="15px" ref={galleryContainer} overflowY="scroll">
-        {props.gallery && (
-          <FlexDiv gap="15px">
-            {props.gallery?.map((url, index) => (
-              <Container key={index} position="relative" margin="0 5px 0 0">
-                <Image
-                  addCss={image}
-                  width="250px"
-                  height="200px"
-                  src={url}
-                  alt="schedulePhoto"
-                />
-                {props.isEdit && (
-                  <RoundButtonSmall
-                    addCss={closeBtn}
-                    close
-                    className="material-icons"
-                    onClick={() => {
-                      const newGallery = props.gallery.filter(
-                        (_, newIndex) => index !== newIndex
-                      );
-                      props.setGallery(newGallery);
-                    }}>
-                    cancel
-                  </RoundButtonSmall>
-                )}
-              </Container>
-            ))}
-          </FlexDiv>
-        )}
-        {props.imageBuffer?.length > 0 && (
-          <FlexDiv gap="15px">
-            {props.imageBuffer.map((blob, index) => {
-              const blobUrl = URL.createObjectURL(blob);
-              return (
-                <Container
-                  key={blob.lastModified}
-                  position="relative"
-                  margin="0 5px 0 0">
+      {props.gallery && props.imageBuffer && (
+        <FlexDiv gap="15px" ref={galleryContainer} overflowY="auto">
+          {props.gallery?.length > 0 && (
+            <FlexDiv gap="15px">
+              {props.gallery?.map((url, index) => (
+                <Container key={index} position="relative" margin="0 5px 0 0">
                   <Image
-                    addCss={css`
-                      ${image}
-                      border-radius: 10px;
-                      border: 8px solid ${palatte.primary['300']};
-                    `}
+                    addCss={image}
                     width="250px"
                     height="200px"
-                    src={blobUrl}
-                    alt={blob.name}
+                    src={url}
+                    alt="schedulePhoto"
                   />
-                  <P
-                    fontSize="14px"
-                    addCss={preview}
-                    color={palatte.primary.basic}>
-                    預覽
-                  </P>
-                  <RoundButtonSmall
-                    className="material-icons"
-                    close
-                    addCss={closeBtn}
-                    onClick={() => {
-                      const newImagesBuffer = props.imageBuffer.filter(
-                        (_, newIndex) => index !== newIndex
-                      );
-                      props.setImageBuffer(newImagesBuffer);
-                    }}>
-                    cancel
-                  </RoundButtonSmall>
+                  {props.isEdit && (
+                    <RoundButtonSmall
+                      addCss={closeBtn}
+                      close
+                      className="material-icons"
+                      onClick={() => {
+                        const newGallery = props.gallery.filter(
+                          (_, newIndex) => index !== newIndex
+                        );
+                        props.setGallery(newGallery);
+                      }}>
+                      cancel
+                    </RoundButtonSmall>
+                  )}
                 </Container>
-              );
-            })}
-          </FlexDiv>
-        )}
-      </FlexDiv>
+              ))}
+            </FlexDiv>
+          )}
+          {props.imageBuffer?.length > 0 && (
+            <FlexDiv gap="15px">
+              {props.imageBuffer.map((blob, index) => {
+                const blobUrl = URL.createObjectURL(blob);
+                return (
+                  <Container
+                    key={blob.lastModified}
+                    position="relative"
+                    margin="0 5px 0 0">
+                    <Image
+                      addCss={css`
+                        ${image}
+                        border-radius: 10px;
+                        border: 8px solid ${palatte.primary['300']};
+                      `}
+                      width="250px"
+                      height="200px"
+                      src={blobUrl}
+                      alt={blob.name}
+                    />
+                    <P
+                      fontSize="14px"
+                      addCss={preview}
+                      color={palatte.primary.basic}>
+                      預覽
+                    </P>
+                    <RoundButtonSmall
+                      className="material-icons"
+                      close
+                      addCss={closeBtn}
+                      onClick={() => {
+                        const newImagesBuffer = props.imageBuffer.filter(
+                          (_, newIndex) => index !== newIndex
+                        );
+                        props.setImageBuffer(newImagesBuffer);
+                      }}>
+                      cancel
+                    </RoundButtonSmall>
+                  </Container>
+                );
+              })}
+            </FlexDiv>
+          )}
+        </FlexDiv>
+      )}
       {props.isEdit && (
         <AddImages
           imageBuffer={props.imageBuffer}

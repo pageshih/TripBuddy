@@ -676,7 +676,6 @@ function AddSchedule(props) {
             setDepartString(
               timestampToString(res.overviews.depart_times[day], 'time')
             );
-            res.schedules.sort((a, b) => a.start_time - b.start_time);
             setSchedules(
               filterDaySchedules(res.schedules, res.overviews.depart_times)[day]
             );

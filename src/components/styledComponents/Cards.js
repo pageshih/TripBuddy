@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { styles, palatte, H4, H5, P, mediaQuery } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
@@ -43,6 +44,7 @@ const Card = styled.div`
   }
   ${(props) => props.addCss}
 `;
+
 const TimeTag = styled.div`
   font-weight: 700;
   color: ${palatte.white};
@@ -52,6 +54,98 @@ const TimeTag = styled.div`
   padding: 5px 20px;
   z-index: 5;
 `;
+function SpotCard(props) {
+  return (
+    <CardWrapper column as={props.as} gap="20px">
+      <FlexDiv
+        gap="10px"
+        addCss={css`
+          position: absolute;
+          top: -15px;
+          left: 30px;
+          ${mediaQuery[0]} {
+            left: -10px;
+          }
+        `}>
+        {props.isEdit && <CheckboxCustom />}
+        {props.time && (
+          <TimeTag>{timestampToString(props.time, 'time')}</TimeTag>
+        )}
+      </FlexDiv>
+      <Card
+        gap="40px"
+        onClick={props.onClick}
+        addCss={css`
+          ${mediaQuery[0]} {
+            gap: 0px;
+          }
+        `}>
+        <Image
+          src={props.imgSrc}
+          alt={props.imgAlt}
+          minWidth="330px"
+          height="200px"
+          addCss={css`
+            ${mediaQuery[0]} {
+              width: 100%;
+            }
+          `}
+        />
+        <FlexChildDiv
+          shrink="1"
+          direction="column"
+          gap="15px"
+          padding="5px 5px 5px 0"
+          addCss={css`
+            ${mediaQuery[0]} {
+              width: 100%;
+              padding: 20px;
+              gap: 10px;
+            }
+          `}>
+          <H5 margin="0 0 10px 0">{props.title}</H5>
+          <FlexDiv gap="2px">
+            <span
+              className="material-icons"
+              css={css`
+                color: ${palatte.danger.basic};
+              `}>
+              location_on
+            </span>
+            <P>{props.address}</P>
+          </FlexDiv>
+          {props.duration && (
+            <FlexDiv gap="4px">
+              <span
+                className="material-icons"
+                css={css`
+                  color: ${palatte.gray['500']};
+                  font-size: 22px;
+                `}>
+                schedule
+              </span>
+              <P color={palatte.gray['700']} fontSize="14px">
+                停留 {Math.floor(props.duration / 60)} 小時
+              </P>
+            </FlexDiv>
+          )}
+        </FlexChildDiv>
+      </Card>
+      {props.children}
+    </CardWrapper>
+  );
+}
+SpotCard.propTypes = {
+  imgSrc: PropTypes.string.isRequired,
+  imgAlt: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
+  as: PropTypes.string,
+  isEdit: PropTypes.bool,
+  onClick: PropTypes.func,
+  time: PropTypes.number,
+  duration: PropTypes.number,
+};
 function ScheduleCard(props) {
   const transitIcon = {
     WALKING: {
@@ -80,8 +174,17 @@ function ScheduleCard(props) {
     gap: 5px;
   `;
   return (
-    <CardWrapper column as={props.as} gap="20px">
-      <FlexDiv
+    <SpotCard
+      as={props.as}
+      isEdit={props.isEdit}
+      time={props.schedule.start_time}
+      onClick={props.onClick}
+      imgSrc={props.schedule.placeDetail.photos[0]}
+      imgAlt={props.schedule.placeDetail.name}
+      title={props.schedule.placeDetail.name}
+      address={props.schedule.placeDetail.formatted_address}
+      duration={props.duration}>
+      {/* <FlexDiv
         gap="10px"
         addCss={css`
           position: absolute;
@@ -156,7 +259,7 @@ function ScheduleCard(props) {
             </FlexDiv>
           )}
         </FlexChildDiv>
-      </Card>
+      </Card> */}
       {props.children}
       {props.transit.detail && (
         <FlexDiv justifyContent="center" gap="30px">
@@ -179,11 +282,11 @@ function ScheduleCard(props) {
           </FlexDiv>
         </FlexDiv>
       )}
-    </CardWrapper>
+    </SpotCard>
   );
 }
 
-const OverviewCard = (props) => {
+function OverviewCard(props) {
   const container = css`
     flex-basis: ${props.row ? '300px' : 'calc(50% - 60px)'};
     height: 300px;
@@ -250,6 +353,14 @@ const OverviewCard = (props) => {
       <div className="darken" css={darken} />
     </Card>
   );
-};
+}
 
-export { Card, cardCss, CardWrapper, TimeTag, ScheduleCard, OverviewCard };
+export {
+  Card,
+  cardCss,
+  CardWrapper,
+  TimeTag,
+  ScheduleCard,
+  OverviewCard,
+  SpotCard,
+};

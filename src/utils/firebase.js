@@ -219,7 +219,7 @@ const firestore = {
       itinerary_id: itineraryOverviewRef.id,
       cover_photo: 'https://picsum.photos/1000/500',
     };
-    this.getTravelMode(userUID).then((obj) => {
+    this.getItinerariesSetting(userUID).then((obj) => {
       if (!obj.default_travel_mode) {
         batch.set(itineraryUserRef, { default_travel_mode: 'DRIVING' });
       }
@@ -240,7 +240,7 @@ const firestore = {
       .then(() => Promise.resolve(itineraryOverviewRef.id))
       .catch((error) => Promise.reject(error));
   },
-  getItinerary(userUID, itineraryId, map, isEdit) {
+  getItinerary(userUID, itineraryId, map, isForEdit) {
     const itineraryUserRef = doc(this.db, 'itineraries', userUID);
     const getOverviews = new Promise((resolve, reject) => {
       const overviewsRef = doc(
@@ -284,10 +284,13 @@ const firestore = {
       );
       return getDocs(schedulesRef)
         .then((snapShots) => {
-          const schedules = snapShots.docs.map((snapShot) => {
-            return snapShot.data();
-          });
-          if (isEdit) {
+          const schedules = snapShots.docs
+            .map((snapShot) => {
+              return snapShot.data();
+            })
+            .sort((a, b) => a.start_time - b.start_time);
+
+          if (isForEdit) {
             const update = schedules.map((schedule) =>
               this.updatePlaceData(schedule.placeDetail, map)
             );
@@ -303,6 +306,7 @@ const firestore = {
                 return acc;
               }, []);
               this.editSchedules(userUID, itineraryId, dataToFirebase, 'merge');
+
               resolve({ schedules });
             });
           } else {
@@ -312,14 +316,13 @@ const firestore = {
         .catch((error) => reject(error));
     });
     return Promise.all(
-      isEdit
+      isForEdit
         ? [getOverviews, getWaitingSpots, getSchedules]
         : [getOverviews, getSchedules]
     ).then((docs) => {
       const newData = docs.reduce((acc, doc) => {
         return { ...acc, ...doc };
       }, {});
-      console.log(newData);
       return newData;
     });
   },
@@ -457,7 +460,9 @@ const firestore = {
     );
     const q = query(schedulesRef, where('end_time', '>=', Number(timestamp)));
     return getDocs(q).then((snapShots) => {
-      const target = snapShots.docs.map((schedules) => schedules.data());
+      const target = snapShots.docs
+        .map((schedules) => schedules.data())
+        .sort((a, b) => a.start_time - b.start_time);
       const updated = target.map((schedule) =>
         this.updatePlaceData(schedule.placeDetail, map)
       );
