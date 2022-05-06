@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { palatte, mediaQuery, P } from './basicStyle';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
 import {
@@ -128,6 +129,13 @@ const CheckboxCustom = (props) => {
       />
     </label>
   );
+};
+CheckboxCustom.propTypes = {
+  id: PropTypes.string.isRequired,
+  selectedList: PropTypes.object.isRequired,
+  setSelectedList: PropTypes.func.isRequired,
+  selectAll: PropTypes.bool,
+  addCss: PropTypes.func,
 };
 function SelectAllCheckBox(props) {
   const selectAllItems = (e) => {

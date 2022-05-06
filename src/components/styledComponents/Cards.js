@@ -67,7 +67,13 @@ function SpotCard(props) {
             left: -10px;
           }
         `}>
-        {props.isEdit && <CheckboxCustom />}
+        {props.isEdit && (
+          <CheckboxCustom
+            id={props.id}
+            selectedList={props.selectedSpotList}
+            setSelectedList={props.setSelectedSpotList}
+          />
+        )}
         {props.time && (
           <TimeTag>{timestampToString(props.time, 'time')}</TimeTag>
         )}
@@ -141,10 +147,13 @@ SpotCard.propTypes = {
   title: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   as: PropTypes.string,
-  isEdit: PropTypes.bool,
   onClick: PropTypes.func,
   time: PropTypes.number,
   duration: PropTypes.number,
+  isEdit: PropTypes.bool,
+  id: PropTypes.string,
+  selectedList: PropTypes.array,
+  setSelectedList: PropTypes.func,
 };
 function ScheduleCard(props) {
   const transitIcon = {
@@ -176,90 +185,17 @@ function ScheduleCard(props) {
   return (
     <SpotCard
       as={props.as}
-      isEdit={props.isEdit}
       time={props.schedule.start_time}
       onClick={props.onClick}
       imgSrc={props.schedule.placeDetail.photos[0]}
       imgAlt={props.schedule.placeDetail.name}
       title={props.schedule.placeDetail.name}
       address={props.schedule.placeDetail.formatted_address}
-      duration={props.duration}>
-      {/* <FlexDiv
-        gap="10px"
-        addCss={css`
-          position: absolute;
-          top: -15px;
-          left: 30px;
-          ${mediaQuery[0]} {
-            left: -10px;
-          }
-        `}>
-        {props.isEdit && <CheckboxCustom />}
-        <TimeTag>
-          {timestampToString(props.schedule.start_time, 'time')}
-        </TimeTag>
-      </FlexDiv>
-      <Card
-        gap="40px"
-        onClick={props.onClick}
-        addCss={css`
-          ${mediaQuery[0]} {
-            gap: 0px;
-          }
-        `}>
-        <Image
-          src={props.schedule.placeDetail.photos[0]}
-          alt={props.schedule.placeDetail.name}
-          minWidth="330px"
-          height="200px"
-          addCss={css`
-            ${mediaQuery[0]} {
-              width: 100%;
-            }
-          `}
-        />
-        <FlexChildDiv
-          shrink="1"
-          direction="column"
-          gap="15px"
-          padding="5px 5px 5px 0"
-          addCss={css`
-            ${mediaQuery[0]} {
-              width: 100%;
-              padding: 20px;
-              gap: 10px;
-            }
-          `}>
-          <H5 margin="0 0 10px 0">{props.schedule.placeDetail.name}</H5>
-          {props.address && (
-            <FlexDiv gap="2px">
-              <span
-                className="material-icons"
-                css={css`
-                  color: ${palatte.danger.basic};
-                `}>
-                location_on
-              </span>
-              <P>{props.address}</P>
-            </FlexDiv>
-          )}
-          {props.duration && (
-            <FlexDiv gap="4px">
-              <span
-                className="material-icons"
-                css={css`
-                  color: ${palatte.gray['500']};
-                  font-size: 22px;
-                `}>
-                schedule
-              </span>
-              <P color={palatte.gray['700']} fontSize="14px">
-                停留 {Math.floor(props.duration / 60)} 小時
-              </P>
-            </FlexDiv>
-          )}
-        </FlexChildDiv>
-      </Card> */}
+      duration={props.duration}
+      isEdit={props.isEdit}
+      id={props.schedule.schedule_id}
+      selectedList={props.selectedSpotList}
+      setSelectedList={props.setSelectedSpotList}>
       {props.children}
       {props.transit.detail && (
         <FlexDiv justifyContent="center" gap="30px">
@@ -285,6 +221,22 @@ function ScheduleCard(props) {
     </SpotCard>
   );
 }
+ScheduleCard.propTypes = {
+  schedule: PropTypes.object.isRequired,
+  imgSrc: PropTypes.string.isRequired,
+  imgAlt: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
+  as: PropTypes.string,
+  isEdit: PropTypes.bool,
+  selectedList: PropTypes.array,
+  setSelectedList: PropTypes.func,
+  onClick: PropTypes.func,
+  time: PropTypes.number,
+  duration: PropTypes.number,
+  transit: PropTypes.object,
+  children: PropTypes.element,
+};
 
 function OverviewCard(props) {
   const container = css`

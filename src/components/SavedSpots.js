@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv } from './styledComponents/Layout';
-import { Card, CardWrapper } from './styledComponents/Cards';
+import { Card, CardWrapper, SpotCard } from './styledComponents/Cards';
 import { CheckboxCustom, SelectAllCheckBox } from './styledComponents/Form';
 
 function SavedSpots(props) {
@@ -83,6 +83,7 @@ function SavedSpots(props) {
           刪除景點
         </button>
       </FlexDiv>
+
       <SelectAllCheckBox
         padding="0 12px"
         setAllChecked={() =>
@@ -90,32 +91,24 @@ function SavedSpots(props) {
         }
         setAllUnchecked={() => setSelectedSpotList([])}
       />
-      <CardWrapper column padding="20px" gap="20px">
+      <FlexDiv direction="column" padding="20px" gap="20px">
         {savedSpots?.map((spot) => (
-          <Card gap="20px" position="relative" key={spot.place_id}>
-            <CheckboxCustom
-              id={spot.place_id}
-              selectedList={selectedSpotList}
-              setSelectedList={setSelectedSpotList}
-            />
-            <div style={{ width: '300px', height: '200px' }}>
-              <img
-                src={spot.photos[0]}
-                alt={spot.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-            <div>
-              <h3>{spot.name}</h3>
-              <p>{spot.formatted_address}</p>
-              <p>{spot.rating}</p>
-            </div>
-          </Card>
+          <SpotCard
+            key={spot.place_id}
+            title={spot.name}
+            address={spot.formatted_address}
+            id={spot.place_id}
+            selectedList={selectedSpotList}
+            setSelectedList={setSelectedSpotList}
+            imgSrc={spot.photos[0]}
+            imgAlt={spot.name}
+            rating={spot.rating}
+          />
         ))}
         <button type="click" onClick={() => navigate('/explore')}>
           新增景點
         </button>
-      </CardWrapper>
+      </FlexDiv>
     </>
   );
 }
