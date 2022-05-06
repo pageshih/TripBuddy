@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte } from './basicStyle';
+import { palatte, styles } from './basicStyle';
 
 const layout = (props) => css`
   display: ${props.display};
@@ -20,6 +20,7 @@ const layout = (props) => css`
   position: ${props.position};
   background-color: ${props.backgroundColor};
   box-shadow: ${props.boxShadow};
+  border-radius: ${props.borderRadius};
 `;
 const flexParent = (props) => css`
   display: flex;
@@ -65,6 +66,19 @@ const Image = (props) => (
       min-height: ${props.minHeight};
       max-height: ${props.maxHeight};
       position: relative;
+      overflow: hidden;
+      ${props.round && props.size
+        ? css`
+            width: ${props.size};
+            height: ${props.size};
+            border-radius: 50%;
+          `
+        : null}
+      ${props.shadow
+        ? css`
+            box-shadow: ${styles.shadow};
+          `
+        : null}
       ${props.addCss}
     `}>
     <img

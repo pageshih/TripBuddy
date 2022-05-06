@@ -71,12 +71,12 @@ function Itineraries() {
             future: [],
           };
           overviews.forEach(async (itinerary) => {
-            const countDownDay = Math.floor(
-              (itinerary.start_date - now) / (24 * 60 * 60 * 1000)
-            );
+            const countDownDay =
+              new Date(itinerary.start_date).getDate() -
+              new Date(now).getDate();
             const tripDays =
-              (itinerary.end_date - itinerary.start_date) /
-              (24 * 60 * 60 * 1000);
+              new Date(itinerary.end_date).getDate() -
+              new Date(itinerary.start_date).getDate();
             if (countDownDay <= 0 && countDownDay + tripDays >= -1) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
@@ -214,15 +214,15 @@ function Itineraries() {
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>即將到來的行程</H4>
-                  <FlexDiv as="ul" gap="30px" overflowY="scroll">
+                  <FlexDiv as="ul" gap="30px" overflowX="auto">
                     {coming?.map((itinerary) => (
                       <OverviewCard
                         src={itinerary.cover_photo}
                         as="li"
                         alt="cover"
                         title={itinerary.title}
-                        start_date={itinerary.start_date}
-                        end_date={itinerary.end_date}
+                        startDate={itinerary.start_date}
+                        endDate={itinerary.end_date}
                         key={itinerary.itinerary_id}
                         onClick={() => {
                           navigate(`/${itinerary.itinerary_id}`);
@@ -235,7 +235,7 @@ function Itineraries() {
               {future?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>其他行程</H4>
-                  <FlexDiv as="ul" gap="60px" overflowY="scroll">
+                  <FlexDiv as="ul" gap="60px" overflowX="auto">
                     {future?.map((itinerary) => (
                       <OverviewCard
                         as="li"

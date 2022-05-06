@@ -9,7 +9,13 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { firebaseConfig } from './apiKey';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -94,22 +100,28 @@ const firebaseStorage = {
     });
     return Promise.all(uploadPromises);
   },
-  uploadImages(pathAry, files) {
-    const basicPath = pathAry.reduce((acc, path, index, array) => {
-      if (index < array.length - 1) {
-        acc += `${path}/`;
-      } else {
-        acc += path;
-      }
+  getPath(pathAry) {
+    return pathAry.reduce((acc, path, index, array) => {
+      acc += `${path}/`;
       return acc;
     }, '');
+  },
+  uploadImages(pathAry, files, customFileName) {
+    const basicPath = this.getPath(pathAry);
     const uploadPromises = files.map((file) => {
-      const imageRef = ref(this.storage, `${basicPath}/${file.name}`);
+      const imageRef = ref(
+        this.storage,
+        `${basicPath}${customFileName || file.name}`
+      );
       return uploadBytes(imageRef, file)
         .then((uploadResult) => getDownloadURL(uploadResult.ref))
         .then((url) => url);
     });
     return Promise.all(uploadPromises);
+  },
+  clearImageRoot(pathAry) {
+    const imageRootRef = ref(this.storage, `${this.getPath(pathAry)}/*`);
+    return deleteObject(imageRootRef);
   },
 };
 const firestore = {
@@ -205,10 +217,13 @@ const firestore = {
       ...basicInfo,
       depart_times: createDepartTimeAry(basicInfo),
       itinerary_id: itineraryOverviewRef.id,
-      cover_photo: 'https://picsum.photos/200/300',
+      cover_photo: 'https://picsum.photos/1000/500',
     };
-
-    batch.set(itineraryUserRef, {});
+    this.getTravelMode(userUID).then((obj) => {
+      if (!obj.default_travel_mode) {
+        batch.set(itineraryUserRef, { default_travel_mode: 'DRIVING' });
+      }
+    });
     batch.set(itineraryOverviewRef, overview, { merge });
     batch.set(
       itineraryDetailRef,
@@ -233,7 +248,15 @@ const firestore = {
         itineraryId
       );
       getDoc(overviewsRef)
-        .then((snapShot) => resolve(snapShot.data()))
+        .then(async (snapShot) => {
+          const overview = snapShot.data();
+          let setting = await this.getItinerariesSetting(userUID);
+          if (!setting.default_travel_mode) {
+            setting = { default_travel_mode: 'DRIVING' };
+            await this.setItinerariesSetting(userUID, setting);
+          }
+          resolve({ overviews: { ...overview, ...setting } });
+        })
         .catch((error) => reject(error));
     });
     const getWaitingSpots = new Promise((resolve, reject) => {
@@ -292,16 +315,13 @@ const firestore = {
       isEdit
         ? [getOverviews, getWaitingSpots, getSchedules]
         : [getOverviews, getSchedules]
-    ).then((docs) =>
-      docs.reduce((acc, doc, index) => {
-        if (index === 0) {
-          acc.overviews = doc;
-          return acc;
-        } else {
-          return { ...acc, ...doc };
-        }
-      }, {})
-    );
+    ).then((docs) => {
+      const newData = docs.reduce((acc, doc) => {
+        return { ...acc, ...doc };
+      }, {});
+      console.log(newData);
+      return newData;
+    });
   },
   addSchedule(userUID, itineraryId, scheduleData, isRemoveWaitingSpot) {
     const batch = writeBatch(this.db);
@@ -464,6 +484,7 @@ const firestore = {
       userUID,
       'overviews'
     );
+
     const resetTime = new Date(timestamp).setHours(0, 0, 0, 0);
     const q = query(
       overviewsRef,
@@ -473,6 +494,14 @@ const firestore = {
       const itineraries = snapShots.docs.map((doc) => doc.data());
       return Promise.resolve(itineraries);
     });
+  },
+  getItinerariesSetting(userUID) {
+    const defaultTravelModeRef = doc(this.db, 'itineraries', userUID);
+    return getDoc(defaultTravelModeRef).then((snapShot) => snapShot.data());
+  },
+  setItinerariesSetting(userUID, newSetting) {
+    const defaultTravelModeRef = doc(this.db, 'itineraries', userUID);
+    return setDoc(defaultTravelModeRef, newSetting, { merge: 'merge' });
   },
 };
 

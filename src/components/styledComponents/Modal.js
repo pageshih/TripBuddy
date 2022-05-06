@@ -18,30 +18,32 @@ const FadeBg = styled.div`
 `;
 
 const CenterContainer = styled.div`
+  max-width: ${(props) => props.maxWidth};
+  max-height: ${(props) => props.maxHeight};
+  min-width: ${(props) => props.minWidth};
+  min-height: ${(props) => props.minHeight};
   flex-basis: ${(props) => props.width || '350px'};
   height: ${(props) => props.height || '400px'};
-  max-width: ${(props) => props.maxWidth || '350px'};
-  max-height: ${(props) => props.maxHeight || '400px'};
   background-color: ${palatte.white};
-  border-radius: 10px;
+  border-radius: 30px 20px 30px 30px;
   position: relative;
-  padding: 20px;
+  padding: ${(props) => props.padding || '20px'};
 `;
 
 const CloseBtn = styled.button`
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: -8px;
+  right: -8px;
   padding: 0px;
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 20px;
   color: white;
-  background-color: darkgray;
+  background-color: ${palatte.gray['500']};
   z-index: 1;
   &:hover {
-    background-color: crimson;
+    background-color: ${palatte.danger.basic};
   }
 `;
 function Modal(props) {
@@ -54,8 +56,11 @@ function Modal(props) {
         }
       }}>
       <CenterContainer
+        padding={props.padding}
         width={props.width}
         height={props.height}
+        minWidth={props.minWidth}
+        minHeight={props.minHeight}
         maxHeight={props.maxHeight}
         maxWidth={props.maxWidth}>
         <CloseBtn

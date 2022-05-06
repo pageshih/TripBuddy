@@ -286,7 +286,7 @@ function AddReview(props) {
         checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
       );
       firestore.editProfile(uid, {
-        reviews: reviewTags ? [...reviewTags, addTag] : [addTag],
+        review_tags: reviewTags ? [...reviewTags, addTag] : [addTag],
       });
       setAddTag('');
     }
@@ -320,7 +320,7 @@ function AddReview(props) {
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
     setReview(props.reviews.review);
-  }, [props.isEdit]);
+  }, [props.isEdit, props.allReviewTags]);
   const reviewContainer = css`
     border-radius: 30px;
     background-color: ${palatte.white};

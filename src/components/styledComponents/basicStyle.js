@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { FlexDiv, Container } from './Layout';
+// import { SaveAndCancelButton } from './Button';
 import underline from '../../images/logoDecorationUnderline.svg';
+import PropTypes from 'prop-types';
 
 const palatte = {
   primary: {
@@ -154,45 +156,61 @@ const Logo = (props) => {
     </>
   );
 };
-
+const headingFontSize = {
+  desktop: {
+    2: '52px',
+    3: '40px',
+    4: '32px',
+    5: '28px',
+    6: '24px',
+  },
+  mobile: {
+    2: '52px',
+    3: '40px',
+    4: '24px',
+    5: '20px',
+    6: '18px',
+  },
+};
 const heading = (props) => css`
-  font-weight: medium;
+  font-weight: ${props.fontWeight || 700};
   color: ${props.color};
   text-align: ${props.textAlign};
   margin: ${props.margin};
   ${props.addCss};
 `;
 const H2 = styled.h2`
+  font-size: ${(props) => props.fontSize || headingFontSize.desktop[2]};
   ${heading}
-  font-size: ${(props) => props.fontSize || '52px'};
 `;
 const H3 = styled.h3`
+  font-size: ${(props) => props.fontSize || headingFontSize.desktop[3]};
   ${heading}
-  font-size: ${(props) => props.fontSize || '40px'};
 `;
 
 const H4 = styled.h4`
+  font-size: ${(props) => props.fontSize || headingFontSize.desktop[4]};
   ${heading}
-  font-size: ${(props) => props.fontSize || '32px'};
   ${mediaQuery[0]} {
-    font-size: 24px;
+    font-size: ${headingFontSize.mobile[4]};
   }
 `;
 const H5 = styled.h5`
+  font-size: ${(props) => props.fontSize || headingFontSize.desktop[5]};
   ${heading}
-  font-size: ${(props) => props.fontSize || '28px'};
   ${mediaQuery[0]} {
-    font-size: 20px;
+    font-size: ${headingFontSize.mobile[5]};
   }
 `;
 const H6 = styled.h6`
+  font-size: ${(props) => props.fontSize || headingFontSize.desktop[6]};
   ${heading}
-  font-size: ${(props) => props.fontSize || '24px'};
   ${mediaQuery[0]} {
-    font-size: 18px;
+    font-size: ${headingFontSize.mobile[6]};
   }
 `;
 const P = styled.p`
+  font-weight: 400;
   font-size: ${(props) => props.fontSize || '16px'};
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};
@@ -203,5 +221,34 @@ const P = styled.p`
   }
   ${(props) => props.addCss}
 `;
+const Loader = styled.div`
+  width: ${(props) => props.size};
+  height: ${(props) => props.size};
+  border-radius: 50%;
+  border: 10px solid ${(props) => props.color || palatte.gray['400']};
+  border-top: none;
+`;
 
-export { palatte, Logo, H2, H3, H4, H5, H6, P, styles, mediaQuery };
+const headingComponents = {
+  2: H2,
+  3: H3,
+  4: H4,
+  5: H5,
+  6: H6,
+};
+
+export {
+  palatte,
+  Logo,
+  H2,
+  H3,
+  H4,
+  H5,
+  H6,
+  P,
+  styles,
+  mediaQuery,
+  Loader,
+  headingComponents,
+  headingFontSize,
+};

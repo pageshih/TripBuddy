@@ -4,7 +4,12 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { palatte, mediaQuery, P } from './basicStyle';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
-import { RoundButtonSmallWhite, Button, ButtonOutline } from './Button';
+import {
+  RoundButtonSmallWhite,
+  Button,
+  ButtonOutline,
+  RoundButtonSmall,
+} from './Button';
 import { compressImages } from '../../utils/utilities';
 import { Modal } from './Modal';
 
@@ -55,7 +60,11 @@ function TextField({ children, placeholder, value, onChange, type }) {
 
 const TextInput = styled.input`
   ${inputBase}
-  width: 100%;
+  width: ${(props) => props.width || '100%'};
+`;
+const Select = styled.select`
+  ${inputBase}
+  width: ${(props) => props.width || '100%'};
 `;
 const checkboxCss = css`
   color: white;
@@ -157,10 +166,11 @@ const ReviewTagContainer = styled.div`
       ? palatte.secondary.basic
       : palatte.white};
   border-radius: 20px;
-  border: ${(props) =>
+  outline: ${(props) =>
     props.selectedList?.some((item) => item === props.id)
       ? 'none'
       : `1px solid${palatte.gray['500']}`};
+  outline-offset: -1px;
   & > * {
     font-size: 14px;
     color: ${(props) =>
@@ -318,22 +328,38 @@ function AddImageRoundBtn(props) {
       setIsShowModal(false);
     }
   }, [imageBuffer]);
-
+  const button = css`
+    cursor: pointer;
+    ${props.addCss}
+  `;
   return (
     <>
-      <RoundButtonSmallWhite
-        as="label"
-        size={props.size}
-        className="material-icons"
-        css={css`
-          cursor: pointer;
-        `}>
-        <FileInputHidden
-          setImageBuffer={setImageBuffer}
-          imageBuffer={imageBuffer}
-        />
-        insert_photo
-      </RoundButtonSmallWhite>
+      {props.white ? (
+        <RoundButtonSmallWhite
+          as="label"
+          size={props.size}
+          className="material-icons"
+          css={button}>
+          <FileInputHidden
+            setImageBuffer={setImageBuffer}
+            imageBuffer={imageBuffer}
+          />
+          {props.icon}
+        </RoundButtonSmallWhite>
+      ) : (
+        <RoundButtonSmall
+          as="label"
+          size={props.size}
+          styled={props.styled}
+          className="material-icons"
+          css={button}>
+          <FileInputHidden
+            setImageBuffer={setImageBuffer}
+            imageBuffer={imageBuffer}
+          />
+          {props.icon}
+        </RoundButtonSmall>
+      )}
       {isShowModal && (
         <Modal
           width="fit-content"
@@ -356,7 +382,7 @@ function AddImageRoundBtn(props) {
             alignItems="center"
             direction="column">
             <P fontSize="20px" textAlign="center">
-              確定要將封面更換成這張圖嗎？
+              {props.confirmMessage}
             </P>
             <FlexChildDiv width="100%" justifyContent="center" gap="20px">
               <ButtonOutline
@@ -389,4 +415,5 @@ export {
   AddImages,
   uploadImageStyle,
   AddImageRoundBtn,
+  Select,
 };
