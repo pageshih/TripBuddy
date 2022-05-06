@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { palatte, mediaQuery } from './basicStyle';
+import PropTypes from 'prop-types';
+import { FlexDiv } from './Layout';
 
 const colorMap = {
   backgroundColor: {
@@ -198,6 +200,34 @@ const ReviewTagRemoveButton = (props) => (
   </CapsuleTag>
 );
 
+function SaveAndCancelButton(props) {
+  return (
+    <FlexDiv gap={props.gap || '5px'}>
+      <RoundButtonSmallOutline
+        className="material-icons"
+        type="submit"
+        color="primary"
+        addCss={css`
+          border-radius: 10px;
+        `}>
+        done
+      </RoundButtonSmallOutline>
+      <RoundButtonSmallOutline
+        className="material-icons"
+        type="button"
+        color="danger"
+        addCss={css`
+          border-radius: 10px;
+        `}
+        onClick={props.close}>
+        close
+      </RoundButtonSmallOutline>
+    </FlexDiv>
+  );
+}
+SaveAndCancelButton.propTypes = {
+  close: PropTypes.func,
+};
 export {
   Button,
   ButtonOutline,
@@ -208,4 +238,5 @@ export {
   RoundButtonSmallOutline,
   RoundButtonSmallWhite,
   ReviewTagRemoveButton,
+  SaveAndCancelButton,
 };

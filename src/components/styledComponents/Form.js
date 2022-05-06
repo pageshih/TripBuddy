@@ -60,11 +60,11 @@ function TextField({ children, placeholder, value, onChange, type }) {
 
 const TextInput = styled.input`
   ${inputBase}
-  width: 100%;
+  width: ${(props) => props.width || '100%'};
 `;
 const Select = styled.select`
   ${inputBase}
-  width: 100%;
+  width: ${(props) => props.width || '100%'};
 `;
 const checkboxCss = css`
   color: white;

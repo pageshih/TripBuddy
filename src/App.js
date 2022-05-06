@@ -51,6 +51,9 @@ function App() {
       box-sizing: border-box;
       color: ${palatte.dark};
       font-family: 'Noto Sans TC', sans-serif;
+      &::selection {
+        background-color: rgba(160, 233, 211, 0.6);
+      }
     }
     body {
       margin: 0;

@@ -221,8 +221,8 @@ function Itineraries() {
                         as="li"
                         alt="cover"
                         title={itinerary.title}
-                        start_date={itinerary.start_date}
-                        end_date={itinerary.end_date}
+                        startDate={itinerary.start_date}
+                        endDate={itinerary.end_date}
                         key={itinerary.itinerary_id}
                         onClick={() => {
                           navigate(`/${itinerary.itinerary_id}`);

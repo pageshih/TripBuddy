@@ -25,8 +25,8 @@ import {
   P,
   H5,
   H6,
-  Loader,
 } from './styledComponents/basicStyle';
+import { EditableHeading } from './styledComponents/EditableText';
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
@@ -64,6 +64,11 @@ function UserSetting(props) {
     } catch (error) {
       console.log(error);
     }
+  };
+  const updateUserName = async (value) => {
+    console.log(value);
+    await firestore.editProfile(uid, { name: value });
+    props.setProfile({ ...props.profile, name: value });
   };
   useEffect(() => {
     firestore.getItinerariesSetting(uid).then((res) => {
@@ -113,7 +118,12 @@ function UserSetting(props) {
             />
           </div>
           <FlexDiv direction="column" gap="8px">
-            <H5 fontSize="24px">{props.profile.name}</H5>
+            <EditableHeading
+              level="5"
+              fontSize="24px"
+              onSubmit={updateUserName}>
+              {props.profile.name}
+            </EditableHeading>
             <P fontSize="14px" color={palatte.gray['400']}>
               用戶ID：{props.profile.uid}
             </P>
