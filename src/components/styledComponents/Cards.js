@@ -59,7 +59,11 @@ const TimeTag = styled.div`
 const TextWithIcon = (props) => (
   <FlexDiv
     gap={props.gap}
-    alignItems={typeof props.children === 'string' ? 'center' : 'flex-start'}>
+    alignItems={
+      !props.isSmall && typeof props.children === 'string'
+        ? 'center'
+        : 'flex-start'
+    }>
     <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
       {props.iconLabel && (
         <P
@@ -92,6 +96,7 @@ const TextWithIcon = (props) => (
 );
 const AddressText = (props) => (
   <TextWithIcon
+    isSmall={props.isSmall}
     gap={props.withRating ? '4px' : '2px'}
     iconName="location_on"
     iconColor={palatte.danger.basic}
