@@ -1,27 +1,31 @@
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
 import { googleMap, SearchBar } from '../utils/googleMap';
 import { Context } from '../App';
-import { RoundButton, Button } from './styledComponents/Button';
-import { FlexDiv, FlexChildDiv } from './styledComponents/Layout';
-import { Card, CardWrapper } from './styledComponents/Cards';
 import {
-  CheckboxCustom,
-  TextInput,
-  SelectAllCheckBox,
-} from './styledComponents/Form';
-import styled from '@emotion/styled';
+  RoundButton,
+  Button,
+  ButtonSmall,
+  RoundButtonSmall,
+} from './styledComponents/Button';
+import { FlexDiv, FlexChildDiv } from './styledComponents/Layout';
+import { SpotCard } from './styledComponents/Cards';
+import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
+import { P, H2, palatte } from './styledComponents/basicStyle';
 
 function Map({
-  setPlaceDetail,
   setMap,
   map,
   marker,
-  setMarker,
-  setShowSavedSpots,
+  setIsShowSavedSpots,
+  setIsShowSideColumn,
+  getPlaceShowOnMap,
 }) {
   const ref = useRef();
 
@@ -37,18 +41,14 @@ function Map({
     if (ref.current && map) {
       window.google.maps.event.addListener(map, 'click', (e) => {
         if (e.placeId) {
-          setShowSavedSpots(false);
+          setIsShowSavedSpots(false);
           if (marker) {
             googleMap.deleteMarker(marker);
           } else {
             googleMap
               .getPlaceDetails(map, e.placeId)
               .then((detail) => {
-                setMarker(
-                  googleMap.setSelectedMarker(map, detail.geometry, detail.name)
-                );
-                map.panTo(detail.geometry);
-                setPlaceDetail(detail);
+                getPlaceShowOnMap(detail);
               })
               .catch((status) => {
                 console.log(status);
@@ -58,7 +58,7 @@ function Map({
           if (marker) {
             googleMap.deleteMarker(marker);
             googleMap.setMapStyle(map, 'default');
-            setPlaceDetail(undefined);
+            setIsShowSideColumn(false);
           }
         }
         e.stop();
@@ -68,16 +68,6 @@ function Map({
 
   return <div style={{ width: '100%', height: '100vh' }} ref={ref} />;
 }
-
-const RoundBtnOnMap = styled(RoundButton)`
-  width: 60px;
-  height: 60px;
-  position: absolute;
-  top: 100px;
-  right: 30px;
-  z-index: 1000;
-  border: 2px solid white;
-`;
 
 function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
   return (
@@ -126,8 +116,9 @@ function SavedSpotsList(props) {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const [addAction, setAddAction] = useState();
+  const [addAction, setAddAction] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
+  const [isSelectAll, setIsSelectAll] = useState(false);
 
   useEffect(() => {
     firestore
@@ -155,67 +146,129 @@ function SavedSpotsList(props) {
       alert('還沒有選擇景點喔！');
     }
   };
+  const shadow = css`
+    position: absolute;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0),
+      ${palatte.shadow}
+    );
+    width: 100%;
+    height: 30px;
+    top: -50px;
+  `;
   return (
-    <>
-      <SelectAllCheckBox
-        setAllChecked={() =>
-          setSelectedSpotList(props.savedSpots.map((spot) => spot.place_id))
-        }
-        setAllUnchecked={() => setSelectedSpotList([])}
-      />
-
-      <FlexDiv direction="column" gap="20px" padding="15px 5px 15px 7px">
-        {props.savedSpots.map((spot) => (
-          <Card column gap="20px" position="relative" key={spot.place_id}>
-            <CheckboxCustom
+    <FlexDiv direction="column" maxHeight="calc(100% - 30px)" gap="25px">
+      <FlexDiv justifyContent="space-between" alignItems="flex-end">
+        <H2 fontSize="24px">候補景點</H2>
+        <SelectAllCheckBox
+          size="20px"
+          isSelectAll={isSelectAll}
+          setIsSelectAll={setIsSelectAll}
+          setAllChecked={() =>
+            setSelectedSpotList(props.savedSpots.map((spot) => spot.place_id))
+          }
+          setAllUnchecked={() => setSelectedSpotList([])}
+        />
+      </FlexDiv>
+      <FlexChildDiv direction="column" height="calc(100% - 30px)" gap="20px">
+        <FlexChildDiv
+          direction="column"
+          overflowY="auto"
+          shrink="1"
+          gap="30px"
+          padding="0 0 10px 0"
+          position="relative"
+          addCss={css`
+            &::-webkit-scrollbar {
+              display: none;
+            }
+          `}>
+          {props.savedSpots.map((spot) => (
+            <SpotCard
+              isSmall
+              key={spot.place_id}
+              title={spot.name}
+              address={spot.formatted_address}
               id={spot.place_id}
               selectedList={selectedSpotList}
               setSelectedList={setSelectedSpotList}
+              imgSrc={spot.photos[0]}
+              imgAlt={spot.name}
+              rating={spot.rating}
+              isEdit
+              onClick={() => props.getSavedSpotDetail(spot)}
             />
-            <div onClick={() => props.getSavedSpotDetail(spot)}>
-              <img
-                src={spot?.photos[0]}
-                style={{ width: '100%', objectFit: 'cover' }}
-                alt="spot"
-              />
-              <FlexChildDiv direction="column" padding="10px">
-                <h3>{spot.name}</h3>
-                <p>{spot.formatted_address}</p>
-                <p>{spot.rating}</p>
-              </FlexChildDiv>
-            </div>
-          </Card>
-        ))}
-        <TextInput as="select" onChange={(e) => setAddAction(e.target.value)}>
-          <option value="">---請選擇要加入景點的行程---</option>
-          <option value="add">新行程</option>
-          {createdItineraries?.map((itinerary) => (
-            <option value={itinerary.itinerary_id} key={itinerary.itinerary_id}>
-              {itinerary.title}
-            </option>
           ))}
-        </TextInput>
-        <Button styled="primary" onClick={addSelectSpotsToItinerary}>
-          加入行程
-        </Button>
-        <Button
-          styled="danger"
-          onClick={() => props.removeFromSavedSpots(selectedSpotList)}>
-          刪除景點
-        </Button>
-      </FlexDiv>
-    </>
+        </FlexChildDiv>
+        {selectedSpotList?.length > 0 && (
+          <FlexChildDiv
+            direction="column"
+            gap="15px"
+            padding="0 0 10px 0"
+            position="relative">
+            <div css={shadow}></div>
+            <SelectSmall
+              value={addAction}
+              onChange={(e) => setAddAction(e.target.value)}>
+              <option value="" disabled>
+                ---請選擇要加入景點的行程---
+              </option>
+              <option value="add">新行程</option>
+              {createdItineraries?.map((itinerary) => (
+                <option
+                  value={itinerary.itinerary_id}
+                  key={itinerary.itinerary_id}>
+                  {itinerary.title}
+                </option>
+              ))}
+            </SelectSmall>
+            <ButtonSmall styled="primary" onClick={addSelectSpotsToItinerary}>
+              加入行程
+            </ButtonSmall>
+            <ButtonSmall
+              styled="danger"
+              onClick={() => props.removeFromSavedSpots(selectedSpotList)}>
+              刪除景點
+            </ButtonSmall>
+          </FlexChildDiv>
+        )}
+      </FlexChildDiv>
+    </FlexDiv>
   );
 }
-
+const ButtonOnMap = (props) => (
+  <FlexDiv direction="column" gap="2px" alignItems="center">
+    <RoundButton
+      className="material-icons"
+      size="60px"
+      border
+      borderColor={palatte.white}
+      onClick={props.onClick}>
+      {props.iconName}
+    </RoundButton>
+    <P
+      fontSize="14px"
+      fontWeight="700"
+      color={palatte.gray[700]}
+      addCss={css`
+        text-shadow: -2px -2px 0 ${palatte.white}, 2px -2px 0 ${palatte.white},
+          -2px 2px ${palatte.white}, 2px 2px ${palatte.white};
+      `}>
+      {props.children}
+    </P>
+  </FlexDiv>
+);
 function Explore({ setWaitingSpots }) {
   const { uid } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
   const [savedSpots, setSavedSpots] = useState();
-  const [showSavedSpots, setShowSavedSpots] = useState(false);
+  const [isShowSavedSpots, setIsShowSavedSpots] = useState(false);
+  const [isShowSideColumn, setIsShowSideColumn] = useState(false);
   const sideWindowRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -235,7 +288,8 @@ function Explore({ setWaitingSpots }) {
       } else {
         setSavedSpots([placeDetail]);
       }
-      setShowSavedSpots(true);
+      setIsShowSavedSpots(true);
+      setIsShowSideColumn(true);
       sideWindowRef.current.scrollTop = sideWindowRef.current.scrollHeight;
     } else {
       alert('此景點已在候補清單中！');
@@ -259,7 +313,7 @@ function Explore({ setWaitingSpots }) {
   };
 
   const getSavedSpotDetail = (spot) => {
-    setShowSavedSpots(false);
+    setIsShowSavedSpots(false);
     setPlaceDetail({ ...spot, savedSpot: true });
     if (marker) {
       googleMap.deleteMarker(marker);
@@ -267,55 +321,119 @@ function Explore({ setWaitingSpots }) {
     map.panTo(spot.geometry);
     setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
+  const getPlaceShowOnMap = (detail) => {
+    setMarker(googleMap.setSelectedMarker(map, detail.geometry, detail.name));
+    map.panTo(detail.geometry);
+    setPlaceDetail(detail);
+    setIsShowSideColumn(true);
+  };
+  const expandButton = css`
+    position: absolute;
+    right: -15px;
+    top: 10px;
+    z-index: 1;
+    padding: 5px;
+    border: 1px solid ${palatte.white};
+  `;
   return (
     <>
       {uid && (
         <>
           <FlexDiv height="100vh">
-            <FlexChildDiv
-              direction="column"
-              ref={sideWindowRef}
-              basis={placeDetail || showSavedSpots ? '400px' : null}
-              overflow="scroll"
-              padding={placeDetail || showSavedSpots ? '15px 15px' : null}>
-              {!showSavedSpots && placeDetail && (
-                <PlaceDetail
-                  placeDetail={placeDetail}
-                  addToSavedSpots={addToSavedSpots}
-                  removeFromSavedSpots={removeFromSavedSpots}
-                />
-              )}
-              {showSavedSpots && savedSpots?.length > 0 && (
-                <SavedSpotsList
-                  savedSpots={savedSpots}
-                  removeFromSavedSpots={removeFromSavedSpots}
-                  getSavedSpotDetail={getSavedSpotDetail}
-                  setWaitingSpots={setWaitingSpots}
-                />
-              )}
-              {showSavedSpots && savedSpots?.length === 0 && (
-                <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
-              )}
-            </FlexChildDiv>
+            {isShowSideColumn ? (
+              <FlexChildDiv
+                backgroundColor={palatte.gray[100]}
+                direction="column"
+                height="100%"
+                position="relative"
+                addCss={css`
+                  border-right: 1px solid ${palatte.white};
+                `}
+                ref={sideWindowRef}
+                basis={placeDetail || isShowSavedSpots ? '400px' : null}
+                padding={placeDetail || isShowSavedSpots ? '30px' : null}>
+                <RoundButtonSmall
+                  size="20px"
+                  className="material-icons"
+                  styled="gray500"
+                  addCss={expandButton}
+                  onClick={() => {
+                    setIsShowSideColumn(false);
+                    if (placeDetail) {
+                      googleMap.deleteMarker(marker);
+                      googleMap.setMapStyle(map, 'default');
+                    }
+                  }}>
+                  chevron_left
+                </RoundButtonSmall>
+                <FlexDiv direction="column" overflowY="auto">
+                  {!isShowSavedSpots && placeDetail && (
+                    <PlaceDetail
+                      placeDetail={placeDetail}
+                      addToSavedSpots={addToSavedSpots}
+                      removeFromSavedSpots={removeFromSavedSpots}
+                    />
+                  )}
+                </FlexDiv>
+                {isShowSavedSpots && savedSpots?.length > 0 && (
+                  <SavedSpotsList
+                    savedSpots={savedSpots}
+                    removeFromSavedSpots={removeFromSavedSpots}
+                    getSavedSpotDetail={getSavedSpotDetail}
+                    setWaitingSpots={setWaitingSpots}
+                  />
+                )}
+                {isShowSavedSpots && savedSpots?.length === 0 && (
+                  <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
+                )}
+              </FlexChildDiv>
+            ) : null}
             <FlexChildDiv grow="1" position="relative">
-              <RoundBtnOnMap onClick={() => setShowSavedSpots((prev) => !prev)}>
-                候補景點
-              </RoundBtnOnMap>
-              <SearchBar
-                setPlaceDetail={setPlaceDetail}
-                map={map}
-                setMarker={setMarker}
-                setShowSavedSpots={setShowSavedSpots}
-                option="default"
-              />
+              <FlexDiv
+                direction="column"
+                alignItems="center"
+                gap="10px"
+                css={css`
+                  position: absolute;
+                  top: 100px;
+                  right: 30px;
+                  z-index: 1000;
+                `}>
+                <ButtonOnMap
+                  iconName="add_location"
+                  onClick={() => {
+                    setIsShowSavedSpots(true);
+                    setIsShowSideColumn(true);
+                  }}>
+                  候補景點
+                </ButtonOnMap>
+                <ButtonOnMap
+                  iconName="home"
+                  onClick={() => navigate('/itineraries')}>
+                  回首頁
+                </ButtonOnMap>
+              </FlexDiv>
+              {map && (
+                <SearchBar
+                  placeholder="請輸入地址或關鍵字搜尋"
+                  getPlaceShowOnMap={getPlaceShowOnMap}
+                  option="default"
+                  addCss={{
+                    container: {
+                      left: '15px',
+                    },
+                  }}
+                />
+              )}
               <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
                 <Map
-                  setPlaceDetail={setPlaceDetail}
+                  getPlaceShowOnMap={getPlaceShowOnMap}
                   setMap={setMap}
                   map={map}
                   setMarker={setMarker}
                   marker={marker}
-                  setShowSavedSpots={setShowSavedSpots}
+                  setIsShowSavedSpots={setIsShowSavedSpots}
+                  setIsShowSideColumn={setIsShowSideColumn}
                 />
               </Wrapper>
             </FlexChildDiv>

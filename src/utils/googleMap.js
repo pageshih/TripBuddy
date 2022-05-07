@@ -2,13 +2,25 @@ import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
 import { useEffect, useRef, useContext } from 'react';
 import { Context } from '../App';
-import markerIcon from '../images/place_black_48dp.svg';
 import '../marker.css';
 import { inputBase } from '../components/styledComponents/Form';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { palatte } from '../components/styledComponents/basicStyle';
 
 const googleMap = {
+  svgMarker(color) {
+    return {
+      path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+      fillColor: color,
+      fillOpacity: 1,
+      strokeWeight: 0,
+      rotation: 0,
+      scale: 2,
+      anchor: new window.google.maps.Point(0, 0),
+      labelOrigin: new window.google.maps.Point(13, -5),
+    };
+  },
   center: {
     lat: 25.038621247241373,
     lng: 121.53236932147014,
@@ -116,14 +128,10 @@ const googleMap = {
     return {
       label: {
         text: labelName,
-        color: '#de3400',
+        color: palatte.danger[600],
         className: 'label',
       },
-      icon: {
-        url: markerIcon,
-        labelOrigin: new window.google.maps.Point(25, -10),
-        size: new window.google.maps.Size(48, 48),
-      },
+      icon: this.svgMarker(palatte.danger[400]),
     };
   },
   setSelectedMarker(map, position, labelName) {
@@ -183,8 +191,9 @@ const searchBarStyles = {
   searchIcon: {
     position: 'absolute',
     backgroundColor: 'transparent',
-    right: '26px',
-    top: 'calc(50% - 12px)',
+    left: '32px',
+    top: 'calc(50% - 10px)',
+    color: palatte.gray[800],
   },
   container: {
     position: 'absolute',
@@ -194,6 +203,7 @@ const searchBarStyles = {
   },
   input: {
     width: '100%',
+    paddingLeft: '40px',
   },
 };
 function SearchBar(props) {
@@ -213,18 +223,10 @@ function SearchBar(props) {
       autocomplete.addListener('place_changed', () => {
         const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
         if (place.geometry && place.name) {
-          if (props.setPlaceDetail) {
-            console.log(place);
-            props.setPlaceDetail(place);
+          if (props.getPlaceShowOnMap) {
+            props.getPlaceShowOnMap(place);
           } else if (props.dispatch) {
             props.dispatch(place);
-          }
-          if (props.setMarker && props.map && props.setShowSavedSpots) {
-            props.setMarker(
-              googleMap.setSelectedMarker(props.map, place.geometry, place.name)
-            );
-            props.map.panTo(place.geometry);
-            props.setShowSavedSpots(false);
           }
         }
       });
@@ -232,15 +234,15 @@ function SearchBar(props) {
   }, []);
 
   return (
-    <div css={[searchBarStyles.container, props.css?.container]}>
+    <div css={[searchBarStyles.container, props.addCss?.container]}>
       <input
         onFocus={(e) => e.target.select()}
-        css={[inputBase, searchBarStyles.input, props.css?.input]}
+        css={[inputBase, searchBarStyles.input, props.addCss?.input]}
         ref={ref}
         placeholder={props.placeholder}
       />
       <div
-        css={[searchBarStyles.searchIcon, props.css?.searchIcon]}
+        css={[searchBarStyles.searchIcon, props.addCss?.searchIcon]}
         className="material-icons">
         search
       </div>

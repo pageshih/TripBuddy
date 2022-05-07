@@ -168,10 +168,13 @@ function SelectAllCheckBox(props) {
   return (
     <FlexDiv gap="12px" alignItems="center" padding={props.padding}>
       <CheckboxCustom
+        size={props.size}
         isSelectAll={props.isSelectAll}
         onChange={selectAllItems}
       />
-      <P fontSize="18px" color={palatte.gray[800]}>
+      <P
+        fontSize={`calc(${props.size} - '6px')` || '18px'}
+        color={palatte.gray[800]}>
         全選
       </P>
     </FlexDiv>

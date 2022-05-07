@@ -36,8 +36,10 @@ const Card = styled.div`
   width: 100%;
   gap: ${(props) => props.gap};
   flex-basis: ${(props) => props.basis};
-  flex-direction: ${(props) => props.column && 'column'};
+  flex-direction: ${(props) =>
+    props.isSmall || props.column ? 'column' : 'row'};
   position: ${(props) => props.position};
+  border-radius: ${(props) => props.isSmall && '10px'};
   ${mediaQuery[0]} {
     flex-direction: column;
     border-radius: 10px;
@@ -62,7 +64,7 @@ function SpotCard(props) {
         addCss={css`
           position: absolute;
           top: ${props.time ? '-15px' : props.isEdit ? '20px' : null};
-          left: ${props.small
+          left: ${props.isSmall
             ? props.time
               ? '-10px'
               : props.isEdit
@@ -95,9 +97,11 @@ function SpotCard(props) {
         )}
       </FlexDiv>
       <Card
+        isSmall={props.isSmall}
         gap="40px"
         onClick={props.onClick}
         addCss={css`
+          gap: ${props.isSmall ? '0px' : null};
           ${mediaQuery[0]} {
             gap: 0px;
           }
@@ -107,7 +111,8 @@ function SpotCard(props) {
           alt={props.imgAlt}
           height="200px"
           addCss={css`
-            flex-basis: 330px;
+            flex-basis: ${props.isSmall ? '200px' : '330px'};
+            width: ${props.isSmall ? '100%' : null};
             ${mediaQuery[0]} {
               width: 100%;
             }
@@ -119,18 +124,30 @@ function SpotCard(props) {
           gap="15px"
           padding="5px 5px 5px 0"
           addCss={css`
+            width: ${props.isSmall ? '100%' : null};
+            padding: ${props.isSmall ? '20px' : null};
+            gap: ${props.isSmall ? '10px' : null};
             ${mediaQuery[0]} {
               width: 100%;
               padding: 20px;
               gap: 10px;
             }
           `}>
-          <H5 margin="0 0 10px 0">{props.title}</H5>
+          <H5
+            margin="0 0 10px 0"
+            css={css`
+              font-size: ${props.isSmall && '20px'};
+              margin-bottom: ${props.isSmall && '0'};
+            `}>
+            {props.title}
+          </H5>
           <FlexDiv gap={props.rating ? '4px' : '2px'}>
             <span
               className="material-icons"
               css={css`
                 color: ${palatte.danger.basic};
+                font-size: ${props.isSmall ? '20px' : '24px'};
+                margin: ${props.isSmall ? '3px 3px 3px 0' : '0'};
               `}>
               location_on
             </span>
@@ -160,7 +177,10 @@ function SpotCard(props) {
                 `}>
                 {props.rating}
               </P>
-              <Rating size="24" rating={props.rating} />
+              <Rating
+                size={props.isSmall ? '20' : '24'}
+                rating={props.rating}
+              />
             </FlexDiv>
           )}
         </FlexChildDiv>

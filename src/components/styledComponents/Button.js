@@ -24,8 +24,8 @@ const colorMap = {
     danger: palatte.danger.basic,
     dangerHover: palatte.danger['400'],
     dangerOutline: palatte.danger['400'],
-    round: palatte.gray['200'],
-    roundHover: palatte.primary['400'],
+    round: palatte.secondary[200],
+    roundHover: palatte.primary[400],
   },
 };
 
@@ -87,8 +87,12 @@ const RoundButton = styled.button`
   background-color: ${colorMap.button.round};
   color: ${colorMap.button.roundHover};
   border-radius: 50%;
-  width: 70px;
-  height: 70px;
+  width: ${(props) => props.size || '70px'};
+  height: ${(props) => props.size || '70px'};
+  font-size: ${(props) => `calc(${props.size} - 20px)` || '60px'};
+  border: ${(props) => props.border && '2px solid white'};
+  border-color: ${(props) => props.borderColor};
+  box-shadow: 2px 2px 2px 2px ${palatte.shadow};
   &:hover {
     background-color: ${colorMap.button.roundHover};
     color: ${colorMap.button.round};
@@ -106,6 +110,16 @@ const buttonSmallColorMap = {
       color: palatte.white,
     },
   },
+  gray500: {
+    default: {
+      backgroundColor: palatte.gray['200'],
+      color: palatte.gray['500'],
+    },
+    hover: {
+      backgroundColor: palatte.gray['400'],
+      color: palatte.gray['100'],
+    },
+  },
 };
 const RoundButtonSmall = styled.button`
   display: flex;
@@ -121,8 +135,9 @@ const RoundButtonSmall = styled.button`
       : 'transparent'};
   padding: ${(props) => props.padding || '0px'};
   border-radius: 50%;
-  width: ${(props) => props.size || '24px'};
-  height: ${(props) => props.size || '24px'};
+  min-width: ${(props) => props.size || '24px'};
+  min-height: ${(props) => props.size || '24px'};
+  font-size: ${(props) => props.size || '24px'};
   &:hover {
     color: ${(props) =>
       props.close

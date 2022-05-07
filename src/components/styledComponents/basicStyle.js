@@ -11,11 +11,13 @@ const palatte = {
     basic: '#17B8B6',
     300: '#A0E9D3',
     400: '#40CFCE',
+    600: '#2CAEAE',
     800: '#058B8A',
   },
   secondary: {
     basic: '#FFDD4A',
     100: '#FFFCEE',
+    200: '#FFEFAA',
     500: '#FFC43D',
     700: '#FF9900',
   },
@@ -210,7 +212,7 @@ const H6 = styled.h6`
   }
 `;
 const P = styled.p`
-  font-weight: 400;
+  font-weight: ${(props) => props.fontWeight || 400};
   font-size: ${(props) => props.fontSize || '16px'};
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};
