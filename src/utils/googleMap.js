@@ -17,7 +17,7 @@ const googleMap = {
       strokeWeight: 0,
       rotation: 0,
       scale: 2,
-      anchor: new window.google.maps.Point(0, 0),
+      anchor: new window.google.maps.Point(12, 20),
       labelOrigin: new window.google.maps.Point(13, -5),
     };
   },

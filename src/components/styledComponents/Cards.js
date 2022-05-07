@@ -56,6 +56,71 @@ const TimeTag = styled.div`
   padding: 5px 20px;
   z-index: 5;
 `;
+const TextWithIcon = (props) => (
+  <FlexDiv
+    gap={props.gap}
+    alignItems={typeof props.children === 'string' ? 'center' : 'flex-start'}>
+    <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
+      {props.iconLabel && (
+        <P
+          fontSize={props.labelSize || props.textSize}
+          color={props.labelColor || props.iconColor}>
+          {props.iconLabel}
+        </P>
+      )}
+      <span
+        className="material-icons"
+        css={css`
+          color: ${props.iconColor};
+          font-size: ${props.iconSize};
+          ${props.addCss?.icon};
+        `}>
+        {props.iconName}
+      </span>
+    </FlexDiv>
+    {typeof props.children === 'string' ? (
+      <P
+        fontSize={props.textSize}
+        color={props.textColor}
+        addCss={props.addCss?.text}>
+        {props.children}
+      </P>
+    ) : (
+      props.children
+    )}
+  </FlexDiv>
+);
+const AddressText = (props) => (
+  <TextWithIcon
+    gap={props.withRating ? '4px' : '2px'}
+    iconName="location_on"
+    iconColor={palatte.danger.basic}
+    iconSize={props.isSmall ? '20px' : '24px'}
+    addCss={{
+      icon: css`
+        margin: ${props.isSmall ? '3px 3px 3px 0' : '0'};
+      `,
+    }}>
+    {props.children}
+  </TextWithIcon>
+);
+const RatingText = (props) => (
+  <FlexDiv gap="6px" alignItems="center">
+    {!props.isNoText && (
+      <P
+        addCss={css`
+          margin-bottom: 2px;
+          line-height: 1;
+        `}>
+        {props.rating}
+      </P>
+    )}
+    <Rating
+      size={props.isSmall ? '20' : props.size || '24'}
+      rating={props.rating}
+    />
+  </FlexDiv>
+);
 function SpotCard(props) {
   return (
     <CardWrapper column as={props.as} gap="20px">
@@ -141,47 +206,22 @@ function SpotCard(props) {
             `}>
             {props.title}
           </H5>
-          <FlexDiv gap={props.rating ? '4px' : '2px'}>
-            <span
-              className="material-icons"
-              css={css`
-                color: ${palatte.danger.basic};
-                font-size: ${props.isSmall ? '20px' : '24px'};
-                margin: ${props.isSmall ? '3px 3px 3px 0' : '0'};
-              `}>
-              location_on
-            </span>
-            <P>{props.address}</P>
-          </FlexDiv>
+          <AddressText withRating={props.rating} isSmall={props.isSmall}>
+            {props.address}
+          </AddressText>
           {props.duration && (
-            <FlexDiv gap="4px">
-              <span
-                className="material-icons"
-                css={css`
-                  color: ${palatte.gray['500']};
-                  font-size: 22px;
-                `}>
-                schedule
-              </span>
-              <P color={palatte.gray['700']} fontSize="14px">
-                停留 {Math.floor(props.duration / 60)} 小時
-              </P>
-            </FlexDiv>
+            <TextWithIcon
+              gap="4px"
+              iconColor={palatte.gray['500']}
+              iconSize="22px"
+              iconName="schedule"
+              textColor={palatte.gray['700']}
+              textSize="14px">
+              停留 {Math.floor(props.duration / 60)} 小時
+            </TextWithIcon>
           )}
           {props.rating && (
-            <FlexDiv gap="6px" alignItems="center">
-              <P
-                addCss={css`
-                  margin-bottom: 2px;
-                  line-height: 1;
-                `}>
-                {props.rating}
-              </P>
-              <Rating
-                size={props.isSmall ? '20' : '24'}
-                rating={props.rating}
-              />
-            </FlexDiv>
+            <RatingText rating={props.rating} isSmall={props.isSmall} />
           )}
         </FlexChildDiv>
       </Card>
@@ -363,4 +403,7 @@ export {
   ScheduleCard,
   OverviewCard,
   SpotCard,
+  RatingText,
+  AddressText,
+  TextWithIcon,
 };

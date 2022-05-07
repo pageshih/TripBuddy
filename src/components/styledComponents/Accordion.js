@@ -9,6 +9,8 @@ const ExpandIcon = styled.span`
   align-self: flex-start;
   transform: ${(props) => (props.isExpand ? 'rotateZ(180deg)' : null)};
   transition: transform 0.4s ease;
+  font-size: ${(props) => props.fontSize || '24px'};
+  ${(props) => props.addCss}
 `;
 const AccordionContainer = styled(FlexDiv)`
   flex-direction: column;
@@ -34,12 +36,38 @@ function Accordion(props) {
           {props.titleElement}
         </FlexDiv>
         <ExpandIcon className="material-icons" isExpand={isExpand}>
-          expand_more
+          {props.filled ? 'arrow_drop_down' : 'expand_more'}
         </ExpandIcon>
       </FlexDiv>
       {isExpand && props.children}
     </AccordionContainer>
   );
 }
+function AccordionSmall(props) {
+  const [isExpand, setIsExpand] = useState(false);
+  return (
+    <FlexDiv direction="column" gap="10px">
+      <FlexDiv
+        justifyContent="space-between"
+        addCss={css`
+          cursor: pointer;
+        `}
+        onClick={() => setIsExpand((prev) => !prev)}>
+        <FlexDiv direction="column" grow="1" gap="3px">
+          {props.titleElement}
+        </FlexDiv>
+        <ExpandIcon
+          className="material-icons"
+          isExpand={isExpand}
+          addCss={css`
+            font-size: 20px;
+          `}>
+          {props.filled ? 'arrow_drop_down' : 'expand_more'}
+        </ExpandIcon>
+      </FlexDiv>
+      {isExpand && props.children}
+    </FlexDiv>
+  );
+}
 
-export { Accordion };
+export { Accordion, AccordionSmall };

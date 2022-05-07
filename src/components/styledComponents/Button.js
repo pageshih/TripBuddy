@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { palatte, mediaQuery } from './basicStyle';
 import PropTypes from 'prop-types';
-import { FlexDiv } from './Layout';
+import { FlexChildDiv, FlexDiv } from './Layout';
 
 const colorMap = {
   backgroundColor: {
@@ -252,6 +252,51 @@ function SaveAndCancelButton(props) {
 SaveAndCancelButton.propTypes = {
   close: PropTypes.func,
 };
+const linkTextColor = css`
+  text-decoration: none;
+  & * {
+    color: ${palatte.info.basic};
+  }
+  &:visited {
+    & * {
+      color: ${palatte.gray[700]};
+    }
+  }
+  &:hover {
+    & * {
+      color: ${palatte.secondary[700]};
+    }
+  }
+  &:active {
+    & * {
+      color: ${palatte.primary[800]};
+    }
+  }
+`;
+const LinkText = styled.span`
+  font-size: ${(props) => props.fontSize || '16px'};
+  text-decoration: underline;
+`;
+const LinkIcon = styled.span`
+  font-size: ${(props) =>
+    props.fontSize ? `calc(${props.fontSize} + 4px)` : '20px'};
+  margin-top: 2px;
+`;
+function HyperLink(props) {
+  return (
+    <FlexChildDiv
+      as="a"
+      href={props.href}
+      target={props.target || '_blank'}
+      addCss={linkTextColor}
+      alignItems="center"
+      gap="2px"
+      alignSelf={props.alignSelf}>
+      <LinkText>{props.children}</LinkText>
+      <LinkIcon className="material-icons">open_in_new</LinkIcon>
+    </FlexChildDiv>
+  );
+}
 export {
   Button,
   ButtonOutline,
@@ -264,4 +309,5 @@ export {
   RoundButtonSmallWhite,
   ReviewTagRemoveButton,
   SaveAndCancelButton,
+  HyperLink,
 };
