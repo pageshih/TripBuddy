@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { styles, palatte, H4, H5, P, mediaQuery } from './basicStyle';
+import { styles, palatte, H4, H5, P, mediaQuery, Rating } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom } from './Form';
@@ -61,17 +61,33 @@ function SpotCard(props) {
         gap="10px"
         addCss={css`
           position: absolute;
-          top: -15px;
-          left: 30px;
+          top: ${props.time ? '-15px' : props.isEdit ? '20px' : null};
+          left: ${props.small
+            ? props.time
+              ? '-10px'
+              : props.isEdit
+              ? '20px'
+              : null
+            : props.time
+            ? '30px'
+            : props.isEdit
+            ? '20px'
+            : null};
+          z-index: 1;
           ${mediaQuery[0]} {
-            left: -10px;
+            left: ${props.time ? '-10px' : props.isEdit ? '20px' : null};
           }
         `}>
         {props.isEdit && (
           <CheckboxCustom
             id={props.id}
-            selectedList={props.selectedSpotList}
-            setSelectedList={props.setSelectedSpotList}
+            selectedList={props.selectedList}
+            setSelectedList={props.setSelectedList}
+            addCss={css`
+              outline: ${!props.time && props.isEdit
+                ? `1px solid ${palatte.gray['300']}`
+                : null};
+            `}
           />
         )}
         {props.time && (
@@ -89,9 +105,9 @@ function SpotCard(props) {
         <Image
           src={props.imgSrc}
           alt={props.imgAlt}
-          minWidth="330px"
           height="200px"
           addCss={css`
+            flex-basis: 330px;
             ${mediaQuery[0]} {
               width: 100%;
             }
@@ -110,7 +126,7 @@ function SpotCard(props) {
             }
           `}>
           <H5 margin="0 0 10px 0">{props.title}</H5>
-          <FlexDiv gap="2px">
+          <FlexDiv gap={props.rating ? '4px' : '2px'}>
             <span
               className="material-icons"
               css={css`
@@ -133,6 +149,18 @@ function SpotCard(props) {
               <P color={palatte.gray['700']} fontSize="14px">
                 停留 {Math.floor(props.duration / 60)} 小時
               </P>
+            </FlexDiv>
+          )}
+          {props.rating && (
+            <FlexDiv gap="6px" alignItems="center">
+              <P
+                addCss={css`
+                  margin-bottom: 2px;
+                  line-height: 1;
+                `}>
+                {props.rating}
+              </P>
+              <Rating size="24" rating={props.rating} />
             </FlexDiv>
           )}
         </FlexChildDiv>

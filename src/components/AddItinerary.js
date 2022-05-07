@@ -628,8 +628,8 @@ function MoveScheduleController(props) {
           )
         }
         setAllUnchecked={() => props.setSelectedSchedulesId([])}
-        selectAll={props.selectAll}
-        setSelectAll={props.setSelectAll}
+        isSelectAll={props.selectAll}
+        setIsSelectAll={props.setSelectAll}
       />
       <select
         value={props.changeTime}
@@ -1214,8 +1214,8 @@ function AddSchedule(props) {
                     schedules={schedules}
                     setSelectedSchedulesId={setSelectedSchedulesId}
                     switchDay={switchDay}
-                    setSelectAll={setSelectAll}
-                    selectAll={selectAll}
+                    setIsSelectAll={setSelectAll}
+                    isSelectAll={selectAll}
                     changeSchedulesTime={changeSchedulesTime}
                   />
                 )}

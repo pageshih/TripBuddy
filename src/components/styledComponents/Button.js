@@ -33,6 +33,7 @@ const Button = styled.button`
   display: flex;
   gap: 4px;
   justify-content: center;
+  align-items: center;
   padding: 10px 20px;
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
@@ -63,10 +64,18 @@ const ButtonOutline = styled(Button)`
     color: ${palatte.white};
   }
 `;
-const ButtonSmall = styled(Button)`
-  font-size: ${(props) => props.fontSize || '14px'};
+const buttonSmall = (props) => css`
+  font-size: ${props.fontSize || '14px'};
   padding: 5px 20px;
   border-radius: 5px;
+  white-space: nowrap;
+`;
+const ButtonSmall = styled(Button)`
+  ${buttonSmall}
+`;
+
+const ButtonSmallOutline = styled(ButtonOutline)`
+  ${buttonSmall}
 `;
 const ButtonSmallIcon = styled(ButtonSmall)`
   padding: 5px 10px;
@@ -233,6 +242,7 @@ export {
   ButtonOutline,
   ButtonSmall,
   ButtonSmallIcon,
+  ButtonSmallOutline,
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,
