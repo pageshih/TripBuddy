@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { palatte, mediaQuery, P } from './basicStyle';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
 import {
@@ -65,12 +66,22 @@ const TextInput = styled.input`
 const Select = styled.select`
   ${inputBase}
   width: ${(props) => props.width || '100%'};
+  min-width: fit-content;
+  color: ${(props) => (props.value ? palatte.dark : palatte.gray[600])};
+  & option:disabled {
+    color: ${palatte.gray[400]};
+  }
 `;
-const checkboxCss = css`
+const SelectSmall = styled(Select)`
+  font-size: 14px;
+  padding: 5px 10px;
+`;
+const checkboxCss = (props) => css`
   color: white;
   border: 1px solid ${palatte.primary.basic};
   border-radius: 6px;
   cursor: pointer;
+  font-size: ${props.size || '24px'};
 `;
 const CheckboxDiv = styled.div`
   ${checkboxCss}
@@ -86,16 +97,23 @@ const CheckAllDiv = styled.div`
 `;
 const CheckboxCustom = (props) => {
   return (
-    <label name={props.selectAll !== undefined ? 'selectAll' : props.id}>
-      {props.selectAll !== undefined ? (
+    <label
+      css={css`
+        width: ${props.size || '24px'};
+        height: ${props.size || '24px'};
+      `}
+      name={props.isSelectAll !== undefined ? 'selectAll' : props.id}>
+      {props.isSelectAll !== undefined ? (
         <CheckAllDiv
+          size={props.size}
           css={props.addCss}
-          checked={props.selectAll}
+          checked={props.isSelectAll}
           className="material-icons">
           check
         </CheckAllDiv>
       ) : (
         <CheckboxDiv
+          size={props.size}
           css={props.addCss}
           id={props.id}
           selectedList={props.selectedList}
@@ -107,13 +125,13 @@ const CheckboxCustom = (props) => {
         type="checkbox"
         style={{ display: 'none' }}
         checked={
-          props.selectAll ||
+          props.isSelectAll ||
           props.selectedList?.some((id) => id === props.id) ||
           false
         }
-        id={props.selectAll !== undefined ? 'selectAll' : props.id}
+        id={props.isSelectAll !== undefined ? 'selectAll' : props.id}
         onChange={(e) => {
-          if (props.selectAll !== undefined) {
+          if (props.isSelectAll !== undefined) {
             props.onChange(e);
           } else {
             if (e.target.checked) {
@@ -129,20 +147,36 @@ const CheckboxCustom = (props) => {
     </label>
   );
 };
+CheckboxCustom.propTypes = {
+  id: PropTypes.string,
+  selectedList: PropTypes.array,
+  setSelectedList: PropTypes.func,
+  selectAll: PropTypes.bool,
+  onChange: PropTypes.func,
+  addCss: PropTypes.object,
+};
 function SelectAllCheckBox(props) {
   const selectAllItems = (e) => {
     if (e.target.checked) {
-      props.setSelectAll(true);
+      props.setIsSelectAll(true);
       props.setAllChecked();
     } else {
-      props.setSelectAll(false);
+      props.setIsSelectAll(false);
       props.setAllUnchecked();
     }
   };
   return (
-    <FlexDiv gap="10px" alignItems="center" padding={props.padding}>
-      <CheckboxCustom selectAll={props.selectAll} onChange={selectAllItems} />
-      <p>全選</p>
+    <FlexDiv gap="12px" alignItems="center" padding={props.padding}>
+      <CheckboxCustom
+        size={props.size}
+        isSelectAll={props.isSelectAll}
+        onChange={selectAllItems}
+      />
+      <P
+        fontSize={`calc(${props.size} - '6px')` || '18px'}
+        color={palatte.gray[800]}>
+        全選
+      </P>
     </FlexDiv>
   );
 }
@@ -416,4 +450,5 @@ export {
   uploadImageStyle,
   AddImageRoundBtn,
   Select,
+  SelectSmall,
 };

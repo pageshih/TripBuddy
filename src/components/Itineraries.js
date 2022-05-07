@@ -62,6 +62,7 @@ function Itineraries() {
     firestore
       .getItineraries(uid, now)
       .then((overviews) => {
+        console.log(overviews);
         if (overviews?.length <= 0) {
           setEmpty(true);
         } else {
@@ -77,7 +78,8 @@ function Itineraries() {
             const tripDays =
               new Date(itinerary.end_date).getDate() -
               new Date(itinerary.start_date).getDate();
-            if (countDownDay <= 0 && countDownDay + tripDays >= -1) {
+            console.log(countDownDay, tripDays);
+            if (countDownDay <= 0 && countDownDay + tripDays >= 0) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
                 .then((scheduleProcessing) => {
@@ -89,7 +91,7 @@ function Itineraries() {
                   }
                 })
                 .catch((error) => console.error(error));
-            } else if (countDownDay < 7 && countDownDay > 0) {
+            } else if (countDownDay <= 7 && countDownDay > 0) {
               itineraries.coming.push(itinerary);
             } else if (countDownDay > 7) {
               itineraries.future.push(itinerary);
@@ -148,7 +150,6 @@ function Itineraries() {
                           return (
                             <ScheduleCard
                               as="li"
-                              address={schedule.placeDetail.formatted_address}
                               duration={schedule.duration}
                               transit={{
                                 travelMode: schedule.travel_mode,

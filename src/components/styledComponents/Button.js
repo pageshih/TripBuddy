@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { palatte, mediaQuery } from './basicStyle';
 import PropTypes from 'prop-types';
-import { FlexDiv } from './Layout';
+import { FlexChildDiv, FlexDiv } from './Layout';
 
 const colorMap = {
   backgroundColor: {
@@ -24,8 +24,8 @@ const colorMap = {
     danger: palatte.danger.basic,
     dangerHover: palatte.danger['400'],
     dangerOutline: palatte.danger['400'],
-    round: palatte.gray['200'],
-    roundHover: palatte.primary['400'],
+    round: palatte.secondary[200],
+    roundHover: palatte.primary[400],
   },
 };
 
@@ -33,6 +33,7 @@ const Button = styled.button`
   display: flex;
   gap: 4px;
   justify-content: center;
+  align-items: center;
   padding: 10px 20px;
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
@@ -63,10 +64,18 @@ const ButtonOutline = styled(Button)`
     color: ${palatte.white};
   }
 `;
-const ButtonSmall = styled(Button)`
-  font-size: ${(props) => props.fontSize || '14px'};
+const buttonSmall = (props) => css`
+  font-size: ${props.fontSize || '14px'};
   padding: 5px 20px;
   border-radius: 5px;
+  white-space: nowrap;
+`;
+const ButtonSmall = styled(Button)`
+  ${buttonSmall}
+`;
+
+const ButtonSmallOutline = styled(ButtonOutline)`
+  ${buttonSmall}
 `;
 const ButtonSmallIcon = styled(ButtonSmall)`
   padding: 5px 10px;
@@ -78,8 +87,12 @@ const RoundButton = styled.button`
   background-color: ${colorMap.button.round};
   color: ${colorMap.button.roundHover};
   border-radius: 50%;
-  width: 70px;
-  height: 70px;
+  width: ${(props) => props.size || '70px'};
+  height: ${(props) => props.size || '70px'};
+  font-size: ${(props) => `calc(${props.size} - 20px)` || '60px'};
+  border: ${(props) => props.border && '2px solid white'};
+  border-color: ${(props) => props.borderColor};
+  box-shadow: 2px 2px 2px 2px ${palatte.shadow};
   &:hover {
     background-color: ${colorMap.button.roundHover};
     color: ${colorMap.button.round};
@@ -97,6 +110,16 @@ const buttonSmallColorMap = {
       color: palatte.white,
     },
   },
+  gray500: {
+    default: {
+      backgroundColor: palatte.gray['200'],
+      color: palatte.gray['500'],
+    },
+    hover: {
+      backgroundColor: palatte.gray['400'],
+      color: palatte.gray['100'],
+    },
+  },
 };
 const RoundButtonSmall = styled.button`
   display: flex;
@@ -112,8 +135,9 @@ const RoundButtonSmall = styled.button`
       : 'transparent'};
   padding: ${(props) => props.padding || '0px'};
   border-radius: 50%;
-  width: ${(props) => props.size || '24px'};
-  height: ${(props) => props.size || '24px'};
+  min-width: ${(props) => props.size || '24px'};
+  min-height: ${(props) => props.size || '24px'};
+  font-size: ${(props) => props.size || '24px'};
   &:hover {
     color: ${(props) =>
       props.close
@@ -228,15 +252,62 @@ function SaveAndCancelButton(props) {
 SaveAndCancelButton.propTypes = {
   close: PropTypes.func,
 };
+const linkTextColor = css`
+  text-decoration: none;
+  & * {
+    color: ${palatte.info.basic};
+  }
+  &:visited {
+    & * {
+      color: ${palatte.gray[700]};
+    }
+  }
+  &:hover {
+    & * {
+      color: ${palatte.secondary[700]};
+    }
+  }
+  &:active {
+    & * {
+      color: ${palatte.primary[800]};
+    }
+  }
+`;
+const LinkText = styled.span`
+  font-size: ${(props) => props.fontSize || '16px'};
+  text-decoration: underline;
+`;
+const LinkIcon = styled.span`
+  font-size: ${(props) =>
+    props.fontSize ? `calc(${props.fontSize} + 4px)` : '20px'};
+  margin-top: 2px;
+`;
+function HyperLink(props) {
+  return (
+    <FlexChildDiv
+      as="a"
+      href={props.href}
+      target={props.target || '_blank'}
+      addCss={linkTextColor}
+      alignItems="center"
+      gap="2px"
+      alignSelf={props.alignSelf}>
+      <LinkText>{props.children}</LinkText>
+      <LinkIcon className="material-icons">open_in_new</LinkIcon>
+    </FlexChildDiv>
+  );
+}
 export {
   Button,
   ButtonOutline,
   ButtonSmall,
   ButtonSmallIcon,
+  ButtonSmallOutline,
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,
   RoundButtonSmallWhite,
   ReviewTagRemoveButton,
   SaveAndCancelButton,
+  HyperLink,
 };

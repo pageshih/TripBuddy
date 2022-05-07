@@ -1,17 +1,26 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
-import { FlexDiv } from './styledComponents/Layout';
-import { Card, CardWrapper } from './styledComponents/Cards';
-import { CheckboxCustom, SelectAllCheckBox } from './styledComponents/Form';
+import { mediaQuery, palatte, styles } from './styledComponents/basicStyle';
+import { FlexDiv, Container } from './styledComponents/Layout';
+import { SpotCard } from './styledComponents/Cards';
+import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
+import {
+  Button,
+  ButtonSmallOutline,
+  ButtonSmall,
+} from './styledComponents/Button';
 
 function SavedSpots(props) {
   const { uid, map } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const [addAction, setAddAction] = useState();
+  const [addAction, setAddAction] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
+  const [isSelectAll, setIsSelectAll] = useState(false);
 
   const navigate = useNavigate();
   const deleteSpots = () => {
@@ -65,58 +74,87 @@ function SavedSpots(props) {
     }
   }, [map]);
   return (
-    <>
-      <FlexDiv gap="20px" justifyContent="flex-end" padding="20px">
-        <select onChange={(e) => setAddAction(e.target.value)}>
-          <option value="">---選擇要加入景點的行程---</option>
-          <option value="add">建立一個新行程</option>
-          {createdItineraries?.map((itinerary) => (
-            <option key={itinerary.itinerary_id} value={itinerary.itinerary_id}>
-              {itinerary.title}
+    <FlexDiv
+      direction="column"
+      gap="40px"
+      addCss={css`
+        ${styles.containerSetting};
+        padding-bottom: 80px;
+      `}>
+      <FlexDiv
+        gap="20px"
+        justifyContent="space-between"
+        padding="0 10px 20px 10px"
+        addCss={css`
+          border-bottom: 1px solid ${palatte.gray['400']};
+        `}>
+        <SelectAllCheckBox
+          isSelectAll={isSelectAll}
+          setIsSelectAll={setIsSelectAll}
+          setAllChecked={() =>
+            setSelectedSpotList(savedSpots.map((spot) => spot.place_id))
+          }
+          setAllUnchecked={() => setSelectedSpotList([])}
+        />
+        <FlexDiv gap="20px">
+          <SelectSmall
+            value={addAction}
+            onChange={(e) => setAddAction(e.target.value)}>
+            <option value="" disabled>
+              ---選擇要加入景點的行程---
             </option>
-          ))}
-        </select>
-        <button type="click" onClick={addSelectSpotsToItinerary}>
-          加入行程
-        </button>
-        <button type="click" onClick={deleteSpots}>
-          刪除景點
-        </button>
+            <option value="add">建立一個新行程</option>
+            {createdItineraries?.map((itinerary) => (
+              <option
+                key={itinerary.itinerary_id}
+                value={itinerary.itinerary_id}>
+                {itinerary.title}
+              </option>
+            ))}
+          </SelectSmall>
+          <ButtonSmall
+            styled="primary"
+            type="click"
+            onClick={addSelectSpotsToItinerary}>
+            加入行程
+          </ButtonSmall>
+          <ButtonSmallOutline
+            styled="danger"
+            type="click"
+            onClick={deleteSpots}>
+            刪除景點
+          </ButtonSmallOutline>
+        </FlexDiv>
       </FlexDiv>
-      <SelectAllCheckBox
-        padding="0 12px"
-        setAllChecked={() =>
-          setSelectedSpotList(savedSpots.map((spot) => spot.place_id))
-        }
-        setAllUnchecked={() => setSelectedSpotList([])}
-      />
-      <CardWrapper column padding="20px" gap="20px">
-        {savedSpots?.map((spot) => (
-          <Card gap="20px" position="relative" key={spot.place_id}>
-            <CheckboxCustom
-              id={spot.place_id}
-              selectedList={selectedSpotList}
-              setSelectedList={setSelectedSpotList}
-            />
-            <div style={{ width: '300px', height: '200px' }}>
-              <img
-                src={spot.photos[0]}
-                alt={spot.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-            <div>
-              <h3>{spot.name}</h3>
-              <p>{spot.formatted_address}</p>
-              <p>{spot.rating}</p>
-            </div>
-          </Card>
-        ))}
-        <button type="click" onClick={() => navigate('/explore')}>
-          新增景點
-        </button>
-      </CardWrapper>
-    </>
+
+      {savedSpots?.map((spot) => (
+        <SpotCard
+          key={spot.place_id}
+          title={spot.name}
+          address={spot.formatted_address}
+          id={spot.place_id}
+          selectedList={selectedSpotList}
+          setSelectedList={setSelectedSpotList}
+          imgSrc={spot.photos[0]}
+          imgAlt={spot.name}
+          rating={spot.rating}
+          isEdit
+        />
+      ))}
+      <Button
+        styled="primary"
+        type="click"
+        addCss={css`
+          margin: 20px auto;
+          width: fit-content;
+          ${mediaQuery[0]} {
+            width: 100%;
+          }
+        `}
+        onClick={() => navigate('/explore')}>
+        新增景點
+      </Button>
+    </FlexDiv>
   );
 }
 
