@@ -107,7 +107,6 @@ const GetTodayOpeningHours = (props) => {
   );
 };
 function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
-  const [hideInfo, setHideInfo] = useState();
   let today = new Date().getDay();
   today = today ? today - 1 : 6;
   const restOpeningText = () => {
@@ -135,57 +134,53 @@ function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
         }
       `}>
       <Image
-        minHeight={hideInfo ? '100px' : '250px'}
+        minHeight="250px"
         maxHeight="250px"
         src={placeDetail.photos[0]}
         alt="placePhoto"
       />
       <FlexChildDiv direction="column" padding="0 30px" gap="12px">
         <H2 fontSize="22px">{placeDetail.name}</H2>
-        {!hideInfo && (
-          <>
-            {placeDetail.opening_hours.weekday_text && (
-              <TextWithIcon
-                gap="6px"
-                iconGap="4px"
-                iconName="access_time"
-                iconLabel="營業時間"
-                iconSize="18px"
-                iconColor={palatte.gray[600]}
-                textSize="14px"
-                textColor={palatte.gray[700]}
-                addCss={{
-                  text: css`
-                    & span {
-                      color: inherit;
-                    }
-                  `,
-                }}>
-                <AccordionSmall
-                  filled
-                  titleElement={
-                    <GetTodayOpeningHours
-                      openingText={
-                        placeDetail.opening_hours.weekday_text[today]
-                      }
-                    />
-                  }>
-                  {restOpeningText().map((text, index) => (
-                    <GetTodayOpeningHours
-                      key={`opening_hours_day${index + 1}`}
-                      openingText={text}
-                    />
-                  ))}
-                </AccordionSmall>
-              </TextWithIcon>
-            )}
-            <AddressText withRating isSmall>
-              {placeDetail.formatted_address}
-            </AddressText>
-          </>
+
+        {placeDetail.opening_hours.weekday_text && (
+          <TextWithIcon
+            gap="6px"
+            iconGap="4px"
+            iconName="access_time"
+            iconLabel="營業時間"
+            iconSize="18px"
+            iconColor={palatte.gray[600]}
+            textSize="14px"
+            textColor={palatte.gray[700]}
+            addCss={{
+              text: css`
+                & span {
+                  color: inherit;
+                }
+              `,
+            }}>
+            <AccordionSmall
+              filled
+              titleElement={
+                <GetTodayOpeningHours
+                  openingText={placeDetail.opening_hours.weekday_text[today]}
+                />
+              }>
+              {restOpeningText().map((text, index) => (
+                <GetTodayOpeningHours
+                  key={`opening_hours_day${index + 1}`}
+                  openingText={text}
+                />
+              ))}
+            </AccordionSmall>
+          </TextWithIcon>
         )}
+        <AddressText withRating isSmall>
+          {placeDetail.formatted_address}
+        </AddressText>
+
         <RatingText rating={placeDetail.rating} isSmall />
-        {!hideInfo && placeDetail.website !== '未提供' && (
+        {placeDetail.website !== '未提供' && (
           <HyperLink href={placeDetail.website} alignSelf="flex-start">
             官方網站
           </HyperLink>
