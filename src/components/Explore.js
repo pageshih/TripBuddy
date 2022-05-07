@@ -31,7 +31,7 @@ function Map({
   map,
   marker,
   setIsShowSavedSpots,
-  setIsShowSideColumn,
+  resetMap,
   getPlaceShowOnMap,
 }) {
   const ref = useRef();
@@ -63,9 +63,7 @@ function Map({
           }
         } else {
           if (marker) {
-            googleMap.deleteMarker(marker);
-            googleMap.setMapStyle(map, 'default');
-            setIsShowSideColumn(false);
+            resetMap(true);
           }
         }
         e.stop();
@@ -106,8 +104,12 @@ const GetTodayOpeningHours = (props) => {
     </P>
   );
 };
-function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
-  const [hideInfo, setHideInfo] = useState();
+function PlaceDetail({
+  placeDetail,
+  removeFromSavedSpots,
+  addToSavedSpots,
+  checkIsSavedSpot,
+}) {
   let today = new Date().getDay();
   today = today ? today - 1 : 6;
   const restOpeningText = () => {
@@ -135,67 +137,68 @@ function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
         }
       `}>
       <Image
-        minHeight={hideInfo ? '100px' : '250px'}
+        minHeight="250px"
         maxHeight="250px"
         src={placeDetail.photos[0]}
         alt="placePhoto"
       />
       <FlexChildDiv direction="column" padding="0 30px" gap="12px">
         <H2 fontSize="22px">{placeDetail.name}</H2>
-        {!hideInfo && (
-          <>
-            {placeDetail.opening_hours.weekday_text && (
-              <TextWithIcon
-                gap="6px"
-                iconGap="4px"
-                iconName="access_time"
-                iconLabel="營業時間"
-                iconSize="18px"
-                iconColor={palatte.gray[600]}
-                textSize="14px"
-                textColor={palatte.gray[700]}
-                addCss={{
-                  text: css`
-                    & span {
-                      color: inherit;
-                    }
-                  `,
-                }}>
-                <AccordionSmall
-                  filled
-                  titleElement={
-                    <GetTodayOpeningHours
-                      openingText={
-                        placeDetail.opening_hours.weekday_text[today]
-                      }
-                    />
-                  }>
-                  {restOpeningText().map((text, index) => (
-                    <GetTodayOpeningHours
-                      key={`opening_hours_day${index + 1}`}
-                      openingText={text}
-                    />
-                  ))}
-                </AccordionSmall>
-              </TextWithIcon>
-            )}
-            <AddressText withRating isSmall>
-              {placeDetail.formatted_address}
-            </AddressText>
-          </>
+
+        {placeDetail.opening_hours.weekday_text && (
+          <TextWithIcon
+            gap="6px"
+            iconGap="4px"
+            iconName="access_time"
+            iconLabel="營業時間"
+            iconSize="18px"
+            iconColor={palatte.gray[600]}
+            textSize="14px"
+            textColor={palatte.gray[700]}
+            addCss={{
+              text: css`
+                & span {
+                  color: inherit;
+                }
+              `,
+            }}>
+            <AccordionSmall
+              filled
+              titleElement={
+                <GetTodayOpeningHours
+                  key={`opening_hours_day_today`}
+                  openingText={placeDetail.opening_hours.weekday_text[today]}
+                />
+              }>
+              {restOpeningText().map((text, index) => (
+                <GetTodayOpeningHours
+                  key={`opening_hours_day${index + 1}`}
+                  openingText={text}
+                />
+              ))}
+            </AccordionSmall>
+          </TextWithIcon>
         )}
+        <AddressText withRating isSmall>
+          {placeDetail.formatted_address}
+        </AddressText>
+
         <RatingText rating={placeDetail.rating} isSmall />
-        {!hideInfo && placeDetail.website !== '未提供' && (
+        {placeDetail.website !== '未提供' && (
           <HyperLink href={placeDetail.website} alignSelf="flex-start">
             官方網站
           </HyperLink>
         )}
         <Button
-          styled={placeDetail.savedSpot ? 'danger' : 'primary'}
+          styled={
+            placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
+              ? 'danger'
+              : 'primary'
+          }
           type="button"
           margin="10px 0 0 0 "
           onClick={() =>
-            placeDetail.savedSpot
+            placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
               ? removeFromSavedSpots([placeDetail.place_id])
               : addToSavedSpots()
           }>
@@ -205,9 +208,13 @@ function PlaceDetail({ placeDetail, removeFromSavedSpots, addToSavedSpots }) {
               color: inherit;
               font-size: 28px;
             `}>
-            {placeDetail.savedSpot ? 'wrong_location' : 'add_location_alt'}
+            {placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
+              ? 'wrong_location'
+              : 'add_location_alt'}
           </span>
-          {placeDetail.savedSpot ? '從候補景點中移除' : '加入候補景點'}
+          {placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
+            ? '從候補景點中移除'
+            : '加入候補景點'}
         </Button>
       </FlexChildDiv>
       <FlexChildDiv direction="column" padding="0 30px 30px 30px" gap="20px">
@@ -322,7 +329,7 @@ function SavedSpotsList(props) {
           overflowY="auto"
           shrink="1"
           gap="30px"
-          padding="0 0 10px 0"
+          padding="0 4px 10px 0"
           position="relative"
           addCss={css`
             &::-webkit-scrollbar {
@@ -472,6 +479,13 @@ function Explore({ setWaitingSpots }) {
     setPlaceDetail(detail);
     setIsShowSideColumn(true);
   };
+  const resetMap = (closeSideColumn) => {
+    googleMap.deleteMarker(marker);
+    googleMap.setMapStyle(map, 'default');
+    if (closeSideColumn) {
+      setIsShowSideColumn(false);
+    }
+  };
   const expandButton = css`
     position: absolute;
     right: -15px;
@@ -518,6 +532,9 @@ function Explore({ setWaitingSpots }) {
                     placeDetail={placeDetail}
                     addToSavedSpots={addToSavedSpots}
                     removeFromSavedSpots={removeFromSavedSpots}
+                    checkIsSavedSpot={(placeId) =>
+                      savedSpots.some((spot) => spot.place_id === placeId)
+                    }
                   />
                 )}
                 {isShowSavedSpots && savedSpots?.length > 0 && (
@@ -547,8 +564,16 @@ function Explore({ setWaitingSpots }) {
                 <ButtonOnMap
                   iconName="add_location"
                   onClick={() => {
-                    setIsShowSavedSpots(true);
-                    setIsShowSideColumn((prev) => !prev);
+                    if (!isShowSideColumn) {
+                      setIsShowSavedSpots(true);
+                      setIsShowSideColumn(true);
+                    } else if (isShowSavedSpots) {
+                      setIsShowSideColumn(false);
+                      setIsShowSavedSpots(false);
+                    } else {
+                      setIsShowSavedSpots(true);
+                      resetMap();
+                    }
                   }}>
                   候補景點
                 </ButtonOnMap>
@@ -578,7 +603,7 @@ function Explore({ setWaitingSpots }) {
                   setMarker={setMarker}
                   marker={marker}
                   setIsShowSavedSpots={setIsShowSavedSpots}
-                  setIsShowSideColumn={setIsShowSideColumn}
+                  resetMap={resetMap}
                 />
               </Wrapper>
             </FlexChildDiv>
