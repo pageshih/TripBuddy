@@ -27,7 +27,7 @@ const colorMap = {
     round: palatte.secondary[200],
     roundHover: palatte.primary[400],
     gray: palatte.gray[500],
-    grayHover: palatte.gray[400],
+    grayHover: palatte.gray[600],
     grayOutline: palatte.gray[600],
   },
 };
@@ -69,9 +69,11 @@ const ButtonOutline = styled(Button)`
 `;
 const buttonSmall = (props) => css`
   font-size: ${props.fontSize || '14px'};
-  padding: 5px 20px;
+  padding: ${props.padding || '5px 20px'};
   border-radius: 5px;
   white-space: nowrap;
+  margin: ${props.margin};
+  ${props.addCss}
 `;
 const ButtonSmall = styled(Button)`
   ${buttonSmall}

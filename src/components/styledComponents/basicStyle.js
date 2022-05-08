@@ -231,12 +231,13 @@ const Loader = styled.div`
   border-top: none;
 `;
 
-const headingComponents = {
+const textComponents = {
   2: H2,
   3: H3,
   4: H4,
   5: H5,
   6: H6,
+  P: P,
 };
 
 const Rating = (props) => {
@@ -294,7 +295,7 @@ export {
   styles,
   mediaQuery,
   Loader,
-  headingComponents,
+  textComponents,
   headingFontSize,
   Rating,
 };

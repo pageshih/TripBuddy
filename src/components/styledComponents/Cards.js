@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import { styles, palatte, H4, H5, P, mediaQuery, Rating } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
-import { CheckboxCustom } from './Form';
+import { CheckboxCustom, ChangeTravelModeSelect } from './Form';
 import { RoundButtonSmall } from './Button';
+import { EditableText } from './EditableText';
 
 const CardWrapper = styled.div`
   display: flex;
@@ -144,8 +145,8 @@ function SpotCard(props) {
           onClick={props.onCloseClick}
           addCss={css`
             position: absolute;
-            top: -8px;
-            right: -10px;
+            top: ${props.isSmall ? '-8px' : '10px'};
+            right: ${props.isSmall ? '-10px' : '10px'};
             z-index: 1;
             background-color: ${palatte.white};
           `}>
@@ -154,6 +155,7 @@ function SpotCard(props) {
       )}
       <FlexDiv
         gap="10px"
+        alignItems="center"
         addCss={css`
           position: absolute;
           top: ${props.time ? '-15px' : props.isEdit ? '20px' : null};
@@ -275,6 +277,7 @@ SpotCard.propTypes = {
   setSelectedList: PropTypes.func,
   onCloseClick: PropTypes.func,
 };
+
 function ScheduleCard(props) {
   const transitIcon = {
     WALKING: {
@@ -313,20 +316,33 @@ function ScheduleCard(props) {
       address={props.schedule.placeDetail.formatted_address}
       duration={props.duration}
       isEdit={props.isEdit}
+      isShowCloseBtn={props.isShowCloseBtn}
+      onCloseClick={props.onCloseClick}
+      isSmall={props.isSmall}
       id={props.schedule.schedule_id}
-      selectedList={props.selectedSpotList}
-      setSelectedList={props.setSelectedSpotList}>
+      selectedList={props.selectedList}
+      setSelectedList={props.setSelectedList}>
       {props.children}
-      {props.transit.detail && (
+      {props.transit?.detail && (
         <FlexDiv justifyContent="center" gap="30px">
           <FlexDiv addCss={transitDetailWapper}>
             <span className="material-icons" css={transitIconStyle}>
               {transitIcon[props.transit.travelMode].icon}
             </span>
-            <P color={palatte.info.basic}>
+            <EditableText
+              level="P"
+              inputElement={(setIsEdit) => (
+                <ChangeTravelModeSelect
+                  travelMode={props.transit.travelMode}
+                  onChange={props.selectTravelModeOnChange}
+                  onBlur={() => setIsEdit(false)}
+                  isEdit
+                />
+              )}
+              color={palatte.info.basic}>
               {transitIcon[props.transit.travelMode].title +
                 props.transit.detail.duration.text}
-            </P>
+            </EditableText>
           </FlexDiv>
           <FlexDiv addCss={transitDetailWapper}>
             <span className="material-icons" css={transitIconStyle}>

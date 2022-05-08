@@ -436,6 +436,23 @@ function AddImageRoundBtn(props) {
     </>
   );
 }
+const ChangeTravelModeSelect = (props) => {
+  return (
+    <Select
+      value={props.travelMode}
+      onChange={() => props.onChange()}
+      onBlur={props.onBlur}
+      autoFocus={props.isEdit}>
+      <option value="loading" disabled hidden>
+        ...
+      </option>
+      <option value="DRIVING">開車</option>
+      <option value="TRANSIT">大眾運輸</option>
+      <option value="WALKING">走路</option>
+      <option value="BICYCLING">騎自行車</option>
+    </Select>
+  );
+};
 
 export {
   TextField,
@@ -451,4 +468,5 @@ export {
   AddImageRoundBtn,
   Select,
   SelectSmall,
+  ChangeTravelModeSelect,
 };

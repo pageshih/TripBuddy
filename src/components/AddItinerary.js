@@ -19,6 +19,8 @@ import {
   RoundButtonSmallWhite,
   ButtonOutline,
   HyperLink,
+  ButtonSmall,
+  ButtonSmallOutline,
 } from './styledComponents/Button';
 import {
   Container,
@@ -44,6 +46,7 @@ import {
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
 import { palatte, styles, H2, H3, H5, P } from './styledComponents/basicStyle';
+import { EditableText, EditableDate } from './styledComponents/EditableText';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -414,66 +417,69 @@ const ScheduleCardDrag = (props) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
           <FlexDiv gap="20px">
-            <FlexDiv
-              alignItems="center"
-              gap="5px"
-              onClick={(e) => {
-                if (e.target.id !== 'duration') {
-                  setIsEditDuration(true);
-                }
-              }}>
-              <p>停留</p>
-              {!props.isBrowse && isEditDuration ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDuration((prevValue) =>
-                        prevValue >= 30 ? prevValue - 30 : 0
+            {!props.isBrowse && isEditDuration ? (
+              <FlexDiv alignItems="center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue >= 30 ? prevValue - 30 : 0
+                    );
+                  }}>
+                  -
+                </button>
+                <p>{duration}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuration((prevValue) =>
+                      prevValue < 1440 ? prevValue + 30 : 1440
+                    );
+                  }}>
+                  +
+                </button>
+                <span>分鐘</span>
+                <button
+                  id="duration"
+                  type="button"
+                  style={{ marginLeft: '5px', backgroundColor: 'white' }}
+                  onClick={(e) => {
+                    if (e.target.id === 'duration') {
+                      setIsEditDuration(false);
+                      props.updateDuration(
+                        props.schedule.schedule_id,
+                        duration
                       );
-                    }}>
-                    -
-                  </button>
-                  <p>{duration}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDuration((prevValue) =>
-                        prevValue < 1440 ? prevValue + 30 : 1440
-                      );
-                    }}>
-                    +
-                  </button>
-                  <span>分鐘</span>
-                  <button
-                    id="duration"
-                    type="button"
-                    style={{ marginLeft: '5px', backgroundColor: 'white' }}
-                    onClick={(e) => {
-                      if (e.target.id === 'duration') {
-                        setIsEditDuration(false);
-                        props.updateDuration(
-                          props.schedule.schedule_id,
-                          duration
-                        );
-                      }
-                    }}>
-                    儲存
-                  </button>
-                </>
-              ) : (
-                <p>
-                  {' '}
-                  {duration < 60 ? duration : duration / 60}{' '}
-                  {duration < 60 ? '分鐘' : '小時'}
-                </p>
-              )}
-            </FlexDiv>
-            <FlexChildDiv grow="1" direction="column">
-              <ScheduleStyledCard cursorDefault={props.browse}>
-                {props.children}
-              </ScheduleStyledCard>
-            </FlexChildDiv>
+                    }
+                  }}>
+                  儲存
+                </button>
+              </FlexDiv>
+            ) : (
+              <P
+                onClick={(e) => {
+                  if (e.target.id !== 'duration') {
+                    setIsEditDuration(true);
+                  }
+                }}>
+                停留 {duration < 60 ? duration : duration / 60}{' '}
+                {duration < 60 ? '分鐘' : '小時'}
+              </P>
+            )}
+            <ScheduleCard
+              schedule={props.schedule}
+              duration={props.duration}
+              isEdit={!props.isBrowse}
+              selectedList={props.selectedList}
+              setSelectedList={props.setSelectedList}
+              isShowCloseBtn={!props.isBrowse}
+              onCloseClick={props.onCloseClick}
+              transit={{
+                travelMode: props.schedule.travel_mode,
+                detail: props.schedule.transit_detail,
+              }}
+              selectTravelModeOnChange={props.changeTrasitWay}
+            />
           </FlexDiv>
           {props.schedule.transit_detail && (
             <TransitCard
@@ -489,101 +495,6 @@ const ScheduleCardDrag = (props) => {
     </Draggable>
   );
 };
-
-function EditableH2(props) {
-  const [isEdit, setIsEdit] = useState();
-  const [value, setValue] = useState();
-  useEffect(() => {
-    setValue(props.children);
-  }, [props.children]);
-  const submit = (e) => {
-    e.preventDefault();
-    setIsEdit(false);
-    props.onSubmit(value);
-  };
-  return (
-    <>
-      {isEdit ? (
-        <form onSubmit={submit}>
-          <input value={value} onChange={(e) => setValue(e.target.value)} />
-          <button type="submit">儲存</button>
-        </form>
-      ) : (
-        <H2
-          as={props.as}
-          addCss={props.addCss}
-          color={props.color}
-          textAlign="center"
-          onClick={() => {
-            if (!props.isBrowse) setIsEdit(true);
-          }}>
-          {value}
-        </H2>
-      )}
-    </>
-  );
-}
-
-function EditableDate(props) {
-  const [isEdit, setIsEdit] = useState();
-  const [startTimestamp, setStartTimestamp] = useState();
-  const [endTimestamp, setEndTimestamp] = useState();
-  useEffect(() => {
-    setStartTimestamp(props.start);
-    setEndTimestamp(props.end);
-  }, []);
-  const submit = (e) => {
-    e.preventDefault();
-    setIsEdit(false);
-    props.onSubmit(
-      startTimestamp,
-      endTimestamp,
-      setEndTimestamp,
-      setStartTimestamp
-    );
-  };
-  return (
-    <>
-      {isEdit ? (
-        <form onSubmit={submit}>
-          <input
-            type="date"
-            value={timestampToDateInput(startTimestamp)}
-            onChange={(e) =>
-              setStartTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <span> - </span>
-          <input
-            type="date"
-            value={timestampToDateInput(endTimestamp)}
-            onChange={(e) =>
-              setEndTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <button id="submit" type="submit">
-            儲存
-          </button>
-        </form>
-      ) : (
-        <P
-          color={palatte.white}
-          addCss={css`
-            font-weight: 700;
-          `}
-          textAlign="center"
-          onClick={(e) => {
-            if (e.target.id !== 'submit' && !props.isBrowse) {
-              setIsEdit(true);
-            }
-          }}>
-          {timestampToString(startTimestamp, 'date')} -{' '}
-          {timestampToString(endTimestamp, 'date')}
-        </P>
-      )}
-    </>
-  );
-}
 
 function Overview(props) {
   const navigate = useNavigate();
@@ -627,8 +538,13 @@ function Overview(props) {
             )}
           </FlexDiv>
           <FlexDiv direction="column" gap="10px" alignItems="center">
-            <EditableH2
+            <EditableText
+              level="2"
+              padding="0 2px"
               color={palatte.white}
+              addInputCss={css`
+                color: ${palatte.gray[800]};
+              `}
               isBrowse={props.isBrowse}
               onSubmit={(title) => {
                 if (title !== props.overviews.title) {
@@ -636,12 +552,17 @@ function Overview(props) {
                 }
               }}>
               {props.overviews.title}
-            </EditableH2>
+            </EditableText>
             <EditableDate
+              color={palatte.white}
               start={props.overviews.start_date}
               end={props.overviews.end_date}
               onSubmit={props.updateDate}
               isBrowse={props.isBrowse}
+              addCss={css`
+                font-weight: 700;
+              `}
+              textAlign="center"
             />
             <H3 color={palatte.white}>Day {props.day + 1}</H3>
           </FlexDiv>
@@ -665,24 +586,24 @@ function Overview(props) {
 
 function DepartController(props) {
   return (
-    <FlexDiv alignItems="flex-start" direction="column">
+    <FlexDiv direction="column" gap="5px">
       <FlexDiv
         justifyContent="space-between"
-        gap="50px"
         addCss={css`
           & > * {
             color: ${palatte.gray['700']};
           }
         `}>
-        <p>出發時間</p>
-        <p>{timestampToString(props.departTimes[props.day], 'simpleDate')}</p>
+        <P>出發時間</P>
+        <P>{timestampToString(props.departTimes[props.day], 'simpleDate')}</P>
       </FlexDiv>
-      <EditableH2
-        as="p"
+      <EditableText
+        level="4"
+        fontSize="36px"
         addCss={css`
           color: ${palatte.info.basic};
           font-weight: 700;
-          font-size: 36px;
+          padding: 0;
         `}
         isBrowse={props.isBrowse}
         onSubmit={(newDepartString) => {
@@ -705,7 +626,7 @@ function DepartController(props) {
           }
         }}>
         {props.departString}
-      </EditableH2>
+      </EditableText>
     </FlexDiv>
   );
 }
@@ -1273,6 +1194,7 @@ function AddSchedule(props) {
             <FlexDiv
               direction="column"
               gap="20px"
+              minHeight="100vh"
               width={!isBrowse ? 'calc(100% - 360px)' : null}>
               <Overview
                 container={container}
@@ -1287,7 +1209,8 @@ function AddSchedule(props) {
                 addCss={container}
                 width="100%"
                 justifyContent="space-between"
-                alignItems="flex-end">
+                alignItems="flex-end"
+                margin="0">
                 <DepartController
                   departTimes={overviews.depart_times}
                   day={day}
@@ -1319,69 +1242,83 @@ function AddSchedule(props) {
               </FlexDiv>
               <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
                 {(provided) => (
-                  <FlexDiv
+                  <FlexChildDiv
                     addCss={container}
                     width="100%"
                     direction="column"
                     gap="20px"
-                    backgroundColor="#f0f0f0"
+                    grow="1"
                     // overflowY="scroll"
                     // height="calc(100vh - 500px)"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
-                    {schedules?.length > 0 ? (
-                      schedules.map((schedule, index) => (
-                        <ScheduleCardDrag
-                          isBrowse={isBrowse}
-                          key={schedule.schedule_id}
-                          index={index}
-                          id={schedule.schedule_id}
-                          changeTrasitWay={changeTrasitWay}
-                          schedule={schedule}
-                          updateDuration={updateDuration}
-                          browse={isBrowse}>
-                          {!isBrowse && (
-                            <CheckboxCustom
-                              id={schedule.schedule_id}
-                              selectedList={selectedSchedulesId}
-                              setSelectedList={setSelectedSchedulesId}
+                    <FlexChildDiv
+                      direction="column"
+                      backgroundColor={palatte.gray[100]}
+                      grow="1"
+                      padding="20px"
+                      addCss={css`
+                        border-radius: 10px;
+                      `}>
+                      {schedules?.length > 0 ? (
+                        schedules.map((schedule, index) => (
+                          <ScheduleCardDrag
+                            isBrowse={isBrowse}
+                            key={schedule.schedule_id}
+                            index={index}
+                            id={schedule.schedule_id}
+                            changeTrasitWay={changeTrasitWay}
+                            schedule={schedule}
+                            updateDuration={updateDuration}
+                            browse={isBrowse}
+                            selectedList={selectedSchedulesId}
+                            setSelectedList={setSelectedSchedulesId}
+                            onCloseClick={() =>
+                              deleteSchedule(schedule.schedule_id)
+                            }>
+                            {/* {!isBrowse && (
+                              <CheckboxCustom
+                                id={schedule.schedule_id}
+                                selectedList={selectedSchedulesId}
+                                setSelectedList={setSelectedSchedulesId}
+                              />
+                            )}
+                            <div>
+                              {timestampToString(schedule.start_time, 'time')}
+                            </div>
+                            <img
+                              style={{ width: '300px' }}
+                              src={schedule.placeDetail.photos[0]}
+                              alt={schedule.placeDetail.name}
                             />
-                          )}
-                          <div>
-                            {timestampToString(schedule.start_time, 'time')}
-                          </div>
-                          <img
-                            style={{ width: '300px' }}
-                            src={schedule.placeDetail.photos[0]}
-                            alt={schedule.placeDetail.name}
-                          />
-                          <div>
-                            <h3>{schedule.placeDetail.name}</h3>
-                            <p>{schedule.placeDetail.formatted_address}</p>
-                          </div>
-                          {!isBrowse && (
-                            <button
-                              type="button"
-                              style={{
-                                position: 'absolute',
-                                right: '0',
-                                top: '0',
-                              }}
-                              onClick={() =>
-                                deleteSchedule(schedule.schedule_id)
-                              }>
-                              X
-                            </button>
-                          )}
-                        </ScheduleCardDrag>
-                      ))
-                    ) : (
-                      <p>
-                        {isBrowse ? '點擊編輯新增行程' : '拖拉卡片以新增行程'}
-                      </p>
-                    )}
-                    {provided.placeholder}
-                  </FlexDiv>
+                            <div>
+                              <h3>{schedule.placeDetail.name}</h3>
+                              <p>{schedule.placeDetail.formatted_address}</p>
+                            </div>
+                            {!isBrowse && (
+                              <button
+                                type="button"
+                                style={{
+                                  position: 'absolute',
+                                  right: '0',
+                                  top: '0',
+                                }}
+                                onClick={() =>
+                                  
+                                }>
+                                X
+                              </button>
+                            )} */}
+                          </ScheduleCardDrag>
+                        ))
+                      ) : (
+                        <P color={palatte.gray[800]}>
+                          {isBrowse ? '點擊編輯新增行程' : '拖拉卡片以新增行程'}
+                        </P>
+                      )}
+                      {provided.placeholder}
+                    </FlexChildDiv>
+                  </FlexChildDiv>
                 )}
               </Droppable>
             </FlexDiv>
