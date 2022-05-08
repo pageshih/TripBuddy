@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { css } from '@emotion/react';
-import { palatte, mediaQuery } from './basicStyle';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
+import { palatte, mediaQuery, P } from './basicStyle';
 import PropTypes from 'prop-types';
 import { FlexChildDiv, FlexDiv } from './Layout';
 
@@ -29,14 +30,17 @@ const colorMap = {
     gray: palatte.gray[500],
     grayHover: palatte.gray[600],
     grayOutline: palatte.gray[600],
+    transparent: 'transparent',
+    transparentHover: palatte.shadow,
   },
 };
 
 const Button = styled.button`
   display: flex;
-  gap: 4px;
+  gap: ${(props) => props.gap || '4px'};
   justify-content: center;
   align-items: center;
+  flex-direction: ${(props) => props.direction};
   padding: ${(props) => props.padding || '10px 20px'};
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
@@ -83,9 +87,9 @@ const ButtonSmallOutline = styled(ButtonOutline)`
   ${buttonSmall}
 `;
 const ButtonSmallIcon = styled(ButtonSmall)`
-  padding: 5px 10px;
+  padding: ${(props) => props.padding || '5px 10px'};
   display: flex;
-  gap: 5px;
+  gap: ${(props) => props.gap || '5px'};
 `;
 
 const RoundButton = styled.button`
@@ -125,6 +129,36 @@ const buttonSmallColorMap = {
       color: palatte.gray['100'],
     },
   },
+  gray700: {
+    default: {
+      backgroundColor: palatte.gray['700'],
+      color: palatte.gray['100'],
+    },
+    hover: {
+      backgroundColor: palatte.gray['800'],
+      color: palatte.gray['200'],
+    },
+  },
+  transparent: {
+    default: {
+      backgroundColor: 'transparent',
+      color: palatte.gray['500'],
+    },
+    hover: {
+      backgroundColor: palatte.shadow,
+      color: palatte.white,
+    },
+  },
+  danger: {
+    default: {
+      backgroundColor: palatte.danger.basic,
+      color: palatte.white,
+    },
+    hover: {
+      backgroundColor: palatte.white,
+      color: palatte.danger[400],
+    },
+  },
 };
 const RoundButtonSmall = styled.button`
   display: flex;
@@ -139,9 +173,9 @@ const RoundButtonSmall = styled.button`
       ? buttonSmallColorMap[props.styled].default.backgroundColor
       : 'transparent'};
   padding: ${(props) => props.padding || '0px'};
-  border-radius: 50%;
-  min-width: ${(props) => props.size || '24px'};
-  min-height: ${(props) => props.size || '24px'};
+  border-radius: ${(props) => props.borderRadius || '50%'};
+  width: ${(props) => props.size || '24px'};
+  height: ${(props) => props.size || '24px'};
   font-size: ${(props) => props.size || '24px'};
   &:hover {
     color: ${(props) =>
@@ -304,6 +338,51 @@ function HyperLink(props) {
     </FlexChildDiv>
   );
 }
+
+const iconButtonColoeMap = {
+  danger: {
+    color: palatte.danger.basic,
+    hoverColor: palatte.danger[400],
+  },
+  primary: {
+    color: palatte.primary.basic,
+    hoverColor: palatte.primary[800],
+  },
+};
+
+const ButtonIconColumn = (props) => (
+  <ButtonSmallIcon
+    styled="transparent"
+    type={props.type}
+    padding="0"
+    width="fit-content"
+    onClick={props.onClick}
+    direction="column"
+    alignItems="center"
+    gap="0px"
+    addCss={css`
+      & > * {
+        color: ${iconButtonColoeMap[props.styled].color};
+      }
+      &:hover {
+        background-color: transparent;
+        box-shadow: none;
+        & > * {
+          color: ${iconButtonColoeMap[props.styled].hoverColor};
+        }
+      }
+    `}
+    title={props.children}>
+    <span
+      css={css`
+        font-size: ${props.size};
+      `}
+      className="material-icons">
+      {props.iconName}
+    </span>
+    <P fontSize={`calc(${props.size || '24px'} - 12px)`}>{props.children}</P>
+  </ButtonSmallIcon>
+);
 export {
   Button,
   ButtonOutline,
@@ -317,4 +396,5 @@ export {
   ReviewTagRemoveButton,
   SaveAndCancelButton,
   HyperLink,
+  ButtonIconColumn,
 };

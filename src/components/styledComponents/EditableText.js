@@ -67,35 +67,33 @@ function EditableText(props) {
   return (
     <>
       {isEdit ? (
-        props.inputElement(setIsEdit) || (
-          <form
-            onSubmit={submit}
-            css={css`
-              display: flex;
-              gap: 10px;
-              align-items: center;
-            `}>
-            <TextInput
-              ref={inputRef}
-              type={props.type}
-              size={value.length > 0 ? value.length : 1}
-              value={value}
-              width="auto"
-              css={inputStyle}
-              autoFocus
-              onBlur={submit}
-              onChange={(e) => {
-                setValue(e.target.value);
-              }}
-            />
-          </form>
-        )
+        <form
+          onSubmit={submit}
+          css={css`
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          `}>
+          <TextInput
+            ref={inputRef}
+            type={props.type}
+            size={value.length > 0 ? value.length : 1}
+            value={value}
+            width="auto"
+            css={inputStyle}
+            autoFocus
+            onBlur={submit}
+            onChange={(e) => {
+              setValue(e.target.value);
+            }}
+          />
+        </form>
       ) : (
         <Text
           as={props.as}
           fontSize={props.fontSize}
           addCss={css`
-            ${hoverEffect}
+            ${!props.isBrowse && hoverEffect}
             padding: ${props.padding || '0 12px 0 0 '};
             ${props.addCss}
           `}
@@ -180,7 +178,7 @@ function EditableDate(props) {
         <P
           color={props.color}
           addCss={css`
-            ${hoverEffect}
+            ${!props.isBrowse && hoverEffect}
             ${props.addCss}
           `}
           textAlign={props.textAlign}

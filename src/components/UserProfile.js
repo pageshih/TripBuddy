@@ -16,11 +16,7 @@ import {
   RoundButtonSmall,
   ReviewTagRemoveButton,
 } from './styledComponents/Button';
-import {
-  AddImageRoundBtn,
-  TextInput,
-  ChangeTravelModeSelect,
-} from './styledComponents/Form';
+import { AddImageRoundBtn, TextInput, Select } from './styledComponents/Form';
 import {
   Logo,
   styles,
@@ -30,7 +26,10 @@ import {
   H5,
   H6,
 } from './styledComponents/basicStyle';
-import { EditableText } from './styledComponents/EditableText';
+import {
+  EditableText,
+  ChangeTravelModeSelect,
+} from './styledComponents/EditableText';
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
@@ -239,8 +238,8 @@ function UserSetting(props) {
                 subTitle="編輯行程會自動以選定的交通方式計算到景點的時間與距離"
               />
             }>
-            <ChangeTravelModeSelect
-              travelMode={travelMode}
+            <Select
+              value={travelMode}
               onChange={(e) => {
                 const newTravelMode = e.target.value;
                 setTravelMode('loading');
@@ -251,8 +250,15 @@ function UserSetting(props) {
                   .then(() => {
                     setTravelMode(newTravelMode);
                   });
-              }}
-            />
+              }}>
+              <option value="loading" disabled hidden>
+                ...
+              </option>
+              <option value="DRIVING">開車</option>
+              <option value="TRANSIT">大眾運輸</option>
+              <option value="WALKING">走路</option>
+              <option value="BICYCLING">騎自行車</option>
+            </Select>
           </Accordion>
         </FlexChildDiv>
       </FlexDiv>

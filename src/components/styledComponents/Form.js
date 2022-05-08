@@ -102,8 +102,8 @@ const CheckboxCustom = (props) => {
         width: ${props.size || '24px'};
         height: ${props.size || '24px'};
       `}
-      name={props.isSelectAll !== undefined ? 'selectAll' : props.id}>
-      {props.isSelectAll !== undefined ? (
+      name={props.isSelectAllBox ? 'selectAll' : props.id}>
+      {props.isSelectAllBox ? (
         <CheckAllDiv
           size={props.size}
           css={props.addCss}
@@ -129,10 +129,11 @@ const CheckboxCustom = (props) => {
           props.selectedList?.some((id) => id === props.id) ||
           false
         }
-        id={props.isSelectAll !== undefined ? 'selectAll' : props.id}
+        id={props.isSelectAllBox ? 'selectAll' : props.id}
         onChange={(e) => {
-          if (props.isSelectAll !== undefined) {
+          if (props.isSelectAllBox) {
             props.onChange(e);
+            console.log(props.isSelectAll);
           } else {
             if (e.target.checked) {
               props.setSelectedList([...props.selectedList, props.id]);
@@ -170,11 +171,15 @@ function SelectAllCheckBox(props) {
       <CheckboxCustom
         size={props.size}
         isSelectAll={props.isSelectAll}
+        isSelectAllBox
         onChange={selectAllItems}
       />
       <P
         fontSize={`calc(${props.size} - '6px')` || '18px'}
-        color={palatte.gray[800]}>
+        color={palatte.gray[800]}
+        addCss={css`
+          white-space: nowrap;
+        `}>
         全選
       </P>
     </FlexDiv>

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { styles, palatte, H4, H5, P, mediaQuery, Rating } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
-import { CheckboxCustom, ChangeTravelModeSelect } from './Form';
+import { CheckboxCustom, Select } from './Form';
 import { RoundButtonSmall } from './Button';
 import { EditableText } from './EditableText';
 
@@ -60,13 +60,21 @@ const TimeTag = styled.div`
   z-index: 5;
 `;
 const TextWithIcon = (props) => (
-  <FlexDiv
+  <FlexChildDiv
     gap={props.gap}
+    grow={props.grow}
+    direction={props.direction}
+    margin={props.margin}
+    padding={props.padding}
+    justifyContent={props.justifyContent}
+    addCss={props.addCss?.container}
     alignItems={
-      !props.isSmall && typeof props.children === 'string'
+      props.alignItems ||
+      (!props.isSmall && typeof props.children === 'string'
         ? 'center'
-        : 'flex-start'
-    }>
+        : 'flex-start')
+    }
+    onClick={props.onClick}>
     <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
       {props.iconLabel && (
         <P
@@ -78,8 +86,9 @@ const TextWithIcon = (props) => (
       <span
         className="material-icons"
         css={css`
-          color: ${props.iconColor};
+          color: ${props.color || props.iconColor};
           font-size: ${props.iconSize};
+          text-align: ${props.textAlign};
           ${props.addCss?.icon};
         `}>
         {props.iconName}
@@ -88,14 +97,15 @@ const TextWithIcon = (props) => (
     {typeof props.children === 'string' ? (
       <P
         fontSize={props.textSize}
-        color={props.textColor}
+        textAlign={props.textAlign}
+        color={props.color || props.textColor}
         addCss={props.addCss?.text}>
         {props.children}
       </P>
     ) : (
       props.children
     )}
-  </FlexDiv>
+  </FlexChildDiv>
 );
 const AddressText = (props) => (
   <TextWithIcon
@@ -278,33 +288,113 @@ SpotCard.propTypes = {
   onCloseClick: PropTypes.func,
 };
 
-function ScheduleCard(props) {
-  const transitIcon = {
-    WALKING: {
-      title: '走路',
-      icon: 'directions_walk',
+const transportMode = (schedule) => {
+  const departureTime =
+    schedule?.end_time < new Date().getTime()
+      ? new Date()
+      : new Date(schedule?.end_time);
+  return {
+    BICYCLING: {
+      title: '騎自行車',
+      icon: 'directions_bike',
+      config: {
+        travelMode: 'BICYCLING',
+      },
     },
     DRIVING: {
       title: '開車',
       icon: 'directions_car_filled',
+      config: {
+        travelMode: 'DRIVING',
+        drivingOptions: {
+          departureTime: schedule ? departureTime : null,
+        },
+      },
     },
     TRANSIT: {
-      title: '搭大眾運輸',
+      title: '搭乘大眾運輸',
       icon: 'directions_bus',
+      config: {
+        travelMode: 'TRANSIT',
+        transitOptions: {
+          departureTime: schedule ? departureTime : null,
+        },
+      },
     },
-    BICYCLING: {
-      title: '騎自行車',
-      icon: 'directions_bike',
+    WALKING: {
+      title: '走路',
+      icon: 'directions_walk',
+      config: {
+        travelMode: 'WALKING',
+      },
     },
   };
-  const transitIconStyle = css`
-    color: ${palatte.info.basic};
-    font-size: 60px;
-  `;
-  const transitDetailWapper = css`
-    align-items: center;
-    gap: 5px;
-  `;
+};
+const transitIconStyle = css`
+  color: ${palatte.info.basic};
+  font-size: 60px;
+`;
+const transitDetailWapper = css`
+  align-items: center;
+  gap: 5px;
+`;
+
+function TransitCard(props) {
+  return (
+    <FlexDiv justifyContent="center" gap="30px">
+      <FlexDiv
+        addCss={css`
+          ${transitDetailWapper}
+          gap:${props.isEdit && '10px'}
+        `}>
+        {props.isEdit ? (
+          <>
+            <span className="material-icons" css={transitIconStyle}>
+              {transportMode()[props.travelMode].icon}
+            </span>
+            <Select
+              value={props.travelMode}
+              onChange={(e) =>
+                props.changeTrasitWay(props.scheduleId, e.target.value)
+              }>
+              {Object.keys(transportMode()).map((mode) => (
+                <option key={mode} value={mode}>
+                  {transportMode()[mode].title}
+                </option>
+              ))}
+            </Select>
+            <P
+              color={palatte.info.basic}
+              addCss={css`
+                white-space: nowrap;
+              `}>
+              {props.transitDetail.duration.text}
+            </P>
+          </>
+        ) : (
+          <>
+            <span className="material-icons" css={transitIconStyle}>
+              {transportMode()[props.travelMode].icon}
+            </span>
+            <P color={palatte.info.basic}>
+              {transportMode()[props.travelMode].title +
+                props.transitDetail.duration.text}
+            </P>
+          </>
+        )}
+      </FlexDiv>
+      <FlexDiv addCss={transitDetailWapper}>
+        <span className="material-icons" css={transitIconStyle}>
+          directions
+        </span>
+        <P color={palatte.info.basic}>
+          距離{props.transitDetail.distance.text}
+        </P>
+      </FlexDiv>
+    </FlexDiv>
+  );
+}
+function ScheduleCard(props) {
   return (
     <SpotCard
       as={props.as}
@@ -323,40 +413,37 @@ function ScheduleCard(props) {
       selectedList={props.selectedList}
       setSelectedList={props.setSelectedList}>
       {props.children}
-      {props.transit?.detail && (
-        <FlexDiv justifyContent="center" gap="30px">
-          <FlexDiv addCss={transitDetailWapper}>
-            <span className="material-icons" css={transitIconStyle}>
-              {transitIcon[props.transit.travelMode].icon}
-            </span>
-            <EditableText
-              level="P"
-              inputElement={(setIsEdit) => (
-                <ChangeTravelModeSelect
-                  travelMode={props.transit.travelMode}
-                  onChange={props.selectTravelModeOnChange}
-                  onBlur={() => setIsEdit(false)}
-                  isEdit
-                />
-              )}
-              color={palatte.info.basic}>
-              {transitIcon[props.transit.travelMode].title +
-                props.transit.detail.duration.text}
-            </EditableText>
-          </FlexDiv>
-          <FlexDiv addCss={transitDetailWapper}>
-            <span className="material-icons" css={transitIconStyle}>
-              directions
-            </span>
-            <P color={palatte.info.basic}>
-              距離{props.transit.detail.distance.text}
-            </P>
-          </FlexDiv>
-        </FlexDiv>
+      {props.transitDetail && props.travelMode && (
+        <TransitCard
+          transitDetail={props.transitDetail}
+          travelMode={props.travelMode}
+          changeTrasitWay={props.changeTrasitWay}
+          scheduleId={props.schedule.schedule_id}
+          isEdit={props.isEdit}
+        />
       )}
     </SpotCard>
   );
 }
+/* <FlexDiv justifyContent="center" gap="30px">
+  <FlexDiv addCss={transitDetailWapper}>
+    <span className="material-icons" css={transitIconStyle}>
+      {transportMode()[props.travelMode].icon}
+    </span>
+    <P color={palatte.info.basic}>
+      {transportMode()[props.travelMode].title +
+        props.transitDetail.duration.text}
+    </P>
+  </FlexDiv>
+  <FlexDiv addCss={transitDetailWapper}>
+    <span className="material-icons" css={transitIconStyle}>
+      directions
+    </span>
+    <P color={palatte.info.basic}>
+      距離{props.transitDetail.distance.text}
+    </P>
+  </FlexDiv>
+</FlexDiv> */
 ScheduleCard.propTypes = {
   schedule: PropTypes.object.isRequired,
   imgSrc: PropTypes.string.isRequired,
@@ -454,4 +541,5 @@ export {
   RatingText,
   AddressText,
   TextWithIcon,
+  transportMode,
 };

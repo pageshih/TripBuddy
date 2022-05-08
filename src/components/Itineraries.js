@@ -151,10 +151,8 @@ function Itineraries() {
                             <ScheduleCard
                               as="li"
                               duration={schedule.duration}
-                              transit={{
-                                travelMode: schedule.travel_mode,
-                                detail: schedule.transit_detail,
-                              }}
+                              travelMode={schedule.travel_mode}
+                              transitDetail={schedule.transit_detail}
                               schedule={schedule}
                               key={schedule.schedule_id}
                               onClick={() =>

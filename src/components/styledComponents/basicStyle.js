@@ -45,6 +45,7 @@ const palatte = {
   white: '#FFFFFF',
   shadow: 'rgba(43, 45, 66, 0.2)',
   darkerShadow: 'rgba(43, 45, 66, 0.7)',
+  lighterShadow: 'rgba(161, 163, 184, 0.2)',
 };
 const breakpoints = [992];
 const mediaQuery = breakpoints.map(
@@ -178,6 +179,7 @@ const heading = (props) => css`
   font-weight: ${props.fontWeight || 700};
   color: ${props.color};
   text-align: ${props.textAlign};
+  line-height: ${props.lineHeight};
   margin: ${props.margin};
   ${props.addCss};
 `;
