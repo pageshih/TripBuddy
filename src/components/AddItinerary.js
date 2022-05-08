@@ -14,7 +14,12 @@ import {
   CheckboxCustom,
   AddImageRoundBtn,
 } from './styledComponents/Form';
-import { Button, RoundButtonSmallWhite } from './styledComponents/Button';
+import {
+  Button,
+  RoundButtonSmallWhite,
+  ButtonOutline,
+  HyperLink,
+} from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -26,6 +31,7 @@ import {
   CardWrapper,
   cardCss,
   ScheduleCard,
+  SpotCard,
 } from './styledComponents/Cards';
 import {
   timestampToString,
@@ -37,7 +43,7 @@ import {
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
-import { palatte, styles, H2, H3, P } from './styledComponents/basicStyle';
+import { palatte, styles, H2, H3, H5, P } from './styledComponents/basicStyle';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -91,25 +97,29 @@ import { palatte, styles, H2, H3, P } from './styledComponents/basicStyle';
 function AddOverView(props) {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
+  const [step, setStep] = useState(0);
 
-  // const addOverView = [
-  //   {
-  //     title: '為這趟旅程取個名字吧！',
-  //     type: 'text',
-  //     placeholder: '請輸入行程名稱',
-  //   },
-  //   {
-  //     title: '您選擇了這些景點：',
-  //     type: 'cards',
-  //   },
-  //   {
-  //     title: '預計要去玩幾天呢？',
-  //     type: 'calender',
-  //   },
-  // ];
+  const addOverView = [
+    {
+      title: '為這趟旅程取個名字吧！',
+      type: 'text',
+      placeholder: '請輸入行程名稱',
+      alert: '行程名稱還沒填喔！',
+    },
+    {
+      title: '您選擇了這些景點：',
+      type: 'cards',
+      alert: '請加入景點再創建行程',
+    },
+    {
+      title: '預計要去玩幾天呢？',
+      type: 'calendar',
+      alert: '日期不完整，請確認後再送出！',
+    },
+  ];
   const createItinerary = () => {
     const getTimestamp = (date) => new Date(date).getTime();
     const basicInfo = {
@@ -126,72 +136,154 @@ function AddOverView(props) {
         console.log(error);
       });
   };
+  const nextStep = () => {
+    if (
+      (step === 0 && title) ||
+      (step === 1 && props.waitingSpots?.length > 0) ||
+      (step === 2 && startDate && endDate)
+    ) {
+      setStep((prev) => prev + 1);
+    } else {
+      alert(addOverView[step].alert);
+    }
+  };
   return (
-    <Container maxWidth="1200px" margin="80px auto 0px auto">
-      <h2>為這趟旅程取個名字吧！</h2>
-      <TextInput
-        type="text"
-        placeholder="請輸入行程名稱"
-        value={props.title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-        }}
-      />
-      <h2>您選擇了這些景點：</h2>
-      <CardWrapper gap="20px">
-        {props.waitingSpots?.map((spot) => {
-          return (
-            <Card
-              column
-              gap="20px"
-              position="relative"
-              basis="350px"
-              key={spot.place_id}>
-              <img
-                src={spot.photos[0]}
-                style={{ width: '100%', objectFit: 'cover' }}
-                alt={spot.name}
-              />
-              <FlexChildDiv>
-                <h3 style={{ margin: '0' }}>{spot.name}</h3>
-                <p>{spot.formatted_address}</p>
-                <p>{spot.rating}</p>
+    <Container backgroundColor={palatte.gray[100]}>
+      <FlexDiv
+        as="form"
+        height="100vh"
+        gap="60px"
+        direction="column"
+        justifyContent="center"
+        addCss={styles.containerSetting}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (step < 2) {
+            nextStep();
+          } else {
+            createItinerary();
+          }
+        }}>
+        <FlexDiv direction="column" gap="20px">
+          <H5>{addOverView[step].title}</H5>
+          {addOverView[step].type === 'text' && (
+            <TextInput
+              type="text"
+              placeholder={addOverView[step].placeholder}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+            />
+          )}
+          {addOverView[step].type === 'cards' &&
+            (props.waitingSpots.length > 0 ? (
+              <FlexChildDiv
+                padding="20px 20px 20px 0"
+                gap="30px"
+                wrap="wrap"
+                overflowY="auto"
+                basis="60vh"
+                maxHeight="100%">
+                {props.waitingSpots?.map((spot) => {
+                  return (
+                    <SpotCard
+                      imgSrc={spot.photos[0]}
+                      imgAlt={spot.name}
+                      title={spot.name}
+                      address={spot.formatted_address}
+                      rating={spot.rating}
+                      id={spot.place_id}
+                      key={spot.place_id}
+                      isSmall
+                      isShowCloseBtn
+                      onCloseClick={() =>
+                        props.setWaitingSpots((prev) =>
+                          prev.filter(
+                            (oldSpot) => oldSpot.place_id !== spot.place_id
+                          )
+                        )
+                      }
+                      addCss={css`
+                        flex-basis: 30%;
+                      `}
+                    />
+                  );
+                })}
               </FlexChildDiv>
-            </Card>
-          );
-        })}
-      </CardWrapper>
-      <h2>預計要去玩幾天呢？</h2>
-      <FlexDiv gap="20px">
-        <TextInput
-          type="date"
-          value={timestampToDateInput(startDate)}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-          }}
-        />
-        <p>到</p>
-        <TextInput
-          type="date"
-          value={timestampToDateInput(endDate)}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-          }}
-        />
-      </FlexDiv>
-      <Button
-        styled="primary"
-        margin="20px 0 0 auto"
-        display="block"
-        onClick={createItinerary}>
-        新建行程
-      </Button>
-      {/* <ChooseDate
+            ) : (
+              <>
+                <P>現在景點清單是空的，請加入景點，再創建行程</P>
+                <HyperLink
+                  onClick={() => navigate('/explore')}
+                  iconName="chevron_right"
+                  alignSelf="flex-start">
+                  前往探索景點
+                </HyperLink>
+              </>
+            ))}
+          {addOverView[step].type === 'calendar' && (
+            <FlexDiv gap="20px" alignItems="center">
+              <TextInput
+                type="date"
+                value={timestampToDateInput(startDate)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                }}
+              />
+              <P>到</P>
+              <TextInput
+                type="date"
+                value={timestampToDateInput(endDate)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                }}
+              />
+            </FlexDiv>
+          )}
+        </FlexDiv>
+        <FlexDiv justifyContent={step < 1 ? 'flex-end' : 'space-between'}>
+          {step > 0 && (
+            <ButtonOutline
+              type="button"
+              width="fit-content"
+              styled="gray"
+              padding="10px 20px 10px 10px"
+              onClick={() => setStep((prev) => prev - 1)}>
+              <span
+                className="material-icons"
+                css={css`
+                  color: inherit;
+                `}>
+                chevron_left
+              </span>
+              上一步
+            </ButtonOutline>
+          )}
+          <Button
+            styled="primary"
+            type="submit"
+            width="fit-content"
+            padding={step < 2 && '10px 10px 10px 20px'}>
+            {step < 2 ? '下一步' : '新建行程'}
+            {step < 2 && (
+              <span
+                className="material-icons"
+                css={css`
+                  color: inherit;
+                `}>
+                chevron_right
+              </span>
+            )}
+          </Button>
+        </FlexDiv>
+        {/* <ChooseDate
         startDate={startDate}
         setStartDate={setStartDate}
         endDate={endDate}
         setEndDate={setEndDate}
       /> */}
+      </FlexDiv>
     </Container>
   );
 }
@@ -206,7 +298,7 @@ const SpotStyledCard = styled(Card)`
     cursor: grab;
   }
 `;
-const SpotCard = (props) => {
+const SpotCardDraggable = (props) => {
   return (
     <Draggable
       draggableId={props.id}
@@ -1146,7 +1238,7 @@ function AddSchedule(props) {
                       {...provided.droppableProps}
                       browse={isBrowse}>
                       {waitingSpots?.map((spot, index) => (
-                        <SpotCard
+                        <SpotCardDraggable
                           key={spot.place_id}
                           index={index}
                           id={spot.place_id}>
@@ -1170,7 +1262,7 @@ function AddSchedule(props) {
                             onClick={() => deleteSpot(spot.place_id)}>
                             X
                           </button>
-                        </SpotCard>
+                        </SpotCardDraggable>
                       ))}
                       {provided.placeholder}
                     </CardWrapper>

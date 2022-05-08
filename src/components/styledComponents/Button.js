@@ -26,6 +26,9 @@ const colorMap = {
     dangerOutline: palatte.danger['400'],
     round: palatte.secondary[200],
     roundHover: palatte.primary[400],
+    gray: palatte.gray[500],
+    grayHover: palatte.gray[400],
+    grayOutline: palatte.gray[600],
   },
 };
 
@@ -34,7 +37,7 @@ const Button = styled.button`
   gap: 4px;
   justify-content: center;
   align-items: center;
-  padding: 10px 20px;
+  padding: ${(props) => props.padding || '10px 20px'};
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
   color: ${palatte.white};
@@ -254,6 +257,7 @@ SaveAndCancelButton.propTypes = {
 };
 const linkTextColor = css`
   text-decoration: none;
+  cursor: pointer;
   & * {
     color: ${palatte.info.basic};
   }
@@ -288,12 +292,13 @@ function HyperLink(props) {
       as="a"
       href={props.href}
       target={props.target || '_blank'}
+      onClick={props.onClick}
       addCss={linkTextColor}
       alignItems="center"
       gap="2px"
       alignSelf={props.alignSelf}>
       <LinkText>{props.children}</LinkText>
-      <LinkIcon className="material-icons">open_in_new</LinkIcon>
+      <LinkIcon className="material-icons">{props.iconName}</LinkIcon>
     </FlexChildDiv>
   );
 }

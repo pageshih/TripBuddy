@@ -6,17 +6,19 @@ import { styles, palatte, H4, H5, P, mediaQuery, Rating } from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom } from './Form';
+import { RoundButtonSmall } from './Button';
 
 const CardWrapper = styled.div`
   display: flex;
   position: relative;
-  width: 100%;
+  width: ${(props) => props.width || '100%'};
   gap: ${(props) => props.gap};
   flex-direction: ${(props) => props.column && 'column'};
   flex-grow: ${(props) => props.grow};
   max-width: ${(props) => props.maxWidth};
   background-color: ${(props) => props.backgroundColor};
   padding: ${(props) => props.padding};
+  ${(props) => props.addCss};
 `;
 const cardCss = css`
   border: 1px solid ${palatte.primary.basic};
@@ -128,7 +130,28 @@ const RatingText = (props) => (
 );
 function SpotCard(props) {
   return (
-    <CardWrapper column as={props.as} gap="20px">
+    <CardWrapper
+      column
+      as={props.as}
+      gap="20px"
+      width={props.width}
+      addCss={props.addCss}>
+      {props.isShowCloseBtn && (
+        <RoundButtonSmall
+          className="material-icons"
+          close
+          type="button"
+          onClick={props.onCloseClick}
+          addCss={css`
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            z-index: 1;
+            background-color: ${palatte.white};
+          `}>
+          cancel
+        </RoundButtonSmall>
+      )}
       <FlexDiv
         gap="10px"
         addCss={css`
@@ -244,9 +267,13 @@ SpotCard.propTypes = {
   time: PropTypes.number,
   duration: PropTypes.number,
   isEdit: PropTypes.bool,
+  isSmall: PropTypes.bool,
+  isShowCloseBtn: PropTypes.bool,
+  rating: PropTypes.number,
   id: PropTypes.string,
   selectedList: PropTypes.array,
   setSelectedList: PropTypes.func,
+  onCloseClick: PropTypes.func,
 };
 function ScheduleCard(props) {
   const transitIcon = {

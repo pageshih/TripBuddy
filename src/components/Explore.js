@@ -185,7 +185,10 @@ function PlaceDetail({
 
         <RatingText rating={placeDetail.rating} isSmall />
         {placeDetail.website !== '未提供' && (
-          <HyperLink href={placeDetail.website} alignSelf="flex-start">
+          <HyperLink
+            href={placeDetail.website}
+            alignSelf="flex-start"
+            iconName="open_in_new">
             官方網站
           </HyperLink>
         )}
