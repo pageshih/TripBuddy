@@ -48,7 +48,7 @@ function Pagination(props) {
       </P>
       <PaginationButton
         onClick={() => props.switchDay(props.day + 1)}
-        disabled={props.day === props.finalDay + 1}>
+        disabled={props.day === props.finalDay}>
         navigate_next
       </PaginationButton>
     </FlexDiv>

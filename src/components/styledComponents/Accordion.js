@@ -12,6 +12,12 @@ const ExpandIcon = styled.span`
   font-size: ${(props) => props.fontSize || '24px'};
   ${(props) => props.addCss}
 `;
+const ExpandAddIcon = styled(ExpandIcon)`
+  transform: ${(props) => (props.isExpand ? 'rotateZ(135deg)' : null)};
+  &:hover {
+    color: ${(props) => props.isExpand && palatte.danger.basic};
+  }
+`;
 const AccordionContainer = styled(FlexDiv)`
   flex-direction: column;
   padding: 20px;
@@ -29,15 +35,29 @@ function Accordion(props) {
       <FlexDiv
         justifyContent="space-between"
         addCss={css`
-          cursor: pointer;
+          cursor: ${!props.isDisableExpand || props.isAllowEdit
+            ? 'pointer'
+            : 'normal'};
         `}
         onClick={() => setIsExpand((prev) => !prev)}>
         <FlexDiv direction="column" grow="1" gap="3px">
           {props.titleElement}
         </FlexDiv>
-        <ExpandIcon className="material-icons" isExpand={isExpand}>
-          {props.filled ? 'arrow_drop_down' : 'expand_more'}
-        </ExpandIcon>
+        {props.isAllowEdit ? (
+          props.isDisableExpand ? (
+            <ExpandAddIcon className="material-icons" isExpand={isExpand}>
+              add_circle
+            </ExpandAddIcon>
+          ) : (
+            <ExpandIcon className="material-icons" isExpand={isExpand}>
+              expand_more
+            </ExpandIcon>
+          )
+        ) : props.isDisableExpand ? null : (
+          <ExpandIcon className="material-icons" isExpand={isExpand}>
+            {props.filled ? 'arrow_drop_down' : 'expand_more'}
+          </ExpandIcon>
+        )}
       </FlexDiv>
       {isExpand && props.children}
     </AccordionContainer>

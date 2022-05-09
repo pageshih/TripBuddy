@@ -58,7 +58,8 @@ const styles = {
   container_padding: '20px',
   containerSetting: css`
     max-width: 1090px;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     padding-left: 20px;
     padding-right: 20px;
   `,
@@ -181,6 +182,7 @@ const heading = (props) => css`
   text-align: ${props.textAlign};
   line-height: ${props.lineHeight};
   margin: ${props.margin};
+  white-space: ${props.whiteSpace};
   ${props.addCss};
 `;
 const H2 = styled.h2`
@@ -219,6 +221,7 @@ const P = styled.p`
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};
   text-align: ${(props) => props.textAlign};
+  whitespace: ${(props) => props.whiteSpace};
   ${mediaQuery[0]} {
     font-size: ${(props) => props.mobileFontSize || '14px'};
     margin: ${(props) => props.margin};

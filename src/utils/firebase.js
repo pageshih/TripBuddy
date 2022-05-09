@@ -101,7 +101,7 @@ const firebaseStorage = {
     return Promise.all(uploadPromises);
   },
   getPath(pathAry) {
-    return pathAry.reduce((acc, path, index, array) => {
+    return pathAry.reduce((acc, path) => {
       acc += `${path}/`;
       return acc;
     }, '');

@@ -189,13 +189,18 @@ function SelectAllCheckBox(props) {
 const TextAreaReview = styled.textarea`
   ${inputBase}
   width:100%;
-  height: 100px;
+  height: auto;
   margin: 10px 0;
+  border-color: transparent;
+  background-color: ${(props) =>
+    props.isEmptyInput ? palatte.gray[200] : palatte.white};
   &:read-only {
     border-color: lightgray;
     height: auto;
-    padding-bottom: 1.4em;
-    background-color: #fffced;
+    background-color: ${palatte.white};
+  }
+  &:hover {
+    background-color: ${palatte.white};
   }
 `;
 const ReviewTagContainer = styled.div`

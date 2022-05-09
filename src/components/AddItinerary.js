@@ -57,6 +57,11 @@ import {
   P,
 } from './styledComponents/basicStyle';
 import { EditableText, EditableDate } from './styledComponents/EditableText';
+import {
+  Overview,
+  DepartController,
+  MoveScheduleController,
+} from './EditItinerary';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -316,7 +321,7 @@ const SpotCardDraggable = (props) => {
     <Draggable
       draggableId={props.id}
       index={props.index}
-      isDragDisabled={props.browse}>
+      isDragDisabled={!props.isAllowEdit}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -366,7 +371,7 @@ const ScheduleCardDrag = (props) => {
     <Draggable
       draggableId={props.id}
       index={props.index}
-      isDragDisabled={props.browse}>
+      isDragDisabled={!props.isAllowEdit}>
       {(provided) => (
         <ScheduleWapper
           ref={provided.innerRef}
@@ -377,7 +382,7 @@ const ScheduleCardDrag = (props) => {
               padding="40px 0 0 0"
               basis="120px"
               alignItems="flex-start">
-              {!props.isBrowse && isEditDuration ? (
+              {props.isAllowEdit && isEditDuration ? (
                 <FlexDiv direction="column" alignItems="center">
                   <FlexDiv alignItems="center" gap="8px">
                     <RoundButtonSmall
@@ -442,7 +447,7 @@ const ScheduleCardDrag = (props) => {
                   direction="column"
                   alignItems="center"
                   addCss={
-                    !props.isBrowse && {
+                    props.isAllowEdit && {
                       container: css`
                         &:hover {
                           background-color: ${palatte.lighterShadow};
@@ -468,10 +473,10 @@ const ScheduleCardDrag = (props) => {
             <ScheduleCard
               schedule={props.schedule}
               duration={props.duration}
-              isEdit={!props.isBrowse}
+              isEdit={props.isAllowEdit}
               selectedList={props.selectedList}
               setSelectedList={props.setSelectedList}
-              isShowCloseBtn={!props.isBrowse}
+              isShowCloseBtn={props.isAllowEdit}
               onCloseClick={props.onCloseClick}
               travelMode={props.schedule.travel_mode}
               transitDetail={props.schedule.transit_detail}
@@ -484,176 +489,176 @@ const ScheduleCardDrag = (props) => {
   );
 };
 
-function Overview(props) {
-  const navigate = useNavigate();
-  const { uid } = useContext(Context);
-  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
-    const upload = new updateItineraryCoverPhoto({
-      uid,
-      itineraryId: props.overviews.itinerary_id,
-      imageBuffer,
-    });
-    upload.uploadFirestore().then((cover_photo) => {
-      setIsShowModal(false);
-      props.updateOverviewsFields({ cover_photo });
-    });
-  };
-  return (
-    <>
-      <Container position="relative" margin="0 0 30px 0">
-        <Container addCss={props.container} padding="40px 20px 50px 20px">
-          <FlexDiv justifyContent="space-between">
-            <RoundButtonSmallWhite
-              className="material-icons"
-              type="button"
-              onClick={() => navigate('/itineraries')}>
-              navigate_before
-            </RoundButtonSmallWhite>
-            {props.isBrowse ? (
-              <RoundButtonSmallWhite
-                className="material-icons"
-                type="button"
-                onClick={() => props.setIsBrowse(false)}>
-                edit
-              </RoundButtonSmallWhite>
-            ) : (
-              <AddImageRoundBtn
-                upload={uploadCoverPhoto}
-                white
-                icon="insert_photo"
-                confirmMessage="確定要將封面更換成這張圖嗎？"
-              />
-            )}
-          </FlexDiv>
-          <FlexDiv direction="column" gap="10px" alignItems="center">
-            <EditableText
-              level="2"
-              padding="0 2px"
-              color={palatte.white}
-              addInputCss={css`
-                color: ${palatte.gray[800]};
-              `}
-              isBrowse={props.isBrowse}
-              onSubmit={(title) => {
-                if (title !== props.overviews.title) {
-                  props.updateOverviewsFields({ title });
-                }
-              }}>
-              {props.overviews.title}
-            </EditableText>
-            <EditableDate
-              color={palatte.white}
-              start={props.overviews.start_date}
-              end={props.overviews.end_date}
-              onSubmit={props.updateDate}
-              isBrowse={props.isBrowse}
-              addCss={css`
-                font-weight: 700;
-              `}
-              textAlign="center"
-            />
-            <H3 color={palatte.white}>Day {props.day + 1}</H3>
-          </FlexDiv>
-        </Container>
-        <Image
-          src={props.overviews.cover_photo}
-          alt="cover"
-          blur
-          addCss={css`
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            z-index: -1;
-          `}
-        />
-      </Container>
-    </>
-  );
-}
+// function Overview(props) {
+//   const navigate = useNavigate();
+//   const { uid } = useContext(Context);
+//   const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
+//     const upload = new updateItineraryCoverPhoto({
+//       uid,
+//       itineraryId: props.overviews.itinerary_id,
+//       imageBuffer,
+//     });
+//     upload.uploadFirestore().then((cover_photo) => {
+//       setIsShowModal(false);
+//       props.updateOverviewsFields({ cover_photo });
+//     });
+//   };
+//   return (
+//     <>
+//       <Container position="relative" margin="0 0 30px 0">
+//         <Container addCss={props.container} padding="40px 20px 50px 20px">
+//           <FlexDiv justifyContent="space-between">
+//             <RoundButtonSmallWhite
+//               className="material-icons"
+//               type="button"
+//               onClick={() => navigate('/itineraries')}>
+//               navigate_before
+//             </RoundButtonSmallWhite>
+//             {props.isBrowse ? (
+//               <RoundButtonSmallWhite
+//                 className="material-icons"
+//                 type="button"
+//                 onClick={() => props.setIsBrowse(false)}>
+//                 edit
+//               </RoundButtonSmallWhite>
+//             ) : (
+//               <AddImageRoundBtn
+//                 upload={uploadCoverPhoto}
+//                 white
+//                 icon="insert_photo"
+//                 confirmMessage="確定要將封面更換成這張圖嗎？"
+//               />
+//             )}
+//           </FlexDiv>
+//           <FlexDiv direction="column" gap="10px" alignItems="center">
+//             <EditableText
+//               level="2"
+//               padding="0 2px"
+//               color={palatte.white}
+//               addInputCss={css`
+//                 color: ${palatte.gray[800]};
+//               `}
+//               isBrowse={props.isBrowse}
+//               onSubmit={(title) => {
+//                 if (title !== props.overviews.title) {
+//                   props.updateOverviewsFields({ title });
+//                 }
+//               }}>
+//               {props.overviews.title}
+//             </EditableText>
+//             <EditableDate
+//               color={palatte.white}
+//               start={props.overviews.start_date}
+//               end={props.overviews.end_date}
+//               onSubmit={props.updateDate}
+//               isBrowse={props.isBrowse}
+//               addCss={css`
+//                 font-weight: 700;
+//               `}
+//               textAlign="center"
+//             />
+//             <H3 color={palatte.white}>Day {props.day + 1}</H3>
+//           </FlexDiv>
+//         </Container>
+//         <Image
+//           src={props.overviews.cover_photo}
+//           alt="cover"
+//           blur
+//           addCss={css`
+//             width: 100%;
+//             height: 100%;
+//             position: absolute;
+//             top: 0;
+//             z-index: -1;
+//           `}
+//         />
+//       </Container>
+//     </>
+//   );
+// }
 
-function DepartController(props) {
-  return (
-    <FlexDiv direction="column" gap="5px">
-      <FlexDiv
-        justifyContent="space-between"
-        addCss={css`
-          & > * {
-            color: ${palatte.gray['700']};
-          }
-        `}>
-        <P>出發時間</P>
-        <P>{timestampToString(props.departTimes[props.day], 'simpleDate')}</P>
-      </FlexDiv>
-      <EditableText
-        level="4"
-        fontSize="46px"
-        addCss={css`
-          color: ${palatte.info.basic};
-          font-weight: 700;
-          padding: 0;
-        `}
-        isBrowse={props.isBrowse}
-        onSubmit={(newDepartString) => {
-          if (newDepartString !== props.departString) {
-            const newDepartTimestamp = setTimeToTimestamp(
-              props.departTimes[props.day],
-              newDepartString
-            );
-            const newDepartTimes = Array.from(props.departTimes);
-            newDepartTimes.splice(props.day, 1, newDepartTimestamp);
-            props.updateOverviewsFields({ depart_times: newDepartTimes });
-            props.updateTimeOfSchedule(
-              props.schedules,
-              { isUploadFirebase: true, isSetSchedule: true },
-              newDepartTimestamp
-            );
-            props.setDepartString(
-              timestampToString(newDepartTimestamp, 'time')
-            );
-          }
-        }}>
-        {props.departString}
-      </EditableText>
-    </FlexDiv>
-  );
-}
+// function DepartController(props) {
+//   return (
+//     <FlexDiv direction="column" gap="5px">
+//       <FlexDiv
+//         justifyContent="space-between"
+//         addCss={css`
+//           & > * {
+//             color: ${palatte.gray['700']};
+//           }
+//         `}>
+//         <P>出發時間</P>
+//         <P>{timestampToString(props.departTimes[props.day], 'simpleDate')}</P>
+//       </FlexDiv>
+//       <EditableText
+//         level="4"
+//         fontSize="46px"
+//         addCss={css`
+//           color: ${palatte.info.basic};
+//           font-weight: 700;
+//           padding: 0;
+//         `}
+//         isBrowse={props.isBrowse}
+//         onSubmit={(newDepartString) => {
+//           if (newDepartString !== props.departString) {
+//             const newDepartTimestamp = setTimeToTimestamp(
+//               props.departTimes[props.day],
+//               newDepartString
+//             );
+//             const newDepartTimes = Array.from(props.departTimes);
+//             newDepartTimes.splice(props.day, 1, newDepartTimestamp);
+//             props.updateOverviewsFields({ depart_times: newDepartTimes });
+//             props.updateTimeOfSchedule(
+//               props.schedules,
+//               { isUploadFirebase: true, isSetSchedule: true },
+//               newDepartTimestamp
+//             );
+//             props.setDepartString(
+//               timestampToString(newDepartTimestamp, 'time')
+//             );
+//           }
+//         }}>
+//         {props.departString}
+//       </EditableText>
+//     </FlexDiv>
+//   );
+// }
 
-function MoveScheduleController(props) {
-  return (
-    <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
-      <SelectAllCheckBox
-        setAllChecked={() =>
-          props.setSelectedSchedulesId(
-            props.schedules.map((schedule) => schedule.schedule_id)
-          )
-        }
-        setAllUnchecked={() => props.setSelectedSchedulesId([])}
-        isSelectAll={props.isSelectAll}
-        setIsSelectAll={props.setIsSelectAll}
-      />
-      <SelectSmall
-        value={props.changeTime}
-        onChange={(e) => props.setChangeTime(Number(e.target.value))}>
-        <option value="" disabled>
-          修改所選行程的日期
-        </option>
-        {props.departTimes?.map((timestamp) => (
-          <option value={timestamp} key={timestamp}>
-            {timestampToString(timestamp, 'date')}
-          </option>
-        ))}
-      </SelectSmall>
-      <ButtonSmall
-        styled="primary"
-        padding="5px 15px"
-        type="button"
-        onClick={props.changeSchedulesTime}>
-        移動行程
-      </ButtonSmall>
-    </FlexDiv>
-  );
-}
+// function MoveScheduleController(props) {
+//   return (
+//     <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
+//       <SelectAllCheckBox
+//         setAllChecked={() =>
+//           props.setSelectedSchedulesId(
+//             props.schedules.map((schedule) => schedule.schedule_id)
+//           )
+//         }
+//         setAllUnchecked={() => props.setSelectedSchedulesId([])}
+//         isSelectAll={props.isSelectAll}
+//         setIsSelectAll={props.setIsSelectAll}
+//       />
+//       <SelectSmall
+//         value={props.changeTime}
+//         onChange={(e) => props.setChangeTime(Number(e.target.value))}>
+//         <option value="" disabled>
+//           修改所選行程的日期
+//         </option>
+//         {props.departTimes?.map((timestamp) => (
+//           <option value={timestamp} key={timestamp}>
+//             {timestampToString(timestamp, 'date')}
+//           </option>
+//         ))}
+//       </SelectSmall>
+//       <ButtonSmall
+//         styled="primary"
+//         padding="5px 15px"
+//         type="button"
+//         onClick={props.changeSchedulesTime}>
+//         移動行程
+//       </ButtonSmall>
+//     </FlexDiv>
+//   );
+// }
 
 function AddSchedule(props) {
   const { uid, map } = useContext(Context);
@@ -665,7 +670,7 @@ function AddSchedule(props) {
   const [schedules, setSchedules] = useState([]);
   const [day, setDay] = useState(0);
   const [departString, setDepartString] = useState();
-  const [isBrowse, setIsBrowse] = useState(props.browse);
+  const [isAllowEdit, setIsAllowEdit] = useState(!props.browse);
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [changeTime, setChangeTime] = useState('');
@@ -1108,14 +1113,14 @@ function AddSchedule(props) {
 
   const container = css`
     ${styles.containerSetting}
-    max-width: ${!props.isBrowse && '1280px'};
+    max-width: ${props.isAllowEdit && '1280px'};
   `;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
         <>
           <Container minHeight="100vh">
-            {!isBrowse && (
+            {isAllowEdit && (
               <FlexChildDiv
                 padding="20px"
                 display="flex"
@@ -1145,14 +1150,14 @@ function AddSchedule(props) {
                       type="button"
                       styled="danger"
                       iconName="cancel"
-                      onClick={() => setIsBrowse(true)}>
+                      onClick={() => setIsAllowEdit(false)}>
                       結束編輯
                     </ButtonIconColumn>
                   </FlexDiv>
                 </FlexDiv>
                 <Droppable
                   droppableId="waitingSpotsArea"
-                  isDropDisabled={isBrowse}>
+                  isDropDisabled={!isAllowEdit}>
                   {(provided) => (
                     <FlexChildDiv
                       direction="column"
@@ -1167,11 +1172,11 @@ function AddSchedule(props) {
                         }
                       `}
                       ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      browse={isBrowse}>
+                      {...provided.droppableProps}>
                       {waitingSpots?.map((spot, index) => (
                         <SpotCardDraggable
                           spot={spot}
+                          isAllowEdit={isAllowEdit}
                           key={spot.place_id}
                           index={index}
                           id={spot.place_id}
@@ -1188,11 +1193,11 @@ function AddSchedule(props) {
               direction="column"
               gap="20px"
               minHeight="100vh"
-              width={!isBrowse ? 'calc(100% - 340px)' : null}>
+              width={isAllowEdit ? 'calc(100% - 340px)' : null}>
               <Overview
-                container={container}
-                isBrowse={isBrowse}
-                setIsBrowse={setIsBrowse}
+                containerCss={container}
+                isAllowEdit={isAllowEdit}
+                setIsAllowEdit={setIsAllowEdit}
                 overviews={overviews}
                 updateDate={updateDate}
                 updateOverviewsFields={updateOverviewsFields}
@@ -1207,7 +1212,7 @@ function AddSchedule(props) {
                 <DepartController
                   departTimes={overviews.depart_times}
                   day={day}
-                  isBrowse={isBrowse}
+                  isAllowEdit={isAllowEdit}
                   departString={departString}
                   setDepartString={setDepartString}
                   updateTimeOfSchedule={updateTimeOfSchedule}
@@ -1220,7 +1225,9 @@ function AddSchedule(props) {
                   finalDay={overviews?.depart_times?.length - 1}
                 />
               </FlexDiv>
-              <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
+              <Droppable
+                droppableId="scheduleArea"
+                isDropDisabled={!isAllowEdit}>
                 {(provided) => (
                   <FlexChildDiv
                     addCss={container}
@@ -1240,7 +1247,7 @@ function AddSchedule(props) {
                       addCss={css`
                         border-radius: 10px;
                       `}>
-                      {!isBrowse && (
+                      {isAllowEdit && (
                         <FlexDiv justifyContent="flex-end" margin="0 0 20px 0">
                           <MoveScheduleController
                             departTimes={overviews.depart_times}
@@ -1258,14 +1265,13 @@ function AddSchedule(props) {
                       {schedules?.length > 0 ? (
                         schedules.map((schedule, index) => (
                           <ScheduleCardDrag
-                            isBrowse={isBrowse}
+                            isAllowEdit={isAllowEdit}
                             key={schedule.schedule_id}
                             index={index}
                             id={schedule.schedule_id}
                             changeTrasitWay={changeTrasitWay}
                             schedule={schedule}
                             updateDuration={updateDuration}
-                            browse={isBrowse}
                             selectedList={selectedSchedulesId}
                             setSelectedList={setSelectedSchedulesId}
                             onCloseClick={() =>
@@ -1274,7 +1280,9 @@ function AddSchedule(props) {
                         ))
                       ) : (
                         <P color={palatte.gray[800]}>
-                          {isBrowse ? '點擊編輯新增行程' : '拖拉卡片以新增行程'}
+                          {!isAllowEdit
+                            ? '點擊編輯新增行程'
+                            : '拖拉卡片以新增行程'}
                         </P>
                       )}
                       {provided.placeholder}

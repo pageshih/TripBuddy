@@ -67,8 +67,10 @@ const googleMap = {
     'reviews',
     'website',
     'rating',
+    'url',
   ],
   composePlaceDetailData(place) {
+    console.log(place);
     return {
       place_id: place?.place_id || '未提供',
       name: place?.name || '未提供',
@@ -87,6 +89,7 @@ const googleMap = {
       rating: place?.rating || '未提供',
       // types: place.types || '未提供',
       created_time: new Date().getTime(),
+      url: place?.url,
     };
   },
   initMap(ref, center, zoom) {

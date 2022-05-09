@@ -494,7 +494,7 @@ function Explore({ setWaitingSpots }) {
     right: -15px;
     top: 10px;
     z-index: 1;
-    padding: 5px;
+    padding: 10px;
     border: 1px solid ${palatte.white};
   `;
   return (
@@ -517,7 +517,7 @@ function Explore({ setWaitingSpots }) {
                   isShowSavedSpots ? '30px' : placeDetail ? '0px' : null
                 }>
                 <RoundButtonSmall
-                  size="20px"
+                  size="30px"
                   className="material-icons"
                   styled="gray500"
                   addCss={expandButton}

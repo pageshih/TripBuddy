@@ -176,7 +176,7 @@ const RoundButtonSmall = styled.button`
   border-radius: ${(props) => props.borderRadius || '50%'};
   width: ${(props) => props.size || '24px'};
   height: ${(props) => props.size || '24px'};
-  font-size: ${(props) => props.size || '24px'};
+  font-size: ${(props) => props.fontSize || props.size || '24px'};
   &:hover {
     color: ${(props) =>
       props.close
@@ -207,6 +207,7 @@ const RoundButtonSmallWhite = styled(RoundButtonSmall)`
     background-color: rgba(161, 163, 184, 0.3);
     color: ${palatte.white};
   }
+  ${(props) => props.addCss};
 `;
 
 const RoundButtonSmallOutline = styled(RoundButtonSmall)`

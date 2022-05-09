@@ -143,6 +143,20 @@ const RatingText = (props) => (
     />
   </FlexDiv>
 );
+const DurationText = (props) => (
+  <TextWithIcon
+    gap="4px"
+    iconColor={palatte.gray['500']}
+    iconSize="22px"
+    iconName="schedule"
+    textColor={palatte.gray['700']}
+    textSize="14px"
+    addCss={{
+      icon: `margin: 1px 0;`,
+    }}>
+    停留 {Math.floor(props.duration / 6) / 10} 小時
+  </TextWithIcon>
+);
 function SpotCard(props) {
   return (
     <CardWrapper
@@ -253,17 +267,7 @@ function SpotCard(props) {
           <AddressText withRating={props.rating} isSmall={props.isSmall}>
             {props.address}
           </AddressText>
-          {props.duration && (
-            <TextWithIcon
-              gap="4px"
-              iconColor={palatte.gray['500']}
-              iconSize="22px"
-              iconName="schedule"
-              textColor={palatte.gray['700']}
-              textSize="14px">
-              停留 {Math.floor(props.duration / 60)} 小時
-            </TextWithIcon>
-          )}
+          {props.duration && <DurationText duration={props.duration} />}
           {props.rating && (
             <RatingText rating={props.rating} isSmall={props.isSmall} />
           )}
@@ -468,13 +472,13 @@ ScheduleCard.propTypes = {
 
 function OverviewCard(props) {
   const container = css`
-    flex-basis: ${props.row ? '300px' : 'calc(50% - 60px)'};
+    flex-basis: ${props.basis || (props.row ? '300px' : 'calc(50% - 60px)')};
     height: 300px;
     flex-direction: column;
     border-width: 2px;
     align-items: center;
     justify-content: center;
-    margin: 0 0 4px 0;
+    margin: ${props.margin || '0 0 4px 0'};
     & > .darken {
       background-color: ${palatte.shadow};
     }
@@ -534,6 +538,15 @@ function OverviewCard(props) {
     </Card>
   );
 }
+OverviewCard.propTypes = {
+  as: PropTypes.string,
+  title: PropTypes.string,
+  onClick: PropTypes.func,
+  startDate: PropTypes.number,
+  endDate: PropTypes.number,
+  src: PropTypes.string,
+  alt: PropTypes.string,
+};
 
 export {
   Card,
@@ -545,6 +558,7 @@ export {
   SpotCard,
   RatingText,
   AddressText,
+  DurationText,
   TextWithIcon,
   transportMode,
 };

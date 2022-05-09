@@ -99,13 +99,13 @@ function EditableText(props) {
           as={props.as}
           fontSize={props.fontSize}
           addCss={css`
-            ${!props.isBrowse && hoverEffect}
+            ${props.isAllowEdit && hoverEffect}
             padding: ${props.padding || '0 12px 0 0 '};
             ${props.addCss}
           `}
           color={props.color}
           onClick={() => {
-            if (!props.isBrowse) setIsEdit(true);
+            if (props.isAllowEdit) setIsEdit(true);
           }}>
           {value}
         </Text>
@@ -120,7 +120,7 @@ EditableText.propTypes = {
   as: PropTypes.string,
   fontSize: PropTypes.string,
   color: PropTypes.string,
-  isBrowse: PropTypes.bool,
+  isAllowEdit: PropTypes.bool,
   addCss: PropTypes.string,
 };
 
@@ -184,12 +184,12 @@ function EditableDate(props) {
         <P
           color={props.color}
           addCss={css`
-            ${!props.isBrowse && hoverEffect}
+            ${props.isAllowEdit && hoverEffect}
             ${props.addCss}
           `}
           textAlign={props.textAlign}
           onClick={(e) => {
-            if (e.target.id !== 'submit' && !props.isBrowse) {
+            if (e.target.id !== 'submit' && props.isAllowEdit) {
               setIsEdit(true);
             }
           }}>
