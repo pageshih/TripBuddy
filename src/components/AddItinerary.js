@@ -1144,7 +1144,7 @@ function AddSchedule(props) {
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
         <>
-          <Container minHeight="100vh">
+          <Container minHeight="100vh" padding="0 0 150px 0">
             {isAllowEdit && (
               <FlexChildDiv
                 padding="20px"
