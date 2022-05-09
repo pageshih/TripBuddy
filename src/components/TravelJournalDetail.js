@@ -103,13 +103,13 @@ function TravelJournalDetail() {
 
   const uploadNewSchedule = () => {
     if (addSchedule.start_time && addSchedule.placeDetail) {
-      console.log(addSchedule);
       setIsAddingSchedule(true);
       firestore
         .addSchedule(uid, overviews.itinerary_id, addSchedule)
         .then((newSchedule) => {
           setShowAddSchedule(false);
           alert('已加入行程');
+          setIsAddingSchedule(false);
           overviews.depart_times.forEach((timestamp, index, array) => {
             if (index < array.length - 1 && array.length !== 1) {
               if (
