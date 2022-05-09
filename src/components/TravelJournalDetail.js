@@ -288,6 +288,7 @@ function TravelJournalDetail() {
           )}
 
           <Overview
+            containerCss={styles.containerSetting}
             overviews={overviews}
             day={day}
             isAllowEdit={isAllowEdit}
