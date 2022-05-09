@@ -71,6 +71,7 @@ function Itineraries() {
             coming: [],
             future: [],
           };
+          setProgressing([]);
           overviews.forEach(async (itinerary) => {
             const countDownDay =
               new Date(itinerary.start_date).getDate() -
@@ -78,7 +79,6 @@ function Itineraries() {
             const tripDays =
               new Date(itinerary.end_date).getDate() -
               new Date(itinerary.start_date).getDate();
-            console.log(countDownDay, tripDays);
             if (countDownDay <= 0 && countDownDay + tripDays >= 0) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)

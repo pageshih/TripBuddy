@@ -39,7 +39,11 @@ function Accordion(props) {
             ? 'pointer'
             : 'normal'};
         `}
-        onClick={() => setIsExpand((prev) => !prev)}>
+        onClick={() =>
+          !props.isDisableExpand || props.isAllowEdit
+            ? setIsExpand((prev) => !prev)
+            : null
+        }>
         <FlexDiv direction="column" grow="1" gap="3px">
           {props.titleElement}
         </FlexDiv>

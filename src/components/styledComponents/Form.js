@@ -409,9 +409,10 @@ function AddImageRoundBtn(props) {
           width="fit-content"
           height="fit-content"
           maxWidth="1000px"
-          maxHeight="100vh"
+          maxHeight="90vh"
           close={() => setIsShowModal(false)}>
           <Image
+            height="400px"
             src={
               imageBuffer.length > 0
                 ? URL.createObjectURL(imageBuffer[0])

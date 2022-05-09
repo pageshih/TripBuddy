@@ -217,7 +217,8 @@ const firestore = {
       ...basicInfo,
       depart_times: createDepartTimeAry(basicInfo),
       itinerary_id: itineraryOverviewRef.id,
-      cover_photo: 'https://picsum.photos/1000/500',
+      cover_photo:
+        'https://images.unsplash.com/photo-1564166489229-dfb970a591bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1626&q=80',
     };
     this.getItinerariesSetting(userUID).then((obj) => {
       if (!obj.default_travel_mode) {

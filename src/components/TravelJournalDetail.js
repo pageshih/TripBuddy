@@ -169,6 +169,7 @@ function TravelJournalDetail() {
           : schedule
       );
       setScheduleList([...newScheduleList]);
+      allSchedules.current[day] = [...newScheduleList];
     }
   }, [uploadedReview]);
 
@@ -339,19 +340,23 @@ function TravelJournalDetail() {
               </FlexDiv>
             </FlexDiv>
             <FlexDiv justifyContent="flex-end" gap="20px" margin="0 0 20px 0">
-              <FlexDiv alignItems="center" gap="10px" justifyContent="flex-end">
-                <P>有計畫外的行程？</P>
-                <ButtonSmall
-                  styled="primary"
-                  width="fit-content"
-                  type="button"
-                  onClick={() => {
-                    setShowAddSchedule(true);
-                    console.log(showAddSchedule);
-                  }}>
-                  加入行程
-                </ButtonSmall>
-              </FlexDiv>
+              {isAllowEdit && (
+                <FlexDiv
+                  alignItems="center"
+                  gap="10px"
+                  justifyContent="flex-end">
+                  <P>有計畫外的行程？</P>
+                  <ButtonSmall
+                    styled="primary"
+                    width="fit-content"
+                    type="button"
+                    onClick={() => {
+                      setShowAddSchedule(true);
+                    }}>
+                    加入行程
+                  </ButtonSmall>
+                </FlexDiv>
+              )}
               <Pagination
                 day={day}
                 switchDay={switchDay}
@@ -362,7 +367,7 @@ function TravelJournalDetail() {
               {scheduleList.map((schedule) => (
                 <FlexDiv
                   gap="10px"
-                  alignItems="center"
+                  alignItems="flex-start"
                   key={schedule.schedule_id}>
                   <Accordion
                     titleElement={
@@ -409,34 +414,37 @@ function TravelJournalDetail() {
                       />
                     </FlexDiv>
                   </Accordion>
-                  <RoundButtonSmall
-                    styled="transparent"
-                    size="30px"
-                    close
-                    padding="2px 0 0 2px"
-                    fontSize="24px"
-                    addCss={css`
-                      &:hover {
-                        background-color: ${palatte.white};
-                      }
-                    `}
-                    className="material-icons"
-                    onClick={async () => {
-                      const isDelete = window.confirm(
-                        `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`
-                      );
-                      if (isDelete) {
-                        await deleteSchedule(schedule.schedule_id);
-                        setScheduleList((prev) =>
-                          prev.filter(
-                            (oldSchedule) =>
-                              oldSchedule.schedule_id !== schedule.schedule_id
-                          )
+                  {isAllowEdit && (
+                    <RoundButtonSmall
+                      styled="transparent"
+                      size="30px"
+                      close
+                      padding="2px 0 0 2px"
+                      fontSize="24px"
+                      addCss={css`
+                        margin-top: 18px;
+                        &:hover {
+                          background-color: ${palatte.white};
+                        }
+                      `}
+                      className="material-icons"
+                      onClick={async () => {
+                        const isDelete = window.confirm(
+                          `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`
                         );
-                      }
-                    }}>
-                    delete
-                  </RoundButtonSmall>
+                        if (isDelete) {
+                          await deleteSchedule(schedule.schedule_id);
+                          setScheduleList((prev) =>
+                            prev.filter(
+                              (oldSchedule) =>
+                                oldSchedule.schedule_id !== schedule.schedule_id
+                            )
+                          );
+                        }
+                      }}>
+                      delete
+                    </RoundButtonSmall>
+                  )}
                 </FlexDiv>
               ))}
             </FlexDiv>

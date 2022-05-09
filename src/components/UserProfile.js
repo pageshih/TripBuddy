@@ -121,7 +121,11 @@ function UserSetting(props) {
             />
           </div>
           <FlexDiv direction="column" gap="8px">
-            <EditableText level="5" fontSize="24px" onSubmit={updateUserName}>
+            <EditableText
+              isAllowEdit
+              level="5"
+              fontSize="24px"
+              onSubmit={updateUserName}>
               {props.profile.name}
             </EditableText>
             <P fontSize="14px" color={palatte.gray['400']}>

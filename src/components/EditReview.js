@@ -352,12 +352,12 @@ function AddReview(props) {
   const addCheckedTag = (e) => {
     e.preventDefault();
     if (addTag) {
-      setReviewTags(reviewTags ? [...reviewTags, addTag] : [addTag]);
+      setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
       setCheckedReviewTags(
-        checkedReviewTags ? [...checkedReviewTags, addTag] : [addTag]
+        checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
       );
       firestore.editProfile(uid, {
-        review_tags: reviewTags ? [...reviewTags, addTag] : [addTag],
+        review_tags: reviewTags ? [addTag, ...reviewTags] : [addTag],
       });
       setAddTag('');
     }

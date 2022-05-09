@@ -513,6 +513,7 @@ function Explore({ setWaitingSpots }) {
                 `}
                 ref={sideWindowRef}
                 basis={placeDetail || isShowSavedSpots ? '400px' : null}
+                maxWidth={placeDetail || isShowSavedSpots ? '400px' : null}
                 padding={
                   isShowSavedSpots ? '30px' : placeDetail ? '0px' : null
                 }>
