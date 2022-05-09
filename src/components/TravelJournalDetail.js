@@ -363,9 +363,10 @@ function TravelJournalDetail() {
                 finalDay={overviews.depart_times.length - 1}
               />
             </FlexDiv>
-            <FlexDiv direction="column" gap="20px">
+            <FlexDiv direction="column" gap="20px" maxWidth="calc(100% - 40px)">
               {scheduleList.map((schedule) => (
-                <FlexDiv
+                <FlexChildDiv
+                  grow="1"
                   gap="10px"
                   alignItems="flex-start"
                   key={schedule.schedule_id}>
@@ -381,8 +382,8 @@ function TravelJournalDetail() {
                     }
                     isAllowEdit={isAllowEdit}
                     isDisableExpand={
-                      schedule.gallery ||
-                      schedule.review_tags ||
+                      schedule.gallery?.length > 0 ||
+                      schedule.review_tags?.length > 0 ||
                       schedule.reviews
                         ? false
                         : true
@@ -396,8 +397,8 @@ function TravelJournalDetail() {
                         key={schedule.schedule_id}
                         allReviewTags={reviewTags}
                         showReviewTags={
-                          schedule.review_tags ||
-                          schedule.gallery ||
+                          schedule.review_tags?.length > 0 ||
+                          schedule.gallery?.length > 0 ||
                           schedule.reviews
                             ? schedule.review_tags
                             : reviewTags
@@ -445,7 +446,7 @@ function TravelJournalDetail() {
                       delete
                     </RoundButtonSmall>
                   )}
-                </FlexDiv>
+                </FlexChildDiv>
               ))}
             </FlexDiv>
           </Container>
