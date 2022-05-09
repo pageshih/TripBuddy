@@ -4,7 +4,7 @@ import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { Image } from './styledComponents/Layout';
 import { Card, CardWrapper } from './styledComponents/Cards';
-
+import { palatte, Loader } from './styledComponents/basicStyle';
 import { timestampToString } from '../utils/utilities';
 
 function TravelJournals() {
@@ -48,7 +48,7 @@ function TravelJournals() {
           ))}
         </CardWrapper>
       ) : (
-        <p>loading...</p>
+        <Loader />
       )}
     </>
   );

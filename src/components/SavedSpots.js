@@ -4,8 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
-import { mediaQuery, palatte, styles } from './styledComponents/basicStyle';
-import { FlexDiv, Container } from './styledComponents/Layout';
+import {
+  mediaQuery,
+  palatte,
+  styles,
+  Loader,
+} from './styledComponents/basicStyle';
+import { FlexDiv } from './styledComponents/Layout';
 import { SpotCard } from './styledComponents/Cards';
 import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
 import {
@@ -141,6 +146,7 @@ function SavedSpots(props) {
           isEdit
         />
       ))}
+      {!savedSpots && <Loader />}
       <Button
         styled="primary"
         type="click"

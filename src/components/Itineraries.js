@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState, useRef } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { firestore, firebaseStorage } from '../utils/firebase';
+import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
   styles,
@@ -10,6 +10,7 @@ import {
   H4,
   P,
   mediaQuery,
+  Loader,
 } from './styledComponents/basicStyle';
 import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
@@ -23,7 +24,7 @@ const ExploreSpot = (props) => {
       direction="column"
       gap="20px"
       width="250px"
-      margin="30px 0"
+      margin="30px auto"
       alignSelf="center"
       addCss={css`
         ${mediaQuery[0]} {
@@ -62,7 +63,6 @@ function Itineraries() {
     firestore
       .getItineraries(uid, now)
       .then((overviews) => {
-        console.log(overviews);
         if (overviews?.length <= 0) {
           setEmpty(true);
         } else {
@@ -123,13 +123,13 @@ function Itineraries() {
   `;
   return (
     <>
-      <Container
-        padding={`0 ${styles.container_padding} 100px ${styles.container_padding}`}
-        maxWidth={styles.container_maxWidth}
-        margin="0 auto">
+      <Container addCss={styles.containerSetting}>
         {!empty ? (
           <>
-            <FlexDiv direction="column" gap="70px">
+            <FlexDiv
+              direction="column"
+              gap="70px"
+              margin="auto auto 100px auto">
               {progressing?.overview && (
                 <div css={foldContainer}>
                   <FlexDiv justifyContent="space-between" align-items="center">
@@ -252,6 +252,7 @@ function Itineraries() {
                   </FlexDiv>
                 </FlexDiv>
               )}
+              {!progressing || !coming || !future ? <Loader /> : null}
               <ExploreSpot />
             </FlexDiv>
           </>

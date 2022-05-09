@@ -64,6 +64,12 @@ function EditableText(props) {
     }
     ${props.addInputCss || props.addCss}
   `;
+
+  const countTextLength = (text) => {
+    const encodedText = encodeURIComponent(text);
+    console.log(encodedText);
+    return encodedText.replace(/%[A-F\d]{2}/g, 'U').length;
+  };
   return (
     <>
       {isEdit ? (
@@ -77,7 +83,7 @@ function EditableText(props) {
           <TextInput
             ref={inputRef}
             type={props.type}
-            size={value.length > 0 ? value.length : 1}
+            size={countTextLength(value) > 0 ? countTextLength(value) - 1 : 1}
             value={value}
             width="auto"
             css={inputStyle}

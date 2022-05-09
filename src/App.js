@@ -15,7 +15,8 @@ import {
 } from './components/AddItinerary';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
-import { palatte } from './components/styledComponents/basicStyle';
+import { palatte, Loader } from './components/styledComponents/basicStyle';
+import { FlexDiv } from './components/styledComponents/Layout';
 
 const Context = createContext();
 
@@ -32,7 +33,9 @@ const LoginOrPage = (props) => {
       ) : props.goLogin !== undefined ? (
         props.element
       ) : (
-        <p>loading...</p>
+        <FlexDiv justifyContent="center" padding="100px 0">
+          <Loader />
+        </FlexDiv>
       )}
     </>
   );

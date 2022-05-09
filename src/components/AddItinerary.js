@@ -332,6 +332,9 @@ const SpotCardDraggable = (props) => {
             title={props.spot.name}
             address={props.spot.formatted_address}
             rating={props.spot.rating}
+            addCss={css`
+              cursor: grab;
+            `}
           />
         </div>
       )}
@@ -371,7 +374,7 @@ const ScheduleCardDrag = (props) => {
           {...provided.dragHandleProps}>
           <FlexDiv gap="20px">
             <FlexChildDiv
-              padding="50px 0 0 0"
+              padding="40px 0 0 0"
               basis="120px"
               alignItems="flex-start">
               {!props.isBrowse && isEditDuration ? (
@@ -431,7 +434,7 @@ const ScheduleCardDrag = (props) => {
                 <TextWithIcon
                   grow="1"
                   iconName="watch_later"
-                  margin="20px 0 0 0"
+                  margin="15px 0 0 0"
                   padding="10px 0px"
                   iconSize="40px"
                   gap="2px"
@@ -584,7 +587,7 @@ function DepartController(props) {
       </FlexDiv>
       <EditableText
         level="4"
-        fontSize="36px"
+        fontSize="46px"
         addCss={css`
           color: ${palatte.info.basic};
           font-weight: 700;

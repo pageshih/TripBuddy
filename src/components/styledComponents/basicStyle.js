@@ -225,13 +225,55 @@ const P = styled.p`
   }
   ${(props) => props.addCss}
 `;
-const Loader = styled.div`
-  width: ${(props) => props.size};
-  height: ${(props) => props.size};
-  border-radius: 50%;
-  border: 10px solid ${(props) => props.color || palatte.gray['400']};
-  border-top: none;
-`;
+const Loader = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      margin: 'auto',
+      background: 'rgb(255, 255, 255)',
+      display: 'block',
+      shapeRendering: 'auto',
+    }}
+    width={props.size || '30px'}
+    height={props.size || '30px'}
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid">
+    <circle cx="26" cy="50" fill="#a0e9d3" r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="-0.5s"></animate>
+    </circle>
+    <circle cx="74" cy="50" fill="#17b8b6" r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="0s"></animate>
+    </circle>
+    <circle cx="26" cy="50" fill="#a0e9d3" r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="-0.5s"></animate>
+      <animate
+        attributeName="fill-opacity"
+        values="0;0;1;1"
+        calcMode="discrete"
+        keyTimes="0;0.499;0.5;1"
+        dur="1s"
+        repeatCount="indefinite"></animate>
+    </circle>
+  </svg>
+);
 
 const textComponents = {
   2: H2,

@@ -113,10 +113,14 @@ const AddressText = (props) => (
     gap={props.withRating ? '4px' : '2px'}
     iconName="location_on"
     iconColor={palatte.danger.basic}
-    iconSize={props.isSmall ? '20px' : '24px'}
+    alignItems="flex-start"
+    textSize={!props.isSmall && '17px'}
+    iconSize={props.isSmall ? '20px' : '22px'}
+    mutipleLines
+    iconOffset="20px"
     addCss={{
-      icon: css`
-        margin: ${props.isSmall ? '3px 3px 3px 0' : '0'};
+      icon: `
+        margin: ${props.isSmall ? '3px 3px 3px 0' : '2px 0'};
       `,
     }}>
     {props.children}
@@ -206,7 +210,7 @@ function SpotCard(props) {
         gap="40px"
         onClick={props.onClick}
         addCss={css`
-          gap: ${props.isSmall ? '0px' : null};
+          gap: ${(props.isSmall && '0px') || props.cardGap};
           ${mediaQuery[0]} {
             gap: 0px;
           }
@@ -217,7 +221,7 @@ function SpotCard(props) {
           height="200px"
           addCss={css`
             flex-basis: ${props.isSmall ? '200px' : '330px'};
-            width: ${props.isSmall ? '100%' : null};
+            min-width: ${props.isSmall ? '100%' : '330px'};
             ${mediaQuery[0]} {
               width: 100%;
             }
@@ -406,6 +410,7 @@ function ScheduleCard(props) {
       address={props.schedule.placeDetail.formatted_address}
       duration={props.duration}
       isEdit={props.isEdit}
+      cardGap={props.isEdit && '30px'}
       isShowCloseBtn={props.isShowCloseBtn}
       onCloseClick={props.onCloseClick}
       isSmall={props.isSmall}
