@@ -111,19 +111,9 @@ function TravelJournalDetail() {
           alert('已加入行程');
           setIsAddingSchedule(false);
           overviews.depart_times.forEach((timestamp, index, array) => {
-            if (index < array.length - 1 && array.length !== 1) {
-              if (
-                newSchedule.start_time > timestamp &&
-                newSchedule.start_time < array[index + 1]
-              ) {
-                allSchedules.current[index].push(newSchedule);
-                allSchedules.current[index].sort(
-                  (a, b) => a.start_time - b.start_time
-                );
-              }
-            } else if (
-              index === array.length &&
-              newSchedule.start_time > timestamp
+            if (
+              new Date(newSchedule.start_time).getDate() ===
+              new Date(timestamp).getDate()
             ) {
               allSchedules.current[index].push(newSchedule);
               allSchedules.current[index].sort(
@@ -140,7 +130,9 @@ function TravelJournalDetail() {
   const deleteSchedule = (scheduleId) => {
     firestore
       .deleteSchedule(uid, journalID, scheduleId)
-      .then(() => console.log('刪除成功！'))
+      .then(() => {
+        console.log('刪除成功！');
+      })
       .catch((error) => console.error(error));
   };
   useEffect(() => {
@@ -236,7 +228,6 @@ function TravelJournalDetail() {
                       grow="1">
                       <Select
                         defaultValue=""
-                        value={addSchedule.start_time}
                         onChange={(e) =>
                           dispatchAddSchedule({
                             type: 'choseDate',
@@ -435,12 +426,12 @@ function TravelJournalDetail() {
                         );
                         if (isDelete) {
                           await deleteSchedule(schedule.schedule_id);
-                          setScheduleList((prev) =>
-                            prev.filter(
-                              (oldSchedule) =>
-                                oldSchedule.schedule_id !== schedule.schedule_id
-                            )
+                          const newScheduleList = scheduleList.filter(
+                            (oldSchedule) =>
+                              oldSchedule.schedule_id !== schedule.schedule_id
                           );
+                          setScheduleList(newScheduleList);
+                          allSchedules.current[day] = newScheduleList;
                         }
                       }}>
                       delete
