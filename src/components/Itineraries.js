@@ -84,9 +84,21 @@ function Itineraries() {
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
                 .then((scheduleProcessing) => {
                   if (scheduleProcessing) {
+                    const todaySchedule = scheduleProcessing.filter(
+                      (schedule) => {
+                        console.log(
+                          new Date(schedule.start_time).getDate(),
+                          new Date(now).getDate()
+                        );
+                        return (
+                          new Date(schedule.start_time).getDate() ===
+                          new Date(now).getDate()
+                        );
+                      }
+                    );
                     setProgressing({
                       overview: itinerary,
-                      schedule: scheduleProcessing,
+                      schedule: todaySchedule,
                     });
                   }
                 })

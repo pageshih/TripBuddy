@@ -745,18 +745,32 @@ function AddSchedule(props) {
       if (index < array.length - 1) {
         if (scheduleId) {
           return scheduleId === schedule.schedule_id
-            ? googleMap.getDirection({
-                origin: schedule.placeDetail.geometry,
-                destination: array[index + 1].placeDetail.geometry,
-                ...transportMode(schedule)[newMode].config,
-              })
+            ? googleMap
+                .getDirection({
+                  origin: schedule.placeDetail.geometry,
+                  destination: array[index + 1].placeDetail.geometry,
+                  ...transportMode(schedule)[newMode].config,
+                })
+                .catch((error) => {
+                  if (error.code === 'ZERO_RESULTS') {
+                    alert('抱歉！此交通方式找不到合適的路線，請切換其他方式');
+                  }
+                  return Promise.reject(schedule);
+                })
             : null;
         } else {
-          return googleMap.getDirection({
-            origin: schedule.placeDetail.geometry,
-            destination: array[index + 1].placeDetail.geometry,
-            ...transportMode(schedule)[schedule.travel_mode].config,
-          });
+          return googleMap
+            .getDirection({
+              origin: schedule.placeDetail.geometry,
+              destination: array[index + 1].placeDetail.geometry,
+              ...transportMode(schedule)[schedule.travel_mode].config,
+            })
+            .catch((error) => {
+              if (error.code === 'ZERO_RESULTS') {
+                alert('抱歉！此交通方式找不到合適的路線，請切換其他方式');
+              }
+              return Promise.reject(schedule);
+            });
         }
       }
     });
@@ -797,6 +811,7 @@ function AddSchedule(props) {
         newSchedules[i + 1].start_time = newSchedules[i].end_time;
       }
       if (isSetSchedule) {
+        console.log(newSchedules);
         setSchedules(newSchedules);
         allSchedules.current[day] = newSchedules;
       }
@@ -971,13 +986,22 @@ function AddSchedule(props) {
       .catch((error) => console.error(error));
   };
   const deleteSchedule = (scheduleId) => {
-    updateTimeOfSchedule(
+    // updateTimeOfSchedule(
+    //   schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
+    //   { isSetSchedule: true, isUploadFirebase: true }
+    // );
+    getTransportDetail(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      { isSetSchedule: true, isUploadFirebase: true }
+      {
+        isSetSchedule: true,
+        isUploadFirebase: true,
+      }
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
-      .then(() => console.log('刪除成功！'))
+      .then(() => {
+        console.log('刪除成功！');
+      })
       .catch((error) => console.error(error));
   };
   const deleteSpot = (placeId) => {
