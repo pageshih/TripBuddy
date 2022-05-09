@@ -188,7 +188,7 @@ function ReviewGallery(props) {
   `;
   return (
     <FlexDiv gap="15px">
-      {(props.gallery || props.imageBuffer) && (
+      {(props.gallery?.length > 0 || props.imageBuffer?.length > 0) && (
         <FlexDiv gap="15px" ref={galleryContainer} overflowY="auto">
           {props.gallery?.length > 0 && (
             <FlexDiv gap="15px">

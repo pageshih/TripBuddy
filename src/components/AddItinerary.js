@@ -477,6 +477,7 @@ const ScheduleCardDrag = (props) => {
               selectedList={props.selectedList}
               setSelectedList={props.setSelectedList}
               isShowCloseBtn={props.isAllowEdit}
+              onClick={props.onClick}
               onCloseClick={props.onCloseClick}
               travelMode={props.schedule.travel_mode}
               transitDetail={props.schedule.transit_detail}
@@ -1298,6 +1299,9 @@ function AddSchedule(props) {
                             updateDuration={updateDuration}
                             selectedList={selectedSchedulesId}
                             setSelectedList={setSelectedSchedulesId}
+                            onClick={() =>
+                              window.open(schedule.placeDetail.url, '_blank')
+                            }
                             onCloseClick={() =>
                               deleteSchedule(schedule.schedule_id)
                             }></ScheduleCardDrag>
