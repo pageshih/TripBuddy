@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -19,6 +19,12 @@ import {
   ButtonSmall,
 } from './styledComponents/Button';
 import { Confirm } from './styledComponents/Modal';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+  TooltipNotification,
+} from './styledComponents/Notification';
 
 function SavedSpots(props) {
   const { uid, map } = useContext(Context);
@@ -28,24 +34,24 @@ function SavedSpots(props) {
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState();
-
+  const [notificationSetting, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
+  const [isShowTooltip, setIsShowToolTip] = useState();
   const navigate = useNavigate();
   const deleteSpots = () => {
-    const isDelete = window.confirm('確定要刪除這些景點嗎？(此動作無法復原）');
-    if (isDelete) {
-      const newSavedSpots = savedSpots.filter((spot) => {
-        return (
-          selectedSpotList.every(
-            (selectedId) => selectedId !== spot.place_id
-          ) && spot
-        );
-      });
-      setSavedSpots(newSavedSpots);
-      firestore
-        .deleteSavedSpots(uid, selectedSpotList)
-        .then(() => alert('景點已刪除！'))
-        .catch((error) => console.error(error));
-    }
+    const newSavedSpots = savedSpots.filter((spot) => {
+      return (
+        selectedSpotList.every((selectedId) => selectedId !== spot.place_id) &&
+        spot
+      );
+    });
+    setSavedSpots(newSavedSpots);
+    firestore
+      .deleteSavedSpots(uid, selectedSpotList)
+      .then(() => alert('景點已刪除！'))
+      .catch((error) => console.error(error));
   };
   const addSelectSpotsToItinerary = () => {
     if (selectedSpotList?.length > 0) {
@@ -65,7 +71,11 @@ function SavedSpots(props) {
           .catch((error) => console.error(error));
       }
     } else {
-      alert('還沒有選擇景點喔！');
+      console.log('no');
+      setIsShowToolTip('addSpots');
+      setTimeout(() => {
+        setIsShowToolTip('');
+      }, 3000);
     }
   };
   useEffect(() => {
@@ -82,14 +92,23 @@ function SavedSpots(props) {
   }, [map]);
   return (
     <>
+      <Notification
+        type={notificationSetting.type}
+        fire={notificationSetting.fire}
+        message={notificationSetting.message}
+        id={notificationSetting.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
       <Confirm
         isShowState={isDeleteConfirm}
+        setIsShowState={setIsDeleteConfirm}
         close={() => setIsDeleteConfirm(false)}
         confirmMessage="確定要刪除這些景點嗎？"
         subMessage="(此動作無法復原）"
         yesMessage="刪除"
         yesBtnStyle="danger"
         noBtnStyle="gray"
+        yesAction={deleteSpots}
       />
       <FlexDiv
         direction="column"
@@ -129,12 +148,16 @@ function SavedSpots(props) {
                 </option>
               ))}
             </SelectSmall>
-            <ButtonSmall
-              styled="primary"
-              type="click"
-              onClick={addSelectSpotsToItinerary}>
-              加入行程
-            </ButtonSmall>
+            <TooltipNotification
+              label="還沒有選擇景點喔！"
+              isOpen={isShowTooltip === 'addSpots'}>
+              <ButtonSmall
+                styled="primary"
+                type="click"
+                onClick={addSelectSpotsToItinerary}>
+                加入行程
+              </ButtonSmall>
+            </TooltipNotification>
             <ButtonSmallOutline
               styled="danger"
               type="click"

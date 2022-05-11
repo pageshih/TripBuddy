@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { palatte, P } from './basicStyle';
+import 'animate.css';
 import '../../animation.css';
 import { useEffect, useState } from 'react';
 import { Button, ButtonOutline } from './Button';
@@ -72,7 +73,16 @@ function Modal(props) {
     };
   }, [props.isShowState]);
   return (
-    <CSSTransition in={isShowBg} classNames="fade" timeout={300} unmountOnExit>
+    <CSSTransition
+      in={isShowBg}
+      classNames={{
+        enter: 'animate__animated',
+        enterActive: 'animate__fadeIn',
+        exit: 'animate__animated',
+        exitActive: 'animate__fadeOut',
+      }}
+      timeout={300}
+      unmountOnExit>
       <FadeBg
         id="close"
         onClick={(e) => {
@@ -82,7 +92,12 @@ function Modal(props) {
         }}>
         <CSSTransition
           in={isFlyIn}
-          classNames="flyToBottom"
+          classNames={{
+            enter: 'animate__animated',
+            enterActive: 'animate__fadeInDown',
+            exit: 'animate__animated',
+            exitActive: 'animate__fadeOutUp',
+          }}
           timeout={1000}
           unmountOnExit>
           <CenterContainer
@@ -124,7 +139,12 @@ function Confirm(props) {
             onClick={() => props.close()}>
             {props.noMessage || '取消'}
           </ButtonOutline>
-          <Button styled={props.yesBtnStyle || 'primary'}>
+          <Button
+            styled={props.yesBtnStyle || 'primary'}
+            onClick={() => {
+              props.yesAction();
+              props.setIsShowState(false);
+            }}>
             {props.yesMessage || '確認'}
           </Button>
         </FlexChildDiv>

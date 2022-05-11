@@ -53,7 +53,6 @@ function App() {
     @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
     * {
       box-sizing: border-box;
-      color: ${palatte.dark};
       font-family: 'Noto Sans TC', sans-serif;
       &::selection {
         background-color: rgba(160, 233, 211, 0.6);
@@ -69,7 +68,6 @@ function App() {
     ul {
       list-style: none;
       padding: 0;
-      margin: 0;
     }
     h1,
     h2,
@@ -77,8 +75,15 @@ function App() {
     h4,
     h5,
     h6,
-    p {
+    p,
+    ul,
+    li,
+    a,
+    select,
+    input,
+    option {
       margin: 0;
+      color: ${palatte.dark};
     }
   `;
 
