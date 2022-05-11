@@ -16,6 +16,7 @@ import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
 import { AddReview } from './EditReview';
 import { Button } from './styledComponents/Button';
+import { Accordion } from './styledComponents/Accordion';
 
 const ExploreSpot = (props) => {
   const navigate = useNavigate();
@@ -116,11 +117,7 @@ function Itineraries() {
       .catch((error) => console.error(error));
   }, []);
   const foldContainer = css`
-    display: flex;
     gap: 50px;
-    flex-direction: column;
-    border-radius: 10px;
-    background-color: ${palatte.gray['100']};
     padding: 40px 60px;
     ${mediaQuery[0]} {
       padding: 20px;
@@ -143,11 +140,10 @@ function Itineraries() {
               gap="70px"
               margin="auto auto 100px auto">
               {progressing?.overview && (
-                <div css={foldContainer}>
-                  <FlexDiv justifyContent="space-between" align-items="center">
-                    <H4>進行中的 {progressing.overview.title}</H4>
-                    <span className="material-icons">expand_more</span>
-                  </FlexDiv>
+                <Accordion
+                  addCss={foldContainer}
+                  isDefualtExpand
+                  titleElement={<H4>進行中的 {progressing.overview.title}</H4>}>
                   <FlexDiv
                     as="ul"
                     direction="column"
@@ -220,7 +216,7 @@ function Itineraries() {
                           />
                         )}
                   </FlexDiv>
-                </div>
+                </Accordion>
               )}
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>

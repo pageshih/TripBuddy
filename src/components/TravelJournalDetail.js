@@ -355,7 +355,10 @@ function TravelJournalDetail() {
                 finalDay={overviews.depart_times.length - 1}
               />
             </FlexDiv>
-            <FlexDiv direction="column" gap="20px" maxWidth="calc(100% - 40px)">
+            <FlexDiv
+              direction="column"
+              gap="20px"
+              maxWidth={isAllowEdit && 'calc(100% - 40px)'}>
               {scheduleList.map((schedule) => (
                 <FlexChildDiv
                   grow="1"
@@ -363,6 +366,7 @@ function TravelJournalDetail() {
                   alignItems="flex-start"
                   key={schedule.schedule_id}>
                   <Accordion
+                    isDefualtExpand
                     titleElement={
                       <FlexDiv gap="30px" alignItems="center">
                         <P color={palatte.gray[500]}>

@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
-import { useState } from 'react';
-import { css } from '@emotion/react';
+import { useEffect, useState } from 'react';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
 
@@ -29,9 +31,10 @@ const AccordionContainer = styled(FlexDiv)`
 `;
 
 function Accordion(props) {
-  const [isExpand, setIsExpand] = useState(false);
+  const [isExpand, setIsExpand] = useState(props.isDefualtExpand || false);
+
   return (
-    <AccordionContainer>
+    <AccordionContainer addCss={props.addCss}>
       <FlexDiv
         justifyContent="space-between"
         addCss={css`
@@ -67,6 +70,14 @@ function Accordion(props) {
     </AccordionContainer>
   );
 }
+Accordion.propTypes = {
+  isDefualtExpand: PropTypes.bool,
+  isAllowEdit: PropTypes.bool,
+  isDisableExpand: PropTypes.bool,
+  filled: PropTypes.bool,
+  titleElement: PropTypes.any,
+  children: PropTypes.any,
+};
 function AccordionSmall(props) {
   const [isExpand, setIsExpand] = useState(false);
   return (
