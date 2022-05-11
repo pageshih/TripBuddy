@@ -2,9 +2,11 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { palatte } from './basicStyle';
+import { palatte, P } from './basicStyle';
 import '../../animation.css';
 import { useEffect, useState } from 'react';
+import { Button, ButtonOutline } from './Button';
+import { FlexChildDiv, FlexDiv } from './Layout';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
@@ -54,12 +56,12 @@ function Modal(props) {
   const [isShowBg, setIsShowBg] = useState();
   useEffect(() => {
     let clear;
-    if (!props.isShowState && isFlyIn) {
+    if (!props.isShowState && isFlyIn && isShowBg) {
       setIsFlyIn(false);
       clear = setTimeout(() => {
         setIsShowBg(false);
       }, 300);
-    } else if (props.isShowState && !isFlyIn) {
+    } else if (props.isShowState && !isFlyIn && !isShowBg) {
       setIsShowBg(true);
       clear = setTimeout(() => {
         setIsFlyIn(true);
@@ -107,15 +109,27 @@ function Modal(props) {
 
 function Confirm(props) {
   return (
-    <CSSTransition
-      in={props.isShowState}
-      timeout={300}
-      classNames="fade"
-      unmountOnExit>
-      <Modal close={props.close}>
-        <p>confirm?</p>
-      </Modal>
-    </CSSTransition>
+    <Modal
+      close={props.close}
+      isShowState={props.isShowState}
+      height="fit-content">
+      <FlexDiv direction="column" gap="20px" padding="30px 20px 15px 20px">
+        <FlexDiv direction="column" alignItems="center" gap="5px">
+          <P fontSize="24px">{props.confirmMessage}</P>
+          <P color={palatte.gray[600]}>{props.subMessage}</P>
+        </FlexDiv>
+        <FlexChildDiv gap="20px">
+          <ButtonOutline
+            styled={props.noBtnStyle || 'danger'}
+            onClick={() => props.close()}>
+            {props.noMessage || '取消'}
+          </ButtonOutline>
+          <Button styled={props.yesBtnStyle || 'primary'}>
+            {props.yesMessage || '確認'}
+          </Button>
+        </FlexChildDiv>
+      </FlexDiv>
+    </Modal>
   );
 }
 
