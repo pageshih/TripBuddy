@@ -410,6 +410,7 @@ function AddImageRoundBtn(props) {
           height="fit-content"
           maxWidth="1000px"
           maxHeight="90vh"
+          isShowState={isShowModal}
           close={() => setIsShowModal(false)}>
           <Image
             height="400px"

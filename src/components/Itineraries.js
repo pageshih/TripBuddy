@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
@@ -50,14 +50,13 @@ const ExploreSpot = (props) => {
 };
 
 function Itineraries() {
-  const { uid, map } = useContext(Context);
+  const { uid, map, reviewTags } = useContext(Context);
   const navigate = useNavigate();
   const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
   const now = new Date().getTime();
-  const { reviewTags } = useOutletContext();
   const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
@@ -117,7 +116,6 @@ function Itineraries() {
       .catch((error) => console.error(error));
   }, []);
   const foldContainer = css`
-    gap: 50px;
     padding: 40px 60px;
     ${mediaQuery[0]} {
       padding: 20px;
@@ -142,6 +140,7 @@ function Itineraries() {
               {progressing?.overview && (
                 <Accordion
                   addCss={foldContainer}
+                  gap="50px"
                   isDefualtExpand
                   titleElement={<H4>進行中的 {progressing.overview.title}</H4>}>
                   <FlexDiv
@@ -165,7 +164,7 @@ function Itineraries() {
                               key={schedule.schedule_id}
                               onClick={() =>
                                 navigate(
-                                  `/${progressing.overview.itinerary_id}`
+                                  `/itinerary/${progressing.overview.itinerary_id}`
                                 )
                               }>
                               {schedule.end_time > now &&
@@ -211,7 +210,9 @@ function Itineraries() {
                             endDate={progressing.overview.end_date}
                             key={progressing.overview.itinerary_id}
                             onClick={() => {
-                              navigate(`/${progressing.overview.itinerary_id}`);
+                              navigate(
+                                `/itinerary/${progressing.overview.itinerary_id}`
+                              );
                             }}
                           />
                         )}
@@ -232,7 +233,7 @@ function Itineraries() {
                         endDate={itinerary.end_date}
                         key={itinerary.itinerary_id}
                         onClick={() => {
-                          navigate(`/${itinerary.itinerary_id}`);
+                          navigate(`/itinerary/${itinerary.itinerary_id}`);
                         }}
                       />
                     ))}
@@ -253,7 +254,7 @@ function Itineraries() {
                         startDate={itinerary.start_date}
                         endDate={itinerary.end_date}
                         onClick={() => {
-                          navigate(`/${itinerary.itinerary_id}`);
+                          navigate(`/itinerary/${itinerary.itinerary_id}`);
                         }}
                       />
                     ))}

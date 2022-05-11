@@ -698,7 +698,10 @@ function AddSchedule(props) {
             alert('找不到行程資料');
           }
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error(error);
+          navigate(`/error`);
+        });
     }
   }, [uid, itineraryId]);
 
@@ -1326,8 +1329,4 @@ function AddSchedule(props) {
   );
 }
 
-function AddItinerary() {
-  return <Outlet />;
-}
-
-export { AddOverView, AddSchedule, AddItinerary };
+export { AddOverView, AddSchedule };

@@ -84,6 +84,7 @@ function UserSetting(props) {
       minWidth="70%"
       height="90%"
       padding="20px 40px"
+      isShowState={props.isShowState}
       close={() => props.setIsShowSetting(false)}>
       <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
         <FlexDiv
@@ -156,7 +157,6 @@ function UserSetting(props) {
             <FlexDiv direction="column" gap="15px" height="100%">
               <form
                 css={css`
-                  flex-grow: 1;
                   position: relative;
                 `}
                 onSubmit={async (e) => {
@@ -274,7 +274,21 @@ function UserProfile(props) {
   const [profile, setProfile] = useState();
   const [reviewTags, setReviewTags] = useState();
   const [isShowSetting, setIsShowSetting] = useState();
-
+  const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
+    try {
+      const urlAry = await firebaseStorage.uploadImages(
+        [uid],
+        imageBuffer,
+        'profile_photo'
+      );
+      await firestore.editProfile(uid, { photo: urlAry[0] });
+      props.setProfile({ ...props.profile, photo: urlAry[0] });
+      alert('大頭貼已更新！');
+      setIsShowModal(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const userProfileWrapper = css`
     border-radius: 30px;
     padding: 25px 20px 25px 25px;
@@ -355,15 +369,14 @@ function UserProfile(props) {
       {profile && (
         <>
           <Container minHeight="calc(100vh - 50px)">
-            {isShowSetting && (
-              <UserSetting
-                setIsShowSetting={setIsShowSetting}
-                setProfile={setProfile}
-                profile={profile}
-                reviewTags={reviewTags}
-                setReviewTags={setReviewTags}
-              />
-            )}
+            <UserSetting
+              setIsShowSetting={setIsShowSetting}
+              setProfile={setProfile}
+              profile={profile}
+              reviewTags={reviewTags}
+              setReviewTags={setReviewTags}
+              isShowState={isShowSetting}
+            />
             <Container
               padding="80px 2px 0px 2px"
               backgroundColor={palatte.secondary['100']}
@@ -418,22 +431,28 @@ function UserProfile(props) {
                           display: none;
                         }
                       `}>
-                      <Image
-                        round
-                        size="60px"
-                        addCss={css`
-                          box-shadow: 2px 2px 1px 1px ${palatte.shadow};
-                          border: 1px solid ${palatte.gray['100']};
-                        `}
-                        src={profile.photo}
-                        alt="profilePhoto"
-                      />
-                      <p
+                      <div
+                        css={css`
+                          position: relative;
+                        `}>
+                        <Image
+                          round
+                          size="60px"
+                          addCss={css`
+                            box-shadow: 2px 2px 1px 1px ${palatte.shadow};
+                            border: 1px solid ${palatte.gray['100']};
+                          `}
+                          src={profile.photo}
+                          alt="profilePhoto"
+                        />
+                      </div>
+                      <P
                         css={css`
                           white-space: nowrap;
+                          cursor: default;
                         `}>
                         你好，{profile.name}
-                      </p>
+                      </P>
                     </FlexChildDiv>
                     <FlexDiv alignItems="center" gap="10px">
                       <ButtonSmall styled="danger" onClick={logout}>

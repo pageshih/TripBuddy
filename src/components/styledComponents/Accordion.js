@@ -2,9 +2,11 @@ import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { CSSTransition } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
+import '../../animation.css';
 
 const ExpandIcon = styled.span`
   color: ${palatte.gray['700']};
@@ -25,7 +27,6 @@ const AccordionContainer = styled(FlexDiv)`
   padding: 20px;
   border-radius: 10px;
   background-color: ${palatte.gray['100']};
-  gap: 20px;
   width: 100%;
   ${(props) => props.addCss}
 `;
@@ -66,7 +67,19 @@ function Accordion(props) {
           </ExpandIcon>
         )}
       </FlexDiv>
-      {isExpand && props.children}
+      <CSSTransition
+        in={isExpand}
+        timeout={500}
+        classNames="expand"
+        unmountOnExit>
+        <Container>
+          <div
+            css={css`
+              height: ${props.gap || '20px'};
+            `}></div>
+          {props.children}
+        </Container>
+      </CSSTransition>
     </AccordionContainer>
   );
 }

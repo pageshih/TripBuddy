@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { palatte } from './basicStyle';
+import '../../animation.css';
+import { useEffect, useState } from 'react';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
@@ -47,32 +50,73 @@ const CloseBtn = styled.button`
   }
 `;
 function Modal(props) {
+  const [isFlyIn, setIsFlyIn] = useState();
+  const [isShowBg, setIsShowBg] = useState();
+  useEffect(() => {
+    let clear;
+    if (!props.isShowState && isFlyIn) {
+      setIsFlyIn(false);
+      clear = setTimeout(() => {
+        setIsShowBg(false);
+      }, 300);
+    } else if (props.isShowState && !isFlyIn) {
+      setIsShowBg(true);
+      clear = setTimeout(() => {
+        setIsFlyIn(true);
+      }, 0);
+    }
+    return () => {
+      clearTimeout(clear);
+    };
+  }, [props.isShowState]);
   return (
-    <FadeBg
-      id="close"
-      onClick={(e) => {
-        if (e.target.id === 'close') {
-          props.close();
-        }
-      }}>
-      <CenterContainer
-        padding={props.padding}
-        width={props.width}
-        height={props.height}
-        minWidth={props.minWidth}
-        minHeight={props.minHeight}
-        maxHeight={props.maxHeight}
-        maxWidth={props.maxWidth}>
-        <CloseBtn
-          type="button"
-          onClick={props.close}
-          className="material-icons">
-          close
-        </CloseBtn>
-        {props.children}
-      </CenterContainer>
-    </FadeBg>
+    <CSSTransition in={isShowBg} classNames="fade" timeout={300} unmountOnExit>
+      <FadeBg
+        id="close"
+        onClick={(e) => {
+          if (e.target.id === 'close') {
+            props.close();
+          }
+        }}>
+        <CSSTransition
+          in={isFlyIn}
+          classNames="flyToBottom"
+          timeout={1000}
+          unmountOnExit>
+          <CenterContainer
+            padding={props.padding}
+            width={props.width}
+            height={props.height}
+            minWidth={props.minWidth}
+            minHeight={props.minHeight}
+            maxHeight={props.maxHeight}
+            maxWidth={props.maxWidth}>
+            <CloseBtn
+              type="button"
+              onClick={props.close}
+              className="material-icons">
+              close
+            </CloseBtn>
+            {props.children}
+          </CenterContainer>
+        </CSSTransition>
+      </FadeBg>
+    </CSSTransition>
   );
 }
 
-export { Modal };
+function Confirm(props) {
+  return (
+    <CSSTransition
+      in={props.isShowState}
+      timeout={300}
+      classNames="fade"
+      unmountOnExit>
+      <Modal close={props.close}>
+        <p>confirm?</p>
+      </Modal>
+    </CSSTransition>
+  );
+}
+
+export { Modal, Confirm };

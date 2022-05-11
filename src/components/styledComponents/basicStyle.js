@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { useNavigate } from 'react-router-dom';
 import { FlexDiv, Container } from './Layout';
 // import { SaveAndCancelButton } from './Button';
 import underline from '../../images/logoDecorationUnderline.svg';
@@ -65,6 +66,7 @@ const styles = {
   `,
 };
 const Logo = (props) => {
+  const navigate = useNavigate();
   const logoName = css`
     font-family: 'Caveat', cursive;
     font-size: 64px;
@@ -109,7 +111,11 @@ const Logo = (props) => {
           alignItems="center"
           gap="10px"
           height="fit-content"
-          addCss={props.addCss}>
+          addCss={css`
+            cursor: pointer;
+            ${props.addCss}
+          `}
+          onClick={() => navigate('/itineraries')}>
           <div
             css={css`
               ${ellipse}
@@ -130,8 +136,10 @@ const Logo = (props) => {
           alignItems="flex-end"
           gap="20px"
           addCss={css`
+            cursor: pointer;
             ${props.addCss}
-          `}>
+          `}
+          onClick={() => navigate('/itineraries')}>
           <FlexDiv alignItems="center">
             <div css={ellipse}></div>
             <Container position="relative">
@@ -149,7 +157,10 @@ const Logo = (props) => {
           gap="12px"
           css={css`
             gap: 5px;
-          `}>
+            cursor: pointer;
+            ${props.addCss}
+          `}
+          onClick={() => navigate('/itineraries')}>
           <FlexDiv alignItems="center" gap="10px">
             <div css={ellipse}></div>
             <h1 css={logoName}>TripBuddy</h1>

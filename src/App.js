@@ -13,6 +13,7 @@ import {
   AddOverView,
   AddSchedule,
 } from './components/AddItinerary';
+import NotFound from './components/404';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
 import { palatte, Loader } from './components/styledComponents/basicStyle';
@@ -106,8 +107,9 @@ function App() {
         <EmptyMap libraries={['places']} />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Navigate to="/itineraries" replace />} />
             <Route
-              path="/"
+              path=""
               element={
                 <LoginOrPage
                   goLogin={goLogin}
@@ -115,13 +117,13 @@ function App() {
                   element={<UserProfile setIsLogInOut={setIsLogInOut} />}
                 />
               }>
-              <Route path="itineraries" element={<Itineraries />} />
+              <Route path="/itineraries" element={<Itineraries />} />
               <Route
-                path="saved-spots"
+                path="/saved-spots"
                 element={<SavedSpots setWaitingSpots={setWaitingSpots} />}
               />
               <Route
-                path="travel-journals"
+                path="/travel-journals"
                 element={<TravelJournals />}></Route>
             </Route>
             <Route
@@ -139,35 +141,33 @@ function App() {
                 />
               }
             />
-            <Route path="/add" element={<AddItinerary />}>
-              <Route
-                path=""
-                element={
-                  <LoginOrPage
-                    goLogin={goLogin}
-                    isLogInOut={isLogInOut}
-                    element={
-                      <AddOverView
-                        waitingSpots={waitingSpots}
-                        setWaitingSpots={setWaitingSpots}
-                      />
-                    }
-                  />
-                }
-              />
-              <Route
-                path=":itineraryId"
-                element={
-                  <LoginOrPage
-                    goLogin={goLogin}
-                    isLogInOut={isLogInOut}
-                    element={<AddSchedule />}
-                  />
-                }
-              />
-            </Route>
             <Route
-              path=":itineraryId"
+              path="/add"
+              element={
+                <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
+                  element={
+                    <AddOverView
+                      waitingSpots={waitingSpots}
+                      setWaitingSpots={setWaitingSpots}
+                    />
+                  }
+                />
+              }
+            />
+            <Route
+              path="/add:itineraryId"
+              element={
+                <LoginOrPage
+                  goLogin={goLogin}
+                  isLogInOut={isLogInOut}
+                  element={<AddSchedule />}
+                />
+              }
+            />
+            <Route
+              path="/itinerary/:itineraryId"
               element={
                 <LoginOrPage
                   goLogin={goLogin}
@@ -186,6 +186,8 @@ function App() {
                 />
               }
             />
+            <Route path="error" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/itineraries" replace />} />
           </Routes>
         </BrowserRouter>
       </Context.Provider>
