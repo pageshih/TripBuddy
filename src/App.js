@@ -162,7 +162,7 @@ function App() {
               }
             />
             <Route
-              path="/add:itineraryId"
+              path="/add/:itineraryId"
               element={
                 <LoginOrPage
                   goLogin={goLogin}

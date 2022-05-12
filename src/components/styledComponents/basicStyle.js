@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-import { FlexDiv, Container } from './Layout';
+import { FlexDiv, FlexChildDiv, Container } from './Layout';
 // import { SaveAndCancelButton } from './Button';
 import underline from '../../images/logoDecorationUnderline.svg';
 import PropTypes from 'prop-types';
@@ -239,6 +239,56 @@ const P = styled.p`
   }
   ${(props) => props.addCss}
 `;
+
+const TextWithIcon = (props) => (
+  <FlexChildDiv
+    gap={props.gap}
+    grow={props.grow}
+    direction={props.direction}
+    margin={props.margin}
+    padding={props.padding}
+    justifyContent={props.justifyContent}
+    addCss={props.addCss?.container}
+    alignItems={
+      props.alignItems ||
+      (!props.isSmall && typeof props.children === 'string'
+        ? 'center'
+        : 'flex-start')
+    }
+    onClick={props.onClick}>
+    <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
+      {props.iconLabel && (
+        <P
+          fontSize={props.labelSize || props.textSize}
+          color={props.labelColor || props.iconColor}>
+          {props.iconLabel}
+        </P>
+      )}
+      <span
+        className="material-icons"
+        css={css`
+          color: ${props.color || props.iconColor};
+          font-size: ${props.iconSize};
+          text-align: ${props.textAlign};
+          ${props.addCss?.icon};
+        `}>
+        {props.iconName}
+      </span>
+    </FlexDiv>
+    {typeof props.children === 'string' ? (
+      <P
+        fontSize={props.textSize}
+        textAlign={props.textAlign}
+        color={props.color || props.textColor}
+        addCss={props.addCss?.text}>
+        {props.children}
+      </P>
+    ) : (
+      props.children
+    )}
+  </FlexChildDiv>
+);
+
 const Loader = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -350,6 +400,7 @@ export {
   H5,
   H6,
   P,
+  TextWithIcon,
   styles,
   mediaQuery,
   Loader,

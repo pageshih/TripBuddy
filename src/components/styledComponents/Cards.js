@@ -2,7 +2,16 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { styles, palatte, H4, H5, P, mediaQuery, Rating } from './basicStyle';
+import {
+  styles,
+  palatte,
+  H4,
+  H5,
+  P,
+  mediaQuery,
+  Rating,
+  TextWithIcon,
+} from './basicStyle';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom, Select } from './Form';
@@ -59,54 +68,7 @@ const TimeTag = styled.div`
   padding: 5px 20px;
   z-index: 5;
 `;
-const TextWithIcon = (props) => (
-  <FlexChildDiv
-    gap={props.gap}
-    grow={props.grow}
-    direction={props.direction}
-    margin={props.margin}
-    padding={props.padding}
-    justifyContent={props.justifyContent}
-    addCss={props.addCss?.container}
-    alignItems={
-      props.alignItems ||
-      (!props.isSmall && typeof props.children === 'string'
-        ? 'center'
-        : 'flex-start')
-    }
-    onClick={props.onClick}>
-    <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
-      {props.iconLabel && (
-        <P
-          fontSize={props.labelSize || props.textSize}
-          color={props.labelColor || props.iconColor}>
-          {props.iconLabel}
-        </P>
-      )}
-      <span
-        className="material-icons"
-        css={css`
-          color: ${props.color || props.iconColor};
-          font-size: ${props.iconSize};
-          text-align: ${props.textAlign};
-          ${props.addCss?.icon};
-        `}>
-        {props.iconName}
-      </span>
-    </FlexDiv>
-    {typeof props.children === 'string' ? (
-      <P
-        fontSize={props.textSize}
-        textAlign={props.textAlign}
-        color={props.color || props.textColor}
-        addCss={props.addCss?.text}>
-        {props.children}
-      </P>
-    ) : (
-      props.children
-    )}
-  </FlexChildDiv>
-);
+
 const AddressText = (props) => (
   <TextWithIcon
     isSmall={props.isSmall}

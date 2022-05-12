@@ -34,7 +34,6 @@ import {
   cardCss,
   ScheduleCard,
   SpotCard,
-  TextWithIcon,
   transportMode,
 } from './styledComponents/Cards';
 import {
@@ -55,6 +54,7 @@ import {
   H5,
   H6,
   P,
+  TextWithIcon,
 } from './styledComponents/basicStyle';
 import { EditableText, EditableDate } from './styledComponents/EditableText';
 import {

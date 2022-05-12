@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'animate.css';
 import '../../animation.css';
 import '../../toastify.css';
-import { palatte, styles, P } from './basicStyle';
+import { palatte, styles, P, TextWithIcon } from './basicStyle';
 import { Container, FlexDiv } from './Layout';
 
 const defaultNotification = {
@@ -55,13 +55,21 @@ function Notification(props) {
 
 const tooltipMap = {
   warn: {
+    basicColor: palatte.secondary[500],
     color: palatte.gray[900],
     backgroundColor: palatte.secondary.basic,
     icon: 'warning',
   },
-  error: {},
-  success: {},
-  info: {},
+  error: {
+    basicColor: palatte.danger.basic,
+    icon: 'error',
+  },
+  success: {
+    basicColor: palatte.primary.basic,
+  },
+  info: {
+    basicColor: palatte.info.basic,
+  },
 };
 
 const TooltipContent = styled(FlexDiv)`
@@ -126,10 +134,46 @@ function TooltipNotification(props) {
     </Container>
   );
 }
+function NotificationText(props) {
+  const notification = useRef();
+  const [isOpen, setIsOpen] = useState();
+  useEffect(() => {
+    if (props.children) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [props.children]);
+  return (
+    <CSSTransition
+      nodeRef={notification}
+      in={isOpen}
+      classNames={{
+        enter: 'animate__animated',
+        enterActive: 'animate__shakeX',
+        exit: 'animate__animated',
+        exitActive: 'animate__fadeOutUp',
+      }}
+      timeout={400}
+      unmountOnExit>
+      <div ref={notification}>
+        <TextWithIcon
+          iconName={tooltipMap[props.type].icon}
+          color={tooltipMap[props.type].basicColor}
+          textSize="14px"
+          iconSize="18px"
+          gap="5px">
+          {props.children}
+        </TextWithIcon>
+      </div>
+    </CSSTransition>
+  );
+}
 
 export {
   Notification,
   defaultNotification,
   notificationReducer,
   TooltipNotification,
+  NotificationText,
 };

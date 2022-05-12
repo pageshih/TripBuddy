@@ -17,14 +17,16 @@ import {
   HyperLink,
 } from './styledComponents/Button';
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
-import {
-  SpotCard,
-  RatingText,
-  AddressText,
-  TextWithIcon,
-} from './styledComponents/Cards';
+import { SpotCard, RatingText, AddressText } from './styledComponents/Cards';
 import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
-import { P, H2, H3, palatte } from './styledComponents/basicStyle';
+import {
+  P,
+  H2,
+  H3,
+  palatte,
+  TextWithIcon,
+} from './styledComponents/basicStyle';
+import { NotificationText } from './styledComponents/Notification';
 
 function Map({
   setMap,
@@ -284,6 +286,7 @@ function SavedSpotsList(props) {
   const [addAction, setAddAction] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
+  const [showAlert, setShowAlert] = useState();
 
   useEffect(() => {
     firestore
@@ -292,7 +295,7 @@ function SavedSpotsList(props) {
       .catch((error) => console.error(error));
   }, []);
   const addSelectSpotsToItinerary = () => {
-    if (selectedSpotList?.length > 0) {
+    if (selectedSpotList?.length > 0 && addAction) {
       const waitingSpots = props.savedSpots.filter(
         (spot) =>
           selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
@@ -308,7 +311,9 @@ function SavedSpotsList(props) {
           .catch((error) => console.error(error));
       }
     } else {
-      alert('還沒有選擇景點喔！');
+      if (!addAction) {
+        setShowAlert('請選擇要加入的行程');
+      }
     }
   };
 
@@ -356,6 +361,7 @@ function SavedSpotsList(props) {
             />
           ))}
         </FlexChildDiv>
+
         {selectedSpotList?.length > 0 && (
           <FlexChildDiv
             direction="column"
@@ -363,9 +369,15 @@ function SavedSpotsList(props) {
             padding="0 0 10px 0"
             position="relative">
             <ShadowBottom />
+            <NotificationText type="error">{showAlert}</NotificationText>
             <SelectSmall
               value={addAction}
-              onChange={(e) => setAddAction(e.target.value)}>
+              onChange={(e) => {
+                setAddAction(e.target.value);
+                if (e.target.value) {
+                  setShowAlert('');
+                }
+              }}>
               <option value="" disabled>
                 ---請選擇要加入景點的行程---
               </option>
@@ -550,7 +562,7 @@ function Explore({ setWaitingSpots }) {
                   />
                 )}
                 {isShowSavedSpots && savedSpots?.length === 0 && (
-                  <h3>還沒有加入的景點喔！請點選地圖上的圖標加入景點</h3>
+                  <P>還沒有加入的景點喔！請點選地圖上的圖標加入景點</P>
                 )}
               </FlexChildDiv>
             ) : null}
