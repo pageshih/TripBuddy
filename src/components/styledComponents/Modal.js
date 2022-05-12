@@ -123,20 +123,26 @@ function Modal(props) {
 }
 
 function Confirm(props) {
+  const close = () => {
+    if (props.setIsShowState) {
+      props.setIsShowState(false);
+    } else if (props.dispatchIsShowReducer) {
+      props.dispatchIsShowReducer({ type: 'close' });
+    }
+  };
   return (
-    <Modal
-      close={props.close}
-      isShowState={props.isShowState}
-      height="fit-content">
-      <FlexDiv direction="column" gap="20px" padding="30px 20px 15px 20px">
+    <Modal close={close} isShowState={props.isShowState} height="fit-content">
+      <FlexDiv
+        direction="column"
+        gap="20px"
+        padding="30px 20px 15px 20px"
+        width={props.width}>
         <FlexDiv direction="column" alignItems="center" gap="5px">
-          <P fontSize="24px">{props.confirmMessage}</P>
+          <P fontSize="20px">{props.confirmMessage}</P>
           <P color={palatte.gray[600]}>{props.subMessage}</P>
         </FlexDiv>
         <FlexChildDiv gap="20px">
-          <ButtonOutline
-            styled={props.noBtnStyle || 'danger'}
-            onClick={() => props.close()}>
+          <ButtonOutline styled={props.noBtnStyle || 'danger'} onClick={close}>
             {props.noMessage || '取消'}
           </ButtonOutline>
           <Button
@@ -153,4 +159,33 @@ function Confirm(props) {
   );
 }
 
-export { Modal, Confirm };
+function Alert(props) {
+  const close = () => {
+    if (props.setIsShowState) {
+      props.setIsShowState(false);
+    } else if (props.dispatchIsShowReducer) {
+      props.dispatchIsShowReducer({ type: 'close' });
+    }
+  };
+  return (
+    <Modal close={close} isShowState={props.isShowState} height="fit-content">
+      <FlexDiv
+        direction="column"
+        gap="20px"
+        padding="30px 20px 15px 20px"
+        width={props.width}>
+        <FlexDiv direction="column" alignItems="center" gap="5px">
+          <P fontSize="20px">{props.alertMessage}</P>
+          {props.subMessage && (
+            <P color={palatte.gray[600]}>{props.subMessage}</P>
+          )}
+        </FlexDiv>
+        <Button styled={props.btnStyle || 'primary'} onClick={close}>
+          {props.btnMessage || '確認'}
+        </Button>
+      </FlexDiv>
+    </Modal>
+  );
+}
+
+export { Modal, Confirm, Alert };

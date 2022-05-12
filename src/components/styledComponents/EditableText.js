@@ -149,18 +149,22 @@ function EditableDate(props) {
     setIsEdit(props.isAllowEdit);
   }, [props.isAllowEdit]);
 
-  const submit = useCallback(() => {
-    if (props.time) {
-      props.onSubmit(startTimestamp);
-    } else if (props.start !== startTimestamp || props.end !== endTimestamp) {
-      props.onSubmit(
-        startTimestamp,
-        endTimestamp,
-        setEndTimestamp,
-        setStartTimestamp
-      );
-    }
-  }, [startTimestamp, endTimestamp, props, setEndTimestamp, setStartTimestamp]);
+  const submit = useCallback(
+    (e) => {
+      e?.preventDefault();
+      if (props.time) {
+        props.onSubmit(startTimestamp);
+      } else if (props.start !== startTimestamp || props.end !== endTimestamp) {
+        props.onSubmit(
+          startTimestamp,
+          endTimestamp,
+          setEndTimestamp,
+          setStartTimestamp
+        );
+      }
+    },
+    [startTimestamp, endTimestamp, props, setEndTimestamp, setStartTimestamp]
+  );
 
   useEffect(() => {
     if (isEdit === false) {
@@ -182,7 +186,7 @@ function EditableDate(props) {
               fontSize={props.inputFontSize || props.fontSize}
             />
           ) : (
-            <FlexDiv as="form" gap="5px" alignItems="center">
+            <FlexDiv as="form" gap="5px" alignItems="center" onSubmit={submit}>
               <CustomDateRangePicker
                 startTimestamp={startTimestamp}
                 endTimestamp={endTimestamp}
@@ -190,6 +194,13 @@ function EditableDate(props) {
                 setStartTimestamp={setStartTimestamp}
                 color={props.color}
               />
+              <ButtonSmall
+                styled="gray"
+                width="fit-content"
+                padding="10px 15px"
+                margin="auto auto auto 10px">
+                更新
+              </ButtonSmall>
             </FlexDiv>
           )}
         </>

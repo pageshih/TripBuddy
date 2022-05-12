@@ -17,6 +17,7 @@ import {
   SelectSmall,
 } from './styledComponents/Form';
 import { EditableText, EditableDate } from './styledComponents/EditableText';
+import { TooltipNotification } from './styledComponents/Notification';
 import PropTypes from 'prop-types';
 
 function Overview(props) {
@@ -189,13 +190,21 @@ function MoveScheduleController(props) {
           </option>
         ))}
       </SelectSmall>
-      <ButtonSmall
-        styled="primary"
-        padding="5px 15px"
-        type="button"
-        onClick={props.changeSchedulesTime}>
-        移動行程
-      </ButtonSmall>
+      <TooltipNotification
+        isOpen={
+          props.notification.fire &&
+          props.notification.id.match('toastify')?.length === 0
+        }
+        settingReducer={props.notification}
+        resetSettingReducer={props.dispatchNotification}>
+        <ButtonSmall
+          styled="primary"
+          padding="5px 15px"
+          type="button"
+          onClick={props.changeSchedulesTime}>
+          移動行程
+        </ButtonSmall>
+      </TooltipNotification>
     </FlexDiv>
   );
 }

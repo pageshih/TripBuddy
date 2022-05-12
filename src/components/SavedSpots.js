@@ -118,7 +118,6 @@ function SavedSpots(props) {
       <Confirm
         isShowState={isDeleteConfirm}
         setIsShowState={setIsDeleteConfirm}
-        close={() => setIsDeleteConfirm(false)}
         confirmMessage="確定要刪除這些景點嗎？"
         subMessage="(此動作無法復原）"
         yesMessage="刪除"

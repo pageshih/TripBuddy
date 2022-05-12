@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 // import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
@@ -56,12 +56,17 @@ import {
   P,
   TextWithIcon,
 } from './styledComponents/basicStyle';
-import { EditableText, EditableDate } from './styledComponents/EditableText';
 import {
   Overview,
   DepartController,
   MoveScheduleController,
 } from './EditItinerary';
+import {
+  defaultNotification,
+  notificationReducer,
+  Notification,
+} from './styledComponents/Notification';
+import { Alert } from './styledComponents/Modal';
 // import { style } from '@mui/system';
 
 // function ChooseDate(props) {
@@ -679,11 +684,14 @@ function AddSchedule(props) {
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
   const [day, setDay] = useState(0);
-  const [departString, setDepartString] = useState();
   const [isAllowEdit, setIsAllowEdit] = useState(!props.browse);
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [changeTime, setChangeTime] = useState('');
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   useEffect(() => {
     if (uid && itineraryId) {
@@ -693,9 +701,6 @@ function AddSchedule(props) {
           if (res) {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
-            setDepartString(
-              timestampToString(res.overviews.depart_times[day], 'time')
-            );
             setSchedules(
               filterDaySchedules(res.schedules, res.overviews.depart_times)[day]
             );
@@ -704,7 +709,14 @@ function AddSchedule(props) {
               res.overviews.depart_times
             );
           } else {
-            alert('找不到行程資料');
+            dispatchNotification({
+              type: 'fire',
+              playload: {
+                type: 'error',
+                message: '找不到行程資料',
+                id: 'toastifyNotFound',
+              },
+            });
           }
         })
         .catch((error) => {
@@ -714,6 +726,38 @@ function AddSchedule(props) {
     }
   }, [uid, itineraryId]);
 
+  useEffect(() => {
+    if (
+      selectedSchedulesId?.length === schedules?.length &&
+      selectedSchedulesId?.length !== 0
+    ) {
+      setIsSelectAll(true);
+    } else {
+      setIsSelectAll(false);
+    }
+  }, [selectedSchedulesId, schedules]);
+  useEffect(() => {
+    const totalDuration = schedules.reduce((acc, schedule) => {
+      acc += schedule.duration;
+      return acc;
+    }, 0);
+    const departTime = new Date(overviews.depart_times[day]);
+    const departTimeMin =
+      Number(new Date(departTime).getHours()) * 60 +
+      Number(new Date(departTime).getMinutes());
+    console.log(departTimeMin);
+    if (totalDuration >= 1440 - departTimeMin) {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '總行程時間已超過一天，請切換到隔天繼續規劃',
+          id: 'toastifyDurationExceed',
+          duration: 5000,
+        },
+      });
+    }
+  }, [schedules]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -766,7 +810,16 @@ function AddSchedule(props) {
                 })
                 .catch((error) => {
                   if (error.code === 'ZERO_RESULTS') {
-                    alert('抱歉！此交通方式找不到合適的路線，請切換其他方式');
+                    dispatchNotification({
+                      type: 'fire',
+                      playload: {
+                        message:
+                          '抱歉！此交通方式找不到合適的路線，請切換其他方式',
+                        id: 'alertNoTransport',
+                        btnMessage: '修改交通方式',
+                        width: '450px',
+                      },
+                    });
                   }
                   return Promise.reject(schedule);
                 })
@@ -780,7 +833,15 @@ function AddSchedule(props) {
             })
             .catch((error) => {
               if (error.code === 'ZERO_RESULTS') {
-                alert('抱歉！此交通方式找不到合適的路線，請切換其他方式');
+                dispatchNotification({
+                  type: 'fire',
+                  playload: {
+                    message: '抱歉！此交通方式找不到合適的路線，請切換其他方式',
+                    id: 'alertNoTransport',
+                    btnMessage: '修改交通方式',
+                    width: '450px',
+                  },
+                });
               }
               return Promise.reject(schedule);
             });
@@ -1060,7 +1121,16 @@ function AddSchedule(props) {
         (day) => day.length > 0
       );
       if (dayScheduleHad.length > updateDate.depart_times.length) {
-        alert('新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期');
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            message:
+              '新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期',
+            id: 'alertUpdateDaysError',
+            width: '450px',
+          },
+        });
+
         setEndTimestamp(overviews.end_date);
         setStartTimestamp(overviews.start_date);
       } else {
@@ -1087,12 +1157,6 @@ function AddSchedule(props) {
           }
         }
         allSchedules.current = newAllSchedules;
-        setDepartString(
-          timestampToString(
-            updateDate.depart_times[removeDays > 0 ? 0 : day],
-            'time'
-          )
-        );
         setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
       }
     }
@@ -1100,12 +1164,32 @@ function AddSchedule(props) {
   const switchDay = (nextDay) => {
     setDay(nextDay);
     setSchedules(allSchedules.current[nextDay]);
-    setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
     setIsSelectAll(false);
     setSelectedSchedulesId([]);
     window.scrollTo(0, 0);
   };
   const changeSchedulesTime = async () => {
+    if (!changeTime) {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '請選擇要修改的行程日期',
+          id: 'changeDay',
+        },
+      });
+      return;
+    } else if (selectedSchedulesId?.length === 0) {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '還沒有選取行程喔！',
+          id: 'changeDay',
+        },
+      });
+      return;
+    }
     const targetDay = overviews.depart_times.reduce((acc, timestamp, index) => {
       if (timestamp === changeTime) {
         acc = index;
@@ -1157,6 +1241,27 @@ function AddSchedule(props) {
       {overviews && (
         <>
           <Container minHeight="100vh" padding="0 0 150px 0">
+            <Notification
+              type={notification.type}
+              fire={
+                notification.fire &&
+                notification.id.match('toastify')?.length > 0
+              }
+              message={notification.message}
+              id={notification.id}
+              duration={notification?.duration}
+              resetFireState={() => dispatchNotification({ type: 'close' })}
+            />
+            <Alert
+              isShowState={
+                notification.fire && notification.id.match('alert')?.length > 0
+              }
+              alertMessage={notification.message}
+              subMessage={notification?.subMessage}
+              btnMessage={notification?.btnMessage}
+              width={notification?.width}
+              dispatchIsShowReducer={dispatchNotification}
+            />
             {isAllowEdit && (
               <FlexChildDiv
                 padding="20px"
@@ -1250,8 +1355,6 @@ function AddSchedule(props) {
                   departTimes={overviews.depart_times}
                   day={day}
                   isAllowEdit={isAllowEdit}
-                  departString={departString}
-                  setDepartString={setDepartString}
                   updateTimeOfSchedule={updateTimeOfSchedule}
                   updateOverviewsFields={updateOverviewsFields}
                   schedules={schedules}
@@ -1291,11 +1394,14 @@ function AddSchedule(props) {
                             changeTime={changeTime}
                             setChangeTime={setChangeTime}
                             schedules={schedules}
+                            selectedSchedulesId={selectedSchedulesId}
                             setSelectedSchedulesId={setSelectedSchedulesId}
                             switchDay={switchDay}
                             setIsSelectAll={setIsSelectAll}
                             isSelectAll={isSelectAll}
                             changeSchedulesTime={changeSchedulesTime}
+                            notification={notification}
+                            dispatchNotification={dispatchNotification}
                           />
                         </FlexDiv>
                       )}

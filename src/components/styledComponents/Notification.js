@@ -50,7 +50,9 @@ function Notification(props) {
       props.resetFireState();
     }
   }, [props.fire]);
-  return <ToastContainer autoClose={3000} transition={slideDown} />;
+  return (
+    <ToastContainer autoClose={props.duration || 3000} transition={slideDown} />
+  );
 }
 
 const tooltipMap = {
