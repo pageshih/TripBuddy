@@ -42,10 +42,12 @@ function filterDaySchedules(allSchedules, departTimes) {
 }
 const createDepartTimeAry = (dateObj) => {
   let departTimes = [];
-  const millisecondsOfDay = 24 * 60 * 60 * 1000;
-  const totalaDays = Number(dateObj.end_date - dateObj.start_date);
-  for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
-    departTimes.push(dateObj.start_date + i * millisecondsOfDay);
+  const endDay = Number(new Date(dateObj.end_date).getDate());
+  const startDay = Number(new Date(dateObj.start_date).getDate());
+  const totalDays = endDay - startDay;
+  for (let i = 0; i <= totalDays; i += 1) {
+    const day = new Date(dateObj.start_date).setDate(startDay + i);
+    departTimes.push(day);
   }
   return departTimes;
 };

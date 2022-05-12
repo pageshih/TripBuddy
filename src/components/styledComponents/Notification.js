@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { CSSTransition } from 'react-transition-group';
 import styled from '@emotion/styled';
@@ -64,9 +64,11 @@ const TooltipContent = styled.div`
   ${(props) => props.addCss}
 `;
 function TooltipNotification(props) {
+  const tooltipRef = useRef();
   return (
     <Container position="relative">
       <CSSTransition
+        nodeRef={tooltipRef}
         in={props.isOpen}
         classNames={{
           enter: 'animate__animated',
@@ -76,7 +78,7 @@ function TooltipNotification(props) {
         }}
         timeout={300}
         unmountOnExit>
-        <TooltipContent>{props.label}</TooltipContent>
+        <TooltipContent ref={tooltipRef}>{props.label}</TooltipContent>
       </CSSTransition>
       {props.children}
     </Container>
