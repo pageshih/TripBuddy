@@ -405,23 +405,21 @@ function SavedSpotsList(props) {
   );
 }
 const ButtonOnMap = (props) => (
-  <FlexDiv direction="column" gap="2px" alignItems="center">
-    <RoundButton
-      className="material-icons"
-      size="60px"
-      border
-      borderColor={palatte.white}
-      onClick={props.onClick}>
+  <FlexDiv
+    direction="column"
+    gap="2px"
+    alignItems="center"
+    addCss={css`
+      &:hover {
+        & p {
+          color: ${palatte.primary[300]};
+        }
+      }
+    `}>
+    <RoundButton className="material-icons" size="60px" onClick={props.onClick}>
       {props.iconName}
     </RoundButton>
-    <P
-      fontSize="14px"
-      fontWeight="700"
-      color={palatte.gray[700]}
-      addCss={css`
-        text-shadow: -2px -2px 0 ${palatte.white}, 2px -2px 0 ${palatte.white},
-          -2px 2px ${palatte.white}, 2px 2px ${palatte.white};
-      `}>
+    <P fontSize="14px" fontWeight="500" color={palatte.gray[200]}>
       {props.children}
     </P>
   </FlexDiv>
@@ -571,10 +569,13 @@ function Explore({ setWaitingSpots }) {
                 direction="column"
                 alignItems="center"
                 gap="10px"
+                padding="20px 30px 20px 20px"
                 css={css`
                   position: absolute;
+                  background-color: ${palatte.gray[700]};
+                  border-radius: 20px 0 0 20px;
                   top: 100px;
-                  right: 30px;
+                  right: 0px;
                   z-index: 1000;
                 `}>
                 <ButtonOnMap
