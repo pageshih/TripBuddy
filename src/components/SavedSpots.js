@@ -38,7 +38,10 @@ function SavedSpots(props) {
     notificationReducer,
     defaultNotification
   );
-  const [isShowTooltip, setIsShowToolTip] = useState();
+  const [tooltipAlert, dispatchTooltipAlert] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
   const navigate = useNavigate();
   const deleteSpots = () => {
     const newSavedSpots = savedSpots.filter((spot) => {
@@ -54,7 +57,7 @@ function SavedSpots(props) {
       .catch((error) => console.error(error));
   };
   const addSelectSpotsToItinerary = () => {
-    if (selectedSpotList?.length > 0) {
+    if (selectedSpotList?.length > 0 && addAction) {
       const waitingSpots = savedSpots.filter(
         (spot) =>
           selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
@@ -72,10 +75,23 @@ function SavedSpots(props) {
       }
     } else {
       console.log('no');
-      setIsShowToolTip('addSpots');
-      setTimeout(() => {
-        setIsShowToolTip('');
-      }, 3000);
+      const playload = {
+        type: 'warn',
+        message: '還沒有選擇景點喔！',
+        id: 'addSpots',
+      };
+      if (selectedSpotList?.length <= 0) {
+        dispatchTooltipAlert({
+          type: 'fire',
+          playload,
+        });
+      } else if (!addAction) {
+        playload.message = '請選擇要加入景點的行程';
+        dispatchTooltipAlert({
+          type: 'fire',
+          playload,
+        });
+      }
     }
   };
   useEffect(() => {
@@ -149,8 +165,9 @@ function SavedSpots(props) {
               ))}
             </SelectSmall>
             <TooltipNotification
-              label="還沒有選擇景點喔！"
-              isOpen={isShowTooltip === 'addSpots'}>
+              settingReducer={tooltipAlert}
+              resetSettingReducer={dispatchTooltipAlert}
+              isOpen={tooltipAlert.id === 'addSpots'}>
               <ButtonSmall
                 styled="primary"
                 type="click"
@@ -158,12 +175,30 @@ function SavedSpots(props) {
                 加入行程
               </ButtonSmall>
             </TooltipNotification>
-            <ButtonSmallOutline
-              styled="danger"
-              type="click"
-              onClick={() => setIsDeleteConfirm(true)}>
-              刪除景點
-            </ButtonSmallOutline>
+            <TooltipNotification
+              settingReducer={tooltipAlert}
+              resetSettingReducer={dispatchTooltipAlert}
+              isOpen={tooltipAlert.id === 'deleteSpots'}>
+              <ButtonSmallOutline
+                styled="danger"
+                type="click"
+                onClick={() => {
+                  if (selectedSpotList?.length > 0) {
+                    setIsDeleteConfirm(true);
+                  } else {
+                    dispatchTooltipAlert({
+                      type: 'fire',
+                      playload: {
+                        type: 'warn',
+                        message: '還沒有選擇景點喔！',
+                        id: 'deleteSpots',
+                      },
+                    });
+                  }
+                }}>
+                刪除景點
+              </ButtonSmallOutline>
+            </TooltipNotification>
           </FlexDiv>
         </FlexDiv>
 

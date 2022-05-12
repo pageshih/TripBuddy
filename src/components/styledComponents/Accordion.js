@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { CSSTransition } from 'react-transition-group';
@@ -33,6 +33,7 @@ const AccordionContainer = styled(FlexDiv)`
 
 function Accordion(props) {
   const [isExpand, setIsExpand] = useState(props.isDefualtExpand || false);
+  const contentRef = useRef();
 
   return (
     <AccordionContainer addCss={props.addCss}>
@@ -68,11 +69,12 @@ function Accordion(props) {
         )}
       </FlexDiv>
       <CSSTransition
+        nodeRef={contentRef}
         in={isExpand}
         timeout={500}
         classNames="expand"
         unmountOnExit>
-        <Container>
+        <Container ref={contentRef}>
           <div
             css={css`
               height: ${props.gap || '20px'};

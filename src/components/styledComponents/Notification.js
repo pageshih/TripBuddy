@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from 'react';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { CSSTransition } from 'react-transition-group';
 import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
 import 'animate.css';
 import '../../animation.css';
 import '../../toastify.css';
-import { palatte } from './basicStyle';
+import { palatte, styles, P } from './basicStyle';
 import { Container, FlexDiv } from './Layout';
 
 const defaultNotification = {
@@ -51,25 +53,49 @@ function Notification(props) {
   return <ToastContainer autoClose={3000} transition={slideDown} />;
 }
 
-const TooltipContent = styled.div`
-  position: absolute;
-  top: -130%;
-  left: -25%;
-  color: ${palatte.gray[900]};
-  font-size: 14px;
+const tooltipMap = {
+  warn: {
+    color: palatte.gray[900],
+    backgroundColor: palatte.secondary.basic,
+    icon: 'warning',
+  },
+  error: {},
+  success: {},
+  info: {},
+};
+
+const TooltipContent = styled(FlexDiv)`
+  color: ${(props) => tooltipMap[props.type].color};
   padding: 6px 10px;
   border-radius: 2px;
-  background-color: ${palatte.secondary.basic};
+  background-color: ${(props) => tooltipMap[props.type].backgroundColor};
   white-space: nowrap;
+  box-shadow: 1px 1px 2px 1px ${palatte.shadow};
+  & p {
+    font-size: 14px;
+  }
+  & span {
+    font-size: 18px;
+  }
   ${(props) => props.addCss}
 `;
 function TooltipNotification(props) {
   const tooltipRef = useRef();
+  const [isOpen, setIsOpen] = useState(props.isOpen);
+  useEffect(() => {
+    if (props.isOpen && props.settingReducer.fire) {
+      setIsOpen(true);
+      setTimeout(() => {
+        setIsOpen(false);
+        props.resetSettingReducer({ type: 'close' });
+      }, 3000);
+    }
+  }, [props.isOpen, props.settingReducer.fire]);
   return (
     <Container position="relative">
       <CSSTransition
         nodeRef={tooltipRef}
-        in={props.isOpen}
+        in={isOpen}
         classNames={{
           enter: 'animate__animated',
           enterActive: 'animate__fadeIn',
@@ -78,7 +104,23 @@ function TooltipNotification(props) {
         }}
         timeout={300}
         unmountOnExit>
-        <TooltipContent ref={tooltipRef}>{props.label}</TooltipContent>
+        <Container
+          addCss={css`
+            position: absolute;
+            top: -130%;
+            left: -40%;
+          `}>
+          <TooltipContent
+            gap="5px"
+            alignItems="center"
+            ref={tooltipRef}
+            type={props.settingReducer.type}>
+            <span className="material-icons">
+              {tooltipMap[props.settingReducer.type].icon}
+            </span>
+            <P>{props.settingReducer.message}</P>
+          </TooltipContent>
+        </Container>
       </CSSTransition>
       {props.children}
     </Container>
