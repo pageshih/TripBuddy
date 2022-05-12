@@ -147,36 +147,19 @@ function DepartController(props) {
         <P>出發時間</P>
         <P>{timestampToString(props.departTimes[props.day], 'simpleDate')}</P>
       </FlexDiv>
-      <EditableText
-        level="4"
-        fontSize="46px"
-        addCss={css`
-          color: ${palatte.info.basic};
-          font-weight: 700;
-          padding: 0;
-        `}
+      <EditableDate
+        time
+        start={props.departTimes[props.day]}
+        onSubmit={(newTime) => console.log(newTime)}
         isAllowEdit={props.isAllowEdit}
-        onSubmit={(newDepartString) => {
-          if (newDepartString !== props.departString) {
-            const newDepartTimestamp = setTimeToTimestamp(
-              props.departTimes[props.day],
-              newDepartString
-            );
-            const newDepartTimes = Array.from(props.departTimes);
-            newDepartTimes.splice(props.day, 1, newDepartTimestamp);
-            props.updateOverviewsFields({ depart_times: newDepartTimes });
-            props.updateTimeOfSchedule(
-              props.schedules,
-              { isUploadFirebase: true, isSetSchedule: true },
-              newDepartTimestamp
-            );
-            props.setDepartString(
-              timestampToString(newDepartTimestamp, 'time')
-            );
-          }
-        }}>
-        {props.departString}
-      </EditableText>
+        width="210px"
+        fontSize="46px"
+        inputFontSize="32px"
+        color={palatte.info.basic}
+        addCss={css`
+          font-weight: 700;
+        `}
+      />
     </FlexDiv>
   );
 }

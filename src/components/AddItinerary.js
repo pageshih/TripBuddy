@@ -365,8 +365,13 @@ const ScheduleWapper = styled.li`
 `;
 
 const ScheduleCardDrag = (props) => {
-  const [isEditDuration, setIsEditDuration] = useState();
+  const [isEditDuration, setIsEditDuration] = useState(props.isAllowEdit);
   const [duration, setDuration] = useState(props.schedule.duration);
+  useEffect(() => {
+    if (props.isAllowEdit) {
+      setIsEditDuration(props.isAllowEdit);
+    }
+  }, [props.isAllowEdit]);
   return (
     <Draggable
       draggableId={props.id}
@@ -382,7 +387,7 @@ const ScheduleCardDrag = (props) => {
               padding="40px 0 0 0"
               basis="120px"
               alignItems="flex-start">
-              {props.isAllowEdit && isEditDuration ? (
+              {isEditDuration && props.isAllowEdit ? (
                 <FlexDiv direction="column" alignItems="center">
                   <FlexDiv alignItems="center" gap="8px">
                     <RoundButtonSmall
@@ -400,8 +405,12 @@ const ScheduleCardDrag = (props) => {
                     <P
                       fontWeight="700"
                       fontSize="32px"
-                      color={palatte.secondary[700]}>
-                      {duration}
+                      color={palatte.secondary[700]}
+                      textAlign="center"
+                      addCss={css`
+                        width: 67px;
+                      `}>
+                      {duration < 60 ? duration : duration / 60}
                     </P>
                     <RoundButtonSmall
                       size="20px"
@@ -416,7 +425,7 @@ const ScheduleCardDrag = (props) => {
                       +
                     </RoundButtonSmall>
                   </FlexDiv>
-                  <span>分鐘</span>
+                  <span>{duration < 60 ? '分鐘' : '小時'}</span>
                   <ButtonSmall
                     styled="gray"
                     fontSize="12px"

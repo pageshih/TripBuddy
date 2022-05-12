@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
@@ -10,10 +10,15 @@ import {
   mediaQuery,
   P,
 } from './basicStyle';
-import { TextInput, inputBaseSmall } from './Form';
+import {
+  TextInput,
+  inputBaseSmall,
+  CustomDateRangePicker,
+  CustomTimePicker,
+} from './Form';
 import { ButtonSmall } from './Button';
-import { timestampToString, timestampToDateInput } from '../../utils/utilities';
-import { FlexDiv } from './Layout';
+import { timestampToString } from '../../utils/utilities';
+import { Container, FlexDiv } from './Layout';
 
 const hoverEffect = css`
   width: fit-content;
@@ -25,23 +30,19 @@ const hoverEffect = css`
 `;
 
 function EditableText(props) {
-  const [isEdit, setIsEdit] = useState();
+  const [isEdit, setIsEdit] = useState(true);
   const [value, setValue] = useState();
   const inputRef = useRef();
   const Text = textComponents[props.level];
   useEffect(() => {
     setValue(props.children);
   }, [props.children]);
-  useEffect(() => {
-    if (inputRef.current && isEdit) {
-      inputRef.current.select();
-    }
-  }, [inputRef, isEdit]);
   const submit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setIsEdit(false);
     if (value && !value.match(/^ +$/)) {
       if (value !== props.children && value.length > 0) {
+        console.log('submit');
         props.onSubmit(value);
       }
     } else {
@@ -49,12 +50,27 @@ function EditableText(props) {
     }
   };
 
+  useEffect(() => {
+    setIsEdit(true);
+    if (!props.isAllowEdit) {
+      setIsEdit(false);
+      submit();
+    }
+  }, [props.isAllowEdit]);
+
+  useEffect(() => {
+    if (inputRef.current && isEdit) {
+      inputRef.current.select();
+    }
+  }, [inputRef, isEdit]);
+
   const inputStyle = css`
     border: none;
     outline: 1px solid ${palatte.gray['400']};
     outline-offset: 2px;
     font-weight: 700;
     padding: 0;
+    text-align: center;
     font-size: ${props.fontSize || headingFontSize.desktop[props.level]};
     &:focus {
       outline: 2px solid ${palatte.primary.basic};
@@ -67,12 +83,11 @@ function EditableText(props) {
 
   const countTextLength = (text) => {
     const encodedText = encodeURIComponent(text);
-    console.log(encodedText);
     return encodedText.replace(/%[A-F\d]{2}/g, 'U').length;
   };
   return (
     <>
-      {isEdit ? (
+      {isEdit && props.isAllowEdit ? (
         <form
           onSubmit={submit}
           css={css`
@@ -87,8 +102,6 @@ function EditableText(props) {
             value={value}
             width="auto"
             css={inputStyle}
-            autoFocus
-            onBlur={submit}
             onChange={(e) => {
               setValue(e.target.value);
             }}
@@ -132,70 +145,81 @@ function EditableDate(props) {
     setStartTimestamp(props.start);
     setEndTimestamp(props.end);
   }, []);
-  const submit = (e) => {
-    e.preventDefault();
-    setIsEdit(false);
-    props.onSubmit(
-      startTimestamp,
-      endTimestamp,
-      setEndTimestamp,
-      setStartTimestamp
-    );
-  };
+  useEffect(() => {
+    setIsEdit(props.isAllowEdit);
+  }, [props.isAllowEdit]);
+
+  const submit = useCallback(() => {
+    if (props.time) {
+      props.onSubmit(startTimestamp);
+    } else if (props.start !== startTimestamp || props.end !== endTimestamp) {
+      props.onSubmit(
+        startTimestamp,
+        endTimestamp,
+        setEndTimestamp,
+        setStartTimestamp
+      );
+    }
+  }, [startTimestamp, endTimestamp, props, setEndTimestamp, setStartTimestamp]);
+
+  useEffect(() => {
+    if (isEdit === false) {
+      submit();
+    }
+  }, [isEdit, submit]);
+
   return (
     <>
       {isEdit ? (
-        <FlexDiv as="form" onSubmit={submit} gap="5px" alignItems="center">
-          <input
-            type="date"
-            css={inputBaseSmall}
-            value={timestampToDateInput(startTimestamp)}
-            autoFocus
-            onChange={(e) =>
-              setStartTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <span
-            css={css`
-              color: ${props.color};
-            `}>
-            {' '}
-            -{' '}
-          </span>
-          <input
-            type="date"
-            css={inputBaseSmall}
-            value={timestampToDateInput(endTimestamp)}
-            onChange={(e) =>
-              setEndTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <ButtonSmall
-            styled="gray"
-            padding="5px 10px"
-            margin="0 0 0 5px"
-            width="fit-content"
-            id="submit"
-            type="submit">
-            儲存
-          </ButtonSmall>
-        </FlexDiv>
+        <>
+          {props.time ? (
+            <CustomTimePicker
+              value={startTimestamp}
+              onChange={(newTimestamp) => setStartTimestamp(newTimestamp)}
+              color={props.color}
+              addCss={props.addCss}
+              width={props.width}
+              fontSize={props.inputFontSize || props.fontSize}
+            />
+          ) : (
+            <FlexDiv as="form" gap="5px" alignItems="center">
+              <CustomDateRangePicker
+                startTimestamp={startTimestamp}
+                endTimestamp={endTimestamp}
+                setEndTimestamp={setEndTimestamp}
+                setStartTimestamp={setStartTimestamp}
+                color={props.color}
+              />
+            </FlexDiv>
+          )}
+        </>
       ) : (
-        <P
-          color={props.color}
-          addCss={css`
-            ${props.isAllowEdit && hoverEffect}
-            ${props.addCss}
-          `}
-          textAlign={props.textAlign}
-          onClick={(e) => {
-            if (e.target.id !== 'submit' && props.isAllowEdit) {
-              setIsEdit(true);
-            }
-          }}>
-          {timestampToString(startTimestamp, 'date')} -{' '}
-          {timestampToString(endTimestamp, 'date')}
-        </P>
+        <>
+          {props.time ? (
+            <P
+              fontSize={props.fontSize}
+              color={props.color}
+              addCss={props.addCss}>
+              {timestampToString(startTimestamp, 'time')}
+            </P>
+          ) : (
+            <P
+              color={props.color}
+              addCss={css`
+                ${props.isAllowEdit && hoverEffect}
+                ${props.addCss}
+              `}
+              textAlign={props.textAlign}
+              onClick={(e) => {
+                if (e.target.id !== 'submit' && props.isAllowEdit) {
+                  setIsEdit(true);
+                }
+              }}>
+              {timestampToString(startTimestamp, 'date')} -{' '}
+              {timestampToString(endTimestamp, 'date')}
+            </P>
+          )}
+        </>
       )}
     </>
   );

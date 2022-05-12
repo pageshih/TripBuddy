@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
 import { palatte, mediaQuery, P } from './basicStyle';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
@@ -11,7 +15,11 @@ import {
   ButtonOutline,
   RoundButtonSmall,
 } from './Button';
-import { compressImages } from '../../utils/utilities';
+import {
+  compressImages,
+  timestampToTimeInput,
+  timestampToDateInput,
+} from '../../utils/utilities';
 import { Modal } from './Modal';
 
 const inputBase = css`
@@ -62,6 +70,9 @@ function TextField({ children, placeholder, value, onChange, type }) {
 const TextInput = styled.input`
   ${inputBase}
   width: ${(props) => props.width || '100%'};
+  color: ${(props) => props.color};
+  font-size: ${(props) => props.fontSize};
+  ${(props) => props.addCss};
 `;
 const Select = styled.select`
   ${inputBase}
@@ -466,6 +477,93 @@ const ChangeTravelModeSelect = (props) => {
   );
 };
 
+const DateTimeTextInput = (props) => (
+  <Container position="relative">
+    <TextInput
+      color={props.color}
+      ref={props.inputRef}
+      width={props.width}
+      addCss={props.addCss}
+      fontSize={props.fontSize}
+      {...props.inputProps}
+    />
+    <Container
+      position="absolute"
+      addCss={css`
+        right: 15px;
+        top: calc(50%);
+      `}>
+      {props.InputProps?.endAdornment}
+    </Container>
+  </Container>
+);
+function CustomDatePicker(props) {
+  return (
+    <DatePicker
+      value={timestampToDateInput(props.value)}
+      inputFormat="yyyy/MM/dd"
+      onChange={(value) => {
+        props.onChange(new Date(value).getTime());
+      }}
+      renderInput={(params) => (
+        <DateTimeTextInput
+          color={props.color}
+          fontSize={props.fontSize}
+          {...params}
+        />
+      )}
+    />
+  );
+}
+function CustomTimePicker(props) {
+  return (
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <TimePicker
+        value={new Date(props.value)}
+        ampmInClock={true}
+        onChange={(value) => {
+          console.log(value);
+          props.onChange(new Date(value).getTime());
+        }}
+        renderInput={(params) => (
+          <DateTimeTextInput
+            color={props.color}
+            fontSize={props.fontSize}
+            width={props.width}
+            addCss={props.addCss}
+            {...params}
+          />
+        )}
+      />
+    </LocalizationProvider>
+  );
+}
+function CustomDateRangePicker(props) {
+  return (
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <CustomDatePicker
+        value={props.startTimestamp}
+        onChange={(newStartTimestamp) => {
+          props.setStartTimestamp(newStartTimestamp);
+        }}
+      />
+      <span
+        css={css`
+          color: ${props.color};
+        `}>
+        {' '}
+        -{' '}
+      </span>
+      <CustomDatePicker
+        value={props.endTimestamp}
+        onChange={(newEndTimestamp) => {
+          props.setEndTimestamp(newEndTimestamp);
+        }}
+      />
+    </LocalizationProvider>
+  );
+}
+
 export {
   TextField,
   TextInput,
@@ -481,4 +579,7 @@ export {
   Select,
   SelectSmall,
   ChangeTravelModeSelect,
+  CustomDateRangePicker,
+  CustomDatePicker,
+  CustomTimePicker,
 };

@@ -141,8 +141,8 @@ function Confirm(props) {
           </ButtonOutline>
           <Button
             styled={props.yesBtnStyle || 'primary'}
-            onClick={() => {
-              props.yesAction();
+            onClick={async () => {
+              await props.yesAction();
               props.setIsShowState(false);
             }}>
             {props.yesMessage || '確認'}
