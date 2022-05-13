@@ -1,5 +1,11 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
-import { createContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+} from 'react';
 import { Global, css } from '@emotion/react';
 import { firebaseAuth } from './utils/firebase';
 import Login from './components/Login';
@@ -22,16 +28,19 @@ import { FlexDiv } from './components/styledComponents/Layout';
 const Context = createContext();
 
 const LoginOrPage = (props) => {
+  const { uid, goLogin, setGoLogin, isLogInOut } = useContext(Context);
   useEffect(() => {
-    if (props.goLogin && !props.isLogInOut) {
-      alert('請先登入');
+    if (uid) {
+      setGoLogin(false);
+    } else if (uid === '') {
+      setGoLogin(true);
     }
-  }, []);
+  }, [uid]);
   return (
     <>
-      {props.goLogin ? (
+      {goLogin && !isLogInOut ? (
         <Navigate to="/login" replace={true} />
-      ) : props.goLogin !== undefined ? (
+      ) : goLogin !== undefined ? (
         props.element
       ) : (
         <FlexDiv justifyContent="center" padding="100px 0">
@@ -95,9 +104,8 @@ function App() {
         (userImpl) => {
           if (userImpl) {
             setUid(userImpl.uid);
-            setGoLogin(false);
           } else {
-            setGoLogin(true);
+            setUid('');
           }
         },
         (error) => console.log(error)
@@ -108,20 +116,22 @@ function App() {
   return (
     <>
       <Global styles={cssReset} />
-      <Context.Provider value={{ uid, setUid, map, setMap }}>
+      <Context.Provider
+        value={{
+          uid,
+          setUid,
+          map,
+          setMap,
+          goLogin,
+          setGoLogin,
+          isLogInOut,
+          setIsLogInOut,
+        }}>
         <EmptyMap libraries={['places']} />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Navigate to="/itineraries" replace />} />
-            <Route
-              path=""
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<UserProfile setIsLogInOut={setIsLogInOut} />}
-                />
-              }>
+            <Route path="" element={<LoginOrPage element={<UserProfile />} />}>
               <Route path="/itineraries" element={<Itineraries />} />
               <Route
                 path="/saved-spots"
@@ -131,23 +141,12 @@ function App() {
                 path="/travel-journals"
                 element={<TravelJournals />}></Route>
             </Route>
-            <Route
-              path="/login"
-              element={
-                uid ? (
-                  <Navigate to="itineraries" />
-                ) : (
-                  <Login setIsLogInOut={setIsLogInOut} />
-                )
-              }
-            />
+            <Route path="/login" element={<Login />} />
 
             <Route
               path="/explore"
               element={
                 <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
                   element={<Explore setWaitingSpots={setWaitingSpots} />}
                 />
               }
@@ -156,8 +155,6 @@ function App() {
               path="/add"
               element={
                 <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
                   element={
                     <AddOverView
                       waitingSpots={waitingSpots}
@@ -169,33 +166,15 @@ function App() {
             />
             <Route
               path="/add/:itineraryId"
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<AddSchedule />}
-                />
-              }
+              element={<LoginOrPage element={<AddSchedule />} />}
             />
             <Route
               path="/itinerary/:itineraryId"
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<AddSchedule browse />}
-                />
-              }
+              element={<LoginOrPage element={<AddSchedule browse />} />}
             />
             <Route
               path="/travel-journals/:journalID"
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<TravelJournalDetail />}
-                />
-              }
+              element={<LoginOrPage element={<TravelJournalDetail />} />}
             />
             <Route path="error" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/itineraries" replace />} />

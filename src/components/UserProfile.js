@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
@@ -272,10 +272,12 @@ function UserSetting(props) {
   );
 }
 function UserProfile(props) {
-  const { uid, setUid } = useContext(Context);
+  const { uid, setUid, setGoLogin, isLogInOut, goLogin, setIsLogInOut } =
+    useContext(Context);
   const [profile, setProfile] = useState();
   const [reviewTags, setReviewTags] = useState();
   const [isShowSetting, setIsShowSetting] = useState();
+  const navigate = useNavigate();
   const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
     try {
       const urlAry = await firebaseStorage.uploadImages(
@@ -359,12 +361,17 @@ function UserProfile(props) {
     firebaseAuth
       .userSignOut()
       .then(() => {
-        alert('您已登出');
-        props.setIsLogInOut(true);
-        setUid(undefined);
+        setIsLogInOut(true);
+        setGoLogin(false);
       })
       .catch((res) => console.log(res));
   };
+  useEffect(() => {
+    if (isLogInOut && !goLogin) {
+      setUid(undefined);
+      navigate('/login');
+    }
+  }, [isLogInOut, goLogin]);
 
   return (
     <>
