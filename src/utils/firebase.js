@@ -30,6 +30,7 @@ import {
   where,
   deleteDoc,
   writeBatch,
+  WriteBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
 import { createDepartTimeAry } from './utilities';
@@ -50,10 +51,10 @@ const firebaseAuth = {
   signUp(email, password, name) {
     return createUserWithEmailAndPassword(this.auth, email, password)
       .then((res) => {
-        firestore.editProfile(res.user.uid, {
+        firestore.setDefaultAccount(res.user.uid, {
           name,
           uid: res.user.uid,
-          photo: 'https://picsum.photos/50',
+          photo: '',
           reviews: [],
         });
         return Promise.resolve(res.user.uid);
@@ -65,7 +66,7 @@ const firebaseAuth = {
   googleLogIn() {
     return signInWithPopup(this.auth, this.provider)
       .then((res) => {
-        firestore.editProfile(res.user.uid, {
+        firestore.setDefaultAccount(res.user.uid, {
           name: res.user.displayName,
           uid: res.user.uid,
           photo: res.user.photoURL,
@@ -126,8 +127,24 @@ const firebaseStorage = {
 };
 const firestore = {
   db: getFirestore(app),
-  setProfile(userUID, profile, merge) {
-    return setDoc(doc(this.db, 'profile', userUID), { profile }, { merge });
+  setDefaultAccount(userUID, profile) {
+    const batch = writeBatch(this.db);
+    batch.set(
+      doc(this.db, 'profile', userUID),
+      { ...profile },
+      { merge: 'merge' }
+    );
+    batch.set(
+      doc(this.db, 'savedSpots', userUID),
+      { uid: userUID },
+      { merge: 'merge' }
+    );
+    batch.set(
+      doc(this.db, 'itineraries', userUID),
+      { default_travel_mode: 'DRIVING', uid: userUID },
+      { merge: 'merge' }
+    );
+    return batch.commit();
   },
   getProfile(userUID) {
     return new Promise((resolve) => {

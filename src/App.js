@@ -133,7 +133,13 @@ function App() {
             </Route>
             <Route
               path="/login"
-              element={<Login setIsLogInOut={setIsLogInOut} />}
+              element={
+                uid ? (
+                  <Navigate to="itineraries" />
+                ) : (
+                  <Login setIsLogInOut={setIsLogInOut} />
+                )
+              }
             />
 
             <Route

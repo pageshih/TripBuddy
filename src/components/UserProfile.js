@@ -33,7 +33,7 @@ import {
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
-import loadingSvg from '../images/Dual Ball-1s-200px.svg';
+import defaultUserIcon from '../images/user-avatar-filled.svg';
 
 const activeStyle = (isActive) => {
   return {
@@ -105,7 +105,7 @@ function UserSetting(props) {
               addCss={css`
                 border: 1px solid ${palatte.gray['100']};
               `}
-              src={props.profile.photo}
+              src={props.profile.photo || defaultUserIcon}
               alt={props.profile.name}
             />
             <AddImageRoundBtn
@@ -127,7 +127,7 @@ function UserSetting(props) {
               level="5"
               fontSize="24px"
               onSubmit={updateUserName}>
-              {props.profile.name}
+              {props.profile.name || ''}
             </EditableText>
             <P fontSize="14px" color={palatte.gray['400']}>
               用戶ID：{props.profile.uid}
@@ -443,8 +443,10 @@ function UserProfile(props) {
                           addCss={css`
                             box-shadow: 2px 2px 1px 1px ${palatte.shadow};
                             border: 1px solid ${palatte.gray['100']};
+                            background-color: ${!profile.photo &&
+                            palatte.secondary[100]};
                           `}
-                          src={profile.photo}
+                          src={profile.photo || defaultUserIcon}
                           alt="profilePhoto"
                         />
                       </div>

@@ -98,7 +98,7 @@ function EditableText(props) {
           <TextInput
             ref={inputRef}
             type={props.type}
-            size={countTextLength(value) > 0 ? countTextLength(value) - 1 : 1}
+            size={countTextLength(value) > 0 ? countTextLength(value) : 1}
             value={value}
             width="auto"
             css={inputStyle}
