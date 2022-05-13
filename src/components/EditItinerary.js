@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -136,8 +136,15 @@ Overview.propTypes = {
 };
 
 function DepartController(props) {
+  const [time, setTime] = useState(props.departTimes[props.day]);
+  useEffect(() => {
+    setTime(props.departTimes[props.day]);
+  }, [props.departTimes, props.day]);
   return (
-    <FlexDiv direction="column" gap="5px">
+    <FlexDiv
+      direction="column"
+      gap="5px"
+      maxWidth={props.isAllowEdit && '200px'}>
       <FlexDiv
         justifyContent="space-between"
         addCss={css`
@@ -150,8 +157,8 @@ function DepartController(props) {
       </FlexDiv>
       <EditableDate
         time
-        start={props.departTimes[props.day]}
-        onSubmit={(newTime) => console.log(newTime)}
+        start={time}
+        onSubmit={props.onSubmit}
         isAllowEdit={props.isAllowEdit}
         width="210px"
         fontSize="46px"

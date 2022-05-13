@@ -394,6 +394,7 @@ const ScheduleCardDrag = (props) => {
               alignItems="flex-start">
               {isEditDuration && props.isAllowEdit ? (
                 <FlexDiv direction="column" alignItems="center">
+                  <span>停留</span>
                   <FlexDiv alignItems="center" gap="8px">
                     <RoundButtonSmall
                       type="button"
@@ -431,23 +432,25 @@ const ScheduleCardDrag = (props) => {
                     </RoundButtonSmall>
                   </FlexDiv>
                   <span>{duration < 60 ? '分鐘' : '小時'}</span>
-                  <ButtonSmall
-                    styled="gray"
-                    fontSize="12px"
-                    margin="10px 0 0 0 "
-                    id="duration"
-                    type="button"
-                    onClick={(e) => {
-                      if (e.target.id === 'duration') {
-                        setIsEditDuration(false);
-                        props.updateDuration(
-                          props.schedule.schedule_id,
-                          duration
-                        );
-                      }
-                    }}>
-                    儲存
-                  </ButtonSmall>
+                  {duration !== props.schedule.duration && (
+                    <ButtonSmall
+                      styled="gray"
+                      fontSize="12px"
+                      margin="10px 0 0 0 "
+                      id="duration"
+                      type="button"
+                      onClick={(e) => {
+                        if (e.target.id === 'duration') {
+                          setIsEditDuration(false);
+                          props.updateDuration(
+                            props.schedule.schedule_id,
+                            duration
+                          );
+                        }
+                      }}>
+                      更新時間
+                    </ButtonSmall>
+                  )}
                 </FlexDiv>
               ) : (
                 <TextWithIcon
@@ -737,27 +740,29 @@ function AddSchedule(props) {
     }
   }, [selectedSchedulesId, schedules]);
   useEffect(() => {
-    const totalDuration = schedules.reduce((acc, schedule) => {
-      acc += schedule.duration;
-      return acc;
-    }, 0);
-    const departTime = new Date(overviews.depart_times[day]);
-    const departTimeMin =
-      Number(new Date(departTime).getHours()) * 60 +
-      Number(new Date(departTime).getMinutes());
-    console.log(departTimeMin);
-    if (totalDuration >= 1440 - departTimeMin) {
-      dispatchNotification({
-        type: 'fire',
-        playload: {
-          type: 'warn',
-          message: '總行程時間已超過一天，請切換到隔天繼續規劃',
-          id: 'toastifyDurationExceed',
-          duration: 5000,
-        },
-      });
+    if (overviews) {
+      const totalDuration = schedules.reduce((acc, schedule) => {
+        acc += schedule.duration;
+        return acc;
+      }, 0);
+      const departTime = new Date(overviews.depart_times[day]);
+      const departTimeMinutes =
+        Number(new Date(departTime).getHours()) * 60 +
+        Number(new Date(departTime).getMinutes());
+      console.log(departTimeMinutes);
+      if (totalDuration >= 1440 - departTimeMinutes) {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'warn',
+            message: '總行程時間已超過一天，請切換到隔天繼續規劃',
+            id: 'toastifyDurationExceed',
+            duration: 5000,
+          },
+        });
+      }
     }
-  }, [schedules]);
+  }, [schedules, overviews, day]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -1085,7 +1090,13 @@ function AddSchedule(props) {
       .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
-  const updateDate = (start, end, setEndTimestamp, setStartTimestamp) => {
+  const updateDate = (
+    start,
+    end,
+    setEndTimestamp,
+    setStartTimestamp,
+    setIsEdit
+  ) => {
     let updateDate;
     console.log(start, end);
     const resetTime = {
@@ -1158,6 +1169,7 @@ function AddSchedule(props) {
         }
         allSchedules.current = newAllSchedules;
         setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
+        setIsEdit(false);
       }
     }
   };
@@ -1355,6 +1367,22 @@ function AddSchedule(props) {
                   departTimes={overviews.depart_times}
                   day={day}
                   isAllowEdit={isAllowEdit}
+                  onSubmit={(newTime) => {
+                    console.log(newTime);
+                    if (newTime !== overviews.depart_times[day]) {
+                      console.log('update');
+                      updateTimeOfSchedule(
+                        schedules,
+                        { isSetSchedule: true, isUploadFirebase: true },
+                        newTime
+                      );
+                      updateOverviewsFields({
+                        depart_times: overviews.depart_times.map(
+                          (time, index) => (index === day ? newTime : time)
+                        ),
+                      });
+                    }
+                  }}
                   updateTimeOfSchedule={updateTimeOfSchedule}
                   updateOverviewsFields={updateOverviewsFields}
                   schedules={schedules}
