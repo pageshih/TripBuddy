@@ -6,7 +6,7 @@ import { CSSTransition } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
-import '../../animation.css';
+import '../../css/animation.css';
 import Collapse from '@mui/material/Collapse';
 
 const ExpandIcon = styled.span`

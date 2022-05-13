@@ -6,8 +6,8 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
 import 'animate.css';
-import '../../animation.css';
-import '../../toastify.css';
+import '../../css/animation.css';
+import '../../css/toastify.css';
 import { palatte, styles, P, TextWithIcon } from './basicStyle';
 import { Container, FlexDiv } from './Layout';
 
@@ -42,7 +42,7 @@ function Notification(props) {
   });
   useEffect(() => {
     console.log(props.fire);
-    if (props.fire) {
+    if (props.fire && props.type) {
       toast[props.type](props.message, {
         position: toast.POSITION.TOP_CENTER,
         toastId: props.id,

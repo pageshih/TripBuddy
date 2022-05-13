@@ -90,6 +90,7 @@ const ButtonSmallIcon = styled(ButtonSmall)`
   padding: ${(props) => props.padding || '5px 10px'};
   display: flex;
   gap: ${(props) => props.gap || '5px'};
+  ${(props) => props.addCss};
 `;
 
 const RoundButton = styled.button`
@@ -223,6 +224,36 @@ const RoundButtonSmallOutline = styled(RoundButtonSmall)`
     color: ${palatte.white};
   }
 `;
+
+const RoundButtonSmallWithLabel = (props) => (
+  <FlexDiv
+    as="button"
+    type={props.type}
+    gap={props.gap || '10px'}
+    onClick={props.onClick}
+    addCss={css`
+      background-color: transparent;
+      & > * {
+        color: ${buttonSmallColorMap[props.styled].default.backgroundColor};
+      }
+      &:hover {
+        & p {
+          text-decoration: underline;
+          color: ${buttonSmallColorMap[props.styled].hover.backgroundColor};
+        }
+        & span {
+          border-radius: 50%;
+          background-color: ${buttonSmallColorMap[props.styled].default
+            .backgroundColor};
+          color: ${buttonSmallColorMap[props.styled].hover.color};
+        }
+      }
+      ${props.addCss}
+    `}>
+    <span className="material-icons">{props.iconName}</span>
+    <P>{props.children}</P>
+  </FlexDiv>
+);
 
 const capsule = (props) => css`
   padding: 5px 5px 6px 5px;
@@ -398,4 +429,5 @@ export {
   SaveAndCancelButton,
   HyperLink,
   ButtonIconColumn,
+  RoundButtonSmallWithLabel,
 };

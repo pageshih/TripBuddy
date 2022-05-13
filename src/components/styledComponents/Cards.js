@@ -76,7 +76,7 @@ const AddressText = (props) => (
     iconName="location_on"
     iconColor={palatte.danger.basic}
     alignItems="flex-start"
-    textSize={!props.isSmall && '17px'}
+    textSize={!props.isSmall ? '17px' : '16px'}
     iconSize={props.isSmall ? '20px' : '22px'}
     mutipleLines
     iconOffset="20px"

@@ -141,12 +141,10 @@ function DepartController(props) {
     setTime(props.departTimes[props.day]);
   }, [props.departTimes, props.day]);
   return (
-    <FlexDiv
-      direction="column"
-      gap="5px"
-      maxWidth={props.isAllowEdit && '200px'}>
+    <FlexDiv direction="column" gap="5px">
       <FlexDiv
         justifyContent="space-between"
+        maxWidth={props.isAllowEdit && '200px'}
         addCss={css`
           & > * {
             color: ${palatte.gray['700']};

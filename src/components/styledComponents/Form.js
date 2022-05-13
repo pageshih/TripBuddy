@@ -479,11 +479,10 @@ const ChangeTravelModeSelect = (props) => {
 };
 
 const DateTimeTextInput = (props) => (
-  <Container position="relative">
+  <Container position="relative" width={props.width}>
     <TextInput
       color={props.color}
       ref={props.inputRef}
-      width={props.width}
       addCss={props.addCss}
       fontSize={props.fontSize}
       {...props.inputProps}
@@ -509,6 +508,7 @@ function CustomDatePicker(props) {
       renderInput={(params) => (
         <DateTimeTextInput
           color={props.color}
+          width={props.width}
           fontSize={props.fontSize}
           {...params}
         />
@@ -543,6 +543,7 @@ function CustomDateRangePicker(props) {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <CustomDatePicker
+        width={props.width}
         value={props.startTimestamp}
         onChange={(newStartTimestamp) => {
           props.setStartTimestamp(newStartTimestamp);
@@ -552,11 +553,11 @@ function CustomDateRangePicker(props) {
         css={css`
           color: ${props.color};
         `}>
-        {' '}
-        -{' '}
+        {props.conjunction || ' - '}
       </span>
       <CustomDatePicker
         value={props.endTimestamp}
+        width={props.width}
         onChange={(newEndTimestamp) => {
           props.setEndTimestamp(newEndTimestamp);
         }}

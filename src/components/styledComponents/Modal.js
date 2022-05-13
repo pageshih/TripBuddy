@@ -4,7 +4,7 @@ import { css, jsx } from '@emotion/react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { palatte, P } from './basicStyle';
 import 'animate.css';
-import '../../animation.css';
+import '../../css/animation.css';
 import { useEffect, useRef, useState } from 'react';
 import { Button, ButtonOutline } from './Button';
 import { FlexChildDiv, FlexDiv } from './Layout';

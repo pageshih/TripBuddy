@@ -13,6 +13,7 @@ import {
   SelectAllCheckBox,
   AddImageRoundBtn,
   SelectSmall,
+  CustomDateRangePicker,
 } from './styledComponents/Form';
 import {
   Button,
@@ -22,6 +23,7 @@ import {
   RoundButtonSmall,
   ButtonSmall,
   ButtonIconColumn,
+  RoundButtonSmallWithLabel,
 } from './styledComponents/Button';
 import {
   Container,
@@ -124,6 +126,10 @@ function AddOverView(props) {
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
   const [step, setStep] = useState(0);
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   const addOverView = [
     {
@@ -167,17 +173,34 @@ function AddOverView(props) {
     ) {
       setStep((prev) => prev + 1);
     } else {
-      alert(addOverView[step].alert);
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          message: addOverView[step].alert,
+          id: 'toastifyEmptyValue',
+        },
+      });
     }
   };
   return (
     <Container backgroundColor={palatte.gray[100]}>
+      <Notification
+        type={notification.type}
+        fire={
+          notification.fire && notification.id.match('toastify')?.length > 0
+        }
+        message={notification.message}
+        id={notification.id}
+        duration={notification?.duration}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
       <FlexDiv
         as="form"
         height="100vh"
         gap="60px"
         direction="column"
         justifyContent="center"
+        position="relative"
         addCss={styles.containerSetting}
         onSubmit={(e) => {
           e.preventDefault();
@@ -187,8 +210,23 @@ function AddOverView(props) {
             createItinerary();
           }
         }}>
+        <RoundButtonSmallWithLabel
+          styled="gray700"
+          type="button"
+          iconName="chevron_left"
+          addCss={css`
+            position: absolute;
+            top: 80px;
+            left: -10px;
+          `}
+          onClick={() => navigate('/explore')}>
+          回探索景點
+        </RoundButtonSmallWithLabel>
         <FlexDiv direction="column" gap="20px">
-          <H5>{addOverView[step].title}</H5>
+          {step === 1 && !props.waitingSpots?.length > 0 ? null : (
+            <H5>{addOverView[step].title}</H5>
+          )}
+
           {addOverView[step].type === 'text' && (
             <TextInput
               type="text"
@@ -200,7 +238,7 @@ function AddOverView(props) {
             />
           )}
           {addOverView[step].type === 'cards' &&
-            (props.waitingSpots.length > 0 ? (
+            (props.waitingSpots?.length > 0 ? (
               <FlexChildDiv
                 padding="20px 20px 20px 0"
                 gap="30px"
@@ -247,20 +285,13 @@ function AddOverView(props) {
             ))}
           {addOverView[step].type === 'calendar' && (
             <FlexDiv gap="20px" alignItems="center">
-              <TextInput
-                type="date"
-                value={timestampToDateInput(startDate)}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                }}
-              />
-              <P>到</P>
-              <TextInput
-                type="date"
-                value={timestampToDateInput(endDate)}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
-                }}
+              <CustomDateRangePicker
+                width="100%"
+                conjunction="到"
+                startTimestamp={startDate}
+                endTimestamp={endDate}
+                setStartTimestamp={setStartDate}
+                setEndTimestamp={setEndDate}
               />
             </FlexDiv>
           )}

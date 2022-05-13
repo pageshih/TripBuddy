@@ -2,7 +2,7 @@ import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
 import { useEffect, useRef, useContext } from 'react';
 import { Context } from '../App';
-import '../marker.css';
+import '../css/marker.css';
 import { inputBase } from '../components/styledComponents/Form';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
