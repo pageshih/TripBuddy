@@ -171,8 +171,8 @@ function SpotCard(props) {
             selectedList={props.selectedList}
             setSelectedList={props.setSelectedList}
             addCss={css`
-              outline: ${!props.time && props.isEdit
-                ? `1px solid ${palatte.gray['300']}`
+              box-shadow: ${!props.time && props.isEdit
+                ? `0 0 0 1px ${palatte.gray['300']}`
                 : null};
             `}
           />

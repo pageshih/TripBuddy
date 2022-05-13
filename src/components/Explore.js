@@ -77,24 +77,33 @@ function Map({
 }
 
 const GetTodayOpeningHours = (props) => {
-  const splitOpeningTextAry = props.openingText.split(/: |,/);
-  const today = splitOpeningTextAry.reduce((final, text, index) => {
-    if (index === 0) {
-      final.push(
-        <span
-          css={css`
-            margin-right: 6px;
-          `}>
-          {text}
-        </span>
+  const splitOpeningTextAry = useRef();
+  const [today, setToday] = useState();
+  useEffect(() => {
+    if (props.openingText) {
+      splitOpeningTextAry.current = props.openingText.split(/: |,/);
+      setToday(
+        splitOpeningTextAry.current.reduce((final, text, index) => {
+          if (index === 0) {
+            final.push(
+              <span
+                css={css`
+                  margin-right: 6px;
+                `}>
+                {text}
+              </span>
+            );
+          } else {
+            final.push(text);
+          }
+          return final;
+        }, [])
       );
-    } else {
-      final.push(text);
     }
-    return final;
-  }, []);
+  }, [props.openingText]);
   return (
     <P
+      key={props.key}
       fontSize="14px"
       color={palatte.gray[700]}
       addCss={css`
@@ -147,7 +156,7 @@ function PlaceDetail({
       <FlexChildDiv direction="column" padding="0 30px" gap="12px">
         <H2 fontSize="22px">{placeDetail.name}</H2>
 
-        {placeDetail.opening_hours.weekday_text && (
+        {placeDetail.opening_hours.weekday_text !== '未提供' && (
           <TextWithIcon
             gap="6px"
             iconGap="4px"
@@ -225,7 +234,9 @@ function PlaceDetail({
       <FlexChildDiv direction="column" padding="0 30px 30px 30px" gap="20px">
         <H3 fontSize="18px">評論</H3>
         <FlexDiv as="ul" direction="column" gap="20px">
-          {placeDetail.reviews !== '未提供' &&
+          {placeDetail.reviews === '未提供' ? (
+            <P>找不到評論</P>
+          ) : (
             placeDetail.reviews.map((review) => (
               <FlexDiv
                 as="li"
@@ -265,7 +276,8 @@ function PlaceDetail({
                 </FlexDiv>
                 <P>{review.text}</P>
               </FlexDiv>
-            ))}
+            ))
+          )}
         </FlexDiv>
       </FlexChildDiv>
     </FlexDiv>
@@ -294,6 +306,16 @@ function SavedSpotsList(props) {
       .then((res) => setCreatedItineraries(res))
       .catch((error) => console.error(error));
   }, []);
+  useEffect(() => {
+    if (
+      selectedSpotList.length === props.savedSpots?.length &&
+      selectedSpotList.length !== 0
+    ) {
+      setIsSelectAll(true);
+    } else {
+      setIsSelectAll(false);
+    }
+  }, [selectedSpotList, props.savedSpots]);
   const addSelectSpotsToItinerary = () => {
     if (selectedSpotList?.length > 0 && addAction) {
       const waitingSpots = props.savedSpots.filter(
@@ -530,7 +552,7 @@ function Explore({ setWaitingSpots }) {
                 <RoundButtonSmall
                   size="30px"
                   className="material-icons"
-                  styled="gray500"
+                  styled="gray700"
                   addCss={expandButton}
                   onClick={() => {
                     setIsShowSideColumn(false);

@@ -161,14 +161,16 @@ function UserSetting(props) {
                 `}
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const newReviewTags = props.reviewTags
-                    ? [...props.reviewTags, addTag]
-                    : [addTag];
-                  await firestore.editProfile(uid, {
-                    review_tags: newReviewTags,
-                  });
-                  props.setReviewTags(newReviewTags);
-                  setAddTag('');
+                  if (addTag) {
+                    const newReviewTags = props.reviewTags
+                      ? [...props.reviewTags, addTag]
+                      : [addTag];
+                    await firestore.editProfile(uid, {
+                      review_tags: newReviewTags,
+                    });
+                    props.setReviewTags(newReviewTags);
+                    setAddTag('');
+                  }
                 }}>
                 <TextInput
                   placeholder="新增標籤"

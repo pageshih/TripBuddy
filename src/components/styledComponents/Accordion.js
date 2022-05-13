@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { palatte, mediaQuery } from './basicStyle';
 import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
 import '../../animation.css';
+import Collapse from '@mui/material/Collapse';
 
 const ExpandIcon = styled.span`
   color: ${palatte.gray['700']};
@@ -68,12 +69,7 @@ function Accordion(props) {
           </ExpandIcon>
         )}
       </FlexDiv>
-      <CSSTransition
-        nodeRef={contentRef}
-        in={isExpand}
-        timeout={500}
-        classNames="expand"
-        unmountOnExit>
+      <Collapse nodeRef={contentRef} in={isExpand} timeout={300} unmountOnExit>
         <Container ref={contentRef}>
           <div
             css={css`
@@ -81,7 +77,7 @@ function Accordion(props) {
             `}></div>
           {props.children}
         </Container>
-      </CSSTransition>
+      </Collapse>
     </AccordionContainer>
   );
 }
@@ -95,8 +91,9 @@ Accordion.propTypes = {
 };
 function AccordionSmall(props) {
   const [isExpand, setIsExpand] = useState(false);
+  const contentRef = useRef();
   return (
-    <FlexDiv direction="column" gap="10px">
+    <FlexDiv direction="column">
       <FlexDiv
         justifyContent="space-between"
         addCss={css`
@@ -115,7 +112,15 @@ function AccordionSmall(props) {
           {props.filled ? 'arrow_drop_down' : 'expand_more'}
         </ExpandIcon>
       </FlexDiv>
-      {isExpand && props.children}
+      <Collapse nodeRef={contentRef} in={isExpand} timeout={300} unmountOnExit>
+        <div
+          css={css`
+            height: ${props.gap || '10px'};
+          `}></div>
+        <FlexDiv direction="column" gap={props.gap || '10px'} ref={contentRef}>
+          {props.children}
+        </FlexDiv>
+      </Collapse>
     </FlexDiv>
   );
 }

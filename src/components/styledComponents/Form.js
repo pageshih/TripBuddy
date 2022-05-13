@@ -91,6 +91,7 @@ const checkboxCss = (props) => css`
   color: white;
   border: 1px solid ${palatte.primary.basic};
   border-radius: 6px;
+  -webkit-border-radius: 6px;
   cursor: pointer;
   font-size: ${props.size || '24px'};
 `;
@@ -253,7 +254,7 @@ const ReviewTag = (props) => {
   return (
     <label name={props.tag}>
       <ReviewTagContainer id={props.tag} selectedList={props.selectedList}>
-        <p className="material-icons">{props.children}</p>
+        <p>{props.children}</p>
       </ReviewTagContainer>
       <input
         type="checkbox"

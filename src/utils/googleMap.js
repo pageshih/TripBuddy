@@ -80,8 +80,8 @@ const googleMap = {
         lng: place?.geometry?.location.lng() || '未提供',
       },
       opening_hours: {
-        periods: place?.opening_hours?.periods || ['未提供'],
-        weekday_text: place?.opening_hours?.weekday_text || ['未提供'],
+        periods: place?.opening_hours?.periods || '未提供',
+        weekday_text: place?.opening_hours?.weekday_text || '未提供',
       },
       photos: place?.photos?.map((item) => item.getUrl()) || '未提供',
       reviews: place?.reviews || '未提供',
@@ -89,7 +89,7 @@ const googleMap = {
       rating: place?.rating || '未提供',
       // types: place.types || '未提供',
       created_time: new Date().getTime(),
-      url: place?.url,
+      url: place?.url || '未提供',
     };
   },
   initMap(ref, center, zoom) {
@@ -97,7 +97,6 @@ const googleMap = {
       center: center || this.center,
       zoom: zoom || this.zoom,
       disableDefaultUI: true,
-      fullscreenControl: true,
       zoomControl: true,
     };
     return new window.google.maps.Map(ref, option);

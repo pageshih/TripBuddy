@@ -5,7 +5,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { palatte, P } from './basicStyle';
 import 'animate.css';
 import '../../animation.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, ButtonOutline } from './Button';
 import { FlexChildDiv, FlexDiv } from './Layout';
 
@@ -55,6 +55,8 @@ const CloseBtn = styled.button`
 function Modal(props) {
   const [isFlyIn, setIsFlyIn] = useState();
   const [isShowBg, setIsShowBg] = useState();
+  const bgRef = useRef();
+  const containerRef = useRef();
   useEffect(() => {
     let clear;
     if (!props.isShowState && isFlyIn && isShowBg) {
@@ -75,6 +77,7 @@ function Modal(props) {
   return (
     <CSSTransition
       in={isShowBg}
+      nodeRef={bgRef}
       classNames={{
         enter: 'animate__animated',
         enterActive: 'animate__fadeIn',
@@ -85,6 +88,7 @@ function Modal(props) {
       unmountOnExit>
       <FadeBg
         id="close"
+        ref={bgRef}
         onClick={(e) => {
           if (e.target.id === 'close') {
             props.close();
@@ -92,6 +96,7 @@ function Modal(props) {
         }}>
         <CSSTransition
           in={isFlyIn}
+          nodeRef={containerRef}
           classNames={{
             enter: 'animate__animated',
             enterActive: 'animate__fadeInDown',
@@ -101,6 +106,7 @@ function Modal(props) {
           timeout={1000}
           unmountOnExit>
           <CenterContainer
+            ref={containerRef}
             padding={props.padding}
             width={props.width}
             height={props.height}
