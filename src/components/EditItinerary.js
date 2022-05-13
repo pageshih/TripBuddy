@@ -191,16 +191,18 @@ function MoveScheduleController(props) {
         <option value="" disabled>
           修改所選行程的日期
         </option>
-        {props.departTimes?.map((timestamp) => (
-          <option value={timestamp} key={timestamp}>
-            {timestampToString(timestamp, 'date')}
-          </option>
-        ))}
+        {props.departTimes
+          ?.filter((time) => time !== props.departTimes[props.day])
+          .map((timestamp) => (
+            <option value={timestamp} key={timestamp}>
+              {timestampToString(timestamp, 'date')}
+            </option>
+          ))}
       </SelectSmall>
       <TooltipNotification
         isOpen={
           props.notification.fire &&
-          props.notification.id.match('toastify')?.length === 0
+          props.notification.id.match('tooltip')?.length > 0
         }
         settingReducer={props.notification}
         resetSettingReducer={props.dispatchNotification}>

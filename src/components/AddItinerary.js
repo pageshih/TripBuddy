@@ -1182,12 +1182,13 @@ function AddSchedule(props) {
   };
   const changeSchedulesTime = async () => {
     if (!changeTime) {
+      console.log('yes');
       dispatchNotification({
         type: 'fire',
         playload: {
           type: 'warn',
           message: '請選擇要修改的行程日期',
-          id: 'changeDay',
+          id: 'tooltipChangeDay',
         },
       });
       return;
@@ -1197,7 +1198,7 @@ function AddSchedule(props) {
         playload: {
           type: 'warn',
           message: '還沒有選取行程喔！',
-          id: 'changeDay',
+          id: 'tooltipChangeDay',
         },
       });
       return;
@@ -1418,6 +1419,7 @@ function AddSchedule(props) {
                       {isAllowEdit && (
                         <FlexDiv justifyContent="flex-end" margin="0 0 20px 0">
                           <MoveScheduleController
+                            day={day}
                             departTimes={overviews.depart_times}
                             changeTime={changeTime}
                             setChangeTime={setChangeTime}
