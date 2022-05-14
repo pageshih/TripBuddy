@@ -109,7 +109,6 @@ class uploadReviewFirestore {
         'merge'
       )
       .then(() => {
-        alert('上傳成功！');
         return Promise.resolve(newGallery);
       })
       .catch((error) => console.error(error));
@@ -138,7 +137,6 @@ class updateItineraryCoverPhoto {
         cover_photo: urlAry[0],
       })
       .then(() => {
-        alert('封面圖已更新！');
         return Promise.resolve(urlAry[0]);
       })
       .catch((error) => console.error(error));

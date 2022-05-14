@@ -254,7 +254,12 @@ const ReviewTag = (props) => {
   return (
     <label name={props.tag}>
       <ReviewTagContainer id={props.tag} selectedList={props.selectedList}>
-        <p>{props.children}</p>
+        <P
+          addCss={css`
+            white-space: nowrap;
+          `}>
+          {props.children}
+        </P>
       </ReviewTagContainer>
       <input
         type="checkbox"

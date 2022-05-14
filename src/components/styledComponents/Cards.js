@@ -436,6 +436,7 @@ function OverviewCard(props) {
   const container = css`
     flex-basis: ${props.basis || (props.row ? '300px' : 'calc(50% - 60px)')};
     height: 300px;
+    min-height: 300px;
     flex-direction: column;
     border-width: 2px;
     align-items: center;
@@ -449,6 +450,11 @@ function OverviewCard(props) {
         background-color: ${palatte.darkerShadow};
       }
     }
+    ${mediaQuery[0]} {
+      flex-basis: 100%;
+      margin: auto;
+    }
+    ${props.addCss}
   `;
   const text = css`
     z-index: 1;

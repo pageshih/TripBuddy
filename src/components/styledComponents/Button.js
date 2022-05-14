@@ -31,6 +31,7 @@ const colorMap = {
     grayHover: palatte.gray[600],
     grayOutline: palatte.gray[600],
     transparent: 'transparent',
+    transparentColor: palatte.gray[800],
     transparentHover: palatte.shadow,
   },
 };
@@ -44,7 +45,7 @@ const Button = styled.button`
   padding: ${(props) => props.padding || '10px 20px'};
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
-  color: ${palatte.white};
+  color: ${({ styled }) => colorMap.button[styled + 'Color'] || palatte.white};
   background-color: ${({ styled }) => colorMap.button[styled]};
   align-self: ${(props) => props.alignSelf};
   margin-left: ${(props) => props.marginLeft};
@@ -201,12 +202,12 @@ const RoundButtonSmallWhite = styled(RoundButtonSmall)`
     props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
   height: ${(props) =>
     props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
-  color: ${palatte.gray['100']};
-  background-color: rgba(161, 163, 184, 0.5);
+  color: ${palatte.white};
+  background-color: rgba(50, 50, 50, 0.4);
   text-align: center;
   &:hover {
-    background-color: rgba(161, 163, 184, 0.3);
-    color: ${palatte.white};
+    background-color: rgba(255, 255, 255, 0.6);
+    color: ${palatte.gray[800]};
   }
   ${(props) => props.addCss};
 `;

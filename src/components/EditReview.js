@@ -1,6 +1,9 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { CSSTransition } from 'react-transition-group';
+import 'animate.css';
+import '../css/animation.css';
 import { uploadReviewFirestore } from '../utils/utilities';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
@@ -16,8 +19,14 @@ import {
   RoundButtonSmall,
   Button,
   RoundButtonSmallOutline,
+  ButtonSmall,
 } from './styledComponents/Button';
 import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+} from './styledComponents/Notification';
 
 function ReviewTags(props) {
   const tagContainer = useRef();
@@ -348,6 +357,12 @@ function AddReview(props) {
   const [showInput, setShowInput] = useState();
   const [review, setReview] = useState();
   const [reviewShowInput, setReviewShowInput] = useState(false);
+  const addReviewRef = useRef();
+  const [isDesktop, setIsDesktop] = useState();
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   const addCheckedTag = (e) => {
     e.preventDefault();
@@ -363,43 +378,82 @@ function AddReview(props) {
     }
   };
   const saveReviewToFirebase = async () => {
-    const uploadFirestore = new uploadReviewFirestore({
-      uid,
-      itineraryId: props.itineraryId,
-      scheduleId: props.scheduleId,
-      updateSchedule: {
-        review_tags: checkedReviewTags ? checkedReviewTags : [],
-        review: review ? review : '',
-      },
-      imageBuffer,
-      gallery,
-    });
-    uploadFirestore.doUpload().then((newGallery) => {
-      setGallery(newGallery);
-      setImageBuffer([]);
-      setReviewShowInput(false);
-      const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
-      setReviewTags(
-        props.allReviewTags
-          ? [
-              ...checkTagList,
-              ...reviewTags.filter(
-                (tag) =>
-                  checkedReviewTags.every((checked) => checked !== tag) && tag
-              ),
-            ]
-          : checkTagList
-      );
-      if (props.setUploadedReview) {
-        props.setUploadedReview({
-          schedule_id: props.scheduleId,
-          review_tags: checkedReviewTags,
-          review,
-          gallery: newGallery,
+    if (review || checkedReviewTags?.length > 0 || imageBuffer?.length > 0) {
+      const uploadFirestore = new uploadReviewFirestore({
+        uid,
+        itineraryId: props.itineraryId,
+        scheduleId: props.scheduleId,
+        updateSchedule: {
+          review_tags: checkedReviewTags ? checkedReviewTags : [],
+          review: review ? review : '',
+        },
+        imageBuffer,
+        gallery,
+      });
+      uploadFirestore.doUpload().then((newGallery) => {
+        setGallery(newGallery);
+        setImageBuffer([]);
+        setReviewShowInput(false);
+        const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
+        setReviewTags(
+          props.allReviewTags
+            ? [
+                ...checkTagList,
+                ...reviewTags.filter(
+                  (tag) =>
+                    checkedReviewTags.every((checked) => checked !== tag) && tag
+                ),
+              ]
+            : checkTagList
+        );
+
+        if (props.setUploadedReview) {
+          props.setUploadedReview({
+            schedule_id: props.scheduleId,
+            review_tags: checkedReviewTags,
+            review,
+            gallery: newGallery,
+          });
+        }
+        if (props.showReview && !isDesktop) {
+          props.setShowReview(false);
+        }
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'success',
+            message: '上傳成功',
+            id: 'toastifyUploadSuccess',
+          },
         });
+      });
+    } else {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '還沒有加入內容喔！',
+          id: 'toastifyEmpty',
+        },
+      });
+    }
+  };
+  useEffect(() => {
+    if (window.innerWidth > 992) {
+      props.setShowReview(true);
+      setIsDesktop(true);
+    } else {
+      props.setShowReview(false);
+      setIsDesktop(false);
+    }
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        setIsDesktop(true);
+      } else {
+        setIsDesktop(false);
       }
     });
-  };
+  }, []);
   useEffect(() => {
     if (props.allReviewTags?.length > 0) {
       setShowInput(false);
@@ -436,16 +490,22 @@ function AddReview(props) {
     border: 1px solid ${palatte.primary.basic};
     padding: 30px 40px 40px 40px;
     `}
-    flex:1;
+    max-width: 100%;
+    flex: 1;
     position: relative;
     ${mediaQuery[0]} {
+      ${!props.isJournal &&
+      `
       position: fixed;
       border-radius: 0;
       width: 100%;
       bottom: 75px;
       left: 0;
       z-index: 10;
+      gap: 10px;
+      `}
     }
+    ${props.addCss}
   `;
   const dialogTriangle = css`
     width: 20px;
@@ -463,75 +523,114 @@ function AddReview(props) {
   `;
 
   return (
-    <FlexDiv
-      direction="column"
-      gap="15px"
-      css={reviewContainer}
-      display={props.display}>
-      {!props.isJournal && (
-        <>
-          <div css={dialogTriangle}></div>
-          <H6>你覺得這個景點如何？</H6>
-        </>
-      )}
-
-      <ReviewTags
-        defaultTags={reviewTags}
-        inputTag={addTag}
-        setInputTag={setAddTag}
-        checkedTags={checkedReviewTags}
-        setCheckedTags={setCheckedReviewTags}
-        onSubmit={addCheckedTag}
-        isEdit={props.isEdit}
-        showInput={showInput}
-        setShowInput={setShowInput}
+    <>
+      <Notification
+        type={notification.type}
+        fire={notification.fire}
+        message={notification.message}
+        id={notification.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
       />
-
-      <ReviewGallery
-        isEdit={props.isEdit}
-        gallery={gallery}
-        setGallery={setGallery}
-        imageBuffer={imageBuffer}
-        setImageBuffer={setImageBuffer}
-      />
-
-      <FlexDiv direction="column">
-        {props.isEdit && props.isJournal ? (
-          <TextAreaReview
-            type="textarea"
-            placeholder="添加一點旅行後的心得吧！"
-            value={review}
-            isEmptyInput={review && false}
-            readOnly={reviewShowInput}
-            onChange={(e) => {
-              setReview(e.target.value);
-            }}
-            onClick={() => {
-              setReviewShowInput(false);
-            }}
+      <CSSTransition
+        nodeRef={addReviewRef}
+        timeout={600}
+        in={props.showReview}
+        classNames={{
+          enter: 'animate__animated',
+          enterActive: 'animate__fadeInUp',
+          exit: 'animate__animated',
+          exitActive: 'animate__fadeOutDown',
+        }}
+        unmountOnExit>
+        <FlexDiv
+          ref={addReviewRef}
+          direction="column"
+          gap="15px"
+          css={reviewContainer}
+          position="relative"
+          display={props.display}>
+          {!props.isJournal && (
+            <>
+              <div css={dialogTriangle}></div>
+              <H6>你覺得這個景點如何？</H6>
+              <RoundButtonSmall
+                styled="transparent"
+                className="material-icons"
+                width="fit-content"
+                addCss={css`
+                  display: none;
+                  ${mediaQuery[0]} {
+                    display: block;
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    padding: 5px;
+                  }
+                `}
+                onClick={() => props.setShowReview(false)}>
+                close
+              </RoundButtonSmall>
+            </>
+          )}
+          <ReviewTags
+            defaultTags={reviewTags}
+            inputTag={addTag}
+            setInputTag={setAddTag}
+            checkedTags={checkedReviewTags}
+            setCheckedTags={setCheckedReviewTags}
+            onSubmit={addCheckedTag}
+            isEdit={props.isEdit}
+            showInput={showInput}
+            setShowInput={setShowInput}
           />
-        ) : (
-          <P>{review}</P>
-        )}
-        {props.isEdit && (
-          <Button
-            addCss={css`
-              margin-top: 10px;
-              align-self: flex-end;
-              ${mediaQuery[0]} {
-                width: 100%;
-                font-size: 16px;
-              }
-            `}
-            styled="primary"
-            width="fit-content"
-            type="click"
-            onClick={saveReviewToFirebase}>
-            儲存心得
-          </Button>
-        )}
-      </FlexDiv>
-    </FlexDiv>
+
+          <ReviewGallery
+            isEdit={props.isEdit}
+            gallery={gallery}
+            setGallery={setGallery}
+            imageBuffer={imageBuffer}
+            setImageBuffer={setImageBuffer}
+          />
+
+          <FlexDiv direction="column">
+            {props.isEdit && props.isJournal ? (
+              <TextAreaReview
+                type="textarea"
+                placeholder="添加一點旅行後的心得吧！"
+                value={review}
+                isEmptyInput={review && false}
+                readOnly={reviewShowInput}
+                onChange={(e) => {
+                  setReview(e.target.value);
+                }}
+                onClick={() => {
+                  setReviewShowInput(false);
+                }}
+              />
+            ) : (
+              <P>{review}</P>
+            )}
+            {props.isEdit && (
+              <Button
+                addCss={css`
+                  margin-top: 10px;
+                  align-self: flex-end;
+                  ${mediaQuery[0]} {
+                    width: 100%;
+                    font-size: 16px;
+                  }
+                `}
+                styled="primary"
+                width="fit-content"
+                type="click"
+                onClick={saveReviewToFirebase}>
+                儲存心得
+              </Button>
+            )}
+          </FlexDiv>
+        </FlexDiv>
+      </CSSTransition>
+    </>
   );
 }
 

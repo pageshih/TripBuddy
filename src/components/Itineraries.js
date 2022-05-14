@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
@@ -50,7 +50,8 @@ const ExploreSpot = (props) => {
 };
 
 function Itineraries() {
-  const { uid, map, reviewTags } = useContext(Context);
+  const { uid, map } = useContext(Context);
+  const { reviewTags } = useOutletContext();
   const navigate = useNavigate();
   const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
@@ -184,6 +185,8 @@ function Itineraries() {
                                       添加心得
                                     </Button>
                                     <AddReview
+                                      showReview={showReview}
+                                      setShowReview={setShowReview}
                                       key={schedule.schedule_id}
                                       itineraryId={
                                         progressing.overview.itinerary_id
@@ -222,7 +225,17 @@ function Itineraries() {
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>即將到來的行程</H4>
-                  <FlexDiv as="ul" gap="30px" overflowX="auto">
+                  <FlexDiv
+                    as="ul"
+                    gap="30px"
+                    overflowX="auto"
+                    addCss={css`
+                      ${mediaQuery[0]} {
+                        flex-wrap: wrap;
+                        overflow-x: unset;
+                        gap: 30px;
+                      }
+                    `}>
                     {coming?.map((itinerary) => (
                       <OverviewCard
                         src={itinerary.cover_photo}
@@ -243,7 +256,17 @@ function Itineraries() {
               {future?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>其他行程</H4>
-                  <FlexDiv as="ul" gap="60px" overflowX="auto">
+                  <FlexDiv
+                    as="ul"
+                    gap="60px"
+                    overflowX="auto"
+                    addCss={css`
+                      ${mediaQuery[0]} {
+                        flex-wrap: wrap;
+                        overflow-x: unset;
+                        gap: 30px;
+                      }
+                    `}>
                     {future?.map((itinerary) => (
                       <OverviewCard
                         as="li"

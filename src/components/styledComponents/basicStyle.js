@@ -72,7 +72,7 @@ const Logo = (props) => {
     font-size: 64px;
     color: ${palatte.primary.basic};
     ${mediaQuery[0]} {
-      font-size: 48px;
+      font-size: ${!props.small && !props.underline && '48px'};
     }
   `;
   const ellipse = css`
