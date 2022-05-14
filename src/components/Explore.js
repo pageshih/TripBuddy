@@ -1,5 +1,5 @@
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
@@ -26,7 +26,12 @@ import {
   palatte,
   TextWithIcon,
 } from './styledComponents/basicStyle';
-import { NotificationText } from './styledComponents/Notification';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+  NotificationText,
+} from './styledComponents/Notification';
 
 function Map({
   setMap,
@@ -456,6 +461,10 @@ function Explore({ setWaitingSpots }) {
   const [isShowSideColumn, setIsShowSideColumn] = useState(false);
   const sideWindowRef = useRef();
   const navigate = useNavigate();
+  const [notificationSetting, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -478,8 +487,6 @@ function Explore({ setWaitingSpots }) {
       setIsShowSavedSpots(true);
       setIsShowSideColumn(true);
       sideWindowRef.current.scrollTop = sideWindowRef.current.scrollHeight;
-    } else {
-      alert('此景點已在候補清單中！');
     }
   };
   const removeFromSavedSpots = (idAry) => {
@@ -531,6 +538,13 @@ function Explore({ setWaitingSpots }) {
   `;
   return (
     <>
+      <Notification
+        type={notificationSetting.type}
+        fire={notificationSetting.fire}
+        message={notificationSetting.message}
+        id={notificationSetting.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
       {uid && (
         <>
           <FlexDiv height="100vh">

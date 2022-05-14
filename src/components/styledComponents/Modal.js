@@ -7,7 +7,7 @@ import 'animate.css';
 import '../../css/animation.css';
 import { useEffect, useRef, useState } from 'react';
 import { Button, ButtonOutline } from './Button';
-import { FlexChildDiv, FlexDiv } from './Layout';
+import { FlexChildDiv, FlexDiv, Container } from './Layout';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
@@ -120,7 +120,9 @@ function Modal(props) {
               className="material-icons">
               close
             </CloseBtn>
-            {props.children}
+            <Container overflowY="auto" height="100%">
+              {props.children}
+            </Container>
           </CenterContainer>
         </CSSTransition>
       </FadeBg>
@@ -153,9 +155,8 @@ function Confirm(props) {
           </ButtonOutline>
           <Button
             styled={props.yesBtnStyle || 'primary'}
-            onClick={async () => {
-              await props.yesAction();
-              props.setIsShowState(false);
+            onClick={() => {
+              props.yesAction();
             }}>
             {props.yesMessage || '確認'}
           </Button>

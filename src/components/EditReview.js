@@ -439,20 +439,25 @@ function AddReview(props) {
     }
   };
   useEffect(() => {
-    if (window.innerWidth > 992) {
-      props.setShowReview(true);
-      setIsDesktop(true);
-    } else {
-      props.setShowReview(false);
-      setIsDesktop(false);
-    }
-    window.addEventListener('resize', () => {
+    const checkDesktop = () => {
       if (window.innerWidth > 992) {
         setIsDesktop(true);
       } else {
         setIsDesktop(false);
       }
-    });
+    };
+    checkDesktop();
+    if (props.setShowReview) {
+      if (isDesktop) {
+        props.setShowReview(true);
+      } else {
+        props.setShowReview(false);
+      }
+    }
+    window.addEventListener('resize', checkDesktop);
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+    };
   }, []);
   useEffect(() => {
     if (props.allReviewTags?.length > 0) {
@@ -534,7 +539,7 @@ function AddReview(props) {
       <CSSTransition
         nodeRef={addReviewRef}
         timeout={600}
-        in={props.showReview}
+        in={isDesktop ? true : props.showReview}
         classNames={{
           enter: 'animate__animated',
           enterActive: 'animate__fadeInUp',
@@ -567,7 +572,9 @@ function AddReview(props) {
                     padding: 5px;
                   }
                 `}
-                onClick={() => props.setShowReview(false)}>
+                onClick={() =>
+                  props.setShowReview && props.setShowReview(false)
+                }>
                 close
               </RoundButtonSmall>
             </>

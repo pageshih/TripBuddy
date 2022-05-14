@@ -21,7 +21,7 @@ import {
 import { AddReview, AddReviewTags } from './EditReview';
 import { Overview } from './EditItinerary';
 import { Pagination } from './Pagination';
-import { Modal } from './styledComponents/Modal';
+import { Modal, Confirm } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
 import {
   Button,
@@ -37,7 +37,12 @@ import {
   palatte,
 } from './styledComponents/basicStyle';
 import { Accordion } from './styledComponents/Accordion';
-import { Select, TextInput } from './styledComponents/Form';
+import { Select, TextInput, CustomTimePicker } from './styledComponents/Form';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+} from './styledComponents/Notification';
 
 function TravelJournalDetail() {
   const { uid, map } = useContext(Context);
@@ -52,6 +57,10 @@ function TravelJournalDetail() {
   const [uploadedReview, setUploadedReview] = useState();
   const [showAddSchedule, setShowAddSchedule] = useState();
   const [isAddingSchedule, setIsAddingSchedule] = useState();
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   const initialSchedule = {
     start_time: '',
@@ -76,9 +85,9 @@ function TravelJournalDetail() {
           start_time: action.playload,
         };
       case 'choseTime':
-        const startTime = new Date(
-          state.start_time > 0 ? state.start_time : overviews.start_date
-        ).setHours(Number(action.playload[0]), Number(action.playload[1]));
+        const startTime = new Date(action.playload).setDate(
+          new Date(state.start_time).getDate()
+        );
         return {
           ...state,
           start_time: startTime,
@@ -108,7 +117,14 @@ function TravelJournalDetail() {
         .addSchedule(uid, overviews.itinerary_id, addSchedule)
         .then((newSchedule) => {
           setShowAddSchedule(false);
-          alert('已加入行程');
+          dispatchNotification({
+            type: 'fire',
+            playload: {
+              type: 'success',
+              message: '已加入行程',
+              id: 'toastifyUpload',
+            },
+          });
           setIsAddingSchedule(false);
           overviews.depart_times.forEach((timestamp, index, array) => {
             if (
@@ -131,7 +147,20 @@ function TravelJournalDetail() {
     firestore
       .deleteSchedule(uid, journalID, scheduleId)
       .then(() => {
-        console.log('刪除成功！');
+        const newScheduleList = scheduleList.filter(
+          (oldSchedule) => oldSchedule.schedule_id !== scheduleId
+        );
+        setScheduleList(newScheduleList);
+        allSchedules.current[day] = newScheduleList;
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'success',
+            message: '刪除成功',
+            id: 'toastifyDeleted',
+          },
+        });
+        dispatchNotification({ type: 'close' });
       })
       .catch((error) => console.error(error));
   };
@@ -172,120 +201,136 @@ function TravelJournalDetail() {
   };
   return (
     <>
+      <Notification
+        type={notification.type}
+        fire={
+          notification.fire && notification.id.match('toastify')?.length > 0
+        }
+        message={notification.message}
+        id={notification.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
+      <Confirm
+        dispatchIsShowReducer={dispatchNotification}
+        isShowState={
+          notification.fire && notification.id.match('confirm')?.length > 0
+        }
+        confirmMessage={notification.message}
+        yesMessage="刪除"
+        yesBtnStyle="danger"
+        noBtnStyle="gray"
+        yesAction={notification.yesAction}
+      />
       {overviews && scheduleList ? (
         <>
-          {showAddSchedule && (
-            <Modal
-              close={() => setShowAddSchedule(false)}
-              minWidth="80%"
-              height="80%">
-              <FlexDiv direction="column" height="100%">
-                {isAddingSchedule ? (
-                  <Loader />
-                ) : (
-                  <>
-                    <SearchBar
-                      placeholder="輸入要加入的景點"
-                      dispatch={(place) =>
-                        dispatchAddSchedule({
-                          type: 'changePlace',
-                          playload: place,
-                        })
+          <Modal
+            isShowState={showAddSchedule}
+            close={() => setShowAddSchedule(false)}
+            minWidth="80%"
+            height="80%">
+            <FlexDiv direction="column" height="100%">
+              {isAddingSchedule ? (
+                <Loader />
+              ) : (
+                <>
+                  <SearchBar
+                    placeholder="輸入要加入的景點"
+                    dispatch={(place) =>
+                      dispatchAddSchedule({
+                        type: 'changePlace',
+                        playload: place,
+                      })
+                    }
+                    map={map}
+                    addCss={{
+                      container: { position: 'relative', width: '100%' },
+                    }}
+                    option={{
+                      fields: [
+                        'name',
+                        'place_id',
+                        'formatted_address',
+                        'photos',
+                        'url',
+                      ],
+                    }}
+                  />
+                  {addSchedule.placeDetail && (
+                    <SpotCard
+                      imgSrc={addSchedule.placeDetail.photos[0]}
+                      imgAlt={addSchedule.placeDetail.name}
+                      title={addSchedule.placeDetail.name}
+                      address={addSchedule.placeDetail.formatted_address}
+                      onClick={() =>
+                        window.open(addSchedule.placeDetail.url, '_blank')
                       }
-                      map={map}
-                      addCss={{
-                        container: { position: 'relative', width: '100%' },
-                      }}
-                      option={{
-                        fields: [
-                          'name',
-                          'place_id',
-                          'formatted_address',
-                          'photos',
-                          'url',
-                        ],
+                      addCss={css`
+                        padding: 20px;
+                      `}
+                    />
+                  )}
+                  <FlexChildDiv
+                    display="flex"
+                    direction="column"
+                    gap="20px"
+                    padding="20px"
+                    grow="1">
+                    <Select
+                      defaultValue=""
+                      onChange={(e) =>
+                        dispatchAddSchedule({
+                          type: 'choseDate',
+                          playload: Number(e.target.value),
+                        })
+                      }>
+                      <option value="" disabled>
+                        ---請選擇日期---
+                      </option>
+                      {overviews.depart_times.map((timestamp) => (
+                        <option value={timestamp} key={timestamp}>
+                          {timestampToString(timestamp, 'date')}
+                        </option>
+                      ))}
+                    </Select>
+                    <CustomTimePicker
+                      value={addSchedule.start_time}
+                      onChange={(newValue) => {
+                        console.log(newValue);
+                        dispatchAddSchedule({
+                          type: 'choseTime',
+                          playload: newValue,
+                        });
                       }}
                     />
-                    {addSchedule.placeDetail && (
-                      <SpotCard
-                        imgSrc={addSchedule.placeDetail.photos[0]}
-                        imgAlt={addSchedule.placeDetail.name}
-                        title={addSchedule.placeDetail.name}
-                        address={addSchedule.placeDetail.formatted_address}
-                        onClick={() =>
-                          window.open(addSchedule.placeDetail.url, '_blank')
-                        }
-                        addCss={css`
-                          padding: 20px;
-                        `}
-                      />
-                    )}
-                    <FlexChildDiv
-                      display="flex"
-                      direction="column"
-                      gap="20px"
-                      padding="20px"
-                      grow="1">
-                      <Select
-                        defaultValue=""
+                    <FlexDiv gap="10px" alignItems="center">
+                      <P>停留時間</P>
+                      <TextInput
+                        type="number"
+                        min="30"
+                        max="1440"
+                        value={addSchedule.duration}
+                        step="30"
+                        width="fit-content"
                         onChange={(e) =>
                           dispatchAddSchedule({
-                            type: 'choseDate',
+                            type: 'addDuration',
                             playload: Number(e.target.value),
                           })
-                        }>
-                        <option value="" disabled>
-                          ---請選擇日期---
-                        </option>
-                        {overviews.depart_times.map((timestamp) => (
-                          <option value={timestamp} key={timestamp}>
-                            {timestampToString(timestamp, 'date')}
-                          </option>
-                        ))}
-                      </Select>
-                      <TextInput
-                        type="time"
-                        value={
-                          addSchedule.start_time &&
-                          timestampToTimeInput(addSchedule.start_time)
                         }
-                        onChange={(e) => {
-                          dispatchAddSchedule({
-                            type: 'choseTime',
-                            playload: e.target.value.split(':'),
-                          });
-                        }}
                       />
-                      <FlexDiv gap="10px" alignItems="center">
-                        <P>停留時間</P>
-                        <TextInput
-                          type="number"
-                          min="0"
-                          max="1440"
-                          value={addSchedule.duration}
-                          step="30"
-                          width="fit-content"
-                          onChange={(e) =>
-                            dispatchAddSchedule({
-                              type: 'addDuration',
-                              playload: Number(e.target.value),
-                            })
-                          }
-                        />
-                        <P>分鐘</P>
-                      </FlexDiv>
-                      <Button
-                        styled="primary"
-                        margin="auto 0 0 0"
-                        onClick={uploadNewSchedule}>
-                        新增行程
-                      </Button>
-                    </FlexChildDiv>
-                  </>
-                )}
-              </FlexDiv>
-            </Modal>
-          )}
+                      <P>分鐘</P>
+                    </FlexDiv>
+                    <Button
+                      styled="primary"
+                      margin="auto 0 0 0"
+                      onClick={uploadNewSchedule}>
+                      新增行程
+                    </Button>
+                  </FlexChildDiv>
+                </>
+              )}
+            </FlexDiv>
+          </Modal>
 
           <Overview
             containerCss={styles.containerSetting}
@@ -365,7 +410,7 @@ function TravelJournalDetail() {
                   <Accordion
                     isDefualtExpand
                     addCss={css`
-                      max-width: calc(100% - 40px);
+                      max-width: ${isAllowEdit && 'calc(100% - 40px)'};
                     `}
                     titleElement={
                       <FlexDiv gap="30px" alignItems="center">
@@ -425,19 +470,17 @@ function TravelJournalDetail() {
                         }
                       `}
                       className="material-icons"
-                      onClick={async () => {
-                        const isDelete = window.confirm(
-                          `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`
-                        );
-                        if (isDelete) {
-                          await deleteSchedule(schedule.schedule_id);
-                          const newScheduleList = scheduleList.filter(
-                            (oldSchedule) =>
-                              oldSchedule.schedule_id !== schedule.schedule_id
-                          );
-                          setScheduleList(newScheduleList);
-                          allSchedules.current[day] = newScheduleList;
-                        }
+                      onClick={() => {
+                        dispatchNotification({
+                          type: 'fire',
+                          playload: {
+                            id: 'confirmDelete',
+                            message: `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`,
+                            yesAction: () => {
+                              deleteSchedule(schedule.schedule_id);
+                            },
+                          },
+                        });
                       }}>
                       delete
                     </RoundButtonSmall>

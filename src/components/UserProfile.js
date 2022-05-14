@@ -1,8 +1,9 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import defaultUserIcon from '../images/user-avatar-filled.svg';
 import { firebaseAuth, firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -33,7 +34,11 @@ import {
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
-import defaultUserIcon from '../images/user-avatar-filled.svg';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+} from './styledComponents/Notification';
 
 const activeStyle = (isActive) => {
   return {
@@ -53,6 +58,10 @@ function UserSetting(props) {
   const [addTag, setAddTag] = useState('');
   const addTagInput = useRef();
   const [travelMode, setTravelMode] = useState();
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
   const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
     try {
       const urlAry = await firebaseStorage.uploadImages(
@@ -62,7 +71,14 @@ function UserSetting(props) {
       );
       await firestore.editProfile(uid, { photo: urlAry[0] });
       props.setProfile({ ...props.profile, photo: urlAry[0] });
-      alert('大頭貼已更新！');
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'success',
+          message: '大頭貼已更新',
+          id: 'taostifyUpdate',
+        },
+      });
       setIsShowModal(false);
     } catch (error) {
       console.log(error);
@@ -80,195 +96,205 @@ function UserSetting(props) {
   }, []);
 
   return (
-    <Modal
-      minWidth="70%"
-      height="90%"
-      padding="20px 40px"
-      isShowState={props.isShowState}
-      close={() => props.setIsShowSetting(false)}>
-      <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
-        <FlexDiv
-          gap="20px"
-          alignItems="center"
-          padding="0 0 30px 0"
-          addCss={css`
-            border-bottom: 1px solid ${palatte.gray['400']};
-          `}>
-          <div
-            css={css`
-              position: relative;
+    <>
+      <Notification
+        type={notification.type}
+        fire={notification.fire}
+        message={notification.message}
+        id={notification.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
+
+      <Modal
+        minWidth="70%"
+        height="90%"
+        padding="20px 40px"
+        isShowState={props.isShowState}
+        close={() => props.setIsShowSetting(false)}>
+        <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
+          <FlexDiv
+            gap="20px"
+            alignItems="center"
+            padding="0 0 30px 0"
+            addCss={css`
+              border-bottom: 1px solid ${palatte.gray['400']};
             `}>
-            <Image
-              size="80px"
-              round
-              shadow
-              addCss={css`
-                border: 1px solid ${palatte.gray['100']};
-              `}
-              src={props.profile.photo || defaultUserIcon}
-              alt={props.profile.name}
-            />
-            <AddImageRoundBtn
-              addCss={css`
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                font-size: 16px;
-              `}
-              styled="primary"
-              icon="edit"
-              confirmMessage="確定上傳大頭照？"
-              upload={updateProfilePhoto}
-            />
-          </div>
-          <FlexDiv direction="column" gap="8px">
-            <EditableText
-              isAllowEdit
-              level="5"
-              fontSize="24px"
-              onSubmit={updateUserName}>
-              {props.profile.name || ''}
-            </EditableText>
-            <P fontSize="14px" color={palatte.gray['400']}>
-              用戶ID：{props.profile.uid}
-            </P>
-          </FlexDiv>
-        </FlexDiv>
-        <FlexDiv alignItems="center" gap="5px">
-          <span
-            className="material-icons"
-            css={css`
-              color: ${palatte.gray['700']};
-            `}>
-            settings
-          </span>
-          <H5 fontSize="24px" fontWeight={500}>
-            設置
-          </H5>
-        </FlexDiv>
-        <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="auto">
-          <Accordion
-            titleElement={
-              <SettingTitle
-                title="紀錄心得標籤"
-                subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
-              />
-            }>
-            <FlexDiv direction="column" gap="15px" height="100%">
-              <form
-                css={css`
-                  position: relative;
+            <div
+              css={css`
+                position: relative;
+              `}>
+              <Image
+                size="80px"
+                round
+                shadow
+                addCss={css`
+                  border: 1px solid ${palatte.gray['100']};
                 `}
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (addTag) {
-                    const newReviewTags = props.reviewTags
-                      ? [...props.reviewTags, addTag]
-                      : [addTag];
-                    await firestore.editProfile(uid, {
-                      review_tags: newReviewTags,
-                    });
-                    props.setReviewTags(newReviewTags);
-                    setAddTag('');
-                  }
-                }}>
-                <TextInput
-                  placeholder="新增標籤"
-                  value={addTag}
-                  ref={addTagInput}
-                  onChange={(e) => setAddTag(e.target.value)}
-                />
-                <FlexDiv
-                  gap="5px"
-                  addCss={css`
-                    position: absolute;
-                    right: 12px;
-                    top: calc(50% - 12px);
-                  `}>
-                  <RoundButtonSmall
-                    className="material-icons"
-                    type="submit"
-                    addCss={css`
-                      color: ${palatte.gray['500']};
-                      &:hover {
-                        color: ${palatte.primary.basic};
-                      }
-                    `}>
-                    done
-                  </RoundButtonSmall>
-                  <RoundButtonSmall
-                    className="material-icons"
-                    type="button"
-                    addCss={css`
-                      color: ${palatte.gray['500']};
-                      &:hover {
-                        color: ${palatte.danger.basic};
-                      }
-                    `}
-                    onClick={() => {
-                      setAddTag('');
-                      addTagInput.current.focus();
-                    }}>
-                    close
-                  </RoundButtonSmall>
-                </FlexDiv>
-              </form>
-              <FlexDiv gap="5px">
-                {props.reviewTags?.length > 0 ? (
-                  props.reviewTags.map((tag) => (
-                    <ReviewTagRemoveButton
-                      styled="primary"
-                      key={tag}
-                      onClick={async () => {
-                        const newReviewTags = props.reviewTags.filter(
-                          (originTag) => originTag !== tag
-                        );
-                        await firestore.editProfile(uid, {
-                          review_tags: newReviewTags,
-                        });
-                        props.setReviewTags(newReviewTags);
-                      }}>
-                      {tag}
-                    </ReviewTagRemoveButton>
-                  ))
-                ) : (
-                  <P color={palatte.gray['500']}>尚未添加心得標籤</P>
-                )}
-              </FlexDiv>
-            </FlexDiv>
-          </Accordion>
-          <Accordion
-            titleElement={
-              <SettingTitle
-                title="預設交通方式"
-                subTitle="編輯行程會自動以選定的交通方式計算到景點的時間與距離"
+                src={props.profile.photo || defaultUserIcon}
+                alt={props.profile.name}
               />
-            }>
-            <Select
-              value={travelMode}
-              onChange={(e) => {
-                const newTravelMode = e.target.value;
-                setTravelMode('loading');
-                firestore
-                  .setItinerariesSetting(uid, {
-                    default_travel_mode: newTravelMode,
-                  })
-                  .then(() => {
-                    setTravelMode(newTravelMode);
-                  });
-              }}>
-              <option value="loading" disabled hidden>
-                ...
-              </option>
-              <option value="DRIVING">開車</option>
-              <option value="TRANSIT">大眾運輸</option>
-              <option value="WALKING">走路</option>
-              <option value="BICYCLING">騎自行車</option>
-            </Select>
-          </Accordion>
-        </FlexChildDiv>
-      </FlexDiv>
-    </Modal>
+              <AddImageRoundBtn
+                addCss={css`
+                  position: absolute;
+                  bottom: 0;
+                  right: 0;
+                  font-size: 16px;
+                `}
+                styled="primary"
+                icon="edit"
+                confirmMessage="確定上傳大頭照？"
+                upload={updateProfilePhoto}
+              />
+            </div>
+            <FlexDiv direction="column" gap="8px">
+              <EditableText
+                isAllowEdit
+                level="5"
+                fontSize="24px"
+                onSubmit={updateUserName}>
+                {props.profile.name || ''}
+              </EditableText>
+              <P fontSize="14px" color={palatte.gray['400']}>
+                用戶ID：{props.profile.uid}
+              </P>
+            </FlexDiv>
+          </FlexDiv>
+          <FlexDiv alignItems="center" gap="5px">
+            <span
+              className="material-icons"
+              css={css`
+                color: ${palatte.gray['700']};
+              `}>
+              settings
+            </span>
+            <H5 fontSize="24px" fontWeight={500}>
+              設置
+            </H5>
+          </FlexDiv>
+          <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="auto">
+            <Accordion
+              titleElement={
+                <SettingTitle
+                  title="紀錄心得標籤"
+                  subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
+                />
+              }>
+              <FlexDiv direction="column" gap="15px" height="100%">
+                <form
+                  css={css`
+                    position: relative;
+                  `}
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (addTag) {
+                      const newReviewTags = props.reviewTags
+                        ? [...props.reviewTags, addTag]
+                        : [addTag];
+                      await firestore.editProfile(uid, {
+                        review_tags: newReviewTags,
+                      });
+                      props.setReviewTags(newReviewTags);
+                      setAddTag('');
+                    }
+                  }}>
+                  <TextInput
+                    placeholder="新增標籤"
+                    value={addTag}
+                    ref={addTagInput}
+                    onChange={(e) => setAddTag(e.target.value)}
+                  />
+                  <FlexDiv
+                    gap="5px"
+                    addCss={css`
+                      position: absolute;
+                      right: 12px;
+                      top: calc(50% - 12px);
+                    `}>
+                    <RoundButtonSmall
+                      className="material-icons"
+                      type="submit"
+                      addCss={css`
+                        color: ${palatte.gray['500']};
+                        &:hover {
+                          color: ${palatte.primary.basic};
+                        }
+                      `}>
+                      done
+                    </RoundButtonSmall>
+                    <RoundButtonSmall
+                      className="material-icons"
+                      type="button"
+                      addCss={css`
+                        color: ${palatte.gray['500']};
+                        &:hover {
+                          color: ${palatte.danger.basic};
+                        }
+                      `}
+                      onClick={() => {
+                        setAddTag('');
+                        addTagInput.current.focus();
+                      }}>
+                      close
+                    </RoundButtonSmall>
+                  </FlexDiv>
+                </form>
+                <FlexDiv gap="5px">
+                  {props.reviewTags?.length > 0 ? (
+                    props.reviewTags.map((tag) => (
+                      <ReviewTagRemoveButton
+                        styled="primary"
+                        key={tag}
+                        onClick={async () => {
+                          const newReviewTags = props.reviewTags.filter(
+                            (originTag) => originTag !== tag
+                          );
+                          await firestore.editProfile(uid, {
+                            review_tags: newReviewTags,
+                          });
+                          props.setReviewTags(newReviewTags);
+                        }}>
+                        {tag}
+                      </ReviewTagRemoveButton>
+                    ))
+                  ) : (
+                    <P color={palatte.gray['500']}>尚未添加心得標籤</P>
+                  )}
+                </FlexDiv>
+              </FlexDiv>
+            </Accordion>
+            <Accordion
+              titleElement={
+                <SettingTitle
+                  title="預設交通方式"
+                  subTitle="編輯行程會自動以選定的交通方式計算到景點的時間與距離"
+                />
+              }>
+              <Select
+                value={travelMode}
+                onChange={(e) => {
+                  const newTravelMode = e.target.value;
+                  setTravelMode('loading');
+                  firestore
+                    .setItinerariesSetting(uid, {
+                      default_travel_mode: newTravelMode,
+                    })
+                    .then(() => {
+                      setTravelMode(newTravelMode);
+                    });
+                }}>
+                <option value="loading" disabled hidden>
+                  ...
+                </option>
+                <option value="DRIVING">開車</option>
+                <option value="TRANSIT">大眾運輸</option>
+                <option value="WALKING">走路</option>
+                <option value="BICYCLING">騎自行車</option>
+              </Select>
+            </Accordion>
+          </FlexChildDiv>
+        </FlexDiv>
+      </Modal>
+    </>
   );
 }
 function UserProfile(props) {
@@ -278,21 +304,6 @@ function UserProfile(props) {
   const [reviewTags, setReviewTags] = useState();
   const [isShowSetting, setIsShowSetting] = useState();
   const navigate = useNavigate();
-  const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
-    try {
-      const urlAry = await firebaseStorage.uploadImages(
-        [uid],
-        imageBuffer,
-        'profile_photo'
-      );
-      await firestore.editProfile(uid, { photo: urlAry[0] });
-      props.setProfile({ ...props.profile, photo: urlAry[0] });
-      alert('大頭貼已更新！');
-      setIsShowModal(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const userProfileWrapper = css`
     border-radius: 30px;
     padding: 25px 20px 25px 25px;

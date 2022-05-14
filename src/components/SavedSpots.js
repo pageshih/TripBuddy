@@ -53,7 +53,17 @@ function SavedSpots(props) {
     setSavedSpots(newSavedSpots);
     firestore
       .deleteSavedSpots(uid, selectedSpotList)
-      .then(() => alert('景點已刪除！'))
+      .then(() => {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'success',
+            message: '景點已刪除',
+            id: 'taostifyDeleted',
+          },
+        });
+        dispatchNotification({ type: 'close' });
+      })
       .catch((error) => console.error(error));
   };
   const addSelectSpotsToItinerary = () => {
