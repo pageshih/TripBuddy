@@ -42,15 +42,11 @@ const firebaseAuth = {
   auth: getAuth(app),
   provider: new GoogleAuthProvider(),
   signIn(email, password) {
-    return signInWithEmailAndPassword(this.auth, email, password).catch(
-      (error) => {
-        alert(error.message);
-      }
-    );
+    return signInWithEmailAndPassword(this.auth, email, password);
   },
   signUp(email, password, name) {
-    return createUserWithEmailAndPassword(this.auth, email, password)
-      .then((res) => {
+    return createUserWithEmailAndPassword(this.auth, email, password).then(
+      (res) => {
         firestore.setDefaultAccount(res.user.uid, {
           name,
           uid: res.user.uid,
@@ -58,25 +54,19 @@ const firebaseAuth = {
           reviews: [],
         });
         return Promise.resolve(res.user.uid);
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+      }
+    );
   },
   googleLogIn() {
-    return signInWithPopup(this.auth, this.provider)
-      .then((res) => {
-        firestore.setDefaultAccount(res.user.uid, {
-          name: res.user.displayName,
-          uid: res.user.uid,
-          photo: res.user.photoURL,
-          reviews: [],
-        });
-        return Promise.resolve(res.user.uid);
-      })
-      .catch((error) => {
-        alert(error.message);
+    return signInWithPopup(this.auth, this.provider).then((res) => {
+      firestore.setDefaultAccount(res.user.uid, {
+        name: res.user.displayName,
+        uid: res.user.uid,
+        photo: res.user.photoURL,
+        reviews: [],
       });
+      return Promise.resolve(res.user.uid);
+    });
   },
   userSignOut() {
     return signOut(this.auth);

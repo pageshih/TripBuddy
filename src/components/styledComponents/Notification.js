@@ -137,7 +137,7 @@ function TooltipNotification(props) {
   );
 }
 function NotificationText(props) {
-  const notification = useRef();
+  const notificationRef = useRef();
   const [isOpen, setIsOpen] = useState();
   useEffect(() => {
     if (props.children) {
@@ -148,7 +148,7 @@ function NotificationText(props) {
   }, [props.children]);
   return (
     <CSSTransition
-      nodeRef={notification}
+      nodeRef={notificationRef}
       in={isOpen}
       classNames={{
         enter: 'animate__animated',
@@ -158,7 +158,7 @@ function NotificationText(props) {
       }}
       timeout={400}
       unmountOnExit>
-      <div ref={notification}>
+      <div ref={notificationRef}>
         <TextWithIcon
           iconName={tooltipMap[props.type].icon}
           color={tooltipMap[props.type].basicColor}

@@ -17,6 +17,7 @@ import { TextInput } from './styledComponents/Form';
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
 import {
   Notification,
+  NotificationText,
   defaultNotification,
   notificationReducer,
 } from './styledComponents/Notification';
@@ -44,25 +45,127 @@ function Login(props) {
     notificationReducer,
     defaultNotification
   );
+  const [textNotification, dispatchTextNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
   const authErrorMessage = useRef({
     'auth/email-already-exists': 'Email 已被人使用，請重新輸入',
     'auth/internal-error': '伺服器發生錯誤，請稍後再試',
+    'auth/invalid-password': '密碼錯誤，請重新輸入至少六個字的密碼',
+    'auth/invalid-email': '無效的 Email，請重新輸入',
+    'auth/wrong-password': '密碼錯誤，請重新輸入至少六個字的密碼',
+    'auth/popup-closed-by-user': '您已取消 google 登入',
+    'auth/cancelled-popup-request': '您已取消 google 登入',
+    'auth/popup-blocked': '登入視窗被阻擋，請關閉廣告阻擋套件',
   });
+  useEffect(() => {
+    if (email) {
+      dispatchTextNotification({ type: 'fire', playload: { email: '' } });
+    }
+    if (password) {
+      dispatchTextNotification({ type: 'fire', playload: { password: '' } });
+    }
+    if (userName) {
+      dispatchTextNotification({ type: 'fire', playload: { userName: '' } });
+    }
+  }, [email, password, userName]);
+  const emptyVerify = () => {
+    console.log('login');
+    if (!email) {
+      dispatchTextNotification({
+        type: 'fire',
+        playload: {
+          email: {
+            message: '請輸入 Email',
+          },
+        },
+      });
+    }
+    if (!password) {
+      dispatchTextNotification({
+        type: 'fire',
+        playload: {
+          password: {
+            message: '請輸入密碼',
+          },
+        },
+      });
+    }
+    if (!userName) {
+      dispatchTextNotification({
+        type: 'fire',
+        playload: {
+          userName: {
+            message: '請輸入用戶名稱',
+          },
+        },
+      });
+    }
+  };
+  const errorVerify = (error) => {
+    if (error.code.match('password')?.length > 0) {
+      dispatchTextNotification({
+        type: 'fire',
+        playload: {
+          password: {
+            message: authErrorMessage.current[error.code],
+          },
+        },
+      });
+    } else if (error.code.match('email')?.length > 0) {
+      dispatchTextNotification({
+        type: 'fire',
+        playload: {
+          email: {
+            message: authErrorMessage.current[error.code],
+          },
+        },
+      });
+    } else {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: authErrorMessage.current[error.code] || error.message,
+          id: 'toastifyErrorMessage',
+        },
+      });
+    }
+  };
   const signIn = () => {
-    firebaseAuth.signIn(email, password).then((res) => {
-      console.log(res);
-      setUid(res.user.uid);
-      setIsLogInOut(false);
-      navigate(`/itineraries`);
-    });
+    if (email && password) {
+      firebaseAuth
+        .signIn(email, password)
+        .then((res) => {
+          console.log(res);
+          setUid(res.user.uid);
+          setIsLogInOut(false);
+          navigate(`/itineraries`);
+        })
+        .catch((error) => {
+          errorVerify(error);
+        });
+    } else {
+      emptyVerify();
+    }
   };
   const signUp = () => {
-    firebaseAuth.signUp(email, password, userName).then((uid) => {
-      console.log(uid);
-      setUid(uid);
-      setIsLogInOut(false);
-      navigate(`/itineraries`);
-    });
+    if (email && password && userName) {
+      firebaseAuth
+        .signUp(email, password, userName)
+        .then((uid) => {
+          console.log(uid);
+          setUid(uid);
+          setIsLogInOut(false);
+          navigate(`/itineraries`);
+        })
+        .catch((error) => {
+          errorVerify(error);
+        });
+    } else {
+      emptyVerify();
+    }
   };
   const logInWithGoogle = () => {
     firebaseAuth
@@ -73,7 +176,17 @@ function Login(props) {
         setIsLogInOut(false);
         navigate(`/itineraries`);
       })
-      .catch((error) => alert(error.message));
+      .catch((error) => {
+        console.log(error.code, error.message);
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'warn',
+            message: authErrorMessage.current[error.code],
+            id: 'toastifyErrorMessage',
+          },
+        });
+      });
   };
 
   useEffect(() => {
@@ -93,7 +206,9 @@ function Login(props) {
   return (
     <>
       <Notification
-        fire={notification.fire}
+        fire={
+          notification.fire && notification.id.match('toastify')?.length > 0
+        }
         type={notification.type}
         message={notification.message}
         id={notification.id}
@@ -164,23 +279,35 @@ function Login(props) {
                   gap: 15px;
                 `}>
                 {isSignUp && (
-                  <TextInput
-                    placeholder={'請輸入用戶名稱'}
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                  />
+                  <>
+                    <TextInput
+                      placeholder={'請輸入用戶名稱'}
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                    />
+                    <NotificationText type="error">
+                      {textNotification?.userName?.message}
+                    </NotificationText>
+                  </>
                 )}
                 <TextInput
                   placeholder={'email@example.com'}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
+                <NotificationText type="error">
+                  {textNotification?.email?.message}
+                </NotificationText>
+
                 <TextInput
                   placeholder={'密碼至少6個字'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                 />
+                <NotificationText type="error">
+                  {textNotification?.password?.message}
+                </NotificationText>
               </FlexDiv>
               <Button styled="primary" onClick={isSignUp ? signUp : signIn}>
                 {isSignUp ? '註冊' : ' Email 登入'}
