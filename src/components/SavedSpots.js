@@ -63,6 +63,7 @@ function SavedSpots(props) {
           },
         });
         dispatchNotification({ type: 'close' });
+        setIsDeleteConfirm(false);
       })
       .catch((error) => console.error(error));
   };
