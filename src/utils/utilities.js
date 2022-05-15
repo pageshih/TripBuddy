@@ -32,8 +32,8 @@ function filterDaySchedules(allSchedules, departTimes) {
     acc[index] = allSchedules
       .filter(
         (schedule) =>
-          schedule.end_time > departTimes[index] &&
-          schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
+          new Date(schedule.end_time).getDate() ===
+          new Date(departTimes[index]).getDate()
       )
       .sort((a, b) => a.start_time - b.start_time);
     return acc;
