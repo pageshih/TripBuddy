@@ -50,24 +50,22 @@ function ReviewTags(props) {
   }, [tagContainer]);
   return (
     <FlexDiv alignItems="center" gap="10px" padding="0 0 10px 0">
-      {props.isEdit && props.defaultTags && (
-        <FlexDiv
-          gap="12px"
-          overflowY="auto"
-          ref={tagContainer}
-          position="relative">
-          {props.defaultTags?.map((tag) => (
-            <ReviewTag
-              key={tag}
-              isEdit={props.isEdit}
-              tag={tag}
-              selectedList={props.checkedTags}
-              setSelectedList={props.setCheckedTags}>
-              {tag}
-            </ReviewTag>
-          ))}
-        </FlexDiv>
-      )}
+      <FlexDiv
+        gap="12px"
+        overflowY="auto"
+        ref={tagContainer}
+        position="relative">
+        {props.defaultTags?.map((tag) => (
+          <ReviewTag
+            key={tag}
+            isEdit={props.isEdit}
+            tag={tag}
+            selectedList={props.checkedTags}
+            setSelectedList={props.setCheckedTags}>
+            {tag}
+          </ReviewTag>
+        ))}
+      </FlexDiv>
       <FlexDiv position="relative">
         {isShowShadow && (
           <div
