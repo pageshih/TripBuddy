@@ -69,6 +69,7 @@ function Overview(props) {
                     addCss={css`
                       &:hover {
                         background-color: ${palatte.danger.basic};
+                        color: ${palatte.white};
                       }
                     `}
                     onClick={() => props.setIsAllowEdit(false)}>
@@ -86,6 +87,7 @@ function Overview(props) {
               addInputCss={css`
                 color: ${palatte.gray[800]};
               `}
+              defaultShowText={props.isJournal}
               isAllowEdit={props.isAllowEdit}
               onSubmit={(title) => {
                 if (title !== props.overviews.title) {
@@ -95,6 +97,7 @@ function Overview(props) {
               {props.overviews.title}
             </EditableText>
             <EditableDate
+              defaultShowText={props.isJournal}
               color={palatte.white}
               start={props.overviews.start_date}
               end={props.overviews.end_date}

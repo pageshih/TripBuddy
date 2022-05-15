@@ -32,6 +32,7 @@ import {
   notificationReducer,
   NotificationText,
 } from './styledComponents/Notification';
+import { Confirm } from './styledComponents/Modal';
 
 function Map({
   setMap,
@@ -304,6 +305,7 @@ function SavedSpotsList(props) {
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [showAlert, setShowAlert] = useState();
+  const [isDeleteConfirm, setIsDeleteConfirm] = useState();
 
   useEffect(() => {
     firestore
@@ -345,90 +347,105 @@ function SavedSpotsList(props) {
   };
 
   return (
-    <FlexDiv direction="column" maxHeight="calc(100% - 30px)" gap="25px">
-      <FlexDiv justifyContent="space-between" alignItems="flex-end">
-        <H2 fontSize="24px">候補景點</H2>
-        <SelectAllCheckBox
-          size="20px"
-          isSelectAll={isSelectAll}
-          setIsSelectAll={setIsSelectAll}
-          setAllChecked={() =>
-            setSelectedSpotList(props.savedSpots.map((spot) => spot.place_id))
-          }
-          setAllUnchecked={() => setSelectedSpotList([])}
-        />
-      </FlexDiv>
-      <FlexChildDiv direction="column" height="calc(100% - 30px)" gap="20px">
-        <FlexChildDiv
-          direction="column"
-          overflowY="auto"
-          shrink="1"
-          gap="30px"
-          padding="0 4px 10px 0"
-          position="relative"
-          addCss={css`
-            &::-webkit-scrollbar {
-              display: none;
+    <>
+      <Confirm
+        isShowState={isDeleteConfirm}
+        setIsShowState={setIsDeleteConfirm}
+        confirmMessage="確定要刪除這些景點嗎？"
+        subMessage="(此動作無法復原）"
+        yesMessage="刪除"
+        yesBtnStyle="danger"
+        noBtnStyle="gray"
+        yesAction={() => {
+          props.removeFromSavedSpots(selectedSpotList);
+          setIsDeleteConfirm(false);
+        }}
+      />
+      <FlexDiv direction="column" maxHeight="calc(100% - 30px)" gap="25px">
+        <FlexDiv justifyContent="space-between" alignItems="flex-end">
+          <H2 fontSize="24px">候補景點</H2>
+          <SelectAllCheckBox
+            size="20px"
+            isSelectAll={isSelectAll}
+            setIsSelectAll={setIsSelectAll}
+            setAllChecked={() =>
+              setSelectedSpotList(props.savedSpots.map((spot) => spot.place_id))
             }
-          `}>
-          {props.savedSpots.map((spot) => (
-            <SpotCard
-              isSmall
-              key={spot.place_id}
-              title={spot.name}
-              address={spot.formatted_address}
-              id={spot.place_id}
-              selectedList={selectedSpotList}
-              setSelectedList={setSelectedSpotList}
-              imgSrc={spot.photos[0]}
-              imgAlt={spot.name}
-              rating={spot.rating}
-              isEdit
-              onClick={() => props.getSavedSpotDetail(spot)}
-            />
-          ))}
-        </FlexChildDiv>
-
-        {selectedSpotList?.length > 0 && (
+            setAllUnchecked={() => setSelectedSpotList([])}
+          />
+        </FlexDiv>
+        <FlexChildDiv direction="column" height="calc(100% - 30px)" gap="20px">
           <FlexChildDiv
             direction="column"
-            gap="15px"
-            padding="0 0 10px 0"
-            position="relative">
-            <ShadowBottom />
-            <NotificationText type="error">{showAlert}</NotificationText>
-            <SelectSmall
-              value={addAction}
-              onChange={(e) => {
-                setAddAction(e.target.value);
-                if (e.target.value) {
-                  setShowAlert('');
-                }
-              }}>
-              <option value="" disabled>
-                ---請選擇要加入景點的行程---
-              </option>
-              <option value="add">新建一個行程</option>
-              {createdItineraries?.map((itinerary) => (
-                <option
-                  value={itinerary.itinerary_id}
-                  key={itinerary.itinerary_id}>
-                  {itinerary.title}
-                </option>
-              ))}
-            </SelectSmall>
-            <ButtonSmall styled="primary" onClick={addSelectSpotsToItinerary}>
-              加入行程
-            </ButtonSmall>
-            <ButtonSmall
-              styled="danger"
-              onClick={() => props.removeFromSavedSpots(selectedSpotList)}>
-              刪除景點
-            </ButtonSmall>
+            overflowY="auto"
+            shrink="1"
+            gap="30px"
+            padding="0 4px 10px 0"
+            position="relative"
+            addCss={css`
+              &::-webkit-scrollbar {
+                display: none;
+              }
+            `}>
+            {props.savedSpots.map((spot) => (
+              <SpotCard
+                isSmall
+                key={spot.place_id}
+                title={spot.name}
+                address={spot.formatted_address}
+                id={spot.place_id}
+                selectedList={selectedSpotList}
+                setSelectedList={setSelectedSpotList}
+                imgSrc={spot.photos[0]}
+                imgAlt={spot.name}
+                rating={spot.rating}
+                isEdit
+                onClick={() => props.getSavedSpotDetail(spot)}
+              />
+            ))}
           </FlexChildDiv>
-        )}
-      </FlexChildDiv>
-    </FlexDiv>
+
+          {selectedSpotList?.length > 0 && (
+            <FlexChildDiv
+              direction="column"
+              gap="15px"
+              padding="0 0 10px 0"
+              position="relative">
+              <ShadowBottom />
+              <NotificationText type="error">{showAlert}</NotificationText>
+              <SelectSmall
+                value={addAction}
+                onChange={(e) => {
+                  setAddAction(e.target.value);
+                  if (e.target.value) {
+                    setShowAlert('');
+                  }
+                }}>
+                <option value="" disabled>
+                  ---請選擇要加入景點的行程---
+                </option>
+                <option value="add">新建一個行程</option>
+                {createdItineraries?.map((itinerary) => (
+                  <option
+                    value={itinerary.itinerary_id}
+                    key={itinerary.itinerary_id}>
+                    {itinerary.title}
+                  </option>
+                ))}
+              </SelectSmall>
+              <ButtonSmall styled="primary" onClick={addSelectSpotsToItinerary}>
+                加入行程
+              </ButtonSmall>
+              <ButtonSmall
+                styled="danger"
+                onClick={() => setIsDeleteConfirm(true)}>
+                刪除景點
+              </ButtonSmall>
+            </FlexChildDiv>
+          )}
+        </FlexChildDiv>
+      </FlexDiv>
+    </>
   );
 }
 const ButtonOnMap = (props) => (

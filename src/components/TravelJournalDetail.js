@@ -412,6 +412,12 @@ function TravelJournalDetail() {
                     addCss={css`
                       max-width: ${isAllowEdit && 'calc(100% - 40px)'};
                     `}
+                    isHideContent={
+                      (schedule.review_tags ||
+                        schedule.review_tags?.length > 0) &&
+                      (schedule.gallery || schedule.gallery?.length > 0) &&
+                      schedule.review
+                    }
                     titleElement={
                       <FlexDiv gap="30px" alignItems="center">
                         <P color={palatte.gray[500]}>

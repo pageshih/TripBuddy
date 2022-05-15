@@ -69,15 +69,23 @@ function Accordion(props) {
           </ExpandIcon>
         )}
       </FlexDiv>
-      <Collapse nodeRef={contentRef} in={isExpand} timeout={300} unmountOnExit>
-        <Container ref={contentRef}>
-          <div
-            css={css`
-              height: ${props.gap || '20px'};
-            `}></div>
-          {props.children}
-        </Container>
-      </Collapse>
+      {(!props.isAllowEdit && props.isHideContent) ||
+      props.isAllowEdit ||
+      props.isHideContent === undefined ? (
+        <Collapse
+          nodeRef={contentRef}
+          in={isExpand}
+          timeout={300}
+          unmountOnExit>
+          <Container ref={contentRef}>
+            <div
+              css={css`
+                height: ${props.gap || '20px'};
+              `}></div>
+            {props.children}
+          </Container>
+        </Collapse>
+      ) : null}
     </AccordionContainer>
   );
 }

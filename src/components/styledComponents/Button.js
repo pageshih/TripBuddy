@@ -33,6 +33,7 @@ const colorMap = {
     transparent: 'transparent',
     transparentColor: palatte.gray[800],
     transparentHover: palatte.shadow,
+    infoOutline: palatte.info.basic,
   },
 };
 
@@ -94,6 +95,12 @@ const ButtonSmallIcon = styled(ButtonSmall)`
   ${(props) => props.addCss};
 `;
 
+const ButtonSmallOutlineIcon = styled(ButtonSmallOutline)`
+  padding: ${(props) => props.padding || '5px 10px'};
+  display: flex;
+  gap: ${(props) => props.gap || '5px'};
+  ${(props) => props.addCss};
+`;
 const RoundButton = styled.button`
   background-color: ${colorMap.button.round};
   color: ${colorMap.button.roundHover};
@@ -259,6 +266,7 @@ const RoundButtonSmallWithLabel = (props) => (
 const capsule = (props) => css`
   padding: 5px 5px 6px 5px;
   border-radius: 30px;
+  white-space: nowrap;
   background-color: ${props.styled
     ? buttonSmallColorMap[props.styled].default.backgroundColor
     : 'inherit'};
@@ -422,6 +430,7 @@ export {
   ButtonSmall,
   ButtonSmallIcon,
   ButtonSmallOutline,
+  ButtonSmallOutlineIcon,
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,

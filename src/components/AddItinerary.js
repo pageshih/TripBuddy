@@ -895,6 +895,7 @@ function AddSchedule(props) {
               ),
             },
             distance: transitDetails[index].distance,
+            direction_url: transitDetails[index].direction_url,
           };
           return {
             ...schedule,

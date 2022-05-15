@@ -149,6 +149,7 @@ function UserSetting(props) {
             <FlexDiv direction="column" gap="8px">
               <EditableText
                 isAllowEdit
+                defaultShowText
                 level="5"
                 fontSize="24px"
                 onSubmit={updateUserName}>
@@ -238,7 +239,7 @@ function UserSetting(props) {
                     </RoundButtonSmall>
                   </FlexDiv>
                 </form>
-                <FlexDiv gap="5px">
+                <FlexDiv gap="5px" width="100%" wrap="wrap">
                   {props.reviewTags?.length > 0 ? (
                     props.reviewTags.map((tag) => (
                       <ReviewTagRemoveButton

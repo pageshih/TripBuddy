@@ -50,7 +50,7 @@ function ReviewTags(props) {
   }, [tagContainer]);
   return (
     <FlexDiv alignItems="center" gap="10px" padding="0 0 10px 0">
-      {props.defaultTags && (
+      {props.isEdit && props.defaultTags && (
         <FlexDiv
           gap="12px"
           overflowY="auto"
@@ -378,65 +378,65 @@ function AddReview(props) {
     }
   };
   const saveReviewToFirebase = async () => {
-    if (review || checkedReviewTags?.length > 0 || imageBuffer?.length > 0) {
-      const uploadFirestore = new uploadReviewFirestore({
-        uid,
-        itineraryId: props.itineraryId,
-        scheduleId: props.scheduleId,
-        updateSchedule: {
-          review_tags: checkedReviewTags ? checkedReviewTags : [],
-          review: review ? review : '',
-        },
-        imageBuffer,
-        gallery,
-      });
-      uploadFirestore.doUpload().then((newGallery) => {
-        setGallery(newGallery);
-        setImageBuffer([]);
-        setReviewShowInput(false);
-        const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
-        setReviewTags(
-          props.allReviewTags
-            ? [
-                ...checkTagList,
-                ...reviewTags.filter(
-                  (tag) =>
-                    checkedReviewTags.every((checked) => checked !== tag) && tag
-                ),
-              ]
-            : checkTagList
-        );
+    // if (review || checkedReviewTags?.length > 0 || imageBuffer?.length > 0) {
+    const uploadFirestore = new uploadReviewFirestore({
+      uid,
+      itineraryId: props.itineraryId,
+      scheduleId: props.scheduleId,
+      updateSchedule: {
+        review_tags: checkedReviewTags ? checkedReviewTags : [],
+        review: review ? review : '',
+      },
+      imageBuffer,
+      gallery,
+    });
+    uploadFirestore.doUpload().then((newGallery) => {
+      setGallery(newGallery);
+      setImageBuffer([]);
+      setReviewShowInput(false);
+      const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
+      setReviewTags(
+        props.allReviewTags
+          ? [
+              ...checkTagList,
+              ...reviewTags.filter(
+                (tag) =>
+                  checkedReviewTags.every((checked) => checked !== tag) && tag
+              ),
+            ]
+          : checkTagList
+      );
 
-        if (props.setUploadedReview) {
-          props.setUploadedReview({
-            schedule_id: props.scheduleId,
-            review_tags: checkedReviewTags,
-            review,
-            gallery: newGallery,
-          });
-        }
-        if (props.showReview && !isDesktop) {
-          props.setShowReview(false);
-        }
-        dispatchNotification({
-          type: 'fire',
-          playload: {
-            type: 'success',
-            message: '上傳成功',
-            id: 'toastifyUploadSuccess',
-          },
+      if (props.setUploadedReview) {
+        props.setUploadedReview({
+          schedule_id: props.scheduleId,
+          review_tags: checkedReviewTags,
+          review,
+          gallery: newGallery,
         });
-      });
-    } else {
+      }
+      if (props.showReview && !isDesktop) {
+        props.setShowReview(false);
+      }
       dispatchNotification({
         type: 'fire',
         playload: {
-          type: 'warn',
-          message: '還沒有加入內容喔！',
-          id: 'toastifyEmpty',
+          type: 'success',
+          message: '上傳成功',
+          id: 'toastifyUploadSuccess',
         },
       });
-    }
+    });
+    // } else {
+    //   dispatchNotification({
+    //     type: 'fire',
+    //     playload: {
+    //       type: 'warn',
+    //       message: '還沒有加入內容喔！',
+    //       id: 'toastifyEmpty',
+    //     },
+    //   });
+    // }
   };
   useEffect(() => {
     const checkDesktop = () => {

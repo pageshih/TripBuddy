@@ -15,7 +15,7 @@ import {
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom, Select } from './Form';
-import { RoundButtonSmall } from './Button';
+import { RoundButtonSmall, ButtonSmallOutlineIcon } from './Button';
 import { EditableText } from './EditableText';
 
 const CardWrapper = styled.div`
@@ -46,6 +46,7 @@ const Card = styled.div`
   ${cardCss}
   position: relative;
   width: 100%;
+  height: ${(props) => !props.isSmall && '200px'};
   gap: ${(props) => props.gap};
   flex-basis: ${(props) => props.basis};
   flex-direction: ${(props) =>
@@ -55,6 +56,7 @@ const Card = styled.div`
   ${mediaQuery[0]} {
     flex-direction: column;
     border-radius: 10px;
+    height: fit-content;
   }
   ${(props) => props.addCss}
 `;
@@ -194,12 +196,14 @@ function SpotCard(props) {
         <Image
           src={props.imgSrc}
           alt={props.imgAlt}
-          height="200px"
+          height="100%"
           addCss={css`
             flex-basis: ${props.isSmall ? '200px' : '330px'};
             min-width: ${props.isSmall ? '100%' : '330px'};
             ${mediaQuery[0]} {
               width: 100%;
+              min-width: 100%;
+              max-height: 200px;
             }
           `}
         />
@@ -303,63 +307,123 @@ const transportMode = (schedule) => {
 const transitIconStyle = css`
   color: ${palatte.info.basic};
   font-size: 60px;
+  ${mediaQuery[0]} {
+    font-size: 24px;
+    color: ${palatte.gray[500]};
+  }
+`;
+const TransitText = styled(P)`
+  color: ${palatte.info.basic};
+  white-space: nowrap;
+  ${mediaQuery[0]} {
+    color: ${palatte.gray[600]};
+  }
 `;
 const transitDetailWapper = css`
   align-items: center;
   gap: 5px;
 `;
+const transitContainer = css`
+  ${mediaQuery[0]} {
+    background-color: ${palatte.gray[200]};
+    border-radius: 10px;
+    padding: 15px 20px 15px 40px;
+    position: relative;
+    margin: 10px 0;
+    &::before {
+      content: '';
+      height: 120%;
+      position: absolute;
+      top: -10%;
+      left: 15px;
+      border-left: 3px dashed ${palatte.info.basic};
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      bottom: calc(-10% - 3px);
+      width: 10px;
+      height: 10px;
+      border-left: 3px solid ${palatte.info.basic};
+      border-bottom: 3px solid ${palatte.info.basic};
+      transform: rotate(-45deg);
+    }
+  }
+`;
 
 function TransitCard(props) {
   return (
-    <FlexDiv justifyContent="center" gap="30px">
+    <FlexDiv
+      justifyContent="space-between"
+      alignItems="center"
+      gap="30px"
+      addCss={transitContainer}>
       <FlexDiv
+        gap="30px"
+        width="100%"
+        justifyContent="center"
         addCss={css`
-          ${transitDetailWapper}
-          gap:${props.isEdit && '10px'}
+          ${mediaQuery[0]} {
+            flex-direction: column;
+            gap: 10px;
+          }
         `}>
-        {props.isEdit ? (
-          <>
-            <span className="material-icons" css={transitIconStyle}>
-              {transportMode()[props.travelMode].icon}
-            </span>
-            <Select
-              value={props.travelMode}
-              onChange={(e) =>
-                props.changeTrasitWay(props.scheduleId, e.target.value)
-              }>
-              {Object.keys(transportMode()).map((mode) => (
-                <option key={mode} value={mode}>
-                  {transportMode()[mode].title}
-                </option>
-              ))}
-            </Select>
-            <P
-              color={palatte.info.basic}
-              addCss={css`
-                white-space: nowrap;
-              `}>
-              {props.transitDetail.duration.text}
-            </P>
-          </>
-        ) : (
-          <>
-            <span className="material-icons" css={transitIconStyle}>
-              {transportMode()[props.travelMode].icon}
-            </span>
-            <P color={palatte.info.basic}>
-              {transportMode()[props.travelMode].title +
-                props.transitDetail.duration.text}
-            </P>
-          </>
-        )}
-      </FlexDiv>
-      <FlexDiv addCss={transitDetailWapper}>
-        <span className="material-icons" css={transitIconStyle}>
-          directions
-        </span>
-        <P color={palatte.info.basic}>
-          距離{props.transitDetail.distance.text}
-        </P>
+        <FlexDiv
+          addCss={css`
+            ${transitDetailWapper}
+            gap:${props.isEdit && '10px'}
+          `}>
+          {props.isEdit ? (
+            <>
+              <span className="material-icons" css={transitIconStyle}>
+                {transportMode()[props.travelMode].icon}
+              </span>
+              <Select
+                addCss={css`
+                  ${mediaQuery[0]} {
+                    width: 100px;
+                  }
+                `}
+                value={props.travelMode}
+                onChange={(e) =>
+                  props.changeTrasitWay(props.scheduleId, e.target.value)
+                }>
+                {Object.keys(transportMode()).map((mode) => (
+                  <option key={mode} value={mode}>
+                    {transportMode()[mode].title}
+                  </option>
+                ))}
+              </Select>
+              <P
+                color={palatte.info.basic}
+                addCss={css`
+                  white-space: nowrap;
+                  ${mediaQuery[0]} {
+                    color: ${palatte.gray[500]};
+                  }
+                `}>
+                {props.transitDetail.duration.text}
+              </P>
+            </>
+          ) : (
+            <>
+              <span className="material-icons" css={transitIconStyle}>
+                {transportMode()[props.travelMode].icon}
+              </span>
+              <TransitText>
+                {transportMode()[props.travelMode].title +
+                  props.transitDetail.duration.text}
+              </TransitText>
+            </>
+          )}
+        </FlexDiv>
+        <FlexDiv addCss={transitDetailWapper}>
+          <span className="material-icons" css={transitIconStyle}>
+            directions
+          </span>
+          <TransitText>距離{props.transitDetail.distance.text}</TransitText>
+        </FlexDiv>
       </FlexDiv>
     </FlexDiv>
   );

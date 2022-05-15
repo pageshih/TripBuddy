@@ -82,6 +82,7 @@ const Select = styled.select`
   & option:disabled {
     color: ${palatte.gray[400]};
   }
+  ${(props) => props.addCss};
 `;
 const SelectSmall = styled(Select)`
   font-size: 14px;

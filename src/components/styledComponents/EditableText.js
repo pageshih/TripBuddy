@@ -31,7 +31,7 @@ const hoverEffect = css`
 
 function EditableText(props) {
   const [isEdit, setIsEdit] = useState(true);
-  const [value, setValue] = useState();
+  const [value, setValue] = useState('');
   const inputRef = useRef();
   const Text = textComponents[props.level];
   useEffect(() => {
@@ -51,7 +51,11 @@ function EditableText(props) {
   };
 
   useEffect(() => {
-    setIsEdit(true);
+    if (props.defaultShowText) {
+      setIsEdit(false);
+    } else {
+      setIsEdit(true);
+    }
     if (!props.isAllowEdit) {
       setIsEdit(false);
       submit();
@@ -146,7 +150,11 @@ function EditableDate(props) {
     setEndTimestamp(props.end);
   }, [props.start, props.end]);
   useEffect(() => {
-    setIsEdit(props.isAllowEdit);
+    if (props.defaultShowText) {
+      setIsEdit(false);
+    } else {
+      setIsEdit(props.isAllowEdit);
+    }
   }, [props.isAllowEdit]);
 
   const submit = useCallback(

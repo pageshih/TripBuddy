@@ -154,6 +154,7 @@ const googleMap = {
     const returnObj = {
       duration: route.duration,
       distance: route.distance,
+      direction_url: `https://www.google.com/maps?saddr=My+Location&daddr=${parameter.destination.lat},${parameter.destination.lng}`,
     };
     return Promise.resolve(returnObj);
   },
