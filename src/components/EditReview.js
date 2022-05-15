@@ -577,62 +577,71 @@ function AddReview(props) {
               </RoundButtonSmall>
             </>
           )}
-          <ReviewTags
-            defaultTags={reviewTags}
-            inputTag={addTag}
-            setInputTag={setAddTag}
-            checkedTags={checkedReviewTags}
-            setCheckedTags={setCheckedReviewTags}
-            onSubmit={addCheckedTag}
-            isEdit={props.isEdit}
-            showInput={showInput}
-            setShowInput={setShowInput}
-          />
+          {(!props.isEdit &&
+            checkedReviewTags &&
+            checkedReviewTags?.length > 0) ||
+          props.isEdit ? (
+            <ReviewTags
+              defaultTags={reviewTags}
+              inputTag={addTag}
+              setInputTag={setAddTag}
+              checkedTags={checkedReviewTags}
+              setCheckedTags={setCheckedReviewTags}
+              onSubmit={addCheckedTag}
+              isEdit={props.isEdit}
+              showInput={showInput}
+              setShowInput={setShowInput}
+            />
+          ) : null}
 
-          <ReviewGallery
-            isEdit={props.isEdit}
-            gallery={gallery}
-            setGallery={setGallery}
-            imageBuffer={imageBuffer}
-            setImageBuffer={setImageBuffer}
-          />
+          {(!props.isEdit && gallery && gallery?.length > 0) || props.isEdit ? (
+            <ReviewGallery
+              isEdit={props.isEdit}
+              gallery={gallery}
+              setGallery={setGallery}
+              imageBuffer={imageBuffer}
+              setImageBuffer={setImageBuffer}
+            />
+          ) : null}
 
-          <FlexDiv direction="column">
-            {props.isEdit && props.isJournal ? (
-              <TextAreaReview
-                type="textarea"
-                placeholder="添加一點旅行後的心得吧！"
-                value={review}
-                isEmptyInput={review && false}
-                readOnly={reviewShowInput}
-                onChange={(e) => {
-                  setReview(e.target.value);
-                }}
-                onClick={() => {
-                  setReviewShowInput(false);
-                }}
-              />
-            ) : (
-              <P>{review}</P>
-            )}
-            {props.isEdit && (
-              <Button
-                addCss={css`
-                  margin-top: 10px;
-                  align-self: flex-end;
-                  ${mediaQuery[0]} {
-                    width: 100%;
-                    font-size: 16px;
-                  }
-                `}
-                styled="primary"
-                width="fit-content"
-                type="click"
-                onClick={saveReviewToFirebase}>
-                儲存心得
-              </Button>
-            )}
-          </FlexDiv>
+          {(!props.isEdit && review) || props.isEdit ? (
+            <FlexDiv direction="column">
+              {props.isEdit && props.isJournal ? (
+                <TextAreaReview
+                  type="textarea"
+                  placeholder="添加一點旅行後的心得吧！"
+                  value={review}
+                  isEmptyInput={review && false}
+                  readOnly={reviewShowInput}
+                  onChange={(e) => {
+                    setReview(e.target.value);
+                  }}
+                  onClick={() => {
+                    setReviewShowInput(false);
+                  }}
+                />
+              ) : (
+                <P>{review}</P>
+              )}
+              {props.isEdit && (
+                <Button
+                  addCss={css`
+                    margin-top: 10px;
+                    align-self: flex-end;
+                    ${mediaQuery[0]} {
+                      width: 100%;
+                      font-size: 16px;
+                    }
+                  `}
+                  styled="primary"
+                  width="fit-content"
+                  type="click"
+                  onClick={saveReviewToFirebase}>
+                  儲存心得
+                </Button>
+              )}
+            </FlexDiv>
+          ) : null}
         </FlexDiv>
       </CSSTransition>
     </>

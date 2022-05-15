@@ -69,7 +69,7 @@ function Accordion(props) {
           </ExpandIcon>
         )}
       </FlexDiv>
-      {(!props.isAllowEdit && props.isHideContent) ||
+      {(!props.isAllowEdit && !props.isHideContent) ||
       props.isAllowEdit ||
       props.isHideContent === undefined ? (
         <Collapse
