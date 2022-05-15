@@ -139,10 +139,6 @@ Overview.propTypes = {
 };
 
 function DepartController(props) {
-  const [time, setTime] = useState(props.departTimes[props.day]);
-  useEffect(() => {
-    setTime(props.departTimes[props.day]);
-  }, [props.departTimes, props.day]);
   return (
     <FlexDiv direction="column" gap="5px">
       <FlexDiv
@@ -158,7 +154,7 @@ function DepartController(props) {
       </FlexDiv>
       <EditableDate
         time
-        start={time}
+        start={props.departTimes[props.day]}
         onSubmit={props.onSubmit}
         isAllowEdit={props.isAllowEdit}
         width="210px"

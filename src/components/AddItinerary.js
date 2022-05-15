@@ -216,13 +216,13 @@ function AddOverView(props) {
           iconName="chevron_left"
           addCss={css`
             position: absolute;
-            top: 80px;
+            top: 50px;
             left: -10px;
           `}
           onClick={() => navigate('/explore')}>
           回探索景點
         </RoundButtonSmallWithLabel>
-        <FlexDiv direction="column" gap="20px">
+        <FlexDiv direction="column" gap="20px" padding="80px 0 0 0">
           {step === 1 && !props.waitingSpots?.length > 0 ? null : (
             <H5>{addOverView[step].title}</H5>
           )}
