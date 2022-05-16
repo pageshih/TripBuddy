@@ -4,7 +4,10 @@ import { css, jsx } from '@emotion/react';
 import { CSSTransition } from 'react-transition-group';
 import 'animate.css';
 import '../css/animation.css';
-import { uploadReviewFirestore } from '../utils/utilities';
+import {
+  uploadReviewFirestore,
+  checkArraysIsTheSame,
+} from '../utils/utilities';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv, Container, Image } from './styledComponents/Layout';
@@ -21,7 +24,13 @@ import {
   RoundButtonSmallOutline,
   ButtonSmall,
 } from './styledComponents/Button';
-import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
+import {
+  palatte,
+  P,
+  H6,
+  mediaQuery,
+  PendingLoader,
+} from './styledComponents/basicStyle';
 import {
   Notification,
   defaultNotification,
@@ -356,11 +365,13 @@ function AddReview(props) {
   const [review, setReview] = useState();
   const [reviewShowInput, setReviewShowInput] = useState(false);
   const addReviewRef = useRef();
+  const saveButtonRef = useRef();
   const [isDesktop, setIsDesktop] = useState();
   const [notification, dispatchNotification] = useReducer(
     notificationReducer,
     defaultNotification
   );
+  const [isPending, setIsPending] = useState();
 
   const addCheckedTag = (e) => {
     e.preventDefault();
@@ -377,6 +388,7 @@ function AddReview(props) {
   };
   const saveReviewToFirebase = async () => {
     // if (review || checkedReviewTags?.length > 0 || imageBuffer?.length > 0) {
+    setIsPending(true);
     const uploadFirestore = new uploadReviewFirestore({
       uid,
       itineraryId: props.itineraryId,
@@ -405,14 +417,15 @@ function AddReview(props) {
           : checkTagList
       );
 
-      if (props.setUploadedReview) {
-        props.setUploadedReview({
+      if (props.updateOriginReviewState) {
+        props.updateOriginReviewState({
           schedule_id: props.scheduleId,
           review_tags: checkedReviewTags,
           review,
           gallery: newGallery,
         });
       }
+      setIsPending(false);
       if (props.showReview && !isDesktop) {
         props.setShowReview(false);
       }
@@ -425,16 +438,6 @@ function AddReview(props) {
         },
       });
     });
-    // } else {
-    //   dispatchNotification({
-    //     type: 'fire',
-    //     playload: {
-    //       type: 'warn',
-    //       message: '還沒有加入內容喔！',
-    //       id: 'toastifyEmpty',
-    //     },
-    //   });
-    // }
   };
   useEffect(() => {
     const checkDesktop = () => {
@@ -623,8 +626,29 @@ function AddReview(props) {
               ) : (
                 <P>{review}</P>
               )}
-              {props.isEdit && (
+              <CSSTransition
+                in={
+                  props.isEdit &&
+                  (!checkArraysIsTheSame(
+                    checkedReviewTags,
+                    props.reviews.review_tags
+                  ) ||
+                    !checkArraysIsTheSame(gallery, props.reviews.gallery) ||
+                    imageBuffer?.length > 0 ||
+                    review !== props.reviews.review)
+                }
+                timeout={400}
+                nodeRef={saveButtonRef}
+                classNames={{
+                  enter: 'animate__animated',
+                  enterActive: 'animate__fadeIn',
+                  exit: 'animate__animated',
+                  exitActive: 'animate__fadeOut',
+                }}
+                unmountOnExit>
                 <Button
+                  ref={saveButtonRef}
+                  disabled={isPending}
                   addCss={css`
                     margin-top: 10px;
                     align-self: flex-end;
@@ -637,9 +661,18 @@ function AddReview(props) {
                   width="fit-content"
                   type="click"
                   onClick={saveReviewToFirebase}>
-                  儲存心得
+                  {isPending ? (
+                    <div
+                      css={css`
+                        width: 70px;
+                      `}>
+                      <PendingLoader size="24" />
+                    </div>
+                  ) : (
+                    '儲存心得'
+                  )}
                 </Button>
-              )}
+              </CSSTransition>
             </FlexDiv>
           ) : null}
         </FlexDiv>

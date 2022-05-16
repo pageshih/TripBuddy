@@ -191,6 +191,23 @@ function Itineraries() {
                                       itineraryId={
                                         progressing.overview.itinerary_id
                                       }
+                                      updateOriginReviewState={(
+                                        updatedSchedule
+                                      ) => {
+                                        setProgressing({
+                                          ...progressing,
+                                          schedule: progressing.schedule.map(
+                                            (schedule) =>
+                                              schedule.schedule_id ===
+                                              updatedSchedule.schedule_id
+                                                ? {
+                                                    ...schedule,
+                                                    ...updatedSchedule,
+                                                  }
+                                                : schedule
+                                          ),
+                                        });
+                                      }}
                                       scheduleId={schedule.schedule_id}
                                       allReviewTags={reviewTags}
                                       showReviewTags={schedule.review_tags}

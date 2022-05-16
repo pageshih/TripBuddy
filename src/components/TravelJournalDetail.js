@@ -454,7 +454,7 @@ function TravelJournalDetail() {
                         }
                         itineraryId={journalID}
                         scheduleId={schedule.schedule_id}
-                        setUploadedReview={setUploadedReview}
+                        updateOriginReviewState={setUploadedReview}
                         reviews={{
                           review_tags: schedule.review_tags,
                           review: schedule.review,

@@ -229,7 +229,6 @@ const ReviewTagContainer = styled.div`
       : `1px solid${palatte.gray['500']}`};
   outline-offset: -1px;
   & > * {
-    font-size: 14px;
     color: ${(props) =>
       props.selectedList?.some((item) => item === props.id)
         ? palatte.gray['900']

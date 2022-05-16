@@ -58,6 +58,11 @@ const Button = styled.button`
     background-color: ${({ styled }) => colorMap.button[styled + 'Hover']};
     box-shadow: 2px 2px 2px 2px ${palatte.shadow};
   }
+  &:disabled {
+    background-color: ${palatte.gray[200]};
+    color: ${palatte.gray[700]};
+    cursor: not-allowed;
+  }
   ${mediaQuery[0]} {
     font-size: 14px;
   }

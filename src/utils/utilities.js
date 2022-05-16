@@ -63,6 +63,15 @@ const compressImages = async (files) => {
   return Promise.all(images);
 };
 
+function checkArraysIsTheSame(array1, array2) {
+  return (
+    array1 &&
+    array2 &&
+    array1.length === array2.length &&
+    array1.every((item, index) => item === array2[index])
+  );
+}
+
 class uploadReviewFirestore {
   constructor({
     uid,
@@ -153,4 +162,5 @@ export {
   timestampToTimeInput,
   updateItineraryCoverPhoto,
   uploadReviewFirestore,
+  checkArraysIsTheSame,
 };
