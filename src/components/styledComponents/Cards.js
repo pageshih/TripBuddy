@@ -358,6 +358,7 @@ function TransitCard(props) {
       justifyContent="space-between"
       alignItems="center"
       gap="30px"
+      padding={!props.isEdit && '0 20px 0 15%'}
       addCss={transitContainer}>
       <FlexDiv
         gap="30px"
@@ -425,6 +426,26 @@ function TransitCard(props) {
           <TransitText>距離{props.transitDetail.distance.text}</TransitText>
         </FlexDiv>
       </FlexDiv>
+      {!props.isEdit && (
+        <ButtonSmallOutlineIcon
+          styled="info"
+          onClick={() =>
+            window.open(props.transitDetail.direction_url, '_blank')
+          }
+          addCss={css`
+            width: fit-content;
+          `}>
+          <span
+            className="material-icons"
+            css={css`
+              color: inherit;
+              font-size: 20px;
+            `}>
+            explore
+          </span>
+          開始導航
+        </ButtonSmallOutlineIcon>
+      )}
     </FlexDiv>
   );
 }

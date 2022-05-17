@@ -862,11 +862,17 @@ function AddSchedule(props) {
             : null;
         } else {
           return googleMap
-            .getDirection({
-              origin: schedule.placeDetail.geometry,
-              destination: array[index + 1].placeDetail.geometry,
-              ...transportMode(schedule)[schedule.travel_mode].config,
-            })
+            .getDirection(
+              {
+                origin: schedule.placeDetail.geometry,
+                destination: array[index + 1].placeDetail.geometry,
+                ...transportMode(schedule)[schedule.travel_mode].config,
+              },
+              {
+                name: array[index + 1].placeDetail.name,
+                address: array[index + 1].placeDetail.formatted_address,
+              }
+            )
             .catch((error) => {
               if (error.code === 'ZERO_RESULTS') {
                 dispatchNotification({

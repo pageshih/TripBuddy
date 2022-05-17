@@ -147,14 +147,18 @@ const googleMap = {
   deleteMarker(marker) {
     marker.setMap(null);
   },
-  async getDirection(parameter) {
+  async getDirection(parameter, destinationAddressAndName) {
     const newDirection = new window.google.maps.DirectionsService();
     const result = await newDirection.route(parameter);
     const route = result.routes[0].legs[0];
+    const destination =
+      destinationAddressAndName?.name ||
+      destinationAddressAndName?.address ||
+      `${parameter.destination.lat},${parameter.destination.lng}`;
     const returnObj = {
       duration: route.duration,
       distance: route.distance,
-      direction_url: `https://www.google.com/maps?saddr=My+Location&daddr=${parameter.destination.lat},${parameter.destination.lng}`,
+      direction_url: `https://www.google.com/maps?saddr=My+Location&daddr=${destination}`,
     };
     return Promise.resolve(returnObj);
   },
