@@ -317,8 +317,9 @@ function TransitCard(props) {
     margin-left: auto;
     margin-right: 10px;
     ${mediaQuery[0]} {
+      flex-wrap: wrap;
       width: 100%;
-      gap: 0;
+      gap: 10px;
       background-color: ${palatte.gray[200]};
       border-radius: 10px;
       padding: 15px 15px 15px 40px;
@@ -366,6 +367,7 @@ function TransitCard(props) {
           width: 100%;
           justify-content: center;
           ${mediaQuery[0]} {
+            width: fit-content;
             flex-direction: column;
             gap: 10px;
           }
