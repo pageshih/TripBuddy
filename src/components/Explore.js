@@ -286,7 +286,15 @@ const PlaceReview = ({ reviews }) => {
           padding: 0;
         }
       `}>
-      <H3 fontSize="18px">評論</H3>
+      <H3
+        css={css`
+          font-size: 18px;
+          ${mediaQuery[0]} {
+            font-size: 18px;
+          }
+        `}>
+        評論
+      </H3>
       <FlexDiv as="ul" direction="column" gap="20px">
         {reviews ? (
           reviews.map((review) => (
@@ -538,10 +546,10 @@ function SavedSpotsList(props) {
       <FlexDiv css={container}>
         <FlexDiv css={headerContainer}>
           <H2
-            fontSize="24px"
             css={css`
+              font-size: 24px;
               ${mediaQuery[0]} {
-                font-size: 18px;
+                font-size: 20px;
               }
             `}>
             候補景點

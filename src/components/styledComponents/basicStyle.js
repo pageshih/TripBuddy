@@ -180,8 +180,8 @@ const headingFontSize = {
     6: '24px',
   },
   mobile: {
-    2: '52px',
-    3: '40px',
+    2: '42px',
+    3: '30px',
     4: '28px',
     5: '24px',
     6: '20px',
@@ -199,10 +199,16 @@ const heading = (props) => css`
 const H2 = styled.h2`
   font-size: ${(props) => props.fontSize || headingFontSize.desktop[2]};
   ${heading}
+  ${mediaQuery[0]} {
+    font-size: ${headingFontSize.mobile[2]};
+  }
 `;
 const H3 = styled.h3`
   font-size: ${(props) => props.fontSize || headingFontSize.desktop[3]};
   ${heading}
+  ${mediaQuery[0]} {
+    font-size: ${headingFontSize.mobile[3]};
+  }
 `;
 
 const H4 = styled.h4`
@@ -628,6 +634,7 @@ export {
   TextWithIcon,
   styles,
   mediaQuery,
+  breakpoints,
   Loader,
   PendingLoader,
   textComponents,

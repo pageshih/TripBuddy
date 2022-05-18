@@ -400,13 +400,13 @@ const ButtonIconColumn = (props) => (
   <ButtonSmallIcon
     styled="transparent"
     type={props.type}
-    padding="0"
-    width="fit-content"
     onClick={props.onClick}
-    direction="column"
-    alignItems="center"
-    gap="0px"
     addCss={css`
+      padding: 0;
+      width: fit-content;
+      flex-direction: column;
+      align-items: center;
+      gap: 0px;
       & > * {
         color: ${iconButtonColoeMap[props.styled].color};
       }
@@ -416,6 +416,10 @@ const ButtonIconColumn = (props) => (
         & > * {
           color: ${iconButtonColoeMap[props.styled].hoverColor};
         }
+      }
+      ${mediaQuery[0]} {
+        flex-direction: row;
+        gap: 5px;
       }
     `}
     title={props.children}>

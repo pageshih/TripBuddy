@@ -56,6 +56,7 @@ import {
   P,
   TextWithIcon,
   mediaQuery,
+  breakpoints,
 } from './styledComponents/basicStyle';
 import {
   Overview,
@@ -288,13 +289,13 @@ function AddOverView(props) {
 
 const SpotCardDraggable = (props) => {
   return (
-    <Draggable
-      draggableId={props.id}
-      index={props.index}
-      isDragDisabled={!props.isAllowEdit}>
-      {(provided) => (
+    <Draggable draggableId={props.id} index={props.index}>
+      {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
+          css={css`
+            min-width: 90%;
+          `}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
           <SpotCard
@@ -307,6 +308,7 @@ const SpotCardDraggable = (props) => {
             title={props.spot.name}
             address={props.spot.formatted_address}
             rating={props.spot.rating}
+            width={snapshot.isDragging && '300px'}
             addCss={css`
               cursor: grab;
             `}
@@ -317,124 +319,6 @@ const SpotCardDraggable = (props) => {
   );
 };
 
-const DurationController = ({
-  isEditStatus,
-  changeEditStatus,
-  isAllowEdit,
-  decreaseAction,
-  increaseAction,
-  duration,
-  isUpdate,
-  updateAction,
-}) => (
-  <FlexChildDiv
-    css={css`
-      padding: 40px 0 0 0;
-      basis: 120px;
-      align-items: flex-start;
-      ${mediaQuery[0]} {
-        padding: 0;
-        justify-content: center;
-        border: 1px solid ${palatte.primary.basic};
-        padding: 20px 10px;
-        border-radius: 10px;
-      }
-    `}>
-    {isEditStatus ? (
-      <FlexDiv
-        css={css`
-          flex-direction: column;
-          align-items: center;
-          ${mediaQuery[0]} {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2px;
-          }
-        `}>
-        <span>停留</span>
-        <FlexDiv
-          css={css`
-            align-items: center;
-            gap: 8px;
-          `}>
-          <RoundButtonSmall
-            type="button"
-            size="20px"
-            padding="5px 5px 7px 5px"
-            styled="transparent"
-            onClick={decreaseAction}>
-            −
-          </RoundButtonSmall>
-          <P
-            css={css`
-              font-weight: 700;
-              font-size: 32px;
-              color: ${palatte.secondary[700]};
-              text-align: center;
-              width: 67px;
-              ${mediaQuery[0]} {
-                font-size: 28px;
-              }
-            `}>
-            {duration < 60 ? duration : duration / 60}
-          </P>
-          <RoundButtonSmall
-            size="20px"
-            styled="transparent"
-            padding="5px 5px 7px 7px"
-            type="button"
-            onClick={increaseAction}>
-            +
-          </RoundButtonSmall>
-        </FlexDiv>
-        <span>{duration < 60 ? '分鐘' : '小時'}</span>
-        {isUpdate && (
-          <ButtonSmall
-            styled="gray"
-            fontSize="12px"
-            margin="10px 0 0 0 "
-            id="duration"
-            type="button"
-            onClick={updateAction}>
-            更新時間
-          </ButtonSmall>
-        )}
-      </FlexDiv>
-    ) : (
-      <TextWithIcon
-        iconName="watch_later"
-        iconSize="40px"
-        color={palatte.primary.basic}
-        addCss={{
-          container: css`
-            flex-grow: 1;
-            margin: 15px 0 0 0;
-            padding: 10px 0px;
-            gap: 2px;
-            flex-direction: column;
-            align-items: center;
-            ${isAllowEdit &&
-            `&:hover {
-                background-color: ${palatte.lighterShadow};
-                border-radius: 10px;
-                cursor: pointer;
-              }`}
-            ${mediaQuery[0]} {
-              padding: 0;
-              margin: 0;
-            }
-          `,
-        }}
-        onClick={changeEditStatus}>
-        {'停留' +
-          ' ' +
-          (duration < 60 ? duration : duration / 60) +
-          ' ' +
-          (duration < 60 ? '分鐘' : '小時')}
-      </TextWithIcon>
-    )}
-  </FlexChildDiv>
-);
 const ScheduleWapper = styled.li`
   padding: 30px;
   display: flex;
@@ -457,7 +341,7 @@ const ScheduleCardDrag = (props) => {
       draggableId={props.id}
       index={props.index}
       isDragDisabled={!props.isAllowEdit}>
-      {(provided) => (
+      {(provided, snapshot) => (
         <ScheduleWapper
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -470,36 +354,33 @@ const ScheduleCardDrag = (props) => {
                 gap: 30px;
               }
             `}>
-            <DurationController
-              isEditStatus={isEditDuration && props.isAllowEdit}
-              isAllowEdit={props.isAllowEdit}
-              duration={duration}
-              isUpdate={duration !== props.schedule.duration}
-              changeEditStatus={(e) => {
-                if (e.target.id !== 'duration') {
-                  setIsEditDuration(true);
-                }
-              }}
-              decreaseAction={() => {
-                setDuration((prevValue) =>
-                  prevValue > 30 ? prevValue - 30 : 30
-                );
-              }}
-              increaseAction={() => {
-                setDuration((prevValue) =>
-                  prevValue < 1440 ? prevValue + 30 : 1440
-                );
-              }}
-              updateAction={(e) => {
-                if (e.target.id === 'duration') {
-                  setIsEditDuration(false);
-                  props.updateDuration(props.schedule.schedule_id, duration);
-                }
-              }}
-            />
             <ScheduleCard
               schedule={props.schedule}
-              duration={props.duration}
+              durationControllerConfig={{
+                isEditStatus: isEditDuration && props.isAllowEdit,
+                isUpdate: duration !== props.schedule.duration,
+                changeEditStatus: (e) => {
+                  if (e.target.id !== 'duration') {
+                    setIsEditDuration(true);
+                  }
+                },
+                decreaseAction: () => {
+                  setDuration((prevValue) =>
+                    prevValue > 30 ? prevValue - 30 : 30
+                  );
+                },
+                increaseAction: () => {
+                  setDuration((prevValue) =>
+                    prevValue < 1440 ? prevValue + 30 : 1440
+                  );
+                },
+                updateAction: (e) => {
+                  if (e.target.id === 'duration') {
+                    setIsEditDuration(false);
+                    props.updateDuration(props.schedule.schedule_id, duration);
+                  }
+                },
+              }}
               isEdit={props.isAllowEdit}
               selectedList={props.selectedList}
               setSelectedList={props.setSelectedList}
@@ -509,6 +390,7 @@ const ScheduleCardDrag = (props) => {
               travelMode={props.schedule.travel_mode}
               transitDetail={props.schedule.transit_detail}
               changeTrasitWay={props.changeTrasitWay}
+              isDragging={snapshot.isDragging}
             />
           </FlexDiv>
         </ScheduleWapper>
@@ -516,6 +398,114 @@ const ScheduleCardDrag = (props) => {
     </Draggable>
   );
 };
+
+function WaitingSpotArea({
+  addSpotAction,
+  closeAction,
+  waitingSpots,
+  deleteSpot,
+}) {
+  const [isMobile, setIsMobile] = useState();
+  useEffect(() => {
+    const checkWindowSize = () => {
+      if (window.innerWidth < breakpoints[0]) setIsMobile(true);
+    };
+    checkWindowSize();
+    console.log(window.innerWidth, breakpoints[0]);
+    window.addEventListener('resize', checkWindowSize);
+    return () => {
+      window.removeEventListener('resize', checkWindowSize);
+    };
+  }, []);
+  return (
+    <FlexChildDiv
+      addCss={css`
+        padding: 20px;
+        flex-direction: column;
+        background-color: ${palatte.gray[100]};
+        gap: 20px;
+        position: fixed;
+        right: 0;
+        height: 100vh;
+        width: 340px;
+        ${mediaQuery[0]} {
+          height: 40vh;
+          width: 100%;
+          bottom: 0;
+          z-index: 5;
+          box-shadow: 0 -2px 2px 2px ${palatte.shadow};
+          gap: 10px;
+        }
+      `}>
+      <FlexDiv
+        addCss={css`
+          justify-content: space-between;
+          align-items: center;
+        `}>
+        <H6 fontSize="22px">待定景點</H6>
+        <FlexDiv
+          addCss={css`
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+          `}>
+          <ButtonIconColumn
+            type="button"
+            styled="primary"
+            iconName="explore"
+            onClick={addSpotAction}>
+            新增景點
+          </ButtonIconColumn>
+          <ButtonIconColumn
+            type="button"
+            styled="danger"
+            iconName="cancel"
+            onClick={closeAction}>
+            結束編輯
+          </ButtonIconColumn>
+        </FlexDiv>
+      </FlexDiv>
+      <Droppable
+        droppableId="waitingSpotsArea"
+        direction={isMobile && 'horizontal'}>
+        {(provided, snapshot) => (
+          <FlexChildDiv
+            addCss={css`
+              flex-direction: column;
+              flex-grow: 1;
+              gap: 20px;
+              padding: 10px;
+              max-width: 300px;
+              overflow-y: auto;
+              &::-webkit-scrollbar {
+                display: none;
+              }
+              ${mediaQuery[0]} {
+                flex-direction: row;
+                overflow-y: initial;
+                overflow-x: auto;
+                max-width: 100%;
+              }
+              background-color: ${snapshot.isDraggingOver && palatte.gray[300]};
+            `}
+            ref={provided.innerRef}
+            {...provided.droppableProps}>
+            {waitingSpots?.map((spot, index) => (
+              <SpotCardDraggable
+                spot={spot}
+                key={spot.place_id}
+                index={index}
+                id={spot.place_id}
+                deleteSpot={deleteSpot}
+              />
+            ))}
+            {provided.placeholder}
+          </FlexChildDiv>
+        )}
+      </Droppable>
+    </FlexChildDiv>
+  );
+}
 
 function AddSchedule(props) {
   const { uid, map } = useContext(Context);
@@ -1122,79 +1112,24 @@ function AddSchedule(props) {
               dispatchIsShowReducer={dispatchNotification}
             />
             {isAllowEdit && (
-              <FlexChildDiv
-                padding="20px"
-                display="flex"
-                direction="column"
-                backgroundColor={palatte.gray[100]}
-                gap="20px"
-                addCss={css`
-                  position: fixed;
-                  right: 0;
-                  height: 100vh;
-                  width: 340px;
-                `}>
-                <FlexDiv justifyContent="space-between" alignItems="center">
-                  <H6 fontSize="22px">待定景點</H6>
-                  <FlexDiv
-                    justifyContent="flex-end"
-                    alignItems="center"
-                    gap="15px">
-                    <ButtonIconColumn
-                      type="button"
-                      styled="primary"
-                      iconName="explore"
-                      onClick={() => navigate('/explore')}>
-                      新增景點
-                    </ButtonIconColumn>
-                    <ButtonIconColumn
-                      type="button"
-                      styled="danger"
-                      iconName="cancel"
-                      onClick={() => setIsAllowEdit(false)}>
-                      結束編輯
-                    </ButtonIconColumn>
-                  </FlexDiv>
-                </FlexDiv>
-                <Droppable
-                  droppableId="waitingSpotsArea"
-                  isDropDisabled={!isAllowEdit}>
-                  {(provided) => (
-                    <FlexChildDiv
-                      direction="column"
-                      grow="1"
-                      gap="20px"
-                      padding="10px"
-                      maxWidth="300px"
-                      overflowY="auto"
-                      addCss={css`
-                        &::-webkit-scrollbar {
-                          display: none;
-                        }
-                      `}
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}>
-                      {waitingSpots?.map((spot, index) => (
-                        <SpotCardDraggable
-                          spot={spot}
-                          isAllowEdit={isAllowEdit}
-                          key={spot.place_id}
-                          index={index}
-                          id={spot.place_id}
-                          deleteSpot={deleteSpot}
-                        />
-                      ))}
-                      {provided.placeholder}
-                    </FlexChildDiv>
-                  )}
-                </Droppable>
-              </FlexChildDiv>
+              <WaitingSpotArea
+                addSpotAction={() => navigate('/explore')}
+                closeAction={() => setIsAllowEdit(false)}
+                waitingSpots={waitingSpots}
+                deleteSpot={deleteSpot}
+              />
             )}
             <FlexDiv
-              direction="column"
-              gap="20px"
-              minHeight="100vh"
-              width={isAllowEdit ? 'calc(100% - 340px)' : null}>
+              addCss={css`
+                flex-direction: column;
+                gap: 20px;
+                min-height: 100vh;
+                width: ${isAllowEdit && 'calc(100% - 340px)'};
+                ${mediaQuery[0]} {
+                  width: 100%;
+                  padding-bottom: ${isAllowEdit && '25vh'};
+                }
+              `}>
               <Overview
                 containerCss={container}
                 isAllowEdit={isAllowEdit}
@@ -1243,24 +1178,29 @@ function AddSchedule(props) {
               <Droppable
                 droppableId="scheduleArea"
                 isDropDisabled={!isAllowEdit}>
-                {(provided) => (
+                {(provided, snapshot) => (
                   <FlexChildDiv
-                    addCss={container}
-                    width="100%"
-                    direction="column"
-                    gap="20px"
-                    grow="1"
-                    // overflowY="scroll"
-                    // height="calc(100vh - 500px)"
+                    addCss={css`
+                      ${container}
+                      width: 100%;
+                      flex-direction: column;
+                      gap: 20px;
+                      flex-grow: 1;
+                    `}
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
                     <FlexChildDiv
-                      direction="column"
-                      backgroundColor={palatte.gray[100]}
-                      grow="1"
-                      padding="20px"
                       addCss={css`
+                        flex-direction: column;
+                        background-color: ${snapshot.isDraggingOver
+                          ? palatte.gray[300]
+                          : palatte.gray[100]};
+                        flex-grow: 1;
+                        padding: 20px;
                         border-radius: 10px;
+                        ${mediaQuery[0]} {
+                          gap: 20px;
+                        }
                       `}>
                       {isAllowEdit && (
                         <FlexDiv justifyContent="flex-end" margin="0 0 20px 0">

@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, H3, P } from './styledComponents/basicStyle';
+import { palatte, H3, P, mediaQuery } from './styledComponents/basicStyle';
 import {
   timestampToString,
   setTimeToTimestamp,
@@ -38,7 +38,11 @@ function Overview(props) {
     <>
       <Container position="relative" margin="0 0 30px 0">
         <Container addCss={props.containerCss} padding="40px 20px 50px 20px">
-          <FlexDiv justifyContent="space-between">
+          <FlexDiv
+            addCss={css`
+              justify-content: space-between;
+              margin-bottom: 10px;
+            `}>
             <RoundButtonSmallWhite
               className="material-icons"
               type="button"
@@ -82,8 +86,10 @@ function Overview(props) {
           <FlexDiv direction="column" gap="10px" alignItems="center">
             <EditableText
               level="2"
-              padding="0 2px"
-              color={palatte.white}
+              addCss={css`
+                padding: 0 2px;
+                color: ${palatte.white};
+              `}
               addInputCss={css`
                 color: ${palatte.gray[800]};
               `}
@@ -98,17 +104,17 @@ function Overview(props) {
             </EditableText>
             <EditableDate
               defaultShowText={props.isJournal}
-              color={palatte.white}
               start={props.overviews.start_date}
               end={props.overviews.end_date}
               onSubmit={props.updateDate}
               isAllowEdit={props.isAllowEdit}
               addCss={css`
+                color: ${palatte.white};
                 font-weight: 700;
+                text-align: center;
               `}
-              textAlign="center"
             />
-            {props.hideDay ? null : (
+            {!props.hideDay && (
               <H3 color={palatte.white}>Day {props.day + 1}</H3>
             )}
           </FlexDiv>
@@ -171,7 +177,17 @@ function DepartController(props) {
 
 function MoveScheduleController(props) {
   return (
-    <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
+    <FlexDiv
+      addCss={css`
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;
+        ${mediaQuery[0]} {
+          justify-content: space-between;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+      `}>
       <SelectAllCheckBox
         setAllChecked={() =>
           props.setSelectedSchedulesId(
@@ -182,35 +198,48 @@ function MoveScheduleController(props) {
         isSelectAll={props.isSelectAll}
         setIsSelectAll={props.setIsSelectAll}
       />
-      <SelectSmall
-        value={props.changeTime}
-        onChange={(e) => props.setChangeTime(Number(e.target.value))}>
-        <option value="" disabled>
-          修改所選行程的日期
-        </option>
-        {props.departTimes
-          ?.filter((time) => time !== props.departTimes[props.day])
-          .map((timestamp) => (
-            <option value={timestamp} key={timestamp}>
-              {timestampToString(timestamp, 'date')}
-            </option>
-          ))}
-      </SelectSmall>
-      <TooltipNotification
-        isOpen={
-          props.notification.fire &&
-          props.notification.id.match('tooltip')?.length > 0
-        }
-        settingReducer={props.notification}
-        resetSettingReducer={props.dispatchNotification}>
-        <ButtonSmall
-          styled="primary"
-          padding="5px 15px"
-          type="button"
-          onClick={props.changeSchedulesTime}>
-          移動行程
-        </ButtonSmall>
-      </TooltipNotification>
+      <FlexDiv
+        addCss={css`
+          gap: 20px;
+          align-items: center;
+          ${mediaQuery[0]} {
+            gap: 10px;
+            align-self: flex-end;
+          }
+        `}>
+        <SelectSmall
+          addCss={css`
+            width: fit-content;
+          `}
+          value={props.changeTime}
+          onChange={(e) => props.setChangeTime(Number(e.target.value))}>
+          <option value="" disabled>
+            修改所選行程的日期
+          </option>
+          {props.departTimes
+            ?.filter((time) => time !== props.departTimes[props.day])
+            .map((timestamp) => (
+              <option value={timestamp} key={timestamp}>
+                {timestampToString(timestamp, 'date')}
+              </option>
+            ))}
+        </SelectSmall>
+        <TooltipNotification
+          isOpen={
+            props.notification.fire &&
+            props.notification.id.match('tooltip')?.length > 0
+          }
+          settingReducer={props.notification}
+          resetSettingReducer={props.dispatchNotification}>
+          <ButtonSmall
+            styled="primary"
+            padding="5px 15px"
+            type="button"
+            onClick={props.changeSchedulesTime}>
+            移動行程
+          </ButtonSmall>
+        </TooltipNotification>
+      </FlexDiv>
     </FlexDiv>
   );
 }

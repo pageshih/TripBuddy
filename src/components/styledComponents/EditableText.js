@@ -114,13 +114,11 @@ function EditableText(props) {
       ) : (
         <Text
           as={props.as}
-          fontSize={props.fontSize}
           addCss={css`
+            padding: 0 12px 0 0;
             ${props.isAllowEdit && hoverEffect}
-            padding: ${props.padding || '0 12px 0 0 '};
             ${props.addCss}
           `}
-          color={props.color}
           onClick={() => {
             if (props.isAllowEdit) setIsEdit(true);
           }}>
@@ -187,10 +185,16 @@ function EditableDate(props) {
                 onChange={(newTimestamp) => {
                   setStartTimestamp(newTimestamp);
                 }}
-                color={props.color}
-                addCss={props.addCss}
-                width={props.width}
-                fontSize={props.inputFontSize || props.fontSize}
+                addCss={css`
+                  font-size: ${props.inputFontSize || props.fontSize};
+                  color: ${props.color};
+                  width: ${props.width};
+                  ${mediaQuery[0]} {
+                    width: ${`calc(${props.width} - 30px)`};
+                    font-size: ${`calc(${props.fontSize} - 20px)`};
+                  }
+                  ${props.addCss}
+                `}
               />
               {startTimestamp !== props.start && (
                 <ButtonSmall
@@ -232,6 +236,9 @@ function EditableDate(props) {
               color={props.color}
               addCss={css`
                 ${props.isAllowEdit && hoverEffect}
+                ${mediaQuery[0]} {
+                  font-size: ${`calc(${props.fontSize} - 12px)`};
+                }
                 ${props.addCss}
               `}
               onClick={(e) => {
