@@ -260,7 +260,8 @@ const TextWithIcon = (props) => (
       {props.iconLabel && (
         <P
           fontSize={props.labelSize || props.textSize}
-          color={props.labelColor || props.iconColor}>
+          color={props.labelColor || props.iconColor}
+          css={props.addCss.iconLabel}>
           {props.iconLabel}
         </P>
       )}

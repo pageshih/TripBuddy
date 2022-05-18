@@ -18,49 +18,6 @@ import { CheckboxCustom, Select } from './Form';
 import { RoundButtonSmall, ButtonSmallOutlineIcon } from './Button';
 import { EditableText } from './EditableText';
 
-const CardWrapper = styled.div`
-  display: flex;
-  position: relative;
-  width: ${(props) => props.width || '100%'};
-  gap: ${(props) => props.gap};
-  flex-direction: ${(props) => props.column && 'column'};
-  flex-grow: ${(props) => props.grow};
-  max-width: ${(props) => props.maxWidth};
-  background-color: ${(props) => props.backgroundColor};
-  padding: ${(props) => props.padding};
-  ${(props) => props.addCss};
-`;
-const cardCss = css`
-  border: 1px solid ${palatte.primary.basic};
-  border-radius: 30px;
-  display: flex;
-  overflow: hidden;
-  background-color: ${palatte.white};
-  align-items: center;
-  &:hover {
-    cursor: pointer;
-    box-shadow: ${styles.shadow};
-  }
-`;
-const Card = styled.div`
-  ${cardCss}
-  position: relative;
-  width: 100%;
-  height: ${(props) => !props.isSmall && '200px'};
-  gap: ${(props) => props.gap};
-  flex-basis: ${(props) => props.basis};
-  flex-direction: ${(props) =>
-    props.isSmall || props.column ? 'column' : 'row'};
-  position: ${(props) => props.position};
-  border-radius: ${(props) => props.isSmall && '10px'};
-  ${mediaQuery[0]} {
-    flex-direction: column;
-    border-radius: 10px;
-    height: fit-content;
-  }
-  ${(props) => props.addCss}
-`;
-
 const TimeTag = styled.div`
   font-weight: 700;
   color: ${palatte.white};
@@ -79,7 +36,7 @@ const AddressText = (props) => (
     iconColor={palatte.danger.basic}
     alignItems="flex-start"
     textSize={!props.isSmall ? '17px' : '16px'}
-    iconSize={props.isSmall ? '20px' : '22px'}
+    iconSize={props.isSmall ? '18px' : '22px'}
     mutipleLines
     iconOffset="20px"
     addCss={{
@@ -102,7 +59,7 @@ const RatingText = (props) => (
       </P>
     )}
     <Rating
-      size={props.isSmall ? '20' : props.size || '24'}
+      size={props.isSmall ? '18' : props.size || '24'}
       rating={props.rating}
     />
   </FlexDiv>
@@ -121,61 +78,134 @@ const DurationText = (props) => (
     停留 {Math.floor(props.duration / 6) / 10} 小時
   </TextWithIcon>
 );
+const CardWrapper = styled.div`
+  display: flex;
+  position: relative;
+  gap: 20px;
+  flex-direction: column;
+  width: 100%;
+  ${mediaQuery[0]} {
+    min-width: 90%;
+  }
+`;
+
+const Card = styled.div`
+  border: 1px solid ${palatte.primary.basic};
+  border-radius: 30px;
+  display: flex;
+  overflow: hidden;
+  background-color: ${palatte.white};
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: ${(props) => !props.isSmall && '200px'};
+  gap: ${(props) => props.gap};
+  flex-basis: ${(props) => props.basis};
+  flex-direction: ${(props) =>
+    props.isSmall || props.column ? 'column' : 'row'};
+  position: ${(props) => props.position};
+  border-radius: ${(props) => props.isSmall && '10px'};
+  &:hover {
+    cursor: pointer;
+    box-shadow: ${styles.shadow};
+  }
+  ${mediaQuery[0]} {
+    flex-direction: column;
+    border-radius: 10px;
+    height: fit-content;
+  }
+`;
+
 function SpotCard(props) {
+  const tagAndCheckboxContainer = css`
+    gap: 10px;
+    align-items: center;
+    position: absolute;
+    top: ${props.time ? '-15px' : props.isEdit ? '20px' : null};
+    left: ${props.isSmall
+      ? props.time
+        ? '-10px'
+        : props.isEdit
+        ? '20px'
+        : null
+      : props.time
+      ? '30px'
+      : props.isEdit
+      ? '20px'
+      : null};
+    z-index: 1;
+    ${mediaQuery[0]} {
+      left: ${props.time ? '-10px' : props.isEdit ? '20px' : null};
+    }
+  `;
+  const closeButton = css`
+    position: absolute;
+    top: ${props.isSmall ? '-8px' : '10px'};
+    right: ${props.isSmall ? '-10px' : '10px'};
+    z-index: 1;
+    background-color: ${palatte.white};
+  `;
+  const image = css`
+    flex-basis: ${props.isSmall ? '200px' : '330px'};
+    min-width: ${props.isSmall ? '100%' : '330px'};
+    ${mediaQuery[0]} {
+      width: 100%;
+      min-width: ${props.isSmall ? '30%' : '100%'};
+      max-height: ${props.isSmall ? '100%' : '200px'};
+    }
+  `;
+  const textContainer = css`
+    flex-shrink: 1;
+    flex-direction: column;
+    gap: 15px;
+    padding: 5px 5px 5px 0;
+    width: ${props.isSmall ? '100%' : null};
+    padding: ${props.isSmall ? '20px' : null};
+    gap: ${props.isSmall ? '10px' : null};
+    ${mediaQuery[0]} {
+      width: 100%;
+      padding: 15px;
+      gap: 5px;
+    }
+  `;
+  const title = css`
+    margin: 0 0 10px 0;
+    font-size: ${props.isSmall && '20px'};
+    margin-bottom: ${props.isSmall && '0'};
+    ${mediaQuery[0]} {
+      ${props.isSmall && `font-size: 16px;`}
+    }
+  `;
+  const card = css`
+    gap: ${(props.isSmall && '0px') || props.cardGap};
+    ${mediaQuery[0]} {
+      gap: 0px;
+      flex-direction: row;
+      height: 100%;
+    }
+  `;
   return (
-    <CardWrapper
-      column
-      as={props.as}
-      gap="20px"
-      width={props.width}
-      addCss={props.addCss}>
+    <CardWrapper as={props.as}>
       {props.isShowCloseBtn && (
         <RoundButtonSmall
           className="material-icons"
           close
           type="button"
           onClick={props.onCloseClick}
-          addCss={css`
-            position: absolute;
-            top: ${props.isSmall ? '-8px' : '10px'};
-            right: ${props.isSmall ? '-10px' : '10px'};
-            z-index: 1;
-            background-color: ${palatte.white};
-          `}>
+          addCss={closeButton}>
           cancel
         </RoundButtonSmall>
       )}
-      <FlexDiv
-        gap="10px"
-        alignItems="center"
-        addCss={css`
-          position: absolute;
-          top: ${props.time ? '-15px' : props.isEdit ? '20px' : null};
-          left: ${props.isSmall
-            ? props.time
-              ? '-10px'
-              : props.isEdit
-              ? '20px'
-              : null
-            : props.time
-            ? '30px'
-            : props.isEdit
-            ? '20px'
-            : null};
-          z-index: 1;
-          ${mediaQuery[0]} {
-            left: ${props.time ? '-10px' : props.isEdit ? '20px' : null};
-          }
-        `}>
+      <FlexDiv css={tagAndCheckboxContainer}>
         {props.isEdit && (
           <CheckboxCustom
             id={props.id}
             selectedList={props.selectedList}
             setSelectedList={props.setSelectedList}
             addCss={css`
-              box-shadow: ${!props.time && props.isEdit
-                ? `0 0 0 1px ${palatte.gray['300']}`
-                : null};
+              box-shadow: ${!props.time &&
+              props.isEdit &&
+              `0 0 0 1px ${palatte.gray['300']}`};
             `}
           />
         )}
@@ -187,49 +217,15 @@ function SpotCard(props) {
         isSmall={props.isSmall}
         gap="40px"
         onClick={props.onClick}
-        addCss={css`
-          gap: ${(props.isSmall && '0px') || props.cardGap};
-          ${mediaQuery[0]} {
-            gap: 0px;
-          }
-        `}>
+        css={card}>
         <Image
           src={props.imgSrc}
           alt={props.imgAlt}
           height="100%"
-          addCss={css`
-            flex-basis: ${props.isSmall ? '200px' : '330px'};
-            min-width: ${props.isSmall ? '100%' : '330px'};
-            ${mediaQuery[0]} {
-              width: 100%;
-              min-width: 100%;
-              max-height: 200px;
-            }
-          `}
+          addCss={image}
         />
-        <FlexChildDiv
-          shrink="1"
-          direction="column"
-          gap="15px"
-          padding="5px 5px 5px 0"
-          addCss={css`
-            width: ${props.isSmall ? '100%' : null};
-            padding: ${props.isSmall ? '20px' : null};
-            gap: ${props.isSmall ? '10px' : null};
-            ${mediaQuery[0]} {
-              width: 100%;
-              padding: 20px;
-              gap: 10px;
-            }
-          `}>
-          <H5
-            margin="0 0 10px 0"
-            css={css`
-              font-size: ${props.isSmall && '20px'};
-              margin-bottom: ${props.isSmall && '0'};
-            `}>
-            {props.title}
-          </H5>
+        <FlexChildDiv css={textContainer}>
+          <H5 css={title}>{props.title}</H5>
           <AddressText withRating={props.rating} isSmall={props.isSmall}>
             {props.address}
           </AddressText>
@@ -603,9 +599,6 @@ OverviewCard.propTypes = {
 };
 
 export {
-  Card,
-  cardCss,
-  CardWrapper,
   TimeTag,
   ScheduleCard,
   OverviewCard,

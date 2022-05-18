@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { Image } from './styledComponents/Layout';
-import { Card, OverviewCard } from './styledComponents/Cards';
+import { OverviewCard } from './styledComponents/Cards';
 import { FlexDiv } from './styledComponents/Layout';
 import { palatte, styles, Loader } from './styledComponents/basicStyle';
 import { timestampToString } from '../utils/utilities';

@@ -32,8 +32,6 @@ import {
   Image,
 } from './styledComponents/Layout';
 import {
-  Card,
-  cardCss,
   ScheduleCard,
   SpotCard,
   transportMode,
@@ -341,17 +339,7 @@ function AddOverView(props) {
     </Container>
   );
 }
-const SpotStyledCard = styled(Card)`
-  position: relative;
-  background-color: white;
-  flex-direction: column;
-  gap: 20px;
-  flex-basis: 300px;
-  cursor: grab;
-  &:hover {
-    cursor: grab;
-  }
-`;
+
 const SpotCardDraggable = (props) => {
   return (
     <Draggable
@@ -382,17 +370,7 @@ const SpotCardDraggable = (props) => {
     </Draggable>
   );
 };
-const ScheduleStyledCard = styled.div`
-  ${cardCss}
-  position: relative;
-  gap: 20px;
-  height: 250px;
-  cursor: ${(props) => (props.cursorDefault ? 'default' : 'grab')};
-  background-color: white;
-  &:hover {
-    cursor: grab;
-  }
-`;
+
 const ScheduleWapper = styled.li`
   padding: 30px;
   display: flex;

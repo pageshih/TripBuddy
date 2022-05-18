@@ -122,18 +122,21 @@ const GetTodayOpeningHours = (props) => {
     </P>
   );
 };
-function PlaceDetail({
-  placeDetail,
-  removeFromSavedSpots,
-  addToSavedSpots,
-  checkIsSavedSpot,
-}) {
+
+const PlaceOverview = ({
+  imgUrl,
+  openingHours,
+  spotName,
+  address,
+  rating,
+  website,
+  buttonAction,
+  isSavedSpot,
+}) => {
   let today = new Date().getDay();
   today = today ? today - 1 : 6;
   const restOpeningText = () => {
-    const restDays = placeDetail.opening_hours.weekday_text.filter(
-      (_, index) => index !== today
-    );
+    const restDays = openingHours.filter((_, index) => index !== today);
     const newOrderRestDays =
       today < 6
         ? [
@@ -145,148 +148,234 @@ function PlaceDetail({
   };
   return (
     <FlexDiv
-      height="100%"
-      direction="column"
-      gap="20px"
-      overflowY="auto"
-      addCss={css`
+      css={css`
+        flex-direction: column;
+        gap: 10px;
+        ${mediaQuery[0]} {
+        }
+      `}>
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          ${mediaQuery[0]} {
+            flex-direction: row;
+            justify-content: space-between;
+            flex-basis: 200px;
+            gap: 10px;
+          }
+        `}>
+        <Image
+          src={imgUrl}
+          alt="placePhoto"
+          addCss={css`
+            ${mediaQuery[0]} {
+              flex-basis: 50%;
+              height: 160px;
+            }
+          `}
+        />
+        <FlexChildDiv
+          css={css`
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 20px;
+            ${mediaQuery[0]} {
+              order: -1;
+              padding: 0;
+            }
+          `}>
+          <H2
+            css={css`
+              font-size: 22px;
+              ${mediaQuery[0]} {
+                font-size: 16px;
+              }
+            `}>
+            {spotName}
+          </H2>
+
+          {openingHours && (
+            <TextWithIcon
+              gap="6px"
+              iconGap="4px"
+              iconName="access_time"
+              iconLabel="營業時間"
+              iconSize="18px"
+              iconColor={palatte.gray[600]}
+              textSize="14px"
+              textColor={palatte.gray[700]}
+              addCss={{
+                text: css`
+                  & span {
+                    color: inherit;
+                  }
+                `,
+                iconLabel: css`
+                  ${mediaQuery[0]} {
+                    display: none;
+                  }
+                `,
+              }}>
+              <AccordionSmall
+                filled
+                titleElement={
+                  <GetTodayOpeningHours
+                    key={`opening_hours_day_today`}
+                    openingText={openingHours[today]}
+                  />
+                }>
+                {restOpeningText().map((text, index) => (
+                  <GetTodayOpeningHours
+                    key={`opening_hours_day${index + 1}`}
+                    openingText={text}
+                  />
+                ))}
+              </AccordionSmall>
+            </TextWithIcon>
+          )}
+          <AddressText withRating isSmall>
+            {address}
+          </AddressText>
+
+          <RatingText rating={rating} isSmall />
+          {website && (
+            <HyperLink
+              href={website}
+              alignSelf="flex-start"
+              iconName="open_in_new">
+              官方網站
+            </HyperLink>
+          )}
+        </FlexChildDiv>
+      </div>
+      <Button
+        styled={isSavedSpot ? 'danger' : 'primary'}
+        type="button"
+        css={css`
+          width: calc(100% - 60px);
+          margin: 0 30px;
+          ${mediaQuery[0]} {
+            width: 100%;
+            margin: 0;
+          }
+        `}
+        onClick={buttonAction}>
+        <span
+          className="material-icons"
+          css={css`
+            color: inherit;
+            font-size: 28px;
+          `}>
+          {isSavedSpot ? 'wrong_location' : 'add_location_alt'}
+        </span>
+        {isSavedSpot ? '從候補景點中移除' : '加入候補景點'}
+      </Button>
+    </FlexDiv>
+  );
+};
+const PlaceReview = ({ reviews }) => {
+  return (
+    <FlexChildDiv
+      css={css`
+        flex-direction: column;
+        padding: 0 30px 30px 30px;
+        gap: 20px;
+        ${mediaQuery[0]} {
+          padding: 0;
+        }
+      `}>
+      <H3 fontSize="18px">評論</H3>
+      <FlexDiv as="ul" direction="column" gap="20px">
+        {reviews ? (
+          reviews.map((review) => (
+            <FlexDiv
+              as="li"
+              direction="column"
+              padding="20px"
+              gap="10px"
+              key={review.time}
+              css={css`
+                background-color: ${palatte.white};
+                border-radius: 10px;
+                border: 1px solid ${palatte.gray[400]};
+              `}>
+              <FlexDiv gap="12px" alignItems="center">
+                <Image
+                  size="40px"
+                  round
+                  shadow
+                  addCss={css`
+                    border: 1px solid ${palatte.gray['100']};
+                  `}
+                  src={review.profile_photo_url}
+                  alt={review.author_name}
+                />
+                <a
+                  css={css`
+                    text-decoration: none;
+                  `}
+                  href={review.author_url}>
+                  {review.author_name}
+                </a>
+              </FlexDiv>
+              <FlexDiv alignItems="center" gap="6px">
+                <RatingText rating={review.rating} size="18" isNoText />
+                <P fontSize="14px" color={palatte.gray[700]}>
+                  {review.relative_time_description}
+                </P>
+              </FlexDiv>
+              <P>{review.text}</P>
+            </FlexDiv>
+          ))
+        ) : (
+          <P>找不到評論</P>
+        )}
+      </FlexDiv>
+    </FlexChildDiv>
+  );
+};
+function PlaceDetail({
+  placeDetail,
+  removeFromSavedSpots,
+  addToSavedSpots,
+  checkIsSavedSpot,
+}) {
+  return (
+    <FlexDiv
+      css={css`
+        height: 100%;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
         &::-webkit-scrollbar {
           display: none;
         }
+        ${mediaQuery[0]} {
+          padding: 30px 20px;
+        }
       `}>
-      <Image
-        minHeight="250px"
-        maxHeight="250px"
-        src={placeDetail.photos[0]}
-        alt="placePhoto"
+      <PlaceOverview
+        isSavedSpot={checkIsSavedSpot(placeDetail.place_id)}
+        spotName={placeDetail.name}
+        address={placeDetail.formatted_address}
+        imgUrl={placeDetail.photos[0]}
+        rating={placeDetail.rating}
+        website={placeDetail.website !== '未提供' && placeDetail.website}
+        buttonAction={() =>
+          checkIsSavedSpot(placeDetail.place_id)
+            ? removeFromSavedSpots([placeDetail.place_id])
+            : addToSavedSpots()
+        }
+        openingHours={
+          placeDetail.opening_hours.weekday_text !== '未提供' &&
+          placeDetail.opening_hours.weekday_text
+        }
       />
-      <FlexChildDiv direction="column" padding="0 30px" gap="12px">
-        <H2 fontSize="22px">{placeDetail.name}</H2>
-
-        {placeDetail.opening_hours.weekday_text !== '未提供' && (
-          <TextWithIcon
-            gap="6px"
-            iconGap="4px"
-            iconName="access_time"
-            iconLabel="營業時間"
-            iconSize="18px"
-            iconColor={palatte.gray[600]}
-            textSize="14px"
-            textColor={palatte.gray[700]}
-            addCss={{
-              text: css`
-                & span {
-                  color: inherit;
-                }
-              `,
-            }}>
-            <AccordionSmall
-              filled
-              titleElement={
-                <GetTodayOpeningHours
-                  key={`opening_hours_day_today`}
-                  openingText={placeDetail.opening_hours.weekday_text[today]}
-                />
-              }>
-              {restOpeningText().map((text, index) => (
-                <GetTodayOpeningHours
-                  key={`opening_hours_day${index + 1}`}
-                  openingText={text}
-                />
-              ))}
-            </AccordionSmall>
-          </TextWithIcon>
-        )}
-        <AddressText withRating isSmall>
-          {placeDetail.formatted_address}
-        </AddressText>
-
-        <RatingText rating={placeDetail.rating} isSmall />
-        {placeDetail.website !== '未提供' && (
-          <HyperLink
-            href={placeDetail.website}
-            alignSelf="flex-start"
-            iconName="open_in_new">
-            官方網站
-          </HyperLink>
-        )}
-        <Button
-          styled={
-            placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
-              ? 'danger'
-              : 'primary'
-          }
-          type="button"
-          margin="10px 0 0 0 "
-          onClick={() =>
-            placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
-              ? removeFromSavedSpots([placeDetail.place_id])
-              : addToSavedSpots()
-          }>
-          <span
-            className="material-icons"
-            css={css`
-              color: inherit;
-              font-size: 28px;
-            `}>
-            {placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
-              ? 'wrong_location'
-              : 'add_location_alt'}
-          </span>
-          {placeDetail.savedSpot || checkIsSavedSpot(placeDetail.place_id)
-            ? '從候補景點中移除'
-            : '加入候補景點'}
-        </Button>
-      </FlexChildDiv>
-      <FlexChildDiv direction="column" padding="0 30px 30px 30px" gap="20px">
-        <H3 fontSize="18px">評論</H3>
-        <FlexDiv as="ul" direction="column" gap="20px">
-          {placeDetail.reviews === '未提供' ? (
-            <P>找不到評論</P>
-          ) : (
-            placeDetail.reviews.map((review) => (
-              <FlexDiv
-                as="li"
-                direction="column"
-                padding="20px"
-                gap="10px"
-                key={review.time}
-                css={css`
-                  background-color: ${palatte.white};
-                  border-radius: 10px;
-                  border: 1px solid ${palatte.gray[400]};
-                `}>
-                <FlexDiv gap="12px" alignItems="center">
-                  <Image
-                    size="40px"
-                    round
-                    shadow
-                    addCss={css`
-                      border: 1px solid ${palatte.gray['100']};
-                    `}
-                    src={review.profile_photo_url}
-                    alt={review.author_name}
-                  />
-                  <a
-                    css={css`
-                      text-decoration: none;
-                    `}
-                    href={review.author_url}>
-                    {review.author_name}
-                  </a>
-                </FlexDiv>
-                <FlexDiv alignItems="center" gap="6px">
-                  <RatingText rating={review.rating} size="18" isNoText />
-                  <P fontSize="14px" color={palatte.gray[700]}>
-                    {review.relative_time_description}
-                  </P>
-                </FlexDiv>
-                <P>{review.text}</P>
-              </FlexDiv>
-            ))
-          )}
-        </FlexDiv>
-      </FlexChildDiv>
+      <PlaceReview
+        reviews={placeDetail.reviews !== '未提供' && placeDetail.reviews}
+      />
     </FlexDiv>
   );
 }
@@ -297,7 +386,58 @@ const ShadowBottom = styled.div`
   width: 100%;
   height: 20px;
   top: -40px;
+  ${mediaQuery[0]} {
+    display: none;
+  }
 `;
+
+const AddSpotToItineraryController = ({
+  createdItineraries,
+  choseItinerary,
+  showAlertMessage,
+  onChangeItinerary,
+  addAction,
+  deleteAction,
+}) => {
+  const container = css`
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 0 10px 0;
+    position: relative;
+  `;
+  const buttonContainer = css`
+    flex-direction: column;
+    gap: 10px;
+    ${mediaQuery[0]} {
+      flex-direction: row;
+    }
+  `;
+  return (
+    <FlexChildDiv css={container}>
+      <ShadowBottom />
+      <NotificationText type="error">{showAlertMessage}</NotificationText>
+      <SelectSmall value={choseItinerary} onChange={onChangeItinerary}>
+        <option value="" disabled>
+          ---請選擇要加入景點的行程---
+        </option>
+        <option value="add">新建一個行程</option>
+        {createdItineraries?.map((itinerary) => (
+          <option value={itinerary.itinerary_id} key={itinerary.itinerary_id}>
+            {itinerary.title}
+          </option>
+        ))}
+      </SelectSmall>
+      <FlexDiv css={buttonContainer}>
+        <ButtonSmall styled="primary" onClick={addAction}>
+          加入行程
+        </ButtonSmall>
+        <ButtonSmall styled="danger" onClick={deleteAction}>
+          刪除景點
+        </ButtonSmall>
+      </FlexDiv>
+    </FlexChildDiv>
+  );
+};
 function SavedSpotsList(props) {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
@@ -305,7 +445,7 @@ function SavedSpotsList(props) {
   const [addAction, setAddAction] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
-  const [showAlert, setShowAlert] = useState();
+  const [showAlertMessage, setShowAlertMessage] = useState();
   const [isDeleteConfirm, setIsDeleteConfirm] = useState();
 
   useEffect(() => {
@@ -342,11 +482,44 @@ function SavedSpotsList(props) {
       }
     } else {
       if (!addAction) {
-        setShowAlert('請選擇要加入的行程');
+        setShowAlertMessage('請選擇要加入的行程');
       }
     }
   };
-
+  const spotsContainer = css`
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 1;
+    gap: 30px;
+    padding: 0 4px 10px 0;
+    position: relative;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    ${mediaQuery[0]} {
+      gap: 15px;
+      flex-direction: row;
+      overflow-y: initial;
+      overflow-x: auto;
+      padding: 0;
+      flex-basis: 100%;
+    }
+  `;
+  const headerContainer = css`
+    justify-content: space-between;
+    align-items: flex-end;
+    ${mediaQuery[0]} {
+      align-items: center;
+    }
+  `;
+  const container = css`
+    flex-direction: column;
+    height: 100%;
+    gap: 25px;
+    ${mediaQuery[0]} {
+      gap: 10px;
+    }
+  `;
   return (
     <>
       <Confirm
@@ -362,9 +535,17 @@ function SavedSpotsList(props) {
           setIsDeleteConfirm(false);
         }}
       />
-      <FlexDiv direction="column" maxHeight="calc(100% - 30px)" gap="25px">
-        <FlexDiv justifyContent="space-between" alignItems="flex-end">
-          <H2 fontSize="24px">候補景點</H2>
+      <FlexDiv css={container}>
+        <FlexDiv css={headerContainer}>
+          <H2
+            fontSize="24px"
+            css={css`
+              ${mediaQuery[0]} {
+                font-size: 18px;
+              }
+            `}>
+            候補景點
+          </H2>
           <SelectAllCheckBox
             size="20px"
             isSelectAll={isSelectAll}
@@ -375,19 +556,16 @@ function SavedSpotsList(props) {
             setAllUnchecked={() => setSelectedSpotList([])}
           />
         </FlexDiv>
-        <FlexChildDiv direction="column" height="calc(100% - 30px)" gap="20px">
-          <FlexChildDiv
-            direction="column"
-            overflowY="auto"
-            shrink="1"
-            gap="30px"
-            padding="0 4px 10px 0"
-            position="relative"
-            addCss={css`
-              &::-webkit-scrollbar {
-                display: none;
-              }
-            `}>
+        <FlexChildDiv
+          css={css`
+            flex-direction: column;
+            height: calc(100% - 30px);
+            gap: 20px;
+            ${mediaQuery[0]} {
+              gap: 10px;
+            }
+          `}>
+          <FlexChildDiv css={spotsContainer}>
             {props.savedSpots.map((spot) => (
               <SpotCard
                 isSmall
@@ -407,42 +585,19 @@ function SavedSpotsList(props) {
           </FlexChildDiv>
 
           {selectedSpotList?.length > 0 && (
-            <FlexChildDiv
-              direction="column"
-              gap="15px"
-              padding="0 0 10px 0"
-              position="relative">
-              <ShadowBottom />
-              <NotificationText type="error">{showAlert}</NotificationText>
-              <SelectSmall
-                value={addAction}
-                onChange={(e) => {
-                  setAddAction(e.target.value);
-                  if (e.target.value) {
-                    setShowAlert('');
-                  }
-                }}>
-                <option value="" disabled>
-                  ---請選擇要加入景點的行程---
-                </option>
-                <option value="add">新建一個行程</option>
-                {createdItineraries?.map((itinerary) => (
-                  <option
-                    value={itinerary.itinerary_id}
-                    key={itinerary.itinerary_id}>
-                    {itinerary.title}
-                  </option>
-                ))}
-              </SelectSmall>
-              <ButtonSmall styled="primary" onClick={addSelectSpotsToItinerary}>
-                加入行程
-              </ButtonSmall>
-              <ButtonSmall
-                styled="danger"
-                onClick={() => setIsDeleteConfirm(true)}>
-                刪除景點
-              </ButtonSmall>
-            </FlexChildDiv>
+            <AddSpotToItineraryController
+              createdItineraries={createdItineraries}
+              choseItinerary={addAction}
+              showAlertMessage={showAlertMessage}
+              addAction={addSelectSpotsToItinerary}
+              deleteAction={() => setIsDeleteConfirm(true)}
+              onChangeItinerary={(e) => {
+                setAddAction(e.target.value);
+                if (e.target.value) {
+                  setShowAlertMessage('');
+                }
+              }}
+            />
           )}
         </FlexChildDiv>
       </FlexDiv>
@@ -454,20 +609,79 @@ const ButtonOnMap = (props) => (
     direction="column"
     gap="2px"
     alignItems="center"
-    addCss={css`
+    css={css`
       &:hover {
         & p {
           color: ${palatte.primary[300]};
         }
       }
     `}>
-    <RoundButton className="material-icons" size="60px" onClick={props.onClick}>
+    <RoundButton
+      className="material-icons"
+      size="60px"
+      css={css`
+        ${mediaQuery[0]} {
+          width: 40px;
+          height: 40px;
+          font-size: 25px;
+        }
+      `}
+      onClick={props.onClick}>
       {props.iconName}
     </RoundButton>
     <P fontSize="14px" fontWeight="500" color={palatte.gray[200]}>
       {props.children}
     </P>
   </FlexDiv>
+);
+const NavigateButtonsOnMap = (props) => {
+  return (
+    <FlexDiv
+      css={css`
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 20px 30px 20px 20px;
+        position: absolute;
+        background-color: ${palatte.gray[700]};
+        border-radius: 20px 0 0 20px;
+        top: 100px;
+        right: 0px;
+        z-index: 1000;
+        ${mediaQuery[0]} {
+          padding: 15px;
+        }
+      `}>
+      <ButtonOnMap iconName="add_location" onClick={props.onWaitingSpotClick}>
+        候補景點
+      </ButtonOnMap>
+      <ButtonOnMap iconName="home" onClick={props.onHomeClick}>
+        回首頁
+      </ButtonOnMap>
+    </FlexDiv>
+  );
+};
+const ExpandButton = (props) => (
+  <RoundButtonSmall
+    size="30px"
+    className="material-icons"
+    styled="gray700"
+    addCss={css`
+      position: absolute;
+      right: -15px;
+      top: 10px;
+      z-index: 1;
+      padding: 10px;
+      border: 1px solid ${palatte.white};
+      ${mediaQuery[0]} {
+        right: 15px;
+        top: -15px;
+        transform: rotate(-90deg);
+      }
+    `}
+    onClick={props.onClick}>
+    chevron_left
+  </RoundButtonSmall>
 );
 function Explore({ setWaitingSpots }) {
   const { uid } = useContext(Context);
@@ -546,15 +760,20 @@ function Explore({ setWaitingSpots }) {
       setIsShowSideColumn(false);
     }
   };
-  const expandButton = css`
-    position: absolute;
-    right: -15px;
-    top: 10px;
-    z-index: 1;
-    padding: 10px;
-    border: 1px solid ${palatte.white};
-    ${mediaQuery[0]}{
-      disanled
+  const sideBarContainer = css`
+    background-color: ${palatte.gray[100]};
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    flex-basis: ${placeDetail || isShowSavedSpots ? '400px' : null};
+    max-width: ${placeDetail || isShowSavedSpots ? '400px' : null};
+    padding: ${isShowSavedSpots ? '30px' : placeDetail && '0px'};
+    border-right: 1px solid ${palatte.white};
+    ${mediaQuery[0]} {
+      order: 1;
+      height: 30%;
+      max-width: 100%;
+      padding: ${isShowSavedSpots && '20px'};
     }
   `;
   return (
@@ -570,44 +789,22 @@ function Explore({ setWaitingSpots }) {
         <>
           <FlexDiv
             height="100vh"
-            addCss={css`
+            css={css`
               ${mediaQuery[0]} {
                 flex-direction: column;
               }
             `}>
-            {isShowSideColumn ? (
-              <FlexChildDiv
-                backgroundColor={palatte.gray[100]}
-                direction="column"
-                height="100%"
-                position="relative"
-                addCss={css`
-                  border-right: 1px solid ${palatte.white};
-                  ${mediaQuery[0]} {
-                    order: 1;
-                    height: 30%;
-                  }
-                `}
-                ref={sideWindowRef}
-                basis={placeDetail || isShowSavedSpots ? '400px' : null}
-                maxWidth={placeDetail || isShowSavedSpots ? '400px' : null}
-                padding={
-                  isShowSavedSpots ? '30px' : placeDetail ? '0px' : null
-                }>
-                <RoundButtonSmall
-                  size="30px"
-                  className="material-icons"
-                  styled="gray700"
-                  addCss={expandButton}
+            {isShowSideColumn && (
+              <FlexChildDiv css={sideBarContainer} ref={sideWindowRef}>
+                <ExpandButton
                   onClick={() => {
                     setIsShowSideColumn(false);
                     if (placeDetail) {
                       googleMap.deleteMarker(marker);
                       googleMap.setMapStyle(map, 'default');
                     }
-                  }}>
-                  chevron_left
-                </RoundButtonSmall>
+                  }}
+                />
                 {!isShowSavedSpots && placeDetail && (
                   <PlaceDetail
                     placeDetail={placeDetail}
@@ -630,48 +827,30 @@ function Explore({ setWaitingSpots }) {
                   <P>還沒有加入的景點喔！請點選地圖上的圖標加入景點</P>
                 )}
               </FlexChildDiv>
-            ) : null}
+            )}
             <FlexChildDiv
               grow="1"
               position="relative"
-              addCss={css`
-                height: 70%;
+              css={css`
+                ${mediaQuery[0]} {
+                  height: 70%;
+                }
               `}>
-              <FlexDiv
-                direction="column"
-                alignItems="center"
-                gap="10px"
-                padding="20px 30px 20px 20px"
-                css={css`
-                  position: absolute;
-                  background-color: ${palatte.gray[700]};
-                  border-radius: 20px 0 0 20px;
-                  top: 100px;
-                  right: 0px;
-                  z-index: 1000;
-                `}>
-                <ButtonOnMap
-                  iconName="add_location"
-                  onClick={() => {
-                    if (!isShowSideColumn) {
-                      setIsShowSavedSpots(true);
-                      setIsShowSideColumn(true);
-                    } else if (isShowSavedSpots) {
-                      setIsShowSideColumn(false);
-                      setIsShowSavedSpots(false);
-                    } else {
-                      setIsShowSavedSpots(true);
-                      resetMap();
-                    }
-                  }}>
-                  候補景點
-                </ButtonOnMap>
-                <ButtonOnMap
-                  iconName="home"
-                  onClick={() => navigate('/itineraries')}>
-                  回首頁
-                </ButtonOnMap>
-              </FlexDiv>
+              <NavigateButtonsOnMap
+                onWaitingSpotClick={() => {
+                  if (!isShowSideColumn) {
+                    setIsShowSavedSpots(true);
+                    setIsShowSideColumn(true);
+                  } else if (isShowSavedSpots) {
+                    setIsShowSideColumn(false);
+                    setIsShowSavedSpots(false);
+                  } else {
+                    setIsShowSavedSpots(true);
+                    resetMap();
+                  }
+                }}
+                onHomeClick={() => navigate('/itineraries')}
+              />
               {map && (
                 <SearchBar
                   placeholder="請輸入地址或關鍵字搜尋"

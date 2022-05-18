@@ -97,7 +97,6 @@ const googleMap = {
       center: center || this.center,
       zoom: zoom || this.zoom,
       disableDefaultUI: true,
-      zoomControl: true,
     };
     return new window.google.maps.Map(ref, option);
   },
