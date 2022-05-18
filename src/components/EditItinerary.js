@@ -204,7 +204,6 @@ function MoveScheduleController(props) {
           align-items: center;
           ${mediaQuery[0]} {
             gap: 10px;
-            align-self: flex-end;
           }
         `}>
         <SelectSmall

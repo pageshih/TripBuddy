@@ -117,6 +117,15 @@ function SavedSpots(props) {
         .catch((error) => console.error(error));
     }
   }, [map]);
+  const moveScheduleControllerWrapper = css`
+    gap: 20px;
+    align-items: center;
+    ${mediaQuery[0]} {
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  `;
   return (
     <>
       <Notification
@@ -144,10 +153,10 @@ function SavedSpots(props) {
           padding-bottom: 80px;
         `}>
         <FlexDiv
-          gap="20px"
-          justifyContent="space-between"
-          padding="0 10px 20px 10px"
           addCss={css`
+            gap: 20px;
+            justify-content: space-between;
+            padding: 0 10px 20px 10px;
             border-bottom: 1px solid ${palatte.gray['400']};
           `}>
           <SelectAllCheckBox
@@ -158,33 +167,40 @@ function SavedSpots(props) {
             }
             setAllUnchecked={() => setSelectedSpotList([])}
           />
-          <FlexDiv gap="20px">
-            <SelectSmall
-              value={addAction}
-              onChange={(e) => setAddAction(e.target.value)}>
-              <option value="" disabled>
-                ---選擇要加入景點的行程---
-              </option>
-              <option value="add">建立一個新行程</option>
-              {createdItineraries?.map((itinerary) => (
-                <option
-                  key={itinerary.itinerary_id}
-                  value={itinerary.itinerary_id}>
-                  {itinerary.title}
+          <FlexDiv addCss={moveScheduleControllerWrapper}>
+            <FlexDiv addCss={moveScheduleControllerWrapper}>
+              <SelectSmall
+                addCss={css`
+                  flex-basis: fit-content;
+                `}
+                value={addAction}
+                onChange={(e) => setAddAction(e.target.value)}>
+                <option value="" disabled>
+                  ---選擇要加入景點的行程---
                 </option>
-              ))}
-            </SelectSmall>
-            <TooltipNotification
-              settingReducer={tooltipAlert}
-              resetSettingReducer={dispatchTooltipAlert}
-              isOpen={tooltipAlert.id === 'addSpots'}>
-              <ButtonSmall
-                styled="primary"
-                type="click"
-                onClick={addSelectSpotsToItinerary}>
-                加入行程
-              </ButtonSmall>
-            </TooltipNotification>
+                <option value="add">建立一個新行程</option>
+                {createdItineraries?.map((itinerary) => (
+                  <option
+                    key={itinerary.itinerary_id}
+                    value={itinerary.itinerary_id}>
+                    {itinerary.title}
+                  </option>
+                ))}
+              </SelectSmall>
+
+              <TooltipNotification
+                settingReducer={tooltipAlert}
+                resetSettingReducer={dispatchTooltipAlert}
+                isOpen={tooltipAlert.id === 'addSpots'}>
+                <ButtonSmall
+                  styled="primary"
+                  type="click"
+                  onClick={addSelectSpotsToItinerary}>
+                  加入行程
+                </ButtonSmall>
+              </TooltipNotification>
+            </FlexDiv>
+
             <TooltipNotification
               settingReducer={tooltipAlert}
               resetSettingReducer={dispatchTooltipAlert}
