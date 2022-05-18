@@ -25,6 +25,7 @@ import {
   H3,
   palatte,
   TextWithIcon,
+  mediaQuery,
 } from './styledComponents/basicStyle';
 import {
   Notification,
@@ -79,7 +80,7 @@ function Map({
     }
   }, [map, marker]);
 
-  return <div style={{ width: '100%', height: '100vh' }} ref={ref} />;
+  return <div style={{ width: '100%', height: '100%' }} ref={ref} />;
 }
 
 const GetTodayOpeningHours = (props) => {
@@ -552,6 +553,9 @@ function Explore({ setWaitingSpots }) {
     z-index: 1;
     padding: 10px;
     border: 1px solid ${palatte.white};
+    ${mediaQuery[0]}{
+      disanled
+    }
   `;
   return (
     <>
@@ -564,7 +568,13 @@ function Explore({ setWaitingSpots }) {
       />
       {uid && (
         <>
-          <FlexDiv height="100vh">
+          <FlexDiv
+            height="100vh"
+            addCss={css`
+              ${mediaQuery[0]} {
+                flex-direction: column;
+              }
+            `}>
             {isShowSideColumn ? (
               <FlexChildDiv
                 backgroundColor={palatte.gray[100]}
@@ -573,6 +583,10 @@ function Explore({ setWaitingSpots }) {
                 position="relative"
                 addCss={css`
                   border-right: 1px solid ${palatte.white};
+                  ${mediaQuery[0]} {
+                    order: 1;
+                    height: 30%;
+                  }
                 `}
                 ref={sideWindowRef}
                 basis={placeDetail || isShowSavedSpots ? '400px' : null}
@@ -617,7 +631,12 @@ function Explore({ setWaitingSpots }) {
                 )}
               </FlexChildDiv>
             ) : null}
-            <FlexChildDiv grow="1" position="relative">
+            <FlexChildDiv
+              grow="1"
+              position="relative"
+              addCss={css`
+                height: 70%;
+              `}>
               <FlexDiv
                 direction="column"
                 alignItems="center"
@@ -661,6 +680,9 @@ function Explore({ setWaitingSpots }) {
                   addCss={{
                     container: {
                       left: '15px',
+                      [mediaQuery[0]]: {
+                        left: '0',
+                      },
                     },
                   }}
                 />

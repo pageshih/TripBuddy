@@ -325,9 +325,10 @@ const transitDetailWapper = css`
 `;
 const transitContainer = css`
   ${mediaQuery[0]} {
+    gap: 0;
     background-color: ${palatte.gray[200]};
     border-radius: 10px;
-    padding: 15px 20px 15px 40px;
+    padding: 15px 15px 15px 40px;
     position: relative;
     margin: 10px 0;
     &::before {

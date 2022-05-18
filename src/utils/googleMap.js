@@ -6,7 +6,7 @@ import '../css/marker.css';
 import { inputBase } from '../components/styledComponents/Form';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte } from '../components/styledComponents/basicStyle';
+import { mediaQuery, palatte } from '../components/styledComponents/basicStyle';
 
 const googleMap = {
   svgMarker(color) {
@@ -207,10 +207,16 @@ const searchBarStyles = {
     zIndex: '8',
     width: '500px',
     padding: '20px',
+    [mediaQuery[0]]: {
+      width: '100%',
+    },
   },
   input: {
     width: '100%',
     paddingLeft: '40px',
+    [mediaQuery[0]]: {
+      width: '100%',
+    },
   },
 };
 function SearchBar(props) {

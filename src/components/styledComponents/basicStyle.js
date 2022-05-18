@@ -182,9 +182,9 @@ const headingFontSize = {
   mobile: {
     2: '52px',
     3: '40px',
-    4: '24px',
-    5: '20px',
-    6: '18px',
+    4: '28px',
+    5: '24px',
+    6: '20px',
   },
 };
 const heading = (props) => css`
