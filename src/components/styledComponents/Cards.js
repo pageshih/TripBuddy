@@ -173,14 +173,14 @@ function SpotCard(props) {
     font-size: ${props.isSmall && '20px'};
     margin-bottom: ${props.isSmall && '0'};
     ${mediaQuery[0]} {
-      ${props.isSmall && `font-size: 16px;`}
+      font-size: ${props.isSmall ? '16px' : '20px'};
     }
   `;
   const card = css`
     gap: ${(props.isSmall && '0px') || props.cardGap};
     ${mediaQuery[0]} {
       gap: 0px;
-      flex-direction: row;
+      flex-direction: ${props.isSmall && 'row'};
       height: 100%;
     }
   `;
@@ -478,25 +478,7 @@ function ScheduleCard(props) {
     </SpotCard>
   );
 }
-/* <FlexDiv justifyContent="center" gap="30px">
-  <FlexDiv addCss={transitDetailWapper}>
-    <span className="material-icons" css={transitIconStyle}>
-      {transportMode()[props.travelMode].icon}
-    </span>
-    <P color={palatte.info.basic}>
-      {transportMode()[props.travelMode].title +
-        props.transitDetail.duration.text}
-    </P>
-  </FlexDiv>
-  <FlexDiv addCss={transitDetailWapper}>
-    <span className="material-icons" css={transitIconStyle}>
-      directions
-    </span>
-    <P color={palatte.info.basic}>
-      距離{props.transitDetail.distance.text}
-    </P>
-  </FlexDiv>
-</FlexDiv> */
+
 ScheduleCard.propTypes = {
   schedule: PropTypes.object.isRequired,
   imgSrc: PropTypes.string.isRequired,

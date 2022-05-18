@@ -55,6 +55,7 @@ import {
   H6,
   P,
   TextWithIcon,
+  mediaQuery,
 } from './styledComponents/basicStyle';
 import {
   Overview,
@@ -67,55 +68,6 @@ import {
   Notification,
 } from './styledComponents/Notification';
 import { Alert } from './styledComponents/Modal';
-// import { style } from '@mui/system';
-
-// function ChooseDate(props) {
-//   return (
-//     <>
-//       <LocalizationProvider dateAdapter={AdapterLuxon}>
-//         <FlexDiv gap="20px">
-//           <DatePicker
-//             label="date range"
-//             value={props.startDate}
-//             onChange={(newDate) => {
-//               props.setStartDate(newDate);
-//             }}
-//             renderInput={({ inputRef, inputProps, InputProps }) => (
-//               <FlexDiv alignItems="center">
-//                 <TextInput
-//                   ref={inputRef}
-//                   {...inputProps}
-//                   placeholder="旅程開始日期"
-//                   readOnly
-//                 />
-//                 {InputProps?.endAdornment}
-//               </FlexDiv>
-//             )}
-//           />
-//           <p>到</p>
-//           <DatePicker
-//             label="date range"
-//             value={props.endDate}
-//             onChange={(newDate) => {
-//               props.setEndDate(newDate);
-//             }}
-//             renderInput={({ inputRef, inputProps, InputProps }) => (
-//               <FlexDiv alignItems="center">
-//                 <TextInput
-//                   ref={inputRef}
-//                   {...inputProps}
-//                   placeholder="旅程結束日期"
-//                   readOnly
-//                 />
-//                 {InputProps?.endAdornment}
-//               </FlexDiv>
-//             )}
-//           />
-//         </FlexDiv>
-//       </LocalizationProvider>
-//     </>
-//   );
-// }
 
 function AddOverView(props) {
   const { uid } = useContext(Context);
@@ -329,12 +281,6 @@ function AddOverView(props) {
             )}
           </Button>
         </FlexDiv>
-        {/* <ChooseDate
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-      /> */}
       </FlexDiv>
     </Container>
   );
@@ -371,13 +317,133 @@ const SpotCardDraggable = (props) => {
   );
 };
 
+const DurationController = ({
+  isEditStatus,
+  changeEditStatus,
+  isAllowEdit,
+  decreaseAction,
+  increaseAction,
+  duration,
+  isUpdate,
+  updateAction,
+}) => (
+  <FlexChildDiv
+    css={css`
+      padding: 40px 0 0 0;
+      basis: 120px;
+      align-items: flex-start;
+      ${mediaQuery[0]} {
+        padding: 0;
+        justify-content: center;
+        border: 1px solid ${palatte.primary.basic};
+        padding: 20px 10px;
+        border-radius: 10px;
+      }
+    `}>
+    {isEditStatus ? (
+      <FlexDiv
+        css={css`
+          flex-direction: column;
+          align-items: center;
+          ${mediaQuery[0]} {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2px;
+          }
+        `}>
+        <span>停留</span>
+        <FlexDiv
+          css={css`
+            align-items: center;
+            gap: 8px;
+          `}>
+          <RoundButtonSmall
+            type="button"
+            size="20px"
+            padding="5px 5px 7px 5px"
+            styled="transparent"
+            onClick={decreaseAction}>
+            −
+          </RoundButtonSmall>
+          <P
+            css={css`
+              font-weight: 700;
+              font-size: 32px;
+              color: ${palatte.secondary[700]};
+              text-align: center;
+              width: 67px;
+              ${mediaQuery[0]} {
+                font-size: 28px;
+              }
+            `}>
+            {duration < 60 ? duration : duration / 60}
+          </P>
+          <RoundButtonSmall
+            size="20px"
+            styled="transparent"
+            padding="5px 5px 7px 7px"
+            type="button"
+            onClick={increaseAction}>
+            +
+          </RoundButtonSmall>
+        </FlexDiv>
+        <span>{duration < 60 ? '分鐘' : '小時'}</span>
+        {isUpdate && (
+          <ButtonSmall
+            styled="gray"
+            fontSize="12px"
+            margin="10px 0 0 0 "
+            id="duration"
+            type="button"
+            onClick={updateAction}>
+            更新時間
+          </ButtonSmall>
+        )}
+      </FlexDiv>
+    ) : (
+      <TextWithIcon
+        iconName="watch_later"
+        iconSize="40px"
+        color={palatte.primary.basic}
+        addCss={{
+          container: css`
+            flex-grow: 1;
+            margin: 15px 0 0 0;
+            padding: 10px 0px;
+            gap: 2px;
+            flex-direction: column;
+            align-items: center;
+            ${isAllowEdit &&
+            `&:hover {
+                background-color: ${palatte.lighterShadow};
+                border-radius: 10px;
+                cursor: pointer;
+              }`}
+            ${mediaQuery[0]} {
+              padding: 0;
+              margin: 0;
+            }
+          `,
+        }}
+        onClick={changeEditStatus}>
+        {'停留' +
+          ' ' +
+          (duration < 60 ? duration : duration / 60) +
+          ' ' +
+          (duration < 60 ? '分鐘' : '小時')}
+      </TextWithIcon>
+    )}
+  </FlexChildDiv>
+);
 const ScheduleWapper = styled.li`
   padding: 30px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  ${mediaQuery[0]} {
+    padding: 10px;
+  }
 `;
-
 const ScheduleCardDrag = (props) => {
   const [isEditDuration, setIsEditDuration] = useState(props.isAllowEdit);
   const [duration, setDuration] = useState(props.schedule.duration);
@@ -396,106 +462,41 @@ const ScheduleCardDrag = (props) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
-          <FlexDiv gap="20px">
-            <FlexChildDiv
-              padding="40px 0 0 0"
-              basis="120px"
-              alignItems="flex-start">
-              {isEditDuration && props.isAllowEdit ? (
-                <FlexDiv direction="column" alignItems="center">
-                  <span>停留</span>
-                  <FlexDiv alignItems="center" gap="8px">
-                    <RoundButtonSmall
-                      type="button"
-                      size="20px"
-                      padding="5px 5px 7px 5px"
-                      styled="transparent"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue > 30 ? prevValue - 30 : 30
-                        );
-                      }}>
-                      −
-                    </RoundButtonSmall>
-                    <P
-                      fontWeight="700"
-                      fontSize="32px"
-                      color={palatte.secondary[700]}
-                      textAlign="center"
-                      addCss={css`
-                        width: 67px;
-                      `}>
-                      {duration < 60 ? duration : duration / 60}
-                    </P>
-                    <RoundButtonSmall
-                      size="20px"
-                      styled="transparent"
-                      padding="5px 5px 7px 7px"
-                      type="button"
-                      onClick={() => {
-                        setDuration((prevValue) =>
-                          prevValue < 1440 ? prevValue + 30 : 1440
-                        );
-                      }}>
-                      +
-                    </RoundButtonSmall>
-                  </FlexDiv>
-                  <span>{duration < 60 ? '分鐘' : '小時'}</span>
-                  {duration !== props.schedule.duration && (
-                    <ButtonSmall
-                      styled="gray"
-                      fontSize="12px"
-                      margin="10px 0 0 0 "
-                      id="duration"
-                      type="button"
-                      onClick={(e) => {
-                        if (e.target.id === 'duration') {
-                          setIsEditDuration(false);
-                          props.updateDuration(
-                            props.schedule.schedule_id,
-                            duration
-                          );
-                        }
-                      }}>
-                      更新時間
-                    </ButtonSmall>
-                  )}
-                </FlexDiv>
-              ) : (
-                <TextWithIcon
-                  grow="1"
-                  iconName="watch_later"
-                  margin="15px 0 0 0"
-                  padding="10px 0px"
-                  iconSize="40px"
-                  gap="2px"
-                  color={palatte.primary.basic}
-                  direction="column"
-                  alignItems="center"
-                  addCss={
-                    props.isAllowEdit && {
-                      container: css`
-                        &:hover {
-                          background-color: ${palatte.lighterShadow};
-                          border-radius: 10px;
-                          cursor: pointer;
-                        }
-                      `,
-                    }
-                  }
-                  onClick={(e) => {
-                    if (e.target.id !== 'duration') {
-                      setIsEditDuration(true);
-                    }
-                  }}>
-                  {'停留' +
-                    ' ' +
-                    (duration < 60 ? duration : duration / 60) +
-                    ' ' +
-                    (duration < 60 ? '分鐘' : '小時')}
-                </TextWithIcon>
-              )}
-            </FlexChildDiv>
+          <FlexDiv
+            css={css`
+              gap: 20px;
+              ${mediaQuery[0]} {
+                flex-direction: column;
+                gap: 30px;
+              }
+            `}>
+            <DurationController
+              isEditStatus={isEditDuration && props.isAllowEdit}
+              isAllowEdit={props.isAllowEdit}
+              duration={duration}
+              isUpdate={duration !== props.schedule.duration}
+              changeEditStatus={(e) => {
+                if (e.target.id !== 'duration') {
+                  setIsEditDuration(true);
+                }
+              }}
+              decreaseAction={() => {
+                setDuration((prevValue) =>
+                  prevValue > 30 ? prevValue - 30 : 30
+                );
+              }}
+              increaseAction={() => {
+                setDuration((prevValue) =>
+                  prevValue < 1440 ? prevValue + 30 : 1440
+                );
+              }}
+              updateAction={(e) => {
+                if (e.target.id === 'duration') {
+                  setIsEditDuration(false);
+                  props.updateDuration(props.schedule.schedule_id, duration);
+                }
+              }}
+            />
             <ScheduleCard
               schedule={props.schedule}
               duration={props.duration}
@@ -515,177 +516,6 @@ const ScheduleCardDrag = (props) => {
     </Draggable>
   );
 };
-
-// function Overview(props) {
-//   const navigate = useNavigate();
-//   const { uid } = useContext(Context);
-//   const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
-//     const upload = new updateItineraryCoverPhoto({
-//       uid,
-//       itineraryId: props.overviews.itinerary_id,
-//       imageBuffer,
-//     });
-//     upload.uploadFirestore().then((cover_photo) => {
-//       setIsShowModal(false);
-//       props.updateOverviewsFields({ cover_photo });
-//     });
-//   };
-//   return (
-//     <>
-//       <Container position="relative" margin="0 0 30px 0">
-//         <Container addCss={props.container} padding="40px 20px 50px 20px">
-//           <FlexDiv justifyContent="space-between">
-//             <RoundButtonSmallWhite
-//               className="material-icons"
-//               type="button"
-//               onClick={() => navigate('/itineraries')}>
-//               navigate_before
-//             </RoundButtonSmallWhite>
-//             {props.isBrowse ? (
-//               <RoundButtonSmallWhite
-//                 className="material-icons"
-//                 type="button"
-//                 onClick={() => props.setIsBrowse(false)}>
-//                 edit
-//               </RoundButtonSmallWhite>
-//             ) : (
-//               <AddImageRoundBtn
-//                 upload={uploadCoverPhoto}
-//                 white
-//                 icon="insert_photo"
-//                 confirmMessage="確定要將封面更換成這張圖嗎？"
-//               />
-//             )}
-//           </FlexDiv>
-//           <FlexDiv direction="column" gap="10px" alignItems="center">
-//             <EditableText
-//               level="2"
-//               padding="0 2px"
-//               color={palatte.white}
-//               addInputCss={css`
-//                 color: ${palatte.gray[800]};
-//               `}
-//               isBrowse={props.isBrowse}
-//               onSubmit={(title) => {
-//                 if (title !== props.overviews.title) {
-//                   props.updateOverviewsFields({ title });
-//                 }
-//               }}>
-//               {props.overviews.title}
-//             </EditableText>
-//             <EditableDate
-//               color={palatte.white}
-//               start={props.overviews.start_date}
-//               end={props.overviews.end_date}
-//               onSubmit={props.updateDate}
-//               isBrowse={props.isBrowse}
-//               addCss={css`
-//                 font-weight: 700;
-//               `}
-//               textAlign="center"
-//             />
-//             <H3 color={palatte.white}>Day {props.day + 1}</H3>
-//           </FlexDiv>
-//         </Container>
-//         <Image
-//           src={props.overviews.cover_photo}
-//           alt="cover"
-//           blur
-//           addCss={css`
-//             width: 100%;
-//             height: 100%;
-//             position: absolute;
-//             top: 0;
-//             z-index: -1;
-//           `}
-//         />
-//       </Container>
-//     </>
-//   );
-// }
-
-// function DepartController(props) {
-//   return (
-//     <FlexDiv direction="column" gap="5px">
-//       <FlexDiv
-//         justifyContent="space-between"
-//         addCss={css`
-//           & > * {
-//             color: ${palatte.gray['700']};
-//           }
-//         `}>
-//         <P>出發時間</P>
-//         <P>{timestampToString(props.departTimes[props.day], 'simpleDate')}</P>
-//       </FlexDiv>
-//       <EditableText
-//         level="4"
-//         fontSize="46px"
-//         addCss={css`
-//           color: ${palatte.info.basic};
-//           font-weight: 700;
-//           padding: 0;
-//         `}
-//         isBrowse={props.isBrowse}
-//         onSubmit={(newDepartString) => {
-//           if (newDepartString !== props.departString) {
-//             const newDepartTimestamp = setTimeToTimestamp(
-//               props.departTimes[props.day],
-//               newDepartString
-//             );
-//             const newDepartTimes = Array.from(props.departTimes);
-//             newDepartTimes.splice(props.day, 1, newDepartTimestamp);
-//             props.updateOverviewsFields({ depart_times: newDepartTimes });
-//             props.updateTimeOfSchedule(
-//               props.schedules,
-//               { isUploadFirebase: true, isSetSchedule: true },
-//               newDepartTimestamp
-//             );
-//             props.setDepartString(
-//               timestampToString(newDepartTimestamp, 'time')
-//             );
-//           }
-//         }}>
-//         {props.departString}
-//       </EditableText>
-//     </FlexDiv>
-//   );
-// }
-
-// function MoveScheduleController(props) {
-//   return (
-//     <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
-//       <SelectAllCheckBox
-//         setAllChecked={() =>
-//           props.setSelectedSchedulesId(
-//             props.schedules.map((schedule) => schedule.schedule_id)
-//           )
-//         }
-//         setAllUnchecked={() => props.setSelectedSchedulesId([])}
-//         isSelectAll={props.isSelectAll}
-//         setIsSelectAll={props.setIsSelectAll}
-//       />
-//       <SelectSmall
-//         value={props.changeTime}
-//         onChange={(e) => props.setChangeTime(Number(e.target.value))}>
-//         <option value="" disabled>
-//           修改所選行程的日期
-//         </option>
-//         {props.departTimes?.map((timestamp) => (
-//           <option value={timestamp} key={timestamp}>
-//             {timestampToString(timestamp, 'date')}
-//           </option>
-//         ))}
-//       </SelectSmall>
-//       <ButtonSmall
-//         styled="primary"
-//         padding="5px 15px"
-//         type="button"
-//         onClick={props.changeSchedulesTime}>
-//         移動行程
-//       </ButtonSmall>
-//     </FlexDiv>
-//   );
-// }
 
 function AddSchedule(props) {
   const { uid, map } = useContext(Context);
