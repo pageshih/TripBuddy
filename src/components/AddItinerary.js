@@ -651,7 +651,7 @@ function AddSchedule(props) {
                           '抱歉！此交通方式找不到合適的路線，請切換其他方式',
                         id: 'alertNoTransport',
                         btnMessage: '修改交通方式',
-                        width: '450px',
+                        width: '100%',
                       },
                     });
                   }
@@ -679,7 +679,7 @@ function AddSchedule(props) {
                     message: '抱歉！此交通方式找不到合適的路線，請切換其他方式',
                     id: 'alertNoTransport',
                     btnMessage: '修改交通方式',
-                    width: '450px',
+                    width: '100%',
                   },
                 });
               }
@@ -974,7 +974,7 @@ function AddSchedule(props) {
             message:
               '新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期',
             id: 'alertUpdateDaysError',
-            width: '450px',
+            width: '100%',
           },
         });
 

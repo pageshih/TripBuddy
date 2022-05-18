@@ -175,7 +175,11 @@ function Alert(props) {
     }
   };
   return (
-    <Modal close={close} isShowState={props.isShowState} height="fit-content">
+    <Modal
+      close={close}
+      isShowState={props.isShowState}
+      height="fit-content"
+      maxWidth="90%">
       <FlexDiv
         direction="column"
         gap="20px"
