@@ -1,0 +1,17 @@
+:root {
+  --toastify-color-light: #F7F8FC;
+  --toastify-color-dark: #5B5D76;
+  --toastify-color-info: #06BEE1;
+  --toastify-color-success: #17B8B6;
+  --toastify-color-warning: #FF9900;
+  --toastify-color-error: #E5383B;
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+  --toastify-toast-background: #F7F8FC;
+
+  --toastify-text-color-light: #0D060F;
+  --toastify-text-color-dark: #fff;
+  --toastify-text-color-info: #fff;
+  --toastify-text-color-success: #fff;
+  --toastify-text-color-warning: #fff;
+  --toastify-text-color-error: #fff;
+}

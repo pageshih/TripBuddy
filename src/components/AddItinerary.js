@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 import { useNavigate, useParams, Outlet } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 // import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
@@ -11,10 +11,20 @@ import { Context } from '../App';
 import {
   TextInput,
   SelectAllCheckBox,
-  CheckboxCustom,
   AddImageRoundBtn,
+  SelectSmall,
+  CustomDateRangePicker,
 } from './styledComponents/Form';
-import { Button, RoundButtonSmallWhite } from './styledComponents/Button';
+import {
+  Button,
+  RoundButtonSmallWhite,
+  ButtonOutline,
+  HyperLink,
+  RoundButtonSmall,
+  ButtonSmall,
+  ButtonIconColumn,
+  RoundButtonSmallWithLabel,
+} from './styledComponents/Button';
 import {
   Container,
   FlexDiv,
@@ -22,10 +32,9 @@ import {
   Image,
 } from './styledComponents/Layout';
 import {
-  Card,
-  CardWrapper,
-  cardCss,
   ScheduleCard,
+  SpotCard,
+  transportMode,
 } from './styledComponents/Cards';
 import {
   timestampToString,
@@ -37,79 +46,60 @@ import {
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
-import { palatte, styles, H2, H3, P } from './styledComponents/basicStyle';
-// import { style } from '@mui/system';
-
-// function ChooseDate(props) {
-//   return (
-//     <>
-//       <LocalizationProvider dateAdapter={AdapterLuxon}>
-//         <FlexDiv gap="20px">
-//           <DatePicker
-//             label="date range"
-//             value={props.startDate}
-//             onChange={(newDate) => {
-//               props.setStartDate(newDate);
-//             }}
-//             renderInput={({ inputRef, inputProps, InputProps }) => (
-//               <FlexDiv alignItems="center">
-//                 <TextInput
-//                   ref={inputRef}
-//                   {...inputProps}
-//                   placeholder="旅程開始日期"
-//                   readOnly
-//                 />
-//                 {InputProps?.endAdornment}
-//               </FlexDiv>
-//             )}
-//           />
-//           <p>到</p>
-//           <DatePicker
-//             label="date range"
-//             value={props.endDate}
-//             onChange={(newDate) => {
-//               props.setEndDate(newDate);
-//             }}
-//             renderInput={({ inputRef, inputProps, InputProps }) => (
-//               <FlexDiv alignItems="center">
-//                 <TextInput
-//                   ref={inputRef}
-//                   {...inputProps}
-//                   placeholder="旅程結束日期"
-//                   readOnly
-//                 />
-//                 {InputProps?.endAdornment}
-//               </FlexDiv>
-//             )}
-//           />
-//         </FlexDiv>
-//       </LocalizationProvider>
-//     </>
-//   );
-// }
+import {
+  palatte,
+  styles,
+  H2,
+  H3,
+  H5,
+  H6,
+  P,
+  TextWithIcon,
+  mediaQuery,
+  breakpoints,
+} from './styledComponents/basicStyle';
+import {
+  Overview,
+  DepartController,
+  MoveScheduleController,
+} from './EditItinerary';
+import {
+  defaultNotification,
+  notificationReducer,
+  Notification,
+} from './styledComponents/Notification';
+import { Alert } from './styledComponents/Modal';
 
 function AddOverView(props) {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
+  const [step, setStep] = useState(0);
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
-  // const addOverView = [
-  //   {
-  //     title: '為這趟旅程取個名字吧！',
-  //     type: 'text',
-  //     placeholder: '請輸入行程名稱',
-  //   },
-  //   {
-  //     title: '您選擇了這些景點：',
-  //     type: 'cards',
-  //   },
-  //   {
-  //     title: '預計要去玩幾天呢？',
-  //     type: 'calender',
-  //   },
-  // ];
+  const addOverView = [
+    {
+      title: '為這趟旅程取個名字吧！',
+      type: 'text',
+      placeholder: '請輸入行程名稱',
+      alert: '行程名稱還沒填喔！',
+    },
+    {
+      title: '您選擇了這些景點：',
+      type: 'cards',
+      alert: '請加入景點再創建行程',
+    },
+    {
+      title: '預計要去玩幾天呢？',
+      type: 'calendar',
+      alert: '日期不完整，請確認後再送出！',
+    },
+  ];
   const createItinerary = () => {
     const getTimestamp = (date) => new Date(date).getTime();
     const basicInfo = {
@@ -126,527 +116,394 @@ function AddOverView(props) {
         console.log(error);
       });
   };
+  const nextStep = () => {
+    if (
+      (step === 0 && title) ||
+      (step === 1 && props.waitingSpots?.length > 0) ||
+      (step === 2 && startDate && endDate)
+    ) {
+      setStep((prev) => prev + 1);
+    } else {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          message: addOverView[step].alert,
+          id: 'toastifyEmptyValue',
+        },
+      });
+    }
+  };
   return (
-    <Container maxWidth="1200px" margin="80px auto 0px auto">
-      <h2>為這趟旅程取個名字吧！</h2>
-      <TextInput
-        type="text"
-        placeholder="請輸入行程名稱"
-        value={props.title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-        }}
+    <Container backgroundColor={palatte.gray[100]}>
+      <Notification
+        type={notification.type}
+        fire={
+          notification.fire && notification.id.match('toastify')?.length > 0
+        }
+        message={notification.message}
+        id={notification.id}
+        duration={notification?.duration}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
       />
-      <h2>您選擇了這些景點：</h2>
-      <CardWrapper gap="20px">
-        {props.waitingSpots?.map((spot) => {
-          return (
-            <Card
-              column
-              gap="20px"
-              position="relative"
-              basis="350px"
-              key={spot.place_id}>
-              <img
-                src={spot.photos[0]}
-                style={{ width: '100%', objectFit: 'cover' }}
-                alt={spot.name}
-              />
-              <FlexChildDiv>
-                <h3 style={{ margin: '0' }}>{spot.name}</h3>
-                <p>{spot.formatted_address}</p>
-                <p>{spot.rating}</p>
+      <FlexDiv
+        as="form"
+        height="100vh"
+        gap="60px"
+        direction="column"
+        justifyContent="center"
+        position="relative"
+        addCss={styles.containerSetting}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (step < 2) {
+            nextStep();
+          } else {
+            createItinerary();
+          }
+        }}>
+        <RoundButtonSmallWithLabel
+          styled="gray700"
+          type="button"
+          iconName="chevron_left"
+          addCss={css`
+            position: absolute;
+            top: 50px;
+            left: -10px;
+          `}
+          onClick={() => navigate('/explore')}>
+          回探索景點
+        </RoundButtonSmallWithLabel>
+        <FlexDiv direction="column" gap="20px" padding="80px 0 0 0">
+          {step === 1 && !props.waitingSpots?.length > 0 ? null : (
+            <H5>{addOverView[step].title}</H5>
+          )}
+
+          {addOverView[step].type === 'text' && (
+            <TextInput
+              type="text"
+              placeholder={addOverView[step].placeholder}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+            />
+          )}
+          {addOverView[step].type === 'cards' &&
+            (props.waitingSpots?.length > 0 ? (
+              <FlexChildDiv
+                padding="20px 20px 20px 0"
+                gap="30px"
+                wrap="wrap"
+                overflowY="auto"
+                basis="60vh"
+                maxHeight="100%">
+                {props.waitingSpots?.map((spot) => {
+                  return (
+                    <SpotCard
+                      imgSrc={spot.photos[0]}
+                      imgAlt={spot.name}
+                      title={spot.name}
+                      address={spot.formatted_address}
+                      rating={spot.rating}
+                      id={spot.place_id}
+                      key={spot.place_id}
+                      isSmall
+                      isShowCloseBtn
+                      onCloseClick={() =>
+                        props.setWaitingSpots((prev) =>
+                          prev.filter(
+                            (oldSpot) => oldSpot.place_id !== spot.place_id
+                          )
+                        )
+                      }
+                      addCss={css`
+                        flex-basis: 30%;
+                      `}
+                    />
+                  );
+                })}
               </FlexChildDiv>
-            </Card>
-          );
-        })}
-      </CardWrapper>
-      <h2>預計要去玩幾天呢？</h2>
-      <FlexDiv gap="20px">
-        <TextInput
-          type="date"
-          value={timestampToDateInput(startDate)}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-          }}
-        />
-        <p>到</p>
-        <TextInput
-          type="date"
-          value={timestampToDateInput(endDate)}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-          }}
-        />
+            ) : (
+              <>
+                <P>現在景點清單是空的，請加入景點，再創建行程</P>
+                <HyperLink
+                  onClick={() => navigate('/explore')}
+                  iconName="chevron_right"
+                  alignSelf="flex-start">
+                  前往探索景點
+                </HyperLink>
+              </>
+            ))}
+          {addOverView[step].type === 'calendar' && (
+            <FlexDiv gap="20px" alignItems="center">
+              <CustomDateRangePicker
+                width="100%"
+                conjunction="到"
+                startTimestamp={startDate}
+                endTimestamp={endDate}
+                setStartTimestamp={setStartDate}
+                setEndTimestamp={setEndDate}
+              />
+            </FlexDiv>
+          )}
+        </FlexDiv>
+        <FlexDiv justifyContent={step < 1 ? 'flex-end' : 'space-between'}>
+          {step > 0 && (
+            <ButtonOutline
+              type="button"
+              width="fit-content"
+              styled="gray"
+              padding="10px 20px 10px 10px"
+              onClick={() => setStep((prev) => prev - 1)}>
+              <span
+                className="material-icons"
+                css={css`
+                  color: inherit;
+                `}>
+                chevron_left
+              </span>
+              上一步
+            </ButtonOutline>
+          )}
+          <Button
+            styled="primary"
+            type="submit"
+            width="fit-content"
+            padding={step < 2 && '10px 10px 10px 20px'}>
+            {step < 2 ? '下一步' : '新建行程'}
+            {step < 2 && (
+              <span
+                className="material-icons"
+                css={css`
+                  color: inherit;
+                `}>
+                chevron_right
+              </span>
+            )}
+          </Button>
+        </FlexDiv>
       </FlexDiv>
-      <Button
-        styled="primary"
-        margin="20px 0 0 auto"
-        display="block"
-        onClick={createItinerary}>
-        新建行程
-      </Button>
-      {/* <ChooseDate
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-      /> */}
     </Container>
   );
 }
-const SpotStyledCard = styled(Card)`
-  position: relative;
-  background-color: white;
-  flex-direction: column;
-  gap: 20px;
-  flex-basis: 300px;
-  cursor: grab;
-  &:hover {
-    cursor: grab;
-  }
-`;
-const SpotCard = (props) => {
+
+const SpotCardDraggable = (props) => {
   return (
-    <Draggable
-      draggableId={props.id}
-      index={props.index}
-      isDragDisabled={props.browse}>
-      {(provided) => (
-        <SpotStyledCard
+    <Draggable draggableId={props.id} index={props.index}>
+      {(provided, snapshot) => (
+        <div
           ref={provided.innerRef}
+          css={css`
+            min-width: 90%;
+          `}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
-          {props.children}
-        </SpotStyledCard>
+          <SpotCard
+            isSmall
+            isShowCloseBtn
+            onCloseClick={() => props.deleteSpot(props.id)}
+            id={props.id}
+            imgSrc={props.spot.photos[0]}
+            imgAlt={props.spot.name}
+            title={props.spot.name}
+            address={props.spot.formatted_address}
+            rating={props.spot.rating}
+            width={snapshot.isDragging && '300px'}
+            addCss={css`
+              cursor: grab;
+            `}
+          />
+        </div>
       )}
     </Draggable>
   );
 };
-const ScheduleStyledCard = styled.div`
-  ${cardCss}
-  position: relative;
-  gap: 20px;
-  height: 250px;
-  cursor: ${(props) => (props.cursorDefault ? 'default' : 'grab')};
-  background-color: white;
-  &:hover {
-    cursor: grab;
-  }
-`;
+
 const ScheduleWapper = styled.li`
   padding: 30px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  ${mediaQuery[0]} {
+    padding: 10px;
+  }
 `;
-const transportMode = (schedule) => {
-  const departureTime =
-    schedule?.end_time < new Date().getTime()
-      ? new Date()
-      : new Date(schedule?.end_time);
-  return {
-    BICYCLING: {
-      title: '騎自行車',
-      config: {
-        travelMode: 'BICYCLING',
-      },
-    },
-    DRIVING: {
-      title: '開車',
-      config: {
-        travelMode: 'DRIVING',
-        drivingOptions: {
-          departureTime: schedule ? departureTime : null,
-        },
-      },
-    },
-    TRANSIT: {
-      title: '搭乘大眾運輸',
-      config: {
-        travelMode: 'TRANSIT',
-        transitOptions: {
-          departureTime: schedule ? departureTime : null,
-        },
-      },
-    },
-    WALKING: {
-      title: '走路',
-      config: {
-        travelMode: 'WALKING',
-      },
-    },
-  };
-};
-function TransitCard(props) {
-  return (
-    <FlexDiv direction="column" alignItems="center">
-      <FlexDiv alignItems="center" gap="10px">
-        {props.isBrowse ? (
-          <p>
-            {transportMode()[props.travelMode].title}{' '}
-            {props.transitDetail.duration.text}
-          </p>
-        ) : (
-          <>
-            <select
-              value={props.travelMode}
-              onChange={(e) =>
-                props.changeTrasitWay(props.scheduleId, e.target.value)
-              }>
-              {Object.keys(transportMode()).map((mode) => (
-                <option key={mode} value={mode}>
-                  {transportMode()[mode].title}
-                </option>
-              ))}
-            </select>
-            <p>{props.transitDetail.duration.text}</p>
-          </>
-        )}
-      </FlexDiv>
-      <p>距離{props.transitDetail.distance.text}</p>
-    </FlexDiv>
-  );
-}
 const ScheduleCardDrag = (props) => {
-  const [isEditDuration, setIsEditDuration] = useState();
+  const [isEditDuration, setIsEditDuration] = useState(props.isAllowEdit);
   const [duration, setDuration] = useState(props.schedule.duration);
+  useEffect(() => {
+    if (props.isAllowEdit) {
+      setIsEditDuration(props.isAllowEdit);
+    }
+  }, [props.isAllowEdit]);
   return (
     <Draggable
       draggableId={props.id}
       index={props.index}
-      isDragDisabled={props.browse}>
-      {(provided) => (
+      isDragDisabled={!props.isAllowEdit}>
+      {(provided, snapshot) => (
         <ScheduleWapper
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
-          <FlexDiv gap="20px">
-            <FlexDiv
-              alignItems="center"
-              gap="5px"
-              onClick={(e) => {
-                if (e.target.id !== 'duration') {
-                  setIsEditDuration(true);
-                }
-              }}>
-              <p>停留</p>
-              {!props.isBrowse && isEditDuration ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDuration((prevValue) =>
-                        prevValue >= 30 ? prevValue - 30 : 0
-                      );
-                    }}>
-                    -
-                  </button>
-                  <p>{duration}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDuration((prevValue) =>
-                        prevValue < 1440 ? prevValue + 30 : 1440
-                      );
-                    }}>
-                    +
-                  </button>
-                  <span>分鐘</span>
-                  <button
-                    id="duration"
-                    type="button"
-                    style={{ marginLeft: '5px', backgroundColor: 'white' }}
-                    onClick={(e) => {
-                      if (e.target.id === 'duration') {
-                        setIsEditDuration(false);
-                        props.updateDuration(
-                          props.schedule.schedule_id,
-                          duration
-                        );
-                      }
-                    }}>
-                    儲存
-                  </button>
-                </>
-              ) : (
-                <p>
-                  {' '}
-                  {duration < 60 ? duration : duration / 60}{' '}
-                  {duration < 60 ? '分鐘' : '小時'}
-                </p>
-              )}
-            </FlexDiv>
-            <FlexChildDiv grow="1" direction="column">
-              <ScheduleStyledCard cursorDefault={props.browse}>
-                {props.children}
-              </ScheduleStyledCard>
-            </FlexChildDiv>
-          </FlexDiv>
-          {props.schedule.transit_detail && (
-            <TransitCard
-              isBrowse={props.isBrowse}
-              scheduleId={props.schedule.schedule_id}
+          <FlexDiv
+            css={css`
+              gap: 20px;
+              ${mediaQuery[0]} {
+                flex-direction: column;
+                gap: 30px;
+              }
+            `}>
+            <ScheduleCard
+              schedule={props.schedule}
+              durationControllerConfig={{
+                isEditStatus: isEditDuration && props.isAllowEdit,
+                isUpdate: duration !== props.schedule.duration,
+                changeEditStatus: (e) => {
+                  if (e.target.id !== 'duration') {
+                    setIsEditDuration(true);
+                  }
+                },
+                decreaseAction: () => {
+                  setDuration((prevValue) =>
+                    prevValue > 30 ? prevValue - 30 : 30
+                  );
+                },
+                increaseAction: () => {
+                  setDuration((prevValue) =>
+                    prevValue < 1440 ? prevValue + 30 : 1440
+                  );
+                },
+                updateAction: (e) => {
+                  if (e.target.id === 'duration') {
+                    setIsEditDuration(false);
+                    props.updateDuration(props.schedule.schedule_id, duration);
+                  }
+                },
+              }}
+              isEdit={props.isAllowEdit}
+              selectedList={props.selectedList}
+              setSelectedList={props.setSelectedList}
+              isShowCloseBtn={props.isAllowEdit}
+              onClick={props.onClick}
+              onCloseClick={props.onCloseClick}
               travelMode={props.schedule.travel_mode}
               transitDetail={props.schedule.transit_detail}
               changeTrasitWay={props.changeTrasitWay}
+              isDragging={snapshot.isDragging}
             />
-          )}
+          </FlexDiv>
         </ScheduleWapper>
       )}
     </Draggable>
   );
 };
 
-function EditableH2(props) {
-  const [isEdit, setIsEdit] = useState();
-  const [value, setValue] = useState();
+function WaitingSpotArea({
+  addSpotAction,
+  closeAction,
+  waitingSpots,
+  deleteSpot,
+}) {
+  const [isMobile, setIsMobile] = useState();
   useEffect(() => {
-    setValue(props.children);
-  }, [props.children]);
-  const submit = (e) => {
-    e.preventDefault();
-    setIsEdit(false);
-    props.onSubmit(value);
-  };
-  return (
-    <>
-      {isEdit ? (
-        <form onSubmit={submit}>
-          <input value={value} onChange={(e) => setValue(e.target.value)} />
-          <button type="submit">儲存</button>
-        </form>
-      ) : (
-        <H2
-          as={props.as}
-          addCss={props.addCss}
-          color={props.color}
-          textAlign="center"
-          onClick={() => {
-            if (!props.isBrowse) setIsEdit(true);
-          }}>
-          {value}
-        </H2>
-      )}
-    </>
-  );
-}
-
-function EditableDate(props) {
-  const [isEdit, setIsEdit] = useState();
-  const [startTimestamp, setStartTimestamp] = useState();
-  const [endTimestamp, setEndTimestamp] = useState();
-  useEffect(() => {
-    setStartTimestamp(props.start);
-    setEndTimestamp(props.end);
+    const checkWindowSize = () => {
+      if (window.innerWidth < breakpoints[0]) setIsMobile(true);
+    };
+    checkWindowSize();
+    console.log(window.innerWidth, breakpoints[0]);
+    window.addEventListener('resize', checkWindowSize);
+    return () => {
+      window.removeEventListener('resize', checkWindowSize);
+    };
   }, []);
-  const submit = (e) => {
-    e.preventDefault();
-    setIsEdit(false);
-    props.onSubmit(
-      startTimestamp,
-      endTimestamp,
-      setEndTimestamp,
-      setStartTimestamp
-    );
-  };
   return (
-    <>
-      {isEdit ? (
-        <form onSubmit={submit}>
-          <input
-            type="date"
-            value={timestampToDateInput(startTimestamp)}
-            onChange={(e) =>
-              setStartTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <span> - </span>
-          <input
-            type="date"
-            value={timestampToDateInput(endTimestamp)}
-            onChange={(e) =>
-              setEndTimestamp(new Date(e.target.value).getTime())
-            }
-          />
-          <button id="submit" type="submit">
-            儲存
-          </button>
-        </form>
-      ) : (
-        <P
-          color={palatte.white}
-          addCss={css`
-            font-weight: 700;
-          `}
-          textAlign="center"
-          onClick={(e) => {
-            if (e.target.id !== 'submit' && !props.isBrowse) {
-              setIsEdit(true);
-            }
-          }}>
-          {timestampToString(startTimestamp, 'date')} -{' '}
-          {timestampToString(endTimestamp, 'date')}
-        </P>
-      )}
-    </>
-  );
-}
-
-function Overview(props) {
-  const navigate = useNavigate();
-  const { uid } = useContext(Context);
-  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
-    const upload = new updateItineraryCoverPhoto({
-      uid,
-      itineraryId: props.overviews.itinerary_id,
-      imageBuffer,
-    });
-    upload.uploadFirestore().then((cover_photo) => {
-      setIsShowModal(false);
-      props.updateOverviewsFields({ cover_photo });
-    });
-  };
-  return (
-    <>
-      <Container position="relative" margin="0 0 30px 0">
-        <Container addCss={props.container} padding="40px 20px 50px 20px">
-          <FlexDiv justifyContent="space-between">
-            <RoundButtonSmallWhite
-              className="material-icons"
-              type="button"
-              onClick={() => navigate('/itineraries')}>
-              navigate_before
-            </RoundButtonSmallWhite>
-            {props.isBrowse ? (
-              <RoundButtonSmallWhite
-                className="material-icons"
-                type="button"
-                onClick={() => props.setIsBrowse(false)}>
-                edit
-              </RoundButtonSmallWhite>
-            ) : (
-              <AddImageRoundBtn
-                upload={uploadCoverPhoto}
-                white
-                icon="insert_photo"
-                confirmMessage="確定要將封面更換成這張圖嗎？"
-              />
-            )}
-          </FlexDiv>
-          <FlexDiv direction="column" gap="10px" alignItems="center">
-            <EditableH2
-              color={palatte.white}
-              isBrowse={props.isBrowse}
-              onSubmit={(title) => {
-                if (title !== props.overviews.title) {
-                  props.updateOverviewsFields({ title });
-                }
-              }}>
-              {props.overviews.title}
-            </EditableH2>
-            <EditableDate
-              start={props.overviews.start_date}
-              end={props.overviews.end_date}
-              onSubmit={props.updateDate}
-              isBrowse={props.isBrowse}
-            />
-            <H3 color={palatte.white}>Day {props.day + 1}</H3>
-          </FlexDiv>
-        </Container>
-        <Image
-          src={props.overviews.cover_photo}
-          alt="cover"
-          blur
-          addCss={css`
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            z-index: -1;
-          `}
-        />
-      </Container>
-    </>
-  );
-}
-
-function DepartController(props) {
-  return (
-    <FlexDiv alignItems="flex-start" direction="column">
-      <FlexDiv
-        justifyContent="space-between"
-        gap="50px"
-        addCss={css`
-          & > * {
-            color: ${palatte.gray['700']};
-          }
-        `}>
-        <p>出發時間</p>
-        <p>{timestampToString(props.departTimes[props.day], 'simpleDate')}</p>
-      </FlexDiv>
-      <EditableH2
-        as="p"
-        addCss={css`
-          color: ${palatte.info.basic};
-          font-weight: 700;
-          font-size: 36px;
-        `}
-        isBrowse={props.isBrowse}
-        onSubmit={(newDepartString) => {
-          if (newDepartString !== props.departString) {
-            const newDepartTimestamp = setTimeToTimestamp(
-              props.departTimes[props.day],
-              newDepartString
-            );
-            const newDepartTimes = Array.from(props.departTimes);
-            newDepartTimes.splice(props.day, 1, newDepartTimestamp);
-            props.updateOverviewsFields({ depart_times: newDepartTimes });
-            props.updateTimeOfSchedule(
-              props.schedules,
-              { isUploadFirebase: true, isSetSchedule: true },
-              newDepartTimestamp
-            );
-            props.setDepartString(
-              timestampToString(newDepartTimestamp, 'time')
-            );
-          }
-        }}>
-        {props.departString}
-      </EditableH2>
-    </FlexDiv>
-  );
-}
-
-function MoveScheduleController(props) {
-  return (
-    <FlexDiv alignItems="center" justifyContent="flex-end" gap="20px">
-      <SelectAllCheckBox
-        setAllChecked={() =>
-          props.setSelectedSchedulesId(
-            props.schedules.map((schedule) => schedule.schedule_id)
-          )
+    <FlexChildDiv
+      addCss={css`
+        padding: 20px;
+        flex-direction: column;
+        background-color: ${palatte.gray[100]};
+        gap: 20px;
+        position: fixed;
+        right: 0;
+        height: 100vh;
+        width: 340px;
+        ${mediaQuery[0]} {
+          height: 40vh;
+          width: 100%;
+          bottom: 0;
+          z-index: 5;
+          box-shadow: 0 -2px 2px 2px ${palatte.shadow};
+          gap: 10px;
         }
-        setAllUnchecked={() => props.setSelectedSchedulesId([])}
-        isSelectAll={props.selectAll}
-        setIsSelectAll={props.setSelectAll}
-      />
-      <select
-        value={props.changeTime}
-        onChange={(e) => props.setChangeTime(Number(e.target.value))}>
-        <option value="" disabled>
-          修改所選行程的日期
-        </option>
-        {props.departTimes?.map((timestamp) => (
-          <option value={timestamp} key={timestamp}>
-            {timestampToString(timestamp, 'date')}
-          </option>
-        ))}
-      </select>
-      <button type="button" onClick={props.changeSchedulesTime}>
-        移動行程
-      </button>
-    </FlexDiv>
+      `}>
+      <FlexDiv
+        addCss={css`
+          justify-content: space-between;
+          align-items: center;
+        `}>
+        <H6 fontSize="22px">待定景點</H6>
+        <FlexDiv
+          addCss={css`
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+          `}>
+          <ButtonIconColumn
+            type="button"
+            styled="primary"
+            iconName="explore"
+            onClick={addSpotAction}>
+            新增景點
+          </ButtonIconColumn>
+          <ButtonIconColumn
+            type="button"
+            styled="danger"
+            iconName="cancel"
+            onClick={closeAction}>
+            結束編輯
+          </ButtonIconColumn>
+        </FlexDiv>
+      </FlexDiv>
+      <Droppable
+        droppableId="waitingSpotsArea"
+        direction={isMobile && 'horizontal'}>
+        {(provided, snapshot) => (
+          <FlexChildDiv
+            addCss={css`
+              flex-direction: column;
+              flex-grow: 1;
+              gap: 20px;
+              padding: 10px;
+              max-width: 300px;
+              overflow-y: auto;
+              &::-webkit-scrollbar {
+                display: none;
+              }
+              ${mediaQuery[0]} {
+                flex-direction: row;
+                overflow-y: initial;
+                overflow-x: auto;
+                max-width: 100%;
+              }
+              background-color: ${snapshot.isDraggingOver && palatte.gray[300]};
+            `}
+            ref={provided.innerRef}
+            {...provided.droppableProps}>
+            {waitingSpots?.map((spot, index) => (
+              <SpotCardDraggable
+                spot={spot}
+                key={spot.place_id}
+                index={index}
+                id={spot.place_id}
+                deleteSpot={deleteSpot}
+              />
+            ))}
+            {provided.placeholder}
+          </FlexChildDiv>
+        )}
+      </Droppable>
+    </FlexChildDiv>
   );
 }
 
@@ -659,11 +516,14 @@ function AddSchedule(props) {
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
   const [day, setDay] = useState(0);
-  const [departString, setDepartString] = useState();
-  const [isBrowse, setIsBrowse] = useState(props.browse);
+  const [isAllowEdit, setIsAllowEdit] = useState(!props.browse);
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [changeTime, setChangeTime] = useState();
+  const [isSelectAll, setIsSelectAll] = useState(false);
+  const [changeTime, setChangeTime] = useState('');
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   useEffect(() => {
     if (uid && itineraryId) {
@@ -673,9 +533,6 @@ function AddSchedule(props) {
           if (res) {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
-            setDepartString(
-              timestampToString(res.overviews.depart_times[day], 'time')
-            );
             setSchedules(
               filterDaySchedules(res.schedules, res.overviews.depart_times)[day]
             );
@@ -684,13 +541,57 @@ function AddSchedule(props) {
               res.overviews.depart_times
             );
           } else {
-            alert('找不到行程資料');
+            dispatchNotification({
+              type: 'fire',
+              playload: {
+                type: 'error',
+                message: '找不到行程資料',
+                id: 'toastifyNotFound',
+              },
+            });
           }
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error(error);
+          navigate(`/error`);
+        });
     }
   }, [uid, itineraryId]);
 
+  useEffect(() => {
+    if (
+      selectedSchedulesId?.length === schedules?.length &&
+      selectedSchedulesId?.length !== 0
+    ) {
+      setIsSelectAll(true);
+    } else {
+      setIsSelectAll(false);
+    }
+  }, [selectedSchedulesId, schedules]);
+  useEffect(() => {
+    if (overviews) {
+      const totalDuration = schedules.reduce((acc, schedule) => {
+        acc += schedule.duration;
+        return acc;
+      }, 0);
+      const departTime = new Date(overviews.depart_times[day]);
+      const departTimeMinutes =
+        Number(new Date(departTime).getHours()) * 60 +
+        Number(new Date(departTime).getMinutes());
+      console.log(departTimeMinutes);
+      if (totalDuration >= 1440 - departTimeMinutes) {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'warn',
+            message: '總行程時間已超過一天，請切換到隔天繼續規劃',
+            id: 'toastifyDurationExceed',
+            duration: 5000,
+          },
+        });
+      }
+    }
+  }, [schedules, overviews, day]);
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -735,18 +636,55 @@ function AddSchedule(props) {
       if (index < array.length - 1) {
         if (scheduleId) {
           return scheduleId === schedule.schedule_id
-            ? googleMap.getDirection({
-                origin: schedule.placeDetail.geometry,
-                destination: array[index + 1].placeDetail.geometry,
-                ...transportMode(schedule)[newMode].config,
-              })
+            ? googleMap
+                .getDirection({
+                  origin: schedule.placeDetail.geometry,
+                  destination: array[index + 1].placeDetail.geometry,
+                  ...transportMode(schedule)[newMode].config,
+                })
+                .catch((error) => {
+                  if (error.code === 'ZERO_RESULTS') {
+                    dispatchNotification({
+                      type: 'fire',
+                      playload: {
+                        message:
+                          '抱歉！此交通方式找不到合適的路線，請切換其他方式',
+                        id: 'alertNoTransport',
+                        btnMessage: '修改交通方式',
+                        width: '100%',
+                      },
+                    });
+                  }
+                  return Promise.reject(schedule);
+                })
             : null;
         } else {
-          return googleMap.getDirection({
-            origin: schedule.placeDetail.geometry,
-            destination: array[index + 1].placeDetail.geometry,
-            ...transportMode(schedule)[schedule.travel_mode].config,
-          });
+          return googleMap
+            .getDirection(
+              {
+                origin: schedule.placeDetail.geometry,
+                destination: array[index + 1].placeDetail.geometry,
+                ...transportMode(schedule)[schedule.travel_mode].config,
+              },
+              {
+                name: array[index + 1].placeDetail.name,
+                address: array[index + 1].placeDetail.formatted_address,
+              }
+            )
+            .catch((error) => {
+              if (error.code === 'ZERO_RESULTS') {
+                dispatchNotification({
+                  type: 'fire',
+                  playload: {
+                    message: '抱歉！此交通方式找不到合適的路線，請切換其他方式',
+                    id: 'alertNoTransport',
+                    btnMessage: '修改交通方式',
+                    width: '100%',
+                  },
+                });
+              }
+              return Promise.reject(schedule);
+            });
         }
       }
     });
@@ -761,6 +699,7 @@ function AddSchedule(props) {
               ),
             },
             distance: transitDetails[index].distance,
+            direction_url: transitDetails[index].direction_url,
           };
           return {
             ...schedule,
@@ -787,6 +726,7 @@ function AddSchedule(props) {
         newSchedules[i + 1].start_time = newSchedules[i].end_time;
       }
       if (isSetSchedule) {
+        console.log(newSchedules);
         setSchedules(newSchedules);
         allSchedules.current[day] = newSchedules;
       }
@@ -961,13 +901,22 @@ function AddSchedule(props) {
       .catch((error) => console.error(error));
   };
   const deleteSchedule = (scheduleId) => {
-    updateTimeOfSchedule(
+    // updateTimeOfSchedule(
+    //   schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
+    //   { isSetSchedule: true, isUploadFirebase: true }
+    // );
+    getTransportDetail(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      { isSetSchedule: true, isUploadFirebase: true }
+      {
+        isSetSchedule: true,
+        isUploadFirebase: true,
+      }
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
-      .then(() => console.log('刪除成功！'))
+      .then(() => {
+        console.log('刪除成功！');
+      })
       .catch((error) => console.error(error));
   };
   const deleteSpot = (placeId) => {
@@ -977,28 +926,40 @@ function AddSchedule(props) {
       .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
-  const updateDate = (start, end, setEndTimestamp, setStartTimestamp) => {
+  const updateDate = (
+    start,
+    end,
+    setEndTimestamp,
+    setStartTimestamp,
+    setIsEdit
+  ) => {
     let updateDate;
+    console.log(start, end);
+    const resetTime = {
+      start: new Date(start).setHours(8, 0, 0, 0),
+      end: new Date(end).setHours(8, 0, 0, 0),
+    };
+    console.log(resetTime);
     if (overviews.start_date !== start && overviews.end_date !== end) {
       updateDate = {
-        start_date: start,
-        end_date: end,
+        start_date: resetTime.start,
+        end_date: resetTime.end,
         depart_times: createDepartTimeAry({ start_date: start, end_date: end }),
       };
     } else if (overviews.start_date !== start && overviews.end_date === end) {
       updateDate = {
-        start_date: start,
+        start_date: resetTime.start,
         depart_times: createDepartTimeAry({
-          start_date: start,
+          start_date: resetTime.start,
           end_date: overviews.end_date,
         }),
       };
     } else if (overviews.start_date === start && overviews.end_date !== end) {
       updateDate = {
-        end_date: end,
+        end_date: resetTime.end,
         depart_times: createDepartTimeAry({
           start_date: overviews.start_date,
-          end_date: end,
+          end_date: resetTime.end,
         }),
       };
     }
@@ -1007,7 +968,16 @@ function AddSchedule(props) {
         (day) => day.length > 0
       );
       if (dayScheduleHad.length > updateDate.depart_times.length) {
-        alert('新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期');
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            message:
+              '新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期',
+            id: 'alertUpdateDaysError',
+            width: '100%',
+          },
+        });
+
         setEndTimestamp(overviews.end_date);
         setStartTimestamp(overviews.start_date);
       } else {
@@ -1034,33 +1004,47 @@ function AddSchedule(props) {
           }
         }
         allSchedules.current = newAllSchedules;
-        setDepartString(
-          timestampToString(
-            updateDate.depart_times[removeDays > 0 ? 0 : day],
-            'time'
-          )
-        );
         setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
+        setIsEdit(false);
       }
     }
   };
   const switchDay = (nextDay) => {
     setDay(nextDay);
     setSchedules(allSchedules.current[nextDay]);
-    setDepartString(timestampToString(overviews.depart_times[nextDay], 'time'));
-    setSelectAll(false);
+    setIsSelectAll(false);
     setSelectedSchedulesId([]);
     window.scrollTo(0, 0);
   };
   const changeSchedulesTime = async () => {
+    if (!changeTime) {
+      console.log('yes');
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '請選擇要修改的行程日期',
+          id: 'tooltipChangeDay',
+        },
+      });
+      return;
+    } else if (selectedSchedulesId?.length === 0) {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '還沒有選取行程喔！',
+          id: 'tooltipChangeDay',
+        },
+      });
+      return;
+    }
     const targetDay = overviews.depart_times.reduce((acc, timestamp, index) => {
       if (timestamp === changeTime) {
         acc = index;
       }
-      console.log(timestamp);
       return acc;
     }, -1);
-    console.log(changeTime, targetDay);
     if (targetDay > -1) {
       const checkedSchedules = schedules.filter(
         (schedule) =>
@@ -1099,93 +1083,57 @@ function AddSchedule(props) {
 
   const container = css`
     ${styles.containerSetting}
-    max-width: ${!props.isBrowse && '1280px'};
+    max-width: ${props.isAllowEdit && '1280px'};
   `;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {overviews && (
         <>
-          <Container minHeight="100vh">
-            {!isBrowse && (
-              <FlexChildDiv
-                padding="30px"
-                display="flex"
-                direction="column"
-                style={{ backgroundColor: '#f7f7f7' }}
-                addCss={css`
-                  position: fixed;
-                  right: 0;
-                  height: 100vh;
-                  width: 360px;
-                `}>
-                <FlexDiv justifyContent="flex-end" gap="20px">
-                  <button type="button" onClick={() => navigate('/explore')}>
-                    新增景點
-                  </button>
-                  <button
-                    style={{
-                      alignSelf: 'flex-end',
-                      backgroundColor: 'crimson',
-                      color: 'white',
-                    }}
-                    onClick={() => setIsBrowse(true)}>
-                    結束編輯
-                  </button>
-                </FlexDiv>
-                <p>待定景點</p>
-                <Droppable
-                  droppableId="waitingSpotsArea"
-                  isDropDisabled={isBrowse}>
-                  {(provided) => (
-                    <CardWrapper
-                      column
-                      grow="1"
-                      gap="20px"
-                      maxWidth="300px"
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      browse={isBrowse}>
-                      {waitingSpots?.map((spot, index) => (
-                        <SpotCard
-                          key={spot.place_id}
-                          index={index}
-                          id={spot.place_id}>
-                          <img
-                            style={{ width: '100%', objectFit: 'cover' }}
-                            src={spot.photos[0]}
-                            alt={spot.name}
-                          />
-                          <div>
-                            <h3>{spot.name}</h3>
-                            <p>{spot.formatted_address}</p>
-                            <p>{spot.rating}</p>
-                          </div>
-                          <button
-                            type="button"
-                            style={{
-                              position: 'absolute',
-                              right: '0',
-                              top: '0',
-                            }}
-                            onClick={() => deleteSpot(spot.place_id)}>
-                            X
-                          </button>
-                        </SpotCard>
-                      ))}
-                      {provided.placeholder}
-                    </CardWrapper>
-                  )}
-                </Droppable>
-              </FlexChildDiv>
+          <Container minHeight="100vh" padding="0 0 150px 0">
+            <Notification
+              type={notification.type}
+              fire={
+                notification.fire &&
+                notification.id.match('toastify')?.length > 0
+              }
+              message={notification.message}
+              id={notification.id}
+              duration={notification?.duration}
+              resetFireState={() => dispatchNotification({ type: 'close' })}
+            />
+            <Alert
+              isShowState={
+                notification.fire && notification.id.match('alert')?.length > 0
+              }
+              alertMessage={notification.message}
+              subMessage={notification?.subMessage}
+              btnMessage={notification?.btnMessage}
+              width={notification?.width}
+              dispatchIsShowReducer={dispatchNotification}
+            />
+            {isAllowEdit && (
+              <WaitingSpotArea
+                addSpotAction={() => navigate('/explore')}
+                closeAction={() => setIsAllowEdit(false)}
+                waitingSpots={waitingSpots}
+                deleteSpot={deleteSpot}
+              />
             )}
             <FlexDiv
-              direction="column"
-              gap="20px"
-              width={!isBrowse ? 'calc(100% - 360px)' : null}>
+              addCss={css`
+                flex-direction: column;
+                gap: 20px;
+                min-height: 100vh;
+                width: ${isAllowEdit && 'calc(100% - 340px)'};
+                ${mediaQuery[0]} {
+                  width: 100%;
+                  padding-bottom: ${isAllowEdit && '25vh'};
+                }
+              `}>
               <Overview
-                container={container}
-                isBrowse={isBrowse}
-                setIsBrowse={setIsBrowse}
+                containerCss={container}
+                isAllowEdit={isAllowEdit}
+                setIsAllowEdit={setIsAllowEdit}
                 overviews={overviews}
                 updateDate={updateDate}
                 updateOverviewsFields={updateOverviewsFields}
@@ -1195,101 +1143,113 @@ function AddSchedule(props) {
                 addCss={container}
                 width="100%"
                 justifyContent="space-between"
-                alignItems="flex-end">
+                alignItems="flex-end"
+                margin="0">
                 <DepartController
                   departTimes={overviews.depart_times}
                   day={day}
-                  isBrowse={isBrowse}
-                  departString={departString}
-                  setDepartString={setDepartString}
+                  isAllowEdit={isAllowEdit}
+                  onSubmit={(newTime) => {
+                    console.log(newTime);
+                    if (newTime !== overviews.depart_times[day]) {
+                      console.log('update');
+                      updateTimeOfSchedule(
+                        schedules,
+                        { isSetSchedule: true, isUploadFirebase: true },
+                        newTime
+                      );
+                      updateOverviewsFields({
+                        depart_times: overviews.depart_times.map(
+                          (time, index) => (index === day ? newTime : time)
+                        ),
+                      });
+                    }
+                  }}
                   updateTimeOfSchedule={updateTimeOfSchedule}
                   updateOverviewsFields={updateOverviewsFields}
                   schedules={schedules}
                 />
-                {!props.isBrowse && (
-                  <MoveScheduleController
-                    departTimes={overviews.depart_times}
-                    changeTime={changeTime}
-                    setChangeTime={setChangeTime}
-                    schedules={schedules}
-                    setSelectedSchedulesId={setSelectedSchedulesId}
-                    switchDay={switchDay}
-                    setIsSelectAll={setSelectAll}
-                    isSelectAll={selectAll}
-                    changeSchedulesTime={changeSchedulesTime}
-                  />
-                )}
                 <Pagination
                   day={day}
                   switchDay={switchDay}
                   finalDay={overviews?.depart_times?.length - 1}
                 />
               </FlexDiv>
-              <Droppable droppableId="scheduleArea" isDropDisabled={isBrowse}>
-                {(provided) => (
-                  <FlexDiv
-                    addCss={container}
-                    width="100%"
-                    direction="column"
-                    gap="20px"
-                    backgroundColor="#f0f0f0"
-                    // overflowY="scroll"
-                    // height="calc(100vh - 500px)"
+              <Droppable
+                droppableId="scheduleArea"
+                isDropDisabled={!isAllowEdit}>
+                {(provided, snapshot) => (
+                  <FlexChildDiv
+                    addCss={css`
+                      ${container}
+                      width: 100%;
+                      flex-direction: column;
+                      gap: 20px;
+                      flex-grow: 1;
+                    `}
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
-                    {schedules?.length > 0 ? (
-                      schedules.map((schedule, index) => (
-                        <ScheduleCardDrag
-                          isBrowse={isBrowse}
-                          key={schedule.schedule_id}
-                          index={index}
-                          id={schedule.schedule_id}
-                          changeTrasitWay={changeTrasitWay}
-                          schedule={schedule}
-                          updateDuration={updateDuration}
-                          browse={isBrowse}>
-                          {!isBrowse && (
-                            <CheckboxCustom
-                              id={schedule.schedule_id}
-                              selectedList={selectedSchedulesId}
-                              setSelectedList={setSelectedSchedulesId}
-                            />
-                          )}
-                          <div>
-                            {timestampToString(schedule.start_time, 'time')}
-                          </div>
-                          <img
-                            style={{ width: '300px' }}
-                            src={schedule.placeDetail.photos[0]}
-                            alt={schedule.placeDetail.name}
+                    <FlexChildDiv
+                      addCss={css`
+                        flex-direction: column;
+                        background-color: ${snapshot.isDraggingOver
+                          ? palatte.gray[300]
+                          : palatte.gray[100]};
+                        flex-grow: 1;
+                        padding: 20px;
+                        border-radius: 10px;
+                        ${mediaQuery[0]} {
+                          gap: 20px;
+                        }
+                      `}>
+                      {isAllowEdit && (
+                        <FlexDiv justifyContent="flex-end" margin="0 0 20px 0">
+                          <MoveScheduleController
+                            day={day}
+                            departTimes={overviews.depart_times}
+                            changeTime={changeTime}
+                            setChangeTime={setChangeTime}
+                            schedules={schedules}
+                            selectedSchedulesId={selectedSchedulesId}
+                            setSelectedSchedulesId={setSelectedSchedulesId}
+                            switchDay={switchDay}
+                            setIsSelectAll={setIsSelectAll}
+                            isSelectAll={isSelectAll}
+                            changeSchedulesTime={changeSchedulesTime}
+                            notification={notification}
+                            dispatchNotification={dispatchNotification}
                           />
-                          <div>
-                            <h3>{schedule.placeDetail.name}</h3>
-                            <p>{schedule.placeDetail.formatted_address}</p>
-                          </div>
-                          {!isBrowse && (
-                            <button
-                              type="button"
-                              style={{
-                                position: 'absolute',
-                                right: '0',
-                                top: '0',
-                              }}
-                              onClick={() =>
-                                deleteSchedule(schedule.schedule_id)
-                              }>
-                              X
-                            </button>
-                          )}
-                        </ScheduleCardDrag>
-                      ))
-                    ) : (
-                      <p>
-                        {isBrowse ? '點擊編輯新增行程' : '拖拉卡片以新增行程'}
-                      </p>
-                    )}
-                    {provided.placeholder}
-                  </FlexDiv>
+                        </FlexDiv>
+                      )}
+                      {schedules?.length > 0 ? (
+                        schedules.map((schedule, index) => (
+                          <ScheduleCardDrag
+                            isAllowEdit={isAllowEdit}
+                            key={schedule.schedule_id}
+                            index={index}
+                            id={schedule.schedule_id}
+                            changeTrasitWay={changeTrasitWay}
+                            schedule={schedule}
+                            updateDuration={updateDuration}
+                            selectedList={selectedSchedulesId}
+                            setSelectedList={setSelectedSchedulesId}
+                            onClick={() =>
+                              window.open(schedule.placeDetail.url, '_blank')
+                            }
+                            onCloseClick={() =>
+                              deleteSchedule(schedule.schedule_id)
+                            }></ScheduleCardDrag>
+                        ))
+                      ) : (
+                        <P color={palatte.gray[800]}>
+                          {!isAllowEdit
+                            ? '點擊編輯新增行程'
+                            : '拖拉卡片以新增行程'}
+                        </P>
+                      )}
+                      {provided.placeholder}
+                    </FlexChildDiv>
+                  </FlexChildDiv>
                 )}
               </Droppable>
             </FlexDiv>
@@ -1300,8 +1260,4 @@ function AddSchedule(props) {
   );
 }
 
-function AddItinerary() {
-  return <Outlet />;
-}
-
-export { AddOverView, AddSchedule, AddItinerary };
+export { AddOverView, AddSchedule };

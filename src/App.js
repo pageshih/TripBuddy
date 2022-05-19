@@ -1,5 +1,11 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
-import { createContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+} from 'react';
 import { Global, css } from '@emotion/react';
 import { firebaseAuth } from './utils/firebase';
 import Login from './components/Login';
@@ -13,26 +19,33 @@ import {
   AddOverView,
   AddSchedule,
 } from './components/AddItinerary';
+import NotFound from './components/404';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
-import { palatte } from './components/styledComponents/basicStyle';
+import { palatte, Loader } from './components/styledComponents/basicStyle';
+import { FlexDiv } from './components/styledComponents/Layout';
 
 const Context = createContext();
 
 const LoginOrPage = (props) => {
+  const { uid, goLogin, setGoLogin, isLogInOut } = useContext(Context);
   useEffect(() => {
-    if (props.goLogin && !props.isLogInOut) {
-      alert('請先登入');
+    if (uid) {
+      setGoLogin(false);
+    } else if (uid === '') {
+      setGoLogin(true);
     }
-  }, []);
+  }, [uid]);
   return (
     <>
-      {props.goLogin ? (
+      {goLogin && !isLogInOut ? (
         <Navigate to="/login" replace={true} />
-      ) : props.goLogin !== undefined ? (
+      ) : goLogin !== undefined ? (
         props.element
       ) : (
-        <p>loading...</p>
+        <FlexDiv justifyContent="center" padding="100px 0">
+          <Loader />
+        </FlexDiv>
       )}
     </>
   );
@@ -49,7 +62,6 @@ function App() {
     @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
     * {
       box-sizing: border-box;
-      color: ${palatte.dark};
       font-family: 'Noto Sans TC', sans-serif;
       &::selection {
         background-color: rgba(160, 233, 211, 0.6);
@@ -65,7 +77,6 @@ function App() {
     ul {
       list-style: none;
       padding: 0;
-      margin: 0;
     }
     h1,
     h2,
@@ -73,8 +84,15 @@ function App() {
     h4,
     h5,
     h6,
-    p {
+    p,
+    ul,
+    li,
+    a,
+    select,
+    input,
+    option {
       margin: 0;
+      color: ${palatte.dark};
     }
   `;
 
@@ -86,9 +104,8 @@ function App() {
         (userImpl) => {
           if (userImpl) {
             setUid(userImpl.uid);
-            setGoLogin(false);
           } else {
-            setGoLogin(true);
+            setUid('');
           }
         },
         (error) => console.log(error)
@@ -99,90 +116,68 @@ function App() {
   return (
     <>
       <Global styles={cssReset} />
-      <Context.Provider value={{ uid, setUid, map, setMap }}>
+      <Context.Provider
+        value={{
+          uid,
+          setUid,
+          map,
+          setMap,
+          goLogin,
+          setGoLogin,
+          isLogInOut,
+          setIsLogInOut,
+        }}>
         <EmptyMap libraries={['places']} />
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<UserProfile setIsLogInOut={setIsLogInOut} />}
-                />
-              }>
-              <Route path="itineraries" element={<Itineraries />} />
+            <Route path="/" element={<Navigate to="/itineraries" replace />} />
+            <Route path="" element={<LoginOrPage element={<UserProfile />} />}>
+              <Route path="/itineraries" element={<Itineraries />} />
               <Route
-                path="saved-spots"
+                path="/saved-spots"
                 element={<SavedSpots setWaitingSpots={setWaitingSpots} />}
               />
               <Route
-                path="travel-journals"
+                path="/travel-journals"
                 element={<TravelJournals />}></Route>
             </Route>
-            <Route
-              path="/login"
-              element={<Login setIsLogInOut={setIsLogInOut} />}
-            />
+            <Route path="/login" element={<Login />} />
 
             <Route
               path="/explore"
               element={
                 <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
                   element={<Explore setWaitingSpots={setWaitingSpots} />}
                 />
               }
             />
-            <Route path="/add" element={<AddItinerary />}>
-              <Route
-                path=""
-                element={
-                  <LoginOrPage
-                    goLogin={goLogin}
-                    isLogInOut={isLogInOut}
-                    element={
-                      <AddOverView
-                        waitingSpots={waitingSpots}
-                        setWaitingSpots={setWaitingSpots}
-                      />
-                    }
-                  />
-                }
-              />
-              <Route
-                path=":itineraryId"
-                element={
-                  <LoginOrPage
-                    goLogin={goLogin}
-                    isLogInOut={isLogInOut}
-                    element={<AddSchedule />}
-                  />
-                }
-              />
-            </Route>
             <Route
-              path=":itineraryId"
+              path="/add"
               element={
                 <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<AddSchedule browse />}
+                  element={
+                    <AddOverView
+                      waitingSpots={waitingSpots}
+                      setWaitingSpots={setWaitingSpots}
+                    />
+                  }
                 />
               }
+            />
+            <Route
+              path="/add/:itineraryId"
+              element={<LoginOrPage element={<AddSchedule />} />}
+            />
+            <Route
+              path="/itinerary/:itineraryId"
+              element={<LoginOrPage element={<AddSchedule browse />} />}
             />
             <Route
               path="/travel-journals/:journalID"
-              element={
-                <LoginOrPage
-                  goLogin={goLogin}
-                  isLogInOut={isLogInOut}
-                  element={<TravelJournalDetail />}
-                />
-              }
+              element={<LoginOrPage element={<TravelJournalDetail />} />}
             />
+            <Route path="error" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/itineraries" replace />} />
           </Routes>
         </BrowserRouter>
       </Context.Provider>

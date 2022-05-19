@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
 import { palatte, mediaQuery, P } from './basicStyle';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
@@ -11,7 +15,11 @@ import {
   ButtonOutline,
   RoundButtonSmall,
 } from './Button';
-import { compressImages } from '../../utils/utilities';
+import {
+  compressImages,
+  timestampToTimeInput,
+  timestampToDateInput,
+} from '../../utils/utilities';
 import { Modal } from './Modal';
 
 const inputBase = css`
@@ -62,6 +70,9 @@ function TextField({ children, placeholder, value, onChange, type }) {
 const TextInput = styled.input`
   ${inputBase}
   width: ${(props) => props.width || '100%'};
+  color: ${(props) => props.color};
+  font-size: ${(props) => props.fontSize};
+  ${(props) => props.addCss};
 `;
 const Select = styled.select`
   ${inputBase}
@@ -71,6 +82,7 @@ const Select = styled.select`
   & option:disabled {
     color: ${palatte.gray[400]};
   }
+  ${(props) => props.addCss};
 `;
 const SelectSmall = styled(Select)`
   font-size: 14px;
@@ -80,6 +92,7 @@ const checkboxCss = (props) => css`
   color: white;
   border: 1px solid ${palatte.primary.basic};
   border-radius: 6px;
+  -webkit-border-radius: 6px;
   cursor: pointer;
   font-size: ${props.size || '24px'};
 `;
@@ -102,8 +115,8 @@ const CheckboxCustom = (props) => {
         width: ${props.size || '24px'};
         height: ${props.size || '24px'};
       `}
-      name={props.isSelectAll !== undefined ? 'selectAll' : props.id}>
-      {props.isSelectAll !== undefined ? (
+      name={props.isSelectAllBox ? 'selectAll' : props.id}>
+      {props.isSelectAllBox ? (
         <CheckAllDiv
           size={props.size}
           css={props.addCss}
@@ -129,10 +142,11 @@ const CheckboxCustom = (props) => {
           props.selectedList?.some((id) => id === props.id) ||
           false
         }
-        id={props.isSelectAll !== undefined ? 'selectAll' : props.id}
+        id={props.isSelectAllBox ? 'selectAll' : props.id}
         onChange={(e) => {
-          if (props.isSelectAll !== undefined) {
+          if (props.isSelectAllBox) {
             props.onChange(e);
+            console.log(props.isSelectAll);
           } else {
             if (e.target.checked) {
               props.setSelectedList([...props.selectedList, props.id]);
@@ -170,11 +184,15 @@ function SelectAllCheckBox(props) {
       <CheckboxCustom
         size={props.size}
         isSelectAll={props.isSelectAll}
+        isSelectAllBox
         onChange={selectAllItems}
       />
       <P
         fontSize={`calc(${props.size} - '6px')` || '18px'}
-        color={palatte.gray[800]}>
+        color={palatte.gray[800]}
+        addCss={css`
+          white-space: nowrap;
+        `}>
         全選
       </P>
     </FlexDiv>
@@ -184,13 +202,18 @@ function SelectAllCheckBox(props) {
 const TextAreaReview = styled.textarea`
   ${inputBase}
   width:100%;
-  height: 100px;
+  height: auto;
   margin: 10px 0;
+  border-color: transparent;
+  background-color: ${(props) =>
+    props.isEmptyInput ? palatte.gray[200] : palatte.white};
   &:read-only {
     border-color: lightgray;
     height: auto;
-    padding-bottom: 1.4em;
-    background-color: #fffced;
+    background-color: ${palatte.white};
+  }
+  &:hover {
+    background-color: ${palatte.white};
   }
 `;
 const ReviewTagContainer = styled.div`
@@ -206,7 +229,6 @@ const ReviewTagContainer = styled.div`
       : `1px solid${palatte.gray['500']}`};
   outline-offset: -1px;
   & > * {
-    font-size: 14px;
     color: ${(props) =>
       props.selectedList?.some((item) => item === props.id)
         ? palatte.gray['900']
@@ -232,7 +254,12 @@ const ReviewTag = (props) => {
   return (
     <label name={props.tag}>
       <ReviewTagContainer id={props.tag} selectedList={props.selectedList}>
-        <p className="material-icons">{props.children}</p>
+        <P
+          addCss={css`
+            white-space: nowrap;
+          `}>
+          {props.children}
+        </P>
       </ReviewTagContainer>
       <input
         type="checkbox"
@@ -399,9 +426,11 @@ function AddImageRoundBtn(props) {
           width="fit-content"
           height="fit-content"
           maxWidth="1000px"
-          maxHeight="100vh"
+          maxHeight="90vh"
+          isShowState={isShowModal}
           close={() => setIsShowModal(false)}>
           <Image
+            height="400px"
             src={
               imageBuffer.length > 0
                 ? URL.createObjectURL(imageBuffer[0])
@@ -436,6 +465,111 @@ function AddImageRoundBtn(props) {
     </>
   );
 }
+const ChangeTravelModeSelect = (props) => {
+  return (
+    <Select
+      value={props.travelMode}
+      onChange={() => props.onChange()}
+      onBlur={props.onBlur}
+      autoFocus={props.isEdit}>
+      <option value="loading" disabled hidden>
+        ...
+      </option>
+      <option value="DRIVING">開車</option>
+      <option value="TRANSIT">大眾運輸</option>
+      <option value="WALKING">走路</option>
+      <option value="BICYCLING">騎自行車</option>
+    </Select>
+  );
+};
+
+const DateTimeTextInput = (props) => (
+  <Container position="relative" width={props.width}>
+    <TextInput
+      color={props.color}
+      ref={props.inputRef}
+      addCss={props.addCss}
+      fontSize={props.fontSize}
+      {...props.inputProps}
+    />
+    <Container
+      position="absolute"
+      addCss={css`
+        right: 15px;
+        top: calc(50%);
+      `}>
+      {props.InputProps?.endAdornment}
+    </Container>
+  </Container>
+);
+function CustomDatePicker(props) {
+  return (
+    <DatePicker
+      value={timestampToDateInput(props.value)}
+      inputFormat="yyyy/MM/dd"
+      onChange={(value) => {
+        props.onChange(new Date(value).getTime());
+      }}
+      renderInput={(params) => (
+        <DateTimeTextInput
+          color={props.color}
+          width={props.width}
+          fontSize={props.fontSize}
+          {...params}
+        />
+      )}
+    />
+  );
+}
+function CustomTimePicker(props) {
+  return (
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <TimePicker
+        value={new Date(props.value)}
+        ampmInClock={true}
+        onChange={(value) => {
+          console.log(value);
+          props.onChange(new Date(value).getTime());
+        }}
+        renderInput={(params) => (
+          <DateTimeTextInput
+            color={props.color}
+            fontSize={props.fontSize}
+            width={props.width}
+            addCss={props.addCss}
+            {...params}
+          />
+        )}
+      />
+    </LocalizationProvider>
+  );
+}
+function CustomDateRangePicker(props) {
+  return (
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <CustomDatePicker
+        width={props.width}
+        value={props.startTimestamp}
+        onChange={(newStartTimestamp) => {
+          props.setStartTimestamp(newStartTimestamp);
+        }}
+      />
+      <span
+        css={css`
+          color: ${props.color};
+        `}>
+        {props.conjunction || ' - '}
+      </span>
+      <CustomDatePicker
+        value={props.endTimestamp}
+        width={props.width}
+        onChange={(newEndTimestamp) => {
+          props.setEndTimestamp(newEndTimestamp);
+        }}
+      />
+    </LocalizationProvider>
+  );
+}
 
 export {
   TextField,
@@ -451,4 +585,8 @@ export {
   AddImageRoundBtn,
   Select,
   SelectSmall,
+  ChangeTravelModeSelect,
+  CustomDateRangePicker,
+  CustomDatePicker,
+  CustomTimePicker,
 };

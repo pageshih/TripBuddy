@@ -32,8 +32,8 @@ function filterDaySchedules(allSchedules, departTimes) {
     acc[index] = allSchedules
       .filter(
         (schedule) =>
-          schedule.end_time > departTimes[index] &&
-          schedule.end_time < departTimes[index] + 18 * 60 * 60 * 1000
+          new Date(schedule.end_time).getDate() ===
+          new Date(departTimes[index]).getDate()
       )
       .sort((a, b) => a.start_time - b.start_time);
     return acc;
@@ -42,10 +42,12 @@ function filterDaySchedules(allSchedules, departTimes) {
 }
 const createDepartTimeAry = (dateObj) => {
   let departTimes = [];
-  const millisecondsOfDay = 24 * 60 * 60 * 1000;
-  const totalaDays = Number(dateObj.end_date - dateObj.start_date);
-  for (let i = 0; i <= totalaDays / millisecondsOfDay; i += 1) {
-    departTimes.push(dateObj.start_date + i * millisecondsOfDay);
+  const endDay = Number(new Date(dateObj.end_date).getDate());
+  const startDay = Number(new Date(dateObj.start_date).getDate());
+  const totalDays = endDay - startDay;
+  for (let i = 0; i <= totalDays; i += 1) {
+    const day = new Date(dateObj.start_date).setDate(startDay + i);
+    departTimes.push(day);
   }
   return departTimes;
 };
@@ -60,6 +62,15 @@ const compressImages = async (files) => {
   });
   return Promise.all(images);
 };
+
+function checkArraysIsTheSame(array1, array2) {
+  return (
+    array1 &&
+    array2 &&
+    array1.length === array2.length &&
+    array1.every((item, index) => item === array2[index])
+  );
+}
 
 class uploadReviewFirestore {
   constructor({
@@ -107,7 +118,6 @@ class uploadReviewFirestore {
         'merge'
       )
       .then(() => {
-        alert('上傳成功！');
         return Promise.resolve(newGallery);
       })
       .catch((error) => console.error(error));
@@ -136,7 +146,6 @@ class updateItineraryCoverPhoto {
         cover_photo: urlAry[0],
       })
       .then(() => {
-        alert('封面圖已更新！');
         return Promise.resolve(urlAry[0]);
       })
       .catch((error) => console.error(error));
@@ -153,4 +162,5 @@ export {
   timestampToTimeInput,
   updateItineraryCoverPhoto,
   uploadReviewFirestore,
+  checkArraysIsTheSame,
 };

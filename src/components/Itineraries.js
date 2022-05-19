@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState, useRef } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { firestore, firebaseStorage } from '../utils/firebase';
+import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
   styles,
@@ -10,11 +10,13 @@ import {
   H4,
   P,
   mediaQuery,
+  Loader,
 } from './styledComponents/basicStyle';
 import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
 import { AddReview } from './EditReview';
 import { Button } from './styledComponents/Button';
+import { Accordion } from './styledComponents/Accordion';
 
 const ExploreSpot = (props) => {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const ExploreSpot = (props) => {
       direction="column"
       gap="20px"
       width="250px"
-      margin="30px 0"
+      margin="30px auto"
       alignSelf="center"
       addCss={css`
         ${mediaQuery[0]} {
@@ -49,20 +51,19 @@ const ExploreSpot = (props) => {
 
 function Itineraries() {
   const { uid, map } = useContext(Context);
+  const { reviewTags } = useOutletContext();
   const navigate = useNavigate();
   const [empty, setEmpty] = useState();
   const [progressing, setProgressing] = useState();
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
   const now = new Date().getTime();
-  const { reviewTags } = useOutletContext();
   const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     firestore
       .getItineraries(uid, now)
       .then((overviews) => {
-        console.log(overviews);
         if (overviews?.length <= 0) {
           setEmpty(true);
         } else {
@@ -71,6 +72,7 @@ function Itineraries() {
             coming: [],
             future: [],
           };
+          setProgressing([]);
           overviews.forEach(async (itinerary) => {
             const countDownDay =
               new Date(itinerary.start_date).getDate() -
@@ -78,15 +80,26 @@ function Itineraries() {
             const tripDays =
               new Date(itinerary.end_date).getDate() -
               new Date(itinerary.start_date).getDate();
-            console.log(countDownDay, tripDays);
             if (countDownDay <= 0 && countDownDay + tripDays >= 0) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
                 .then((scheduleProcessing) => {
                   if (scheduleProcessing) {
+                    const todaySchedule = scheduleProcessing.filter(
+                      (schedule) => {
+                        console.log(
+                          new Date(schedule.start_time).getDate(),
+                          new Date(now).getDate()
+                        );
+                        return (
+                          new Date(schedule.start_time).getDate() ===
+                          new Date(now).getDate()
+                        );
+                      }
+                    );
                     setProgressing({
                       overview: itinerary,
-                      schedule: scheduleProcessing,
+                      schedule: todaySchedule,
                     });
                   }
                 })
@@ -104,11 +117,6 @@ function Itineraries() {
       .catch((error) => console.error(error));
   }, []);
   const foldContainer = css`
-    display: flex;
-    gap: 50px;
-    flex-direction: column;
-    border-radius: 10px;
-    background-color: ${palatte.gray['100']};
     padding: 40px 60px;
     ${mediaQuery[0]} {
       padding: 20px;
@@ -123,19 +131,19 @@ function Itineraries() {
   `;
   return (
     <>
-      <Container
-        padding={`0 ${styles.container_padding} 100px ${styles.container_padding}`}
-        maxWidth={styles.container_maxWidth}
-        margin="0 auto">
+      <Container addCss={styles.containerSetting}>
         {!empty ? (
           <>
-            <FlexDiv direction="column" gap="70px">
+            <FlexDiv
+              direction="column"
+              gap="70px"
+              margin="auto auto 100px auto">
               {progressing?.overview && (
-                <div css={foldContainer}>
-                  <FlexDiv justifyContent="space-between" align-items="center">
-                    <H4>進行中的 {progressing.overview.title}</H4>
-                    <span className="material-icons">expand_more</span>
-                  </FlexDiv>
+                <Accordion
+                  addCss={foldContainer}
+                  gap="50px"
+                  isDefualtExpand
+                  titleElement={<H4>進行中的 {progressing.overview.title}</H4>}>
                   <FlexDiv
                     as="ul"
                     direction="column"
@@ -151,15 +159,13 @@ function Itineraries() {
                             <ScheduleCard
                               as="li"
                               duration={schedule.duration}
-                              transit={{
-                                travelMode: schedule.travel_mode,
-                                detail: schedule.transit_detail,
-                              }}
+                              travelMode={schedule.travel_mode}
+                              transitDetail={schedule.transit_detail}
                               schedule={schedule}
                               key={schedule.schedule_id}
                               onClick={() =>
                                 navigate(
-                                  `/${progressing.overview.itinerary_id}`
+                                  `/itinerary/${progressing.overview.itinerary_id}`
                                 )
                               }>
                               {schedule.end_time > now &&
@@ -179,10 +185,29 @@ function Itineraries() {
                                       添加心得
                                     </Button>
                                     <AddReview
+                                      showReview={showReview}
+                                      setShowReview={setShowReview}
                                       key={schedule.schedule_id}
                                       itineraryId={
                                         progressing.overview.itinerary_id
                                       }
+                                      updateOriginReviewState={(
+                                        updatedSchedule
+                                      ) => {
+                                        setProgressing({
+                                          ...progressing,
+                                          schedule: progressing.schedule.map(
+                                            (schedule) =>
+                                              schedule.schedule_id ===
+                                              updatedSchedule.schedule_id
+                                                ? {
+                                                    ...schedule,
+                                                    ...updatedSchedule,
+                                                  }
+                                                : schedule
+                                          ),
+                                        });
+                                      }}
                                       scheduleId={schedule.schedule_id}
                                       allReviewTags={reviewTags}
                                       showReviewTags={schedule.review_tags}
@@ -205,17 +230,29 @@ function Itineraries() {
                             endDate={progressing.overview.end_date}
                             key={progressing.overview.itinerary_id}
                             onClick={() => {
-                              navigate(`/${progressing.overview.itinerary_id}`);
+                              navigate(
+                                `/itinerary/${progressing.overview.itinerary_id}`
+                              );
                             }}
                           />
                         )}
                   </FlexDiv>
-                </div>
+                </Accordion>
               )}
               {coming?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>即將到來的行程</H4>
-                  <FlexDiv as="ul" gap="30px" overflowX="auto">
+                  <FlexDiv
+                    as="ul"
+                    gap="30px"
+                    overflowX="auto"
+                    addCss={css`
+                      ${mediaQuery[0]} {
+                        flex-wrap: wrap;
+                        overflow-x: unset;
+                        gap: 30px;
+                      }
+                    `}>
                     {coming?.map((itinerary) => (
                       <OverviewCard
                         src={itinerary.cover_photo}
@@ -226,7 +263,7 @@ function Itineraries() {
                         endDate={itinerary.end_date}
                         key={itinerary.itinerary_id}
                         onClick={() => {
-                          navigate(`/${itinerary.itinerary_id}`);
+                          navigate(`/itinerary/${itinerary.itinerary_id}`);
                         }}
                       />
                     ))}
@@ -236,7 +273,17 @@ function Itineraries() {
               {future?.length > 0 && (
                 <FlexDiv addCss={itinerariesContainer}>
                   <H4>其他行程</H4>
-                  <FlexDiv as="ul" gap="60px" overflowX="auto">
+                  <FlexDiv
+                    as="ul"
+                    gap="60px"
+                    overflowX="auto"
+                    addCss={css`
+                      ${mediaQuery[0]} {
+                        flex-wrap: wrap;
+                        overflow-x: unset;
+                        gap: 30px;
+                      }
+                    `}>
                     {future?.map((itinerary) => (
                       <OverviewCard
                         as="li"
@@ -247,13 +294,14 @@ function Itineraries() {
                         startDate={itinerary.start_date}
                         endDate={itinerary.end_date}
                         onClick={() => {
-                          navigate(`/${itinerary.itinerary_id}`);
+                          navigate(`/itinerary/${itinerary.itinerary_id}`);
                         }}
                       />
                     ))}
                   </FlexDiv>
                 </FlexDiv>
               )}
+              {!progressing || !coming || !future ? <Loader /> : null}
               <ExploreSpot />
             </FlexDiv>
           </>

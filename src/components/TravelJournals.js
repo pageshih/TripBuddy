@@ -3,8 +3,9 @@ import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { Image } from './styledComponents/Layout';
-import { Card, CardWrapper } from './styledComponents/Cards';
-
+import { OverviewCard } from './styledComponents/Cards';
+import { FlexDiv } from './styledComponents/Layout';
+import { palatte, styles, Loader } from './styledComponents/basicStyle';
 import { timestampToString } from '../utils/utilities';
 
 function TravelJournals() {
@@ -23,32 +24,31 @@ function TravelJournals() {
   return (
     <>
       {journals ? (
-        <CardWrapper column gap="20px" padding="20px">
+        <FlexDiv
+          as="ul"
+          wrap="wrap"
+          gap="30px"
+          addCss={styles.containerSetting}
+          margin="auto auto 100px auto">
           {journals?.map((journal) => (
-            <Card
-              gap="20px"
+            <OverviewCard
+              as="li"
+              basis="calc(50% - 15px)"
+              margin="0 0 20px 0"
               key={journal.itinerary_id}
+              src={journal.cover_photo}
+              alt={journal.title}
+              title={journal.title}
+              startDate={journal.start_date}
+              endDate={journal.end_date}
               onClick={() =>
                 navigate(`/travel-journals/${journal.itinerary_id}`)
-              }>
-              <Image
-                src={journal.cover_photo}
-                alt={journal.title}
-                width="300px"
-                height="200px"
-              />
-              <div>
-                <h2>{journal.title}</h2>
-                <p>
-                  {timestampToString(journal.start_date, 'date')} -{' '}
-                  {timestampToString(journal.end_date, 'date')}
-                </p>
-              </div>
-            </Card>
+              }
+            />
           ))}
-        </CardWrapper>
+        </FlexDiv>
       ) : (
-        <p>loading...</p>
+        <Loader />
       )}
     </>
   );

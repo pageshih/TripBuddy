@@ -30,6 +30,7 @@ import {
   where,
   deleteDoc,
   writeBatch,
+  WriteBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
 import { createDepartTimeAry } from './utilities';
@@ -41,41 +42,31 @@ const firebaseAuth = {
   auth: getAuth(app),
   provider: new GoogleAuthProvider(),
   signIn(email, password) {
-    return signInWithEmailAndPassword(this.auth, email, password).catch(
-      (error) => {
-        alert(error.message);
+    return signInWithEmailAndPassword(this.auth, email, password);
+  },
+  signUp(email, password, name) {
+    return createUserWithEmailAndPassword(this.auth, email, password).then(
+      (res) => {
+        firestore.setDefaultAccount(res.user.uid, {
+          name,
+          uid: res.user.uid,
+          photo: '',
+          reviews: [],
+        });
+        return Promise.resolve(res.user.uid);
       }
     );
   },
-  signUp(email, password, name) {
-    return createUserWithEmailAndPassword(this.auth, email, password)
-      .then((res) => {
-        firestore.editProfile(res.user.uid, {
-          name,
-          uid: res.user.uid,
-          photo: 'https://picsum.photos/50',
-          reviews: [],
-        });
-        return Promise.resolve(res.user.uid);
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
-  },
   googleLogIn() {
-    return signInWithPopup(this.auth, this.provider)
-      .then((res) => {
-        firestore.editProfile(res.user.uid, {
-          name: res.user.displayName,
-          uid: res.user.uid,
-          photo: res.user.photoURL,
-          reviews: [],
-        });
-        return Promise.resolve(res.user.uid);
-      })
-      .catch((error) => {
-        alert(error.message);
+    return signInWithPopup(this.auth, this.provider).then((res) => {
+      firestore.setDefaultAccount(res.user.uid, {
+        name: res.user.displayName,
+        uid: res.user.uid,
+        photo: res.user.photoURL,
+        reviews: [],
       });
+      return Promise.resolve(res.user.uid);
+    });
   },
   userSignOut() {
     return signOut(this.auth);
@@ -101,7 +92,7 @@ const firebaseStorage = {
     return Promise.all(uploadPromises);
   },
   getPath(pathAry) {
-    return pathAry.reduce((acc, path, index, array) => {
+    return pathAry.reduce((acc, path) => {
       acc += `${path}/`;
       return acc;
     }, '');
@@ -126,8 +117,24 @@ const firebaseStorage = {
 };
 const firestore = {
   db: getFirestore(app),
-  setProfile(userUID, profile, merge) {
-    return setDoc(doc(this.db, 'profile', userUID), { profile }, { merge });
+  setDefaultAccount(userUID, profile) {
+    const batch = writeBatch(this.db);
+    batch.set(
+      doc(this.db, 'profile', userUID),
+      { ...profile },
+      { merge: 'merge' }
+    );
+    batch.set(
+      doc(this.db, 'savedSpots', userUID),
+      { uid: userUID },
+      { merge: 'merge' }
+    );
+    batch.set(
+      doc(this.db, 'itineraries', userUID),
+      { default_travel_mode: 'DRIVING', uid: userUID },
+      { merge: 'merge' }
+    );
+    return batch.commit();
   },
   getProfile(userUID) {
     return new Promise((resolve) => {
@@ -217,7 +224,8 @@ const firestore = {
       ...basicInfo,
       depart_times: createDepartTimeAry(basicInfo),
       itinerary_id: itineraryOverviewRef.id,
-      cover_photo: 'https://picsum.photos/1000/500',
+      cover_photo:
+        'https://images.unsplash.com/photo-1564166489229-dfb970a591bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1626&q=80',
     };
     this.getItinerariesSetting(userUID).then((obj) => {
       if (!obj.default_travel_mode) {

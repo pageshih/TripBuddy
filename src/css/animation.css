@@ -1,0 +1,9 @@
+.animate__fadeInDown, .animate__fadeOutUp, .animate__fadeOut, .animate__fadeIn, .animate__slideInDown, .animate__slideOutUp{
+  --animate-duration: 400ms;
+}
+.animate__fadeInUp,.animate__fadeOutDown{
+  --animate-duration: 600ms;
+}
+.animate__shakeX  {
+  --animate-duration: 800ms;
+}

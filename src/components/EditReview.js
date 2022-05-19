@@ -1,7 +1,13 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useReducer } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { uploadReviewFirestore } from '../utils/utilities';
+import { CSSTransition } from 'react-transition-group';
+import 'animate.css';
+import '../css/animation.css';
+import {
+  uploadReviewFirestore,
+  checkArraysIsTheSame,
+} from '../utils/utilities';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { FlexDiv, Container, Image } from './styledComponents/Layout';
@@ -16,8 +22,20 @@ import {
   RoundButtonSmall,
   Button,
   RoundButtonSmallOutline,
+  ButtonSmall,
 } from './styledComponents/Button';
-import { palatte, P, H6, mediaQuery } from './styledComponents/basicStyle';
+import {
+  palatte,
+  P,
+  H6,
+  mediaQuery,
+  PendingLoader,
+} from './styledComponents/basicStyle';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+} from './styledComponents/Notification';
 
 function ReviewTags(props) {
   const tagContainer = useRef();
@@ -41,24 +59,22 @@ function ReviewTags(props) {
   }, [tagContainer]);
   return (
     <FlexDiv alignItems="center" gap="10px" padding="0 0 10px 0">
-      {props.defaultTags && (
-        <FlexDiv
-          gap="12px"
-          overflowY="auto"
-          ref={tagContainer}
-          position="relative">
-          {props.defaultTags?.map((tag) => (
-            <ReviewTag
-              key={tag}
-              isEdit={props.isEdit}
-              tag={tag}
-              selectedList={props.checkedTags}
-              setSelectedList={props.setCheckedTags}>
-              {tag}
-            </ReviewTag>
-          ))}
-        </FlexDiv>
-      )}
+      <FlexDiv
+        gap="12px"
+        overflowY="auto"
+        ref={tagContainer}
+        position="relative">
+        {props.defaultTags?.map((tag) => (
+          <ReviewTag
+            key={tag}
+            isEdit={props.isEdit}
+            tag={tag}
+            selectedList={props.checkedTags}
+            setSelectedList={props.setCheckedTags}>
+            {tag}
+          </ReviewTag>
+        ))}
+      </FlexDiv>
       <FlexDiv position="relative">
         {isShowShadow && (
           <div
@@ -188,7 +204,7 @@ function ReviewGallery(props) {
   `;
   return (
     <FlexDiv gap="15px">
-      {props.gallery && props.imageBuffer && (
+      {(props.gallery?.length > 0 || props.imageBuffer?.length > 0) && (
         <FlexDiv gap="15px" ref={galleryContainer} overflowY="auto">
           {props.gallery?.length > 0 && (
             <FlexDiv gap="15px">
@@ -275,16 +291,12 @@ function ReviewGallery(props) {
   );
 }
 
-function AddReview(props) {
+function AddReviewTags(props) {
   const { uid } = useContext(Context);
   const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [gallery, setGallery] = useState();
   const [addTag, setAddTag] = useState('');
-  const [imageBuffer, setImageBuffer] = useState();
   const [showInput, setShowInput] = useState();
-  const [review, setReview] = useState();
-  const [reviewShowInput, setReviewShowInput] = useState(false);
 
   const addCheckedTag = (e) => {
     e.preventDefault();
@@ -325,24 +337,181 @@ function AddReview(props) {
       }
     };
     setReviewTags(newReviewTags());
+    setCheckedReviewTags(props.checkedReviewTags);
+  }, [props.isEdit, props.allReviewTags]);
+  return (
+    <ReviewTags
+      defaultTags={reviewTags}
+      inputTag={addTag}
+      setInputTag={setAddTag}
+      checkedTags={checkedReviewTags}
+      setCheckedTags={setCheckedReviewTags}
+      onSubmit={addCheckedTag}
+      isEdit={props.isEdit}
+      showInput={showInput}
+      setShowInput={setShowInput}
+    />
+  );
+}
+
+function AddReview(props) {
+  const { uid } = useContext(Context);
+  const [reviewTags, setReviewTags] = useState();
+  const [checkedReviewTags, setCheckedReviewTags] = useState();
+  const [addTag, setAddTag] = useState('');
+  const [gallery, setGallery] = useState();
+  const [imageBuffer, setImageBuffer] = useState();
+  const [showInput, setShowInput] = useState();
+  const [review, setReview] = useState();
+  const [reviewShowInput, setReviewShowInput] = useState(false);
+  const addReviewRef = useRef();
+  const saveButtonRef = useRef();
+  const [isDesktop, setIsDesktop] = useState();
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
+  const [isPending, setIsPending] = useState();
+
+  const addCheckedTag = (e) => {
+    e.preventDefault();
+    if (addTag) {
+      setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
+      setCheckedReviewTags(
+        checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
+      );
+      firestore.editProfile(uid, {
+        review_tags: reviewTags ? [addTag, ...reviewTags] : [addTag],
+      });
+      setAddTag('');
+    }
+  };
+  const saveReviewToFirebase = async () => {
+    // if (review || checkedReviewTags?.length > 0 || imageBuffer?.length > 0) {
+    setIsPending(true);
+    const uploadFirestore = new uploadReviewFirestore({
+      uid,
+      itineraryId: props.itineraryId,
+      scheduleId: props.scheduleId,
+      updateSchedule: {
+        review_tags: checkedReviewTags ? checkedReviewTags : [],
+        review: review ? review : '',
+      },
+      imageBuffer,
+      gallery,
+    });
+    uploadFirestore.doUpload().then((newGallery) => {
+      setGallery(newGallery);
+      setImageBuffer([]);
+      setReviewShowInput(false);
+      const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
+      setReviewTags(
+        props.allReviewTags
+          ? [
+              ...checkTagList,
+              ...reviewTags.filter(
+                (tag) =>
+                  checkedReviewTags.every((checked) => checked !== tag) && tag
+              ),
+            ]
+          : checkTagList
+      );
+
+      if (props.updateOriginReviewState) {
+        props.updateOriginReviewState({
+          schedule_id: props.scheduleId,
+          review_tags: checkedReviewTags,
+          review,
+          gallery: newGallery,
+        });
+      }
+      setIsPending(false);
+      if (props.showReview && !isDesktop) {
+        props.setShowReview(false);
+      }
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'success',
+          message: '上傳成功',
+          id: 'toastifyUploadSuccess',
+        },
+      });
+    });
+  };
+  useEffect(() => {
+    const checkDesktop = () => {
+      if (window.innerWidth > 992) {
+        setIsDesktop(true);
+      } else {
+        setIsDesktop(false);
+      }
+    };
+    checkDesktop();
+    if (props.setShowReview) {
+      if (isDesktop) {
+        props.setShowReview(true);
+      } else {
+        props.setShowReview(false);
+      }
+    }
+    window.addEventListener('resize', checkDesktop);
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+    };
+  }, []);
+  useEffect(() => {
+    if (props.allReviewTags?.length > 0) {
+      setShowInput(false);
+    } else {
+      setShowInput(true);
+    }
+    const newReviewTags = () => {
+      if (props.isEdit && props.allReviewTags) {
+        if (props.showReviewTags) {
+          return [
+            ...props.showReviewTags,
+            ...props.allReviewTags.filter(
+              (tag) =>
+                props.showReviewTags.every((recorded) => recorded !== tag) &&
+                tag
+            ),
+          ];
+        } else {
+          return [...props.allReviewTags];
+        }
+      } else {
+        return props.showReviewTags;
+      }
+    };
+    setReviewTags(newReviewTags());
     setGallery(props.reviews.gallery);
     setCheckedReviewTags(props.reviews.review_tags);
     setReview(props.reviews.review);
   }, [props.isEdit, props.allReviewTags]);
   const reviewContainer = css`
     border-radius: 30px;
-    background-color: ${palatte.white};
+    ${!props.isJournal &&
+    `background-color: ${palatte.white};
     border: 1px solid ${palatte.primary.basic};
     padding: 30px 40px 40px 40px;
+    `}
+    max-width: 100%;
+    flex: 1;
     position: relative;
     ${mediaQuery[0]} {
+      ${!props.isJournal &&
+      `
       position: fixed;
       border-radius: 0;
       width: 100%;
       bottom: 75px;
       left: 0;
       z-index: 10;
+      gap: 10px;
+      `}
     }
+    ${props.addCss}
   `;
   const dialogTriangle = css`
     width: 20px;
@@ -360,109 +529,162 @@ function AddReview(props) {
   `;
 
   return (
-    <FlexDiv
-      direction="column"
-      gap="15px"
-      css={reviewContainer}
-      display={props.display}>
-      <div css={dialogTriangle}></div>
-      <H6>你覺得這個景點如何？</H6>
-      <ReviewTags
-        defaultTags={reviewTags}
-        inputTag={addTag}
-        setInputTag={setAddTag}
-        checkedTags={checkedReviewTags}
-        setCheckedTags={setCheckedReviewTags}
-        onSubmit={addCheckedTag}
-        isEdit={props.isEdit}
-        showInput={showInput}
-        setShowInput={setShowInput}
+    <>
+      <Notification
+        type={notification.type}
+        fire={notification.fire}
+        message={notification.message}
+        id={notification.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
       />
-      <ReviewGallery
-        isEdit={props.isEdit}
-        gallery={gallery}
-        setGallery={setGallery}
-        imageBuffer={imageBuffer}
-        setImageBuffer={setImageBuffer}
-      />
-      <FlexDiv direction="column">
-        {props.isEdit && props.isJournal ? (
-          <TextAreaReview
-            type="textarea"
-            placeholder="添加一點旅行後的心得吧！"
-            value={review}
-            readOnly={!reviewShowInput}
-            onChange={(e) => {
-              setReview(e.target.value);
-            }}
-            onClick={() => {
-              setReviewShowInput(true);
-            }}
-          />
-        ) : (
-          <p>{review}</p>
-        )}
-        {props.isEdit && (
-          <Button
-            addCss={css`
-              margin-top: 10px;
-              align-self: flex-end;
-              ${mediaQuery[0]} {
-                width: 100%;
-                font-size: 16px;
-              }
-            `}
-            styled="primary"
-            width="fit-content"
-            type="click"
-            onClick={async () => {
-              const uploadFirestore = new uploadReviewFirestore({
-                uid,
-                itineraryId: props.itineraryId,
-                scheduleId: props.scheduleId,
-                updateSchedule: {
-                  review_tags: checkedReviewTags ? checkedReviewTags : [],
-                  review: review ? review : '',
-                },
-                imageBuffer,
-                gallery,
-              });
-              uploadFirestore.doUpload().then((newGallery) => {
-                setGallery(newGallery);
-                setImageBuffer([]);
-                setReviewShowInput(false);
-                const checkTagList = checkedReviewTags
-                  ? [...checkedReviewTags]
-                  : [];
-                setReviewTags(
-                  props.allReviewTags
-                    ? [
-                        ...checkTagList,
-                        ...reviewTags.filter(
-                          (tag) =>
-                            checkedReviewTags.every(
-                              (checked) => checked !== tag
-                            ) && tag
-                        ),
-                      ]
-                    : checkTagList
-                );
-                if (props.setUploadedReview) {
-                  props.setUploadedReview({
-                    schedule_id: props.scheduleId,
-                    review_tags: checkedReviewTags,
-                    review,
-                    gallery: newGallery,
-                  });
+      <CSSTransition
+        nodeRef={addReviewRef}
+        timeout={600}
+        in={isDesktop ? true : props.showReview}
+        classNames={{
+          enter: 'animate__animated',
+          enterActive: 'animate__fadeInUp',
+          exit: 'animate__animated',
+          exitActive: 'animate__fadeOutDown',
+        }}
+        unmountOnExit>
+        <FlexDiv
+          ref={addReviewRef}
+          direction="column"
+          gap="15px"
+          css={reviewContainer}
+          position="relative"
+          display={props.display}>
+          {!props.isJournal && (
+            <>
+              <div css={dialogTriangle}></div>
+              <H6>你覺得這個景點如何？</H6>
+              <RoundButtonSmall
+                styled="transparent"
+                className="material-icons"
+                width="fit-content"
+                addCss={css`
+                  display: none;
+                  ${mediaQuery[0]} {
+                    display: block;
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    padding: 5px;
+                  }
+                `}
+                onClick={() =>
+                  props.setShowReview && props.setShowReview(false)
+                }>
+                close
+              </RoundButtonSmall>
+            </>
+          )}
+          {(!props.isEdit &&
+            checkedReviewTags &&
+            checkedReviewTags?.length > 0) ||
+          props.isEdit ? (
+            <ReviewTags
+              defaultTags={reviewTags}
+              inputTag={addTag}
+              setInputTag={setAddTag}
+              checkedTags={checkedReviewTags}
+              setCheckedTags={setCheckedReviewTags}
+              onSubmit={addCheckedTag}
+              isEdit={props.isEdit}
+              showInput={showInput}
+              setShowInput={setShowInput}
+            />
+          ) : null}
+
+          {(!props.isEdit && gallery && gallery?.length > 0) || props.isEdit ? (
+            <ReviewGallery
+              isEdit={props.isEdit}
+              gallery={gallery}
+              setGallery={setGallery}
+              imageBuffer={imageBuffer}
+              setImageBuffer={setImageBuffer}
+            />
+          ) : null}
+
+          {(!props.isEdit && review) || props.isEdit ? (
+            <FlexDiv direction="column">
+              {props.isEdit && props.isJournal ? (
+                <TextAreaReview
+                  type="textarea"
+                  placeholder="添加一點旅行後的心得吧！"
+                  value={review}
+                  isEmptyInput={review && false}
+                  readOnly={reviewShowInput}
+                  onChange={(e) => {
+                    setReview(e.target.value);
+                  }}
+                  onClick={() => {
+                    setReviewShowInput(false);
+                  }}
+                />
+              ) : (
+                <P>{review}</P>
+              )}
+              <CSSTransition
+                in={
+                  props.isEdit &&
+                  (!checkArraysIsTheSame(
+                    checkedReviewTags,
+                    props.reviews.review_tags
+                  ) ||
+                    !checkArraysIsTheSame(gallery, props.reviews.gallery) ||
+                    imageBuffer?.length > 0 ||
+                    review !== props.reviews.review)
                 }
-              });
-            }}>
-            儲存心得
-          </Button>
-        )}
-      </FlexDiv>
-    </FlexDiv>
+                timeout={400}
+                nodeRef={saveButtonRef}
+                classNames={{
+                  enter: 'animate__animated',
+                  enterActive: 'animate__fadeIn',
+                  exit: 'animate__animated',
+                  exitActive: 'animate__fadeOut',
+                }}
+                unmountOnExit>
+                <Button
+                  ref={saveButtonRef}
+                  disabled={isPending}
+                  addCss={css`
+                    margin-top: 10px;
+                    align-self: flex-end;
+                    ${mediaQuery[0]} {
+                      width: 100%;
+                      font-size: 16px;
+                    }
+                  `}
+                  styled="primary"
+                  width="fit-content"
+                  type="click"
+                  onClick={saveReviewToFirebase}>
+                  {isPending ? (
+                    <div
+                      css={css`
+                        width: 70px;
+                      `}>
+                      <PendingLoader size="24" />
+                    </div>
+                  ) : (
+                    '儲存心得'
+                  )}
+                </Button>
+              </CSSTransition>
+            </FlexDiv>
+          ) : null}
+        </FlexDiv>
+      </CSSTransition>
+    </>
   );
 }
 
-export { ReviewTags, ReviewGallery, AddReview, uploadReviewFirestore };
+export {
+  ReviewTags,
+  ReviewGallery,
+  AddReview,
+  uploadReviewFirestore,
+  AddReviewTags,
+};

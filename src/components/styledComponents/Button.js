@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { css } from '@emotion/react';
-import { palatte, mediaQuery } from './basicStyle';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
+import { palatte, mediaQuery, P } from './basicStyle';
 import PropTypes from 'prop-types';
 import { FlexChildDiv, FlexDiv } from './Layout';
 
@@ -24,20 +25,28 @@ const colorMap = {
     danger: palatte.danger.basic,
     dangerHover: palatte.danger['400'],
     dangerOutline: palatte.danger['400'],
-    round: palatte.secondary[200],
-    roundHover: palatte.primary[400],
+    round: palatte.gray[100],
+    roundHover: palatte.primary.basic,
+    gray: palatte.gray[500],
+    grayHover: palatte.gray[600],
+    grayOutline: palatte.gray[600],
+    transparent: 'transparent',
+    transparentColor: palatte.gray[800],
+    transparentHover: palatte.shadow,
+    infoOutline: palatte.info.basic,
   },
 };
 
 const Button = styled.button`
   display: flex;
-  gap: 4px;
+  gap: ${(props) => props.gap || '4px'};
   justify-content: center;
   align-items: center;
-  padding: 10px 20px;
+  flex-direction: ${(props) => props.direction};
+  padding: ${(props) => props.padding || '10px 20px'};
   font-size: ${(props) => props.fontSize || '16px'};
   border-radius: 8px;
-  color: ${palatte.white};
+  color: ${({ styled }) => colorMap.button[styled + 'Color'] || palatte.white};
   background-color: ${({ styled }) => colorMap.button[styled]};
   align-self: ${(props) => props.alignSelf};
   margin-left: ${(props) => props.marginLeft};
@@ -48,6 +57,11 @@ const Button = styled.button`
   &:hover {
     background-color: ${({ styled }) => colorMap.button[styled + 'Hover']};
     box-shadow: 2px 2px 2px 2px ${palatte.shadow};
+  }
+  &:disabled {
+    background-color: ${palatte.gray[200]};
+    color: ${palatte.gray[700]};
+    cursor: not-allowed;
   }
   ${mediaQuery[0]} {
     font-size: 14px;
@@ -66,9 +80,11 @@ const ButtonOutline = styled(Button)`
 `;
 const buttonSmall = (props) => css`
   font-size: ${props.fontSize || '14px'};
-  padding: 5px 20px;
+  padding: ${props.padding || '5px 20px'};
   border-radius: 5px;
   white-space: nowrap;
+  margin: ${props.margin};
+  ${props.addCss}
 `;
 const ButtonSmall = styled(Button)`
   ${buttonSmall}
@@ -78,11 +94,18 @@ const ButtonSmallOutline = styled(ButtonOutline)`
   ${buttonSmall}
 `;
 const ButtonSmallIcon = styled(ButtonSmall)`
-  padding: 5px 10px;
+  padding: ${(props) => props.padding || '5px 10px'};
   display: flex;
-  gap: 5px;
+  gap: ${(props) => props.gap || '5px'};
+  ${(props) => props.addCss};
 `;
 
+const ButtonSmallOutlineIcon = styled(ButtonSmallOutline)`
+  padding: ${(props) => props.padding || '5px 10px'};
+  display: flex;
+  gap: ${(props) => props.gap || '5px'};
+  ${(props) => props.addCss};
+`;
 const RoundButton = styled.button`
   background-color: ${colorMap.button.round};
   color: ${colorMap.button.roundHover};
@@ -120,6 +143,36 @@ const buttonSmallColorMap = {
       color: palatte.gray['100'],
     },
   },
+  gray700: {
+    default: {
+      backgroundColor: palatte.gray['700'],
+      color: palatte.gray['100'],
+    },
+    hover: {
+      backgroundColor: palatte.gray['800'],
+      color: palatte.gray['200'],
+    },
+  },
+  transparent: {
+    default: {
+      backgroundColor: 'transparent',
+      color: palatte.gray['500'],
+    },
+    hover: {
+      backgroundColor: palatte.shadow,
+      color: palatte.white,
+    },
+  },
+  danger: {
+    default: {
+      backgroundColor: palatte.danger.basic,
+      color: palatte.white,
+    },
+    hover: {
+      backgroundColor: palatte.white,
+      color: palatte.danger[400],
+    },
+  },
 };
 const RoundButtonSmall = styled.button`
   display: flex;
@@ -134,10 +187,10 @@ const RoundButtonSmall = styled.button`
       ? buttonSmallColorMap[props.styled].default.backgroundColor
       : 'transparent'};
   padding: ${(props) => props.padding || '0px'};
-  border-radius: 50%;
-  min-width: ${(props) => props.size || '24px'};
-  min-height: ${(props) => props.size || '24px'};
-  font-size: ${(props) => props.size || '24px'};
+  border-radius: ${(props) => props.borderRadius || '50%'};
+  width: ${(props) => props.size || '24px'};
+  height: ${(props) => props.size || '24px'};
+  font-size: ${(props) => props.fontSize || props.size || '24px'};
   &:hover {
     color: ${(props) =>
       props.close
@@ -161,13 +214,14 @@ const RoundButtonSmallWhite = styled(RoundButtonSmall)`
     props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
   height: ${(props) =>
     props.size ? `calc(${props.size} + 10px)` : 'fit-content'};
-  color: ${palatte.gray['100']};
-  background-color: rgba(161, 163, 184, 0.5);
+  color: ${palatte.white};
+  background-color: rgba(50, 50, 50, 0.4);
   text-align: center;
   &:hover {
-    background-color: rgba(161, 163, 184, 0.3);
-    color: ${palatte.white};
+    background-color: rgba(255, 255, 255, 0.6);
+    color: ${palatte.gray[800]};
   }
+  ${(props) => props.addCss};
 `;
 
 const RoundButtonSmallOutline = styled(RoundButtonSmall)`
@@ -184,9 +238,40 @@ const RoundButtonSmallOutline = styled(RoundButtonSmall)`
   }
 `;
 
+const RoundButtonSmallWithLabel = (props) => (
+  <FlexDiv
+    as="button"
+    type={props.type}
+    gap={props.gap || '10px'}
+    onClick={props.onClick}
+    addCss={css`
+      background-color: transparent;
+      & > * {
+        color: ${buttonSmallColorMap[props.styled].default.backgroundColor};
+      }
+      &:hover {
+        & p {
+          text-decoration: underline;
+          color: ${buttonSmallColorMap[props.styled].hover.backgroundColor};
+        }
+        & span {
+          border-radius: 50%;
+          background-color: ${buttonSmallColorMap[props.styled].default
+            .backgroundColor};
+          color: ${buttonSmallColorMap[props.styled].hover.color};
+        }
+      }
+      ${props.addCss}
+    `}>
+    <span className="material-icons">{props.iconName}</span>
+    <P>{props.children}</P>
+  </FlexDiv>
+);
+
 const capsule = (props) => css`
   padding: 5px 5px 6px 5px;
   border-radius: 30px;
+  white-space: nowrap;
   background-color: ${props.styled
     ? buttonSmallColorMap[props.styled].default.backgroundColor
     : 'inherit'};
@@ -254,6 +339,7 @@ SaveAndCancelButton.propTypes = {
 };
 const linkTextColor = css`
   text-decoration: none;
+  cursor: pointer;
   & * {
     color: ${palatte.info.basic};
   }
@@ -288,21 +374,72 @@ function HyperLink(props) {
       as="a"
       href={props.href}
       target={props.target || '_blank'}
+      onClick={props.onClick}
       addCss={linkTextColor}
       alignItems="center"
       gap="2px"
       alignSelf={props.alignSelf}>
       <LinkText>{props.children}</LinkText>
-      <LinkIcon className="material-icons">open_in_new</LinkIcon>
+      <LinkIcon className="material-icons">{props.iconName}</LinkIcon>
     </FlexChildDiv>
   );
 }
+
+const iconButtonColoeMap = {
+  danger: {
+    color: palatte.danger.basic,
+    hoverColor: palatte.danger[400],
+  },
+  primary: {
+    color: palatte.primary.basic,
+    hoverColor: palatte.primary[800],
+  },
+};
+
+const ButtonIconColumn = (props) => (
+  <ButtonSmallIcon
+    styled="transparent"
+    type={props.type}
+    onClick={props.onClick}
+    addCss={css`
+      padding: 0;
+      width: fit-content;
+      flex-direction: column;
+      align-items: center;
+      gap: 0px;
+      & > * {
+        color: ${iconButtonColoeMap[props.styled].color};
+      }
+      &:hover {
+        background-color: transparent;
+        box-shadow: none;
+        & > * {
+          color: ${iconButtonColoeMap[props.styled].hoverColor};
+        }
+      }
+      ${mediaQuery[0]} {
+        flex-direction: row;
+        gap: 5px;
+      }
+    `}
+    title={props.children}>
+    <span
+      css={css`
+        font-size: ${props.size};
+      `}
+      className="material-icons">
+      {props.iconName}
+    </span>
+    <P fontSize={`calc(${props.size || '24px'} - 12px)`}>{props.children}</P>
+  </ButtonSmallIcon>
+);
 export {
   Button,
   ButtonOutline,
   ButtonSmall,
   ButtonSmallIcon,
   ButtonSmallOutline,
+  ButtonSmallOutlineIcon,
   RoundButton,
   RoundButtonSmall,
   RoundButtonSmallOutline,
@@ -310,4 +447,6 @@ export {
   ReviewTagRemoveButton,
   SaveAndCancelButton,
   HyperLink,
+  ButtonIconColumn,
+  RoundButtonSmallWithLabel,
 };

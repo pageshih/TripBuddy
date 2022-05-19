@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { FlexDiv, Container } from './Layout';
+import { useNavigate } from 'react-router-dom';
+import { FlexDiv, FlexChildDiv, Container } from './Layout';
 // import { SaveAndCancelButton } from './Button';
 import underline from '../../images/logoDecorationUnderline.svg';
 import PropTypes from 'prop-types';
@@ -45,6 +46,7 @@ const palatte = {
   white: '#FFFFFF',
   shadow: 'rgba(43, 45, 66, 0.2)',
   darkerShadow: 'rgba(43, 45, 66, 0.7)',
+  lighterShadow: 'rgba(161, 163, 184, 0.2)',
 };
 const breakpoints = [992];
 const mediaQuery = breakpoints.map(
@@ -57,18 +59,20 @@ const styles = {
   container_padding: '20px',
   containerSetting: css`
     max-width: 1090px;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     padding-left: 20px;
     padding-right: 20px;
   `,
 };
 const Logo = (props) => {
+  const navigate = useNavigate();
   const logoName = css`
     font-family: 'Caveat', cursive;
     font-size: 64px;
     color: ${palatte.primary.basic};
     ${mediaQuery[0]} {
-      font-size: 48px;
+      font-size: ${!props.small && !props.underline && '48px'};
     }
   `;
   const ellipse = css`
@@ -107,7 +111,11 @@ const Logo = (props) => {
           alignItems="center"
           gap="10px"
           height="fit-content"
-          addCss={props.addCss}>
+          addCss={css`
+            cursor: pointer;
+            ${props.addCss}
+          `}
+          onClick={() => navigate('/itineraries')}>
           <div
             css={css`
               ${ellipse}
@@ -128,8 +136,10 @@ const Logo = (props) => {
           alignItems="flex-end"
           gap="20px"
           addCss={css`
+            cursor: pointer;
             ${props.addCss}
-          `}>
+          `}
+          onClick={() => navigate('/itineraries')}>
           <FlexDiv alignItems="center">
             <div css={ellipse}></div>
             <Container position="relative">
@@ -147,7 +157,10 @@ const Logo = (props) => {
           gap="12px"
           css={css`
             gap: 5px;
-          `}>
+            cursor: pointer;
+            ${props.addCss}
+          `}
+          onClick={() => navigate('/itineraries')}>
           <FlexDiv alignItems="center" gap="10px">
             <div css={ellipse}></div>
             <h1 css={logoName}>TripBuddy</h1>
@@ -167,27 +180,35 @@ const headingFontSize = {
     6: '24px',
   },
   mobile: {
-    2: '52px',
-    3: '40px',
-    4: '24px',
-    5: '20px',
-    6: '18px',
+    2: '42px',
+    3: '30px',
+    4: '28px',
+    5: '24px',
+    6: '20px',
   },
 };
 const heading = (props) => css`
   font-weight: ${props.fontWeight || 700};
   color: ${props.color};
   text-align: ${props.textAlign};
+  line-height: ${props.lineHeight};
   margin: ${props.margin};
+  white-space: ${props.whiteSpace};
   ${props.addCss};
 `;
 const H2 = styled.h2`
   font-size: ${(props) => props.fontSize || headingFontSize.desktop[2]};
   ${heading}
+  ${mediaQuery[0]} {
+    font-size: ${headingFontSize.mobile[2]};
+  }
 `;
 const H3 = styled.h3`
   font-size: ${(props) => props.fontSize || headingFontSize.desktop[3]};
   ${heading}
+  ${mediaQuery[0]} {
+    font-size: ${headingFontSize.mobile[3]};
+  }
 `;
 
 const H4 = styled.h4`
@@ -217,26 +238,345 @@ const P = styled.p`
   color: ${(props) => props.color};
   margin: ${(props) => props.margin};
   text-align: ${(props) => props.textAlign};
+  whitespace: ${(props) => props.whiteSpace};
   ${mediaQuery[0]} {
     font-size: ${(props) => props.mobileFontSize || '14px'};
     margin: ${(props) => props.margin};
   }
   ${(props) => props.addCss}
 `;
-const Loader = styled.div`
-  width: ${(props) => props.size};
-  height: ${(props) => props.size};
-  border-radius: 50%;
-  border: 10px solid ${(props) => props.color || palatte.gray['400']};
-  border-top: none;
-`;
 
-const headingComponents = {
+const TextWithIcon = (props) => (
+  <FlexChildDiv
+    gap={props.gap}
+    grow={props.grow}
+    direction={props.direction}
+    margin={props.margin}
+    padding={props.padding}
+    justifyContent={props.justifyContent}
+    addCss={props.addCss?.container}
+    alignItems={
+      props.alignItems ||
+      (!props.isSmall && typeof props.children === 'string'
+        ? 'center'
+        : 'flex-start')
+    }
+    onClick={props.onClick}>
+    <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
+      {props.iconLabel && (
+        <P
+          fontSize={props.labelSize || props.textSize}
+          color={props.labelColor || props.iconColor}
+          css={props.addCss.iconLabel}>
+          {props.iconLabel}
+        </P>
+      )}
+      <span
+        className="material-icons"
+        css={css`
+          color: ${props.color || props.iconColor};
+          font-size: ${props.iconSize};
+          text-align: ${props.textAlign};
+          ${props.addCss?.icon};
+        `}>
+        {props.iconName}
+      </span>
+    </FlexDiv>
+    {typeof props.children === 'string' ? (
+      <P
+        fontSize={props.textSize}
+        textAlign={props.textAlign}
+        color={props.color || props.textColor}
+        addCss={props.addCss?.text}>
+        {props.children}
+      </P>
+    ) : (
+      props.children
+    )}
+  </FlexChildDiv>
+);
+
+const Loader = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      margin: 'auto',
+      background: 'rgb(255, 255, 255)',
+      display: 'block',
+      shapeRendering: 'auto',
+    }}
+    width={props.size || '30px'}
+    height={props.size || '30px'}
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid">
+    <circle cx="26" cy="50" fill="#a0e9d3" r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="-0.5s"></animate>
+    </circle>
+    <circle cx="74" cy="50" fill={palatte.primary.basic} r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="0s"></animate>
+    </circle>
+    <circle cx="26" cy="50" fill={palatte.primary[300]} r="24">
+      <animate
+        attributeName="cx"
+        repeatCount="indefinite"
+        dur="1s"
+        keyTimes="0;0.5;1"
+        values="26;74;26"
+        begin="-0.5s"></animate>
+      <animate
+        attributeName="fill-opacity"
+        values="0;0;1;1"
+        calcMode="discrete"
+        keyTimes="0;0.499;0.5;1"
+        dur="1s"
+        repeatCount="indefinite"></animate>
+    </circle>
+  </svg>
+);
+
+const PendingLoader = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      margin: 'auto',
+      background: 'transparent',
+      display: 'block',
+      shapeRendering: 'auto',
+    }}
+    width={props.size}
+    height={props.size}
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid">
+    <g transform="translate(80,50)">
+      <g transform="rotate(0)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="1">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.875s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.875s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(71.21320343559643,71.21320343559643)">
+      <g transform="rotate(45)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.875">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.75s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.75s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(50,80)">
+      <g transform="rotate(90)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.75">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.625s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.625s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(28.786796564403577,71.21320343559643)">
+      <g transform="rotate(135)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.625">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.5s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.5s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(20,50.00000000000001)">
+      <g transform="rotate(180)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.5">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.375s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.375s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(28.78679656440357,28.786796564403577)">
+      <g transform="rotate(225)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.375">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.25s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.25s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(49.99999999999999,20)">
+      <g transform="rotate(270)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.25">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="-0.125s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="-0.125s"></animate>
+        </circle>
+      </g>
+    </g>
+    <g transform="translate(71.21320343559643,28.78679656440357)">
+      <g transform="rotate(315)">
+        <circle
+          cx="0"
+          cy="0"
+          r="6"
+          fill={props.color || palatte.gray[600]}
+          fill-opacity="0.125">
+          <animateTransform
+            attributeName="transform"
+            type="scale"
+            begin="0s"
+            values="1.5 1.5;1 1"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"></animateTransform>
+          <animate
+            attributeName="fill-opacity"
+            keyTimes="0;1"
+            dur="1s"
+            repeatCount="indefinite"
+            values="1;0"
+            begin="0s"></animate>
+        </circle>
+      </g>
+    </g>
+  </svg>
+);
+
+const textComponents = {
   2: H2,
   3: H3,
   4: H4,
   5: H5,
   6: H6,
+  P: P,
 };
 
 const Rating = (props) => {
@@ -291,10 +631,13 @@ export {
   H5,
   H6,
   P,
+  TextWithIcon,
   styles,
   mediaQuery,
+  breakpoints,
   Loader,
-  headingComponents,
+  PendingLoader,
+  textComponents,
   headingFontSize,
   Rating,
 };

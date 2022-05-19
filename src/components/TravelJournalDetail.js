@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
 import { useContext, useEffect, useRef, useState, useReducer } from 'react';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import {
@@ -9,18 +11,38 @@ import {
   Image,
   FlexChildDiv,
 } from './styledComponents/Layout';
-import { Card } from './styledComponents/Cards';
+import { SpotCard, DurationText } from './styledComponents/Cards';
 import {
   timestampToString,
   filterDaySchedules,
   timestampToTimeInput,
+  timestampToDateInput,
 } from '../utils/utilities';
-import { AddReview } from './EditReview';
+import { AddReview, AddReviewTags } from './EditReview';
+import { Overview } from './EditItinerary';
 import { Pagination } from './Pagination';
-import { Modal } from './styledComponents/Modal';
+import { Modal, Confirm } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
-import { Button } from './styledComponents/Button';
-import { css } from '@emotion/react';
+import {
+  Button,
+  ButtonSmall,
+  RoundButtonSmall,
+} from './styledComponents/Button';
+import {
+  Loader,
+  H3,
+  H5,
+  P,
+  styles,
+  palatte,
+} from './styledComponents/basicStyle';
+import { Accordion } from './styledComponents/Accordion';
+import { Select, TextInput, CustomTimePicker } from './styledComponents/Form';
+import {
+  Notification,
+  defaultNotification,
+  notificationReducer,
+} from './styledComponents/Notification';
 
 function TravelJournalDetail() {
   const { uid, map } = useContext(Context);
@@ -30,12 +52,18 @@ function TravelJournalDetail() {
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
   const [schedulesExpand, setSchedulesExpand] = useState();
-  const [isEdit, setIsEdit] = useState(false);
+  const [isAllowEdit, setIsAllowEdit] = useState(false);
   const [reviewTags, setReviewTags] = useState();
   const [uploadedReview, setUploadedReview] = useState();
   const [showAddSchedule, setShowAddSchedule] = useState();
+  const [isAddingSchedule, setIsAddingSchedule] = useState();
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
+
   const initialSchedule = {
-    start_time: undefined,
+    start_time: '',
     end_time: 0,
     duration: 30,
     placeDetail: undefined,
@@ -57,9 +85,9 @@ function TravelJournalDetail() {
           start_time: action.playload,
         };
       case 'choseTime':
-        const startTime = new Date(
-          state.start_time > 0 ? state.start_time : overviews.start_date
-        ).setHours(Number(action.playload[0]), Number(action.playload[1]));
+        const startTime = new Date(action.playload).setDate(
+          new Date(state.start_time).getDate()
+        );
         return {
           ...state,
           start_time: startTime,
@@ -84,25 +112,24 @@ function TravelJournalDetail() {
 
   const uploadNewSchedule = () => {
     if (addSchedule.start_time && addSchedule.placeDetail) {
+      setIsAddingSchedule(true);
       firestore
         .addSchedule(uid, overviews.itinerary_id, addSchedule)
         .then((newSchedule) => {
           setShowAddSchedule(false);
-          alert('已加入行程');
+          dispatchNotification({
+            type: 'fire',
+            playload: {
+              type: 'success',
+              message: '已加入行程',
+              id: 'toastifyUpload',
+            },
+          });
+          setIsAddingSchedule(false);
           overviews.depart_times.forEach((timestamp, index, array) => {
-            if (index < array.length - 1 && array.length !== 1) {
-              if (
-                newSchedule.start_time > timestamp &&
-                newSchedule.start_time < array[index + 1]
-              ) {
-                allSchedules.current[index].push(newSchedule);
-                allSchedules.current[index].sort(
-                  (a, b) => a.start_time - b.start_time
-                );
-              }
-            } else if (
-              index === array.length &&
-              newSchedule.start_time > timestamp
+            if (
+              new Date(newSchedule.start_time).getDate() ===
+              new Date(timestamp).getDate()
             ) {
               allSchedules.current[index].push(newSchedule);
               allSchedules.current[index].sort(
@@ -116,6 +143,27 @@ function TravelJournalDetail() {
         .catch((error) => console.error(error));
     }
   };
+  const deleteSchedule = (scheduleId) => {
+    firestore
+      .deleteSchedule(uid, journalID, scheduleId)
+      .then(() => {
+        const newScheduleList = scheduleList.filter(
+          (oldSchedule) => oldSchedule.schedule_id !== scheduleId
+        );
+        setScheduleList(newScheduleList);
+        allSchedules.current[day] = newScheduleList;
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'success',
+            message: '刪除成功',
+            id: 'toastifyDeleted',
+          },
+        });
+        dispatchNotification({ type: 'close' });
+      })
+      .catch((error) => console.error(error));
+  };
   useEffect(() => {
     async function fetchData() {
       try {
@@ -127,7 +175,7 @@ function TravelJournalDetail() {
         );
         setScheduleList([...allSchedules.current[day]]);
         const profile = await firestore.getProfile(uid);
-        setReviewTags(profile.reviews);
+        setReviewTags(profile.review_tags);
       } catch (error) {
         console.error(error);
       }
@@ -142,6 +190,7 @@ function TravelJournalDetail() {
           : schedule
       );
       setScheduleList([...newScheduleList]);
+      allSchedules.current[day] = [...newScheduleList];
     }
   }, [uploadedReview]);
 
@@ -152,232 +201,307 @@ function TravelJournalDetail() {
   };
   return (
     <>
+      <Notification
+        type={notification.type}
+        fire={
+          notification.fire && notification.id.match('toastify')?.length > 0
+        }
+        message={notification.message}
+        id={notification.id}
+        resetFireState={() => dispatchNotification({ type: 'close' })}
+      />
+      <Confirm
+        dispatchIsShowReducer={dispatchNotification}
+        isShowState={
+          notification.fire && notification.id.match('confirm')?.length > 0
+        }
+        confirmMessage={notification.message}
+        yesMessage="刪除"
+        yesBtnStyle="danger"
+        noBtnStyle="gray"
+        yesAction={notification.yesAction}
+      />
       {overviews && scheduleList ? (
         <>
-          {showAddSchedule && (
-            <Modal close={() => setShowAddSchedule(false)}>
-              <FlexDiv direction="column" height="100%">
-                <SearchBar
-                  placeholder="輸入要加入的景點"
-                  dispatch={(place) =>
-                    dispatchAddSchedule({
-                      type: 'changePlace',
-                      playload: place,
-                    })
-                  }
-                  map={map}
-                  css={{
-                    container: { position: 'relative', width: '100%' },
-                  }}
-                  option={{
-                    fields: ['name', 'place_id', 'formatted_address', 'photos'],
-                  }}
-                />
-                {addSchedule.placeDetail && (
-                  <Card column>
-                    <Image
-                      width="150px"
-                      height="100px"
-                      src={addSchedule.placeDetail.photos[0]}
-                      alt={addSchedule.placeDetail.name}
-                    />
-                    <h4>{addSchedule.placeDetail.name}</h4>
-                    <p>{addSchedule.placeDetail.formatted_address}</p>
-                  </Card>
-                )}
-                <FlexChildDiv
-                  display="flex"
-                  direction="column"
-                  gap="20px"
-                  padding="20px"
-                  grow="1">
-                  <select
-                    defaultValue=""
-                    onChange={(e) =>
+          <Modal
+            isShowState={showAddSchedule}
+            close={() => setShowAddSchedule(false)}
+            minWidth="80%"
+            height="80%">
+            <FlexDiv direction="column" height="100%">
+              {isAddingSchedule ? (
+                <Loader />
+              ) : (
+                <>
+                  <SearchBar
+                    placeholder="輸入要加入的景點"
+                    dispatch={(place) =>
                       dispatchAddSchedule({
-                        type: 'choseDate',
-                        playload: Number(e.target.value),
+                        type: 'changePlace',
+                        playload: place,
                       })
-                    }>
-                    <option value="" disabled>
-                      ---請選擇日期---
-                    </option>
-                    {overviews.depart_times.map((timestamp) => (
-                      <option value={timestamp} key={timestamp}>
-                        {timestampToString(timestamp, 'date')}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="time"
-                    value={
-                      addSchedule.start_time &&
-                      timestampToTimeInput(addSchedule.start_time)
                     }
-                    onChange={(e) => {
-                      dispatchAddSchedule({
-                        type: 'choseTime',
-                        playload: e.target.value.split(':'),
-                      });
-                      console.log(e.target.value.split(':'));
+                    map={map}
+                    addCss={{
+                      container: { position: 'relative', width: '100%' },
+                    }}
+                    option={{
+                      fields: [
+                        'name',
+                        'place_id',
+                        'formatted_address',
+                        'photos',
+                        'url',
+                      ],
                     }}
                   />
-                  <FlexDiv gap="10px" alignItems="center">
-                    <p>停留時間</p>
-                    <input
-                      type="number"
-                      min="0"
-                      max="1440"
-                      value={addSchedule.duration}
-                      step="30"
+                  {addSchedule.placeDetail && (
+                    <SpotCard
+                      imgSrc={addSchedule.placeDetail.photos[0]}
+                      imgAlt={addSchedule.placeDetail.name}
+                      title={addSchedule.placeDetail.name}
+                      address={addSchedule.placeDetail.formatted_address}
+                      onClick={() =>
+                        window.open(addSchedule.placeDetail.url, '_blank')
+                      }
+                      addCss={css`
+                        padding: 20px;
+                      `}
+                    />
+                  )}
+                  <FlexChildDiv
+                    display="flex"
+                    direction="column"
+                    gap="20px"
+                    padding="20px"
+                    grow="1">
+                    <Select
+                      defaultValue=""
                       onChange={(e) =>
                         dispatchAddSchedule({
-                          type: 'addDuration',
+                          type: 'choseDate',
                           playload: Number(e.target.value),
                         })
-                      }
+                      }>
+                      <option value="" disabled>
+                        ---請選擇日期---
+                      </option>
+                      {overviews.depart_times.map((timestamp) => (
+                        <option value={timestamp} key={timestamp}>
+                          {timestampToString(timestamp, 'date')}
+                        </option>
+                      ))}
+                    </Select>
+                    <CustomTimePicker
+                      value={addSchedule.start_time}
+                      onChange={(newValue) => {
+                        console.log(newValue);
+                        dispatchAddSchedule({
+                          type: 'choseTime',
+                          playload: newValue,
+                        });
+                      }}
                     />
-                    <span>分鐘</span>
-                  </FlexDiv>
-                  <Button
-                    styled="primary"
-                    margin="auto 0 0 0"
-                    onClick={uploadNewSchedule}>
-                    新增
-                  </Button>
-                </FlexChildDiv>
-              </FlexDiv>
-            </Modal>
-          )}
+                    <FlexDiv gap="10px" alignItems="center">
+                      <P>停留時間</P>
+                      <TextInput
+                        type="number"
+                        min="30"
+                        max="1440"
+                        value={addSchedule.duration}
+                        step="30"
+                        width="fit-content"
+                        onChange={(e) =>
+                          dispatchAddSchedule({
+                            type: 'addDuration',
+                            playload: Number(e.target.value),
+                          })
+                        }
+                      />
+                      <P>分鐘</P>
+                    </FlexDiv>
+                    <Button
+                      styled="primary"
+                      margin="auto 0 0 0"
+                      onClick={uploadNewSchedule}>
+                      新增行程
+                    </Button>
+                  </FlexChildDiv>
+                </>
+              )}
+            </FlexDiv>
+          </Modal>
 
-          <Container>
-            <h2>{overviews.title}</h2>
-            <p>
-              {timestampToString(overviews.start_date, 'date')} -{' '}
-              {timestampToString(overviews.end_date, 'date')}
-            </p>
-            <img src={overviews.cover_photo} alt={overviews.title} />
-            <button type="button" onClick={() => setIsEdit((prev) => !prev)}>
-              {isEdit ? '結束編輯' : '編輯'}
-            </button>
-          </Container>
-          <h3>Day {day + 1}</h3>
-          <p>{timestampToString(overviews.depart_times[day], 'simpleDate')}</p>
-          <FlexDiv alignItems="center">
-            {scheduleList.map((schedule, index, array) => (
-              <p key={schedule.schedule_id}>
-                {schedule.placeDetail.name}
-                {index < array.length - 1 && (
-                  <span
-                    className="material-icons"
-                    style={{ verticalAlign: 'text-bottom' }}>
-                    arrow_right_alt
-                  </span>
-                )}
-              </p>
-            ))}
-          </FlexDiv>
-          <FlexDiv alignItems="center" gap="10px" justifyContent="flex-end">
-            <p>有計畫外的行程？</p>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddSchedule(true);
-                console.log(showAddSchedule);
-              }}>
-              加入行程
-            </button>
-          </FlexDiv>
-          {scheduleList.map((schedule) => (
-            <Card gap="20px" alignItems="center" key={schedule.schedule_id}>
-              <p>{timestampToString(schedule.start_time, 'time')}</p>
-              <FlexChildDiv style={{ flexGrow: 1 }}>
+          <Overview
+            containerCss={styles.containerSetting}
+            overviews={overviews}
+            day={day}
+            isAllowEdit={isAllowEdit}
+            setIsAllowEdit={setIsAllowEdit}
+            isShowCloseBtn
+            hideDay
+            isJournal
+          />
+          <Container
+            addCss={styles.containerSetting}
+            margin="0 auto 100px auto">
+            <FlexDiv gap="30px" alignItems="center" margin="0 0 20px 0">
+              <FlexDiv direction="column" alignItems="center">
+                <H3 whiteSpace="nowrap" color={palatte.primary.basic}>
+                  Day {day + 1}
+                </H3>
+                <P
+                  color={palatte.gray[700]}
+                  addCss={css`
+                    letter-spacing: 2px;
+                  `}>
+                  {timestampToString(overviews.depart_times[day], 'date')}
+                </P>
+              </FlexDiv>
+              <FlexDiv alignItems="center" wrap="wrap">
+                {scheduleList.map((schedule, index, array) => (
+                  <P key={schedule.schedule_id} color={palatte.gray[700]}>
+                    {schedule.placeDetail.name}
+                    {index < array.length - 1 && (
+                      <span
+                        className="material-icons"
+                        css={css`
+                          vertical-align: text-bottom;
+                          color: inherit;
+                        `}>
+                        arrow_right_alt
+                      </span>
+                    )}
+                  </P>
+                ))}
+              </FlexDiv>
+            </FlexDiv>
+            <FlexDiv justifyContent="flex-end" gap="20px" margin="0 0 20px 0">
+              {isAllowEdit && (
                 <FlexDiv
                   alignItems="center"
-                  justifyContent="space-between"
-                  onClick={() => {
-                    if (
-                      schedule.review_tags ||
-                      schedule.gallery ||
-                      schedule.reviews ||
-                      isEdit
-                    ) {
-                      if (
-                        schedulesExpand?.some(
-                          (id) => id === schedule.schedule_id
-                        )
-                      ) {
-                        setSchedulesExpand(
-                          schedulesExpand.filter(
-                            (id) => id !== schedule.schedule_id
-                          )
-                        );
-                      } else {
-                        setSchedulesExpand(
-                          schedulesExpand
-                            ? [...schedulesExpand, schedule.schedule_id]
-                            : [schedule.schedule_id]
-                        );
-                      }
-                    }
-                  }}>
-                  <h3>{schedule.placeDetail.name}</h3>
-                  {schedule.review_tags ||
-                  schedule.gallery ||
-                  schedule.reviews ? (
-                    <span className="material-icons">
-                      {schedulesExpand?.every(
-                        (id) => id !== schedule.schedule_id
-                      )
-                        ? 'expand_more'
-                        : 'expand_less'}
-                    </span>
-                  ) : (
-                    isEdit && (
-                      <span className="material-icons">
-                        {schedulesExpand?.every(
-                          (id) => id !== schedule.schedule_id
-                        )
-                          ? 'add_circle'
-                          : 'cancel'}
-                      </span>
-                    )
-                  )}
+                  gap="10px"
+                  justifyContent="flex-end">
+                  <P>有計畫外的行程？</P>
+                  <ButtonSmall
+                    styled="primary"
+                    width="fit-content"
+                    type="button"
+                    onClick={() => {
+                      setShowAddSchedule(true);
+                    }}>
+                    加入行程
+                  </ButtonSmall>
                 </FlexDiv>
-                {schedulesExpand?.some((id) => id === schedule.schedule_id) && (
-                  <AddReview
-                    isEdit={isEdit}
-                    key={schedule.schedule_id}
-                    allReviewTags={reviewTags}
-                    showReviewTags={
-                      schedule.review_tags ||
-                      schedule.gallery ||
-                      schedule.reviews
-                        ? schedule.review_tags
-                        : reviewTags
+              )}
+              <Pagination
+                day={day}
+                switchDay={switchDay}
+                finalDay={overviews.depart_times.length - 1}
+              />
+            </FlexDiv>
+            <FlexDiv direction="column" gap="20px">
+              {scheduleList.map((schedule) => (
+                <FlexChildDiv
+                  grow="1"
+                  gap="10px"
+                  alignItems="flex-start"
+                  key={schedule.schedule_id}>
+                  <Accordion
+                    isDefualtExpand
+                    addCss={css`
+                      max-width: ${isAllowEdit && 'calc(100% - 40px)'};
+                    `}
+                    isHideContent={
+                      (!schedule.review_tags ||
+                        schedule.review_tags?.length === 0) &&
+                      (!schedule.gallery || schedule.gallery?.length === 0) &&
+                      !schedule.review
+                        ? true
+                        : false
                     }
-                    itineraryId={journalID}
-                    scheduleId={schedule.schedule_id}
-                    setUploadedReview={setUploadedReview}
-                    reviews={{
-                      review_tags: schedule.review_tags,
-                      review: schedule.review,
-                      gallery: schedule.gallery,
-                    }}
-                    isJournal
-                  />
-                )}
-              </FlexChildDiv>
-            </Card>
-          ))}
-          <Pagination
-            day={day}
-            switchDay={switchDay}
-            finalDay={overviews.depart_times.length - 1}
-          />
+                    titleElement={
+                      <FlexDiv gap="30px" alignItems="center">
+                        <P color={palatte.gray[500]}>
+                          {timestampToString(schedule.start_time, 'time')}
+                        </P>
+                        <H5 fontSize="24px">{schedule.placeDetail.name}</H5>
+                        <DurationText duration={schedule.duration} />
+                      </FlexDiv>
+                    }
+                    isAllowEdit={isAllowEdit}
+                    isDisableExpand={
+                      schedule.gallery?.length > 0 ||
+                      schedule.review_tags?.length > 0 ||
+                      schedule.reviews
+                        ? false
+                        : true
+                    }
+                    isShowAddIcon={schedulesExpand?.every(
+                      (id) => id !== schedule.schedule_id
+                    )}>
+                    <FlexDiv padding="0 20px 20px 70px">
+                      <AddReview
+                        isEdit={isAllowEdit}
+                        key={schedule.schedule_id}
+                        allReviewTags={reviewTags}
+                        showReviewTags={
+                          schedule.review_tags?.length > 0 ||
+                          schedule.gallery?.length > 0 ||
+                          schedule.reviews
+                            ? schedule.review_tags
+                            : reviewTags
+                        }
+                        itineraryId={journalID}
+                        scheduleId={schedule.schedule_id}
+                        updateOriginReviewState={setUploadedReview}
+                        reviews={{
+                          review_tags: schedule.review_tags,
+                          review: schedule.review,
+                          gallery: schedule.gallery,
+                        }}
+                        isJournal
+                      />
+                    </FlexDiv>
+                  </Accordion>
+                  {isAllowEdit && (
+                    <RoundButtonSmall
+                      styled="transparent"
+                      size="30px"
+                      close
+                      padding="2px 0 0 2px"
+                      fontSize="24px"
+                      addCss={css`
+                        margin-top: 18px;
+                        &:hover {
+                          background-color: ${palatte.white};
+                        }
+                      `}
+                      className="material-icons"
+                      onClick={() => {
+                        dispatchNotification({
+                          type: 'fire',
+                          playload: {
+                            id: 'confirmDelete',
+                            message: `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`,
+                            yesAction: () => {
+                              deleteSchedule(schedule.schedule_id);
+                            },
+                          },
+                        });
+                      }}>
+                      delete
+                    </RoundButtonSmall>
+                  )}
+                </FlexChildDiv>
+              ))}
+            </FlexDiv>
+          </Container>
         </>
       ) : (
-        <p>loading...</p>
+        <FlexDiv justifyContent="center" padding="100px 0">
+          <Loader />
+        </FlexDiv>
       )}
     </>
   );

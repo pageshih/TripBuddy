@@ -2,11 +2,11 @@ import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
 import { useEffect, useRef, useContext } from 'react';
 import { Context } from '../App';
-import '../marker.css';
+import '../css/marker.css';
 import { inputBase } from '../components/styledComponents/Form';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte } from '../components/styledComponents/basicStyle';
+import { mediaQuery, palatte } from '../components/styledComponents/basicStyle';
 
 const googleMap = {
   svgMarker(color) {
@@ -67,8 +67,10 @@ const googleMap = {
     'reviews',
     'website',
     'rating',
+    'url',
   ],
   composePlaceDetailData(place) {
+    console.log(place);
     return {
       place_id: place?.place_id || '未提供',
       name: place?.name || '未提供',
@@ -78,8 +80,8 @@ const googleMap = {
         lng: place?.geometry?.location.lng() || '未提供',
       },
       opening_hours: {
-        periods: place?.opening_hours?.periods || ['未提供'],
-        weekday_text: place?.opening_hours?.weekday_text || ['未提供'],
+        periods: place?.opening_hours?.periods || '未提供',
+        weekday_text: place?.opening_hours?.weekday_text || '未提供',
       },
       photos: place?.photos?.map((item) => item.getUrl()) || '未提供',
       reviews: place?.reviews || '未提供',
@@ -87,6 +89,7 @@ const googleMap = {
       rating: place?.rating || '未提供',
       // types: place.types || '未提供',
       created_time: new Date().getTime(),
+      url: place?.url || '未提供',
     };
   },
   initMap(ref, center, zoom) {
@@ -94,8 +97,6 @@ const googleMap = {
       center: center || this.center,
       zoom: zoom || this.zoom,
       disableDefaultUI: true,
-      fullscreenControl: true,
-      zoomControl: true,
     };
     return new window.google.maps.Map(ref, option);
   },
@@ -145,13 +146,18 @@ const googleMap = {
   deleteMarker(marker) {
     marker.setMap(null);
   },
-  async getDirection(parameter) {
+  async getDirection(parameter, destinationAddressAndName) {
     const newDirection = new window.google.maps.DirectionsService();
     const result = await newDirection.route(parameter);
     const route = result.routes[0].legs[0];
+    const destination =
+      destinationAddressAndName?.name ||
+      destinationAddressAndName?.address ||
+      `${parameter.destination.lat},${parameter.destination.lng}`;
     const returnObj = {
       duration: route.duration,
       distance: route.distance,
+      direction_url: `https://www.google.com/maps?saddr=My+Location&daddr=${destination}`,
     };
     return Promise.resolve(returnObj);
   },
@@ -200,10 +206,16 @@ const searchBarStyles = {
     zIndex: '8',
     width: '500px',
     padding: '20px',
+    [mediaQuery[0]]: {
+      width: '100%',
+    },
   },
   input: {
     width: '100%',
     paddingLeft: '40px',
+    [mediaQuery[0]]: {
+      width: '100%',
+    },
   },
 };
 function SearchBar(props) {
