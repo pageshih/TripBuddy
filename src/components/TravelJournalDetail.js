@@ -38,14 +38,9 @@ import {
 } from './styledComponents/basicStyle';
 import { Accordion } from './styledComponents/Accordion';
 import { Select, TextInput, CustomTimePicker } from './styledComponents/Form';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-} from './styledComponents/Notification';
 
 function TravelJournalDetail() {
-  const { uid, map } = useContext(Context);
+  const { uid, map, dispatchNotification } = useContext(Context);
   const { journalID } = useParams();
   const [scheduleList, setScheduleList] = useState();
   const allSchedules = useRef();
@@ -57,10 +52,6 @@ function TravelJournalDetail() {
   const [uploadedReview, setUploadedReview] = useState();
   const [showAddSchedule, setShowAddSchedule] = useState();
   const [isAddingSchedule, setIsAddingSchedule] = useState();
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
 
   const initialSchedule = {
     start_time: '',
@@ -122,7 +113,7 @@ function TravelJournalDetail() {
             playload: {
               type: 'success',
               message: '已加入行程',
-              id: 'toastifyUpload',
+              id: 'toastify_upload',
             },
           });
           setIsAddingSchedule(false);
@@ -157,10 +148,9 @@ function TravelJournalDetail() {
           playload: {
             type: 'success',
             message: '刪除成功',
-            id: 'toastifyDeleted',
+            id: 'toastify_deleted',
           },
         });
-        dispatchNotification({ type: 'close' });
       })
       .catch((error) => console.error(error));
   };
@@ -201,26 +191,6 @@ function TravelJournalDetail() {
   };
   return (
     <>
-      <Notification
-        type={notification.type}
-        fire={
-          notification.fire && notification.id.match('toastify')?.length > 0
-        }
-        message={notification.message}
-        id={notification.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
-      <Confirm
-        dispatchIsShowReducer={dispatchNotification}
-        isShowState={
-          notification.fire && notification.id.match('confirm')?.length > 0
-        }
-        confirmMessage={notification.message}
-        yesMessage="刪除"
-        yesBtnStyle="danger"
-        noBtnStyle="gray"
-        yesAction={notification.yesAction}
-      />
       {overviews && scheduleList ? (
         <>
           <Modal
@@ -482,7 +452,7 @@ function TravelJournalDetail() {
                         dispatchNotification({
                           type: 'fire',
                           playload: {
-                            id: 'confirmDelete',
+                            id: 'confirm_delete',
                             message: `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`,
                             yesAction: () => {
                               deleteSchedule(schedule.schedule_id);

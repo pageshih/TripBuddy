@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { CSSTransition } from 'react-transition-group';
 import styled from '@emotion/styled';
@@ -8,7 +8,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'animate.css';
 import '../../css/animation.css';
 import '../../css/toastify.css';
-import { palatte, styles, P, TextWithIcon } from './basicStyle';
+import { Context } from '../../App';
+import { palatte, P, TextWithIcon } from './basicStyle';
 import { Container, FlexDiv } from './Layout';
 
 const defaultNotification = {
@@ -21,7 +22,6 @@ const notificationReducer = (state, action) => {
   switch (action.type) {
     case 'fire':
       return {
-        ...state,
         fire: true,
         ...action.playload,
       };
@@ -30,28 +30,39 @@ const notificationReducer = (state, action) => {
         ...state,
         fire: false,
       };
+    case 'reset':
+      return {
+        ...defaultNotification,
+      };
     default:
       return state;
   }
 };
 
-function Notification(props) {
+function Notification() {
+  const { notification, dispatchNotification } = useContext(Context);
   const slideDown = cssTransition({
     enter: 'animate__animated animate__slideInDown',
     exit: 'animate__animated animate__slideOutUp',
   });
   useEffect(() => {
-    console.log(props.fire);
-    if (props.fire && props.type) {
-      toast[props.type](props.message, {
+    if (
+      notification.fire &&
+      notification.type &&
+      notification.id.match('toastify')?.length > 0
+    ) {
+      toast[notification.type](notification.message, {
         position: toast.POSITION.TOP_CENTER,
-        toastId: props.id,
+        toastId: notification.id,
       });
-      props.resetFireState();
+      dispatchNotification({ type: 'close' });
     }
-  }, [props.fire]);
+  }, [notification, dispatchNotification]);
   return (
-    <ToastContainer autoClose={props.duration || 3000} transition={slideDown} />
+    <ToastContainer
+      autoClose={notification?.duration || 3000}
+      transition={slideDown}
+    />
   );
 }
 
@@ -91,18 +102,24 @@ const TooltipContent = styled(FlexDiv)`
 `;
 function TooltipNotification(props) {
   const tooltipRef = useRef();
-  const [isOpen, setIsOpen] = useState(props.isOpen);
+  const [isOpen, setIsOpen] = useState(props.fire);
+  const { notification, dispatchNotification } = useContext(Context);
+
   useEffect(() => {
-    if (props.isOpen && props.settingReducer.fire) {
+    if (notification.fire && notification.id === `tooltip_${props.id}`) {
       setIsOpen(true);
       setTimeout(() => {
         setIsOpen(false);
-        props.resetSettingReducer({ type: 'close' });
+        dispatchNotification({ type: 'close' });
       }, 3000);
     }
-  }, [props.isOpen, props.settingReducer.fire]);
+  }, [notification, dispatchNotification, props.id]);
   return (
-    <Container position="relative">
+    <div
+      css={css`
+        position: relative;
+        ${props.addCss}
+      `}>
       <CSSTransition
         nodeRef={tooltipRef}
         in={isOpen}
@@ -114,26 +131,28 @@ function TooltipNotification(props) {
         }}
         timeout={300}
         unmountOnExit>
-        <Container
-          addCss={css`
-            position: absolute;
-            top: -130%;
-            left: -40%;
-          `}>
-          <TooltipContent
-            gap="5px"
-            alignItems="center"
-            ref={tooltipRef}
-            type={props.settingReducer.type}>
-            <span className="material-icons">
-              {tooltipMap[props.settingReducer.type].icon}
-            </span>
-            <P>{props.settingReducer.message}</P>
-          </TooltipContent>
-        </Container>
+        {tooltipMap[notification.type] && (
+          <Container
+            addCss={css`
+              position: absolute;
+              top: -130%;
+              left: -40%;
+            `}>
+            <TooltipContent
+              gap="5px"
+              alignItems="center"
+              ref={tooltipRef}
+              type={notification.type}>
+              <span className="material-icons">
+                {tooltipMap[notification.type].icon}
+              </span>
+              <P>{notification.message}</P>
+            </TooltipContent>
+          </Container>
+        )}
       </CSSTransition>
       {props.children}
-    </Container>
+    </div>
   );
 }
 function NotificationText(props) {

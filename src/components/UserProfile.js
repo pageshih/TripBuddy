@@ -34,11 +34,6 @@ import {
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-} from './styledComponents/Notification';
 
 const activeStyle = (isActive) => {
   return {
@@ -54,14 +49,10 @@ const SettingTitle = (props) => (
   </>
 );
 function UserSetting(props) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const [addTag, setAddTag] = useState('');
   const addTagInput = useRef();
   const [travelMode, setTravelMode] = useState();
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
   const updateProfilePhoto = async (imageBuffer, setIsShowModal) => {
     try {
       const urlAry = await firebaseStorage.uploadImages(
@@ -76,7 +67,7 @@ function UserSetting(props) {
         playload: {
           type: 'success',
           message: '大頭貼已更新',
-          id: 'taostifyUpdate',
+          id: 'taostify_update',
         },
       });
       setIsShowModal(false);
@@ -97,26 +88,20 @@ function UserSetting(props) {
 
   return (
     <>
-      <Notification
-        type={notification.type}
-        fire={notification.fire}
-        message={notification.message}
-        id={notification.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
-
       <Modal
-        minWidth="70%"
-        height="90%"
-        padding="20px 40px"
+        addCss={css`
+          min-width: 70%;
+          height: 80%;
+          padding: 20px 40px;
+        `}
         isShowState={props.isShowState}
         close={() => props.setIsShowSetting(false)}>
         <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
           <FlexDiv
-            gap="20px"
-            alignItems="center"
-            padding="0 0 30px 0"
             addCss={css`
+              gap: 20px;
+              align-items: center;
+              padding: 0 0 30px 0;
               border-bottom: 1px solid ${palatte.gray['400']};
             `}>
             <div

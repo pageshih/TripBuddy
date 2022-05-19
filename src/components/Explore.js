@@ -12,13 +12,12 @@ import { AccordionSmall } from './styledComponents/Accordion';
 import {
   RoundButton,
   Button,
-  ButtonSmall,
   RoundButtonSmall,
   HyperLink,
 } from './styledComponents/Button';
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
 import { SpotCard, RatingText, AddressText } from './styledComponents/Cards';
-import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
+import { SelectAllCheckBox } from './styledComponents/Form';
 import {
   P,
   H2,
@@ -27,13 +26,7 @@ import {
   TextWithIcon,
   mediaQuery,
 } from './styledComponents/basicStyle';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-  NotificationText,
-} from './styledComponents/Notification';
-import { Confirm } from './styledComponents/Modal';
+import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';
 
 function Map({
   setMap,
@@ -387,74 +380,14 @@ function PlaceDetail({
     </FlexDiv>
   );
 }
-const ShadowBottom = styled.div`
-  position: absolute;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0), ${palatte.gray[800]});
-  opacity: 0.4;
-  width: 100%;
-  height: 20px;
-  top: -40px;
-  ${mediaQuery[0]} {
-    display: none;
-  }
-`;
 
-const AddSpotToItineraryController = ({
-  createdItineraries,
-  choseItinerary,
-  showAlertMessage,
-  onChangeItinerary,
-  addAction,
-  deleteAction,
-}) => {
-  const container = css`
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 0 10px 0;
-    position: relative;
-  `;
-  const buttonContainer = css`
-    flex-direction: column;
-    gap: 10px;
-    ${mediaQuery[0]} {
-      flex-direction: row;
-    }
-  `;
-  return (
-    <FlexChildDiv css={container}>
-      <ShadowBottom />
-      <NotificationText type="error">{showAlertMessage}</NotificationText>
-      <SelectSmall value={choseItinerary} onChange={onChangeItinerary}>
-        <option value="" disabled>
-          ---請選擇要加入景點的行程---
-        </option>
-        <option value="add">新建一個行程</option>
-        {createdItineraries?.map((itinerary) => (
-          <option value={itinerary.itinerary_id} key={itinerary.itinerary_id}>
-            {itinerary.title}
-          </option>
-        ))}
-      </SelectSmall>
-      <FlexDiv css={buttonContainer}>
-        <ButtonSmall styled="primary" onClick={addAction}>
-          加入行程
-        </ButtonSmall>
-        <ButtonSmall styled="danger" onClick={deleteAction}>
-          刪除景點
-        </ButtonSmall>
-      </FlexDiv>
-    </FlexChildDiv>
-  );
-};
 function SavedSpotsList(props) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const navigate = useNavigate();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const [addAction, setAddAction] = useState('');
+  const [choseItinerary, setChoseItinerary] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
-  const [showAlertMessage, setShowAlertMessage] = useState();
-  const [isDeleteConfirm, setIsDeleteConfirm] = useState();
 
   useEffect(() => {
     firestore
@@ -473,24 +406,31 @@ function SavedSpotsList(props) {
     }
   }, [selectedSpotList, props.savedSpots]);
   const addSelectSpotsToItinerary = () => {
-    if (selectedSpotList?.length > 0 && addAction) {
+    if (selectedSpotList?.length > 0 && choseItinerary) {
       const waitingSpots = props.savedSpots.filter(
         (spot) =>
           selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
           spot
       );
-      if (addAction === 'add') {
+      if (choseItinerary === 'add') {
         props.setWaitingSpots(waitingSpots);
         navigate('/add');
       } else {
         firestore
-          .setWaitingSpots(uid, addAction, waitingSpots)
-          .then(() => navigate(`/add/${addAction}`))
+          .setWaitingSpots(uid, choseItinerary, waitingSpots)
+          .then(() => navigate(`/add/${choseItinerary}`))
           .catch((error) => console.error(error));
       }
     } else {
-      if (!addAction) {
-        setShowAlertMessage('請選擇要加入的行程');
+      if (!choseItinerary) {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'error',
+            message: '請選擇要加入的行程',
+            id: 'textNotification_emptyValue',
+          },
+        });
       }
     }
   };
@@ -530,19 +470,6 @@ function SavedSpotsList(props) {
   `;
   return (
     <>
-      <Confirm
-        isShowState={isDeleteConfirm}
-        setIsShowState={setIsDeleteConfirm}
-        confirmMessage="確定要刪除這些景點嗎？"
-        subMessage="(此動作無法復原）"
-        yesMessage="刪除"
-        yesBtnStyle="danger"
-        noBtnStyle="gray"
-        yesAction={() => {
-          props.removeFromSavedSpots(selectedSpotList);
-          setIsDeleteConfirm(false);
-        }}
-      />
       <FlexDiv css={container}>
         <FlexDiv css={headerContainer}>
           <H2
@@ -595,16 +522,15 @@ function SavedSpotsList(props) {
           {selectedSpotList?.length > 0 && (
             <AddSpotToItineraryController
               createdItineraries={createdItineraries}
-              choseItinerary={addAction}
-              showAlertMessage={showAlertMessage}
+              choseItinerary={choseItinerary}
               addAction={addSelectSpotsToItinerary}
-              deleteAction={() => setIsDeleteConfirm(true)}
+              deleteAction={() => props.removeFromSavedSpots(selectedSpotList)}
+              selectedSpots={selectedSpotList}
               onChangeItinerary={(e) => {
-                setAddAction(e.target.value);
-                if (e.target.value) {
-                  setShowAlertMessage('');
-                }
+                setChoseItinerary(e.target.value);
               }}
+              isColumn
+              isShowShadow
             />
           )}
         </FlexChildDiv>
@@ -701,10 +627,6 @@ function Explore({ setWaitingSpots }) {
   const [isShowSideColumn, setIsShowSideColumn] = useState(false);
   const sideWindowRef = useRef();
   const navigate = useNavigate();
-  const [notificationSetting, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -786,13 +708,6 @@ function Explore({ setWaitingSpots }) {
   `;
   return (
     <>
-      <Notification
-        type={notificationSetting.type}
-        fire={notificationSetting.fire}
-        message={notificationSetting.message}
-        id={notificationSetting.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
       {uid && (
         <>
           <FlexDiv

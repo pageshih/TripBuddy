@@ -22,7 +22,6 @@ import {
   RoundButtonSmall,
   Button,
   RoundButtonSmallOutline,
-  ButtonSmall,
 } from './styledComponents/Button';
 import {
   palatte,
@@ -31,11 +30,6 @@ import {
   mediaQuery,
   PendingLoader,
 } from './styledComponents/basicStyle';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-} from './styledComponents/Notification';
 
 function ReviewTags(props) {
   const tagContainer = useRef();
@@ -355,7 +349,7 @@ function AddReviewTags(props) {
 }
 
 function AddReview(props) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
   const [addTag, setAddTag] = useState('');
@@ -367,10 +361,6 @@ function AddReview(props) {
   const addReviewRef = useRef();
   const saveButtonRef = useRef();
   const [isDesktop, setIsDesktop] = useState();
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
   const [isPending, setIsPending] = useState();
 
   const addCheckedTag = (e) => {
@@ -434,7 +424,7 @@ function AddReview(props) {
         playload: {
           type: 'success',
           message: '上傳成功',
-          id: 'toastifyUploadSuccess',
+          id: 'toastify_uploadSuccess',
         },
       });
     });
@@ -530,13 +520,6 @@ function AddReview(props) {
 
   return (
     <>
-      <Notification
-        type={notification.type}
-        fire={notification.fire}
-        message={notification.message}
-        id={notification.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
       <CSSTransition
         nodeRef={addReviewRef}
         timeout={600}

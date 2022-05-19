@@ -15,12 +15,7 @@ import {
 import { Button, ButtonOutline } from './styledComponents/Button';
 import { TextInput } from './styledComponents/Form';
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
-import {
-  Notification,
-  NotificationText,
-  defaultNotification,
-  notificationReducer,
-} from './styledComponents/Notification';
+import { NotificationText } from './styledComponents/Notification';
 
 const ContainerTopLine = styled.div`
   display: flex;
@@ -34,20 +29,37 @@ const ContainerTopLine = styled.div`
   }
 `;
 
+const textNotificationReducer = (state, action) => {
+  switch (action.type) {
+    case 'fire':
+      return {
+        fire: [...state.fire, action.playload.fire],
+        message: {
+          ...state.message,
+          [action.playload.fire]: action.playload.message,
+        },
+      };
+    case 'close':
+      return {
+        ...state,
+        fire: state.fire.filter((id) => id !== action.playload.close),
+      };
+    default:
+      return state;
+  }
+};
+
 function Login(props) {
+  const { dispatchNotification } = useContext(Context);
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
   const { setUid, setIsLogInOut, goLogin, isLogInOut } = useContext(Context);
   const [isSignUp, setIsSignUp] = useState();
   const [userName, setUserName] = useState('');
   const navigate = useNavigate();
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
   const [textNotification, dispatchTextNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
+    textNotificationReducer,
+    { fire: [], message: {} }
   );
   const authErrorMessage = useRef({
     'auth/email-already-exists': 'Email 已被人使用，請重新輸入',
@@ -61,13 +73,19 @@ function Login(props) {
   });
   useEffect(() => {
     if (email) {
-      dispatchTextNotification({ type: 'fire', playload: { email: '' } });
+      dispatchTextNotification({ type: 'close', playload: { close: 'email' } });
     }
     if (password) {
-      dispatchTextNotification({ type: 'fire', playload: { password: '' } });
+      dispatchTextNotification({
+        type: 'close',
+        playload: { close: 'password' },
+      });
     }
     if (userName) {
-      dispatchTextNotification({ type: 'fire', playload: { userName: '' } });
+      dispatchTextNotification({
+        type: 'close',
+        playload: { close: 'userName' },
+      });
     }
   }, [email, password, userName]);
   const emptyVerify = () => {
@@ -76,9 +94,8 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          email: {
-            message: '請輸入 Email',
-          },
+          fire: 'email',
+          message: '請輸入 Email',
         },
       });
     }
@@ -86,9 +103,8 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          password: {
-            message: '請輸入密碼',
-          },
+          fire: 'password',
+          message: '請輸入密碼',
         },
       });
     }
@@ -96,30 +112,28 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          userName: {
-            message: '請輸入用戶名稱',
-          },
+          fire: 'userName',
+          message: '請輸入用戶名稱',
         },
       });
     }
   };
   const errorVerify = (error) => {
+    console.log(error.code);
     if (error.code.match('password')?.length > 0) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          password: {
-            message: authErrorMessage.current[error.code],
-          },
+          fire: 'password',
+          message: authErrorMessage.current[error.code],
         },
       });
     } else if (error.code.match('email')?.length > 0) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          email: {
-            message: authErrorMessage.current[error.code],
-          },
+          fire: 'email',
+          message: authErrorMessage.current[error.code],
         },
       });
     } else {
@@ -128,7 +142,7 @@ function Login(props) {
         playload: {
           type: 'warn',
           message: authErrorMessage.current[error.code] || error.message,
-          id: 'toastifyErrorMessage',
+          id: 'toastify_errorMessage',
         },
       });
     }
@@ -183,7 +197,7 @@ function Login(props) {
           playload: {
             type: 'warn',
             message: authErrorMessage.current[error.code],
-            id: 'toastifyErrorMessage',
+            id: 'toastify_errorMessage',
           },
         });
       });
@@ -198,22 +212,13 @@ function Login(props) {
         playload: {
           type: isLogInOut ? 'success' : 'warn',
           message: isLogInOut ? '您已登出' : '請先登入',
-          id: 'toastifyLoginFirst',
+          id: 'toastify_loginFirst',
         },
       });
     }
   }, []);
   return (
     <>
-      <Notification
-        fire={
-          notification.fire && notification.id.match('toastify')?.length > 0
-        }
-        type={notification.type}
-        message={notification.message}
-        id={notification.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
       <FlexDiv
         css={css`
           ${mediaQuery[0]} {
@@ -226,9 +231,9 @@ function Login(props) {
         <Image
           src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
           alt="TripBuddy"
-          width="52%"
-          height="100vh"
           addCss={css`
+            width: 52%;
+            height: 100vh;
             ${mediaQuery[0]} {
               height: 200px;
               width: 100%;
@@ -236,11 +241,11 @@ function Login(props) {
           `}
         />
         <FlexChildDiv
-          grow="1"
-          height="100vh"
-          justifyContent="center"
-          alignItems="center"
           addCss={css`
+            flex-grow: 1;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
             ${mediaQuery[0]} {
               position: absolute;
               top: 120px;
@@ -286,7 +291,8 @@ function Login(props) {
                       onChange={(e) => setUserName(e.target.value)}
                     />
                     <NotificationText type="error">
-                      {textNotification?.userName?.message}
+                      {textNotification.fire?.some((id) => id === 'userName') &&
+                        textNotification.message.userName}
                     </NotificationText>
                   </>
                 )}
@@ -296,7 +302,8 @@ function Login(props) {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <NotificationText type="error">
-                  {textNotification?.email?.message}
+                  {textNotification.fire?.some((id) => id === 'email') &&
+                    textNotification.message.email}
                 </NotificationText>
 
                 <TextInput
@@ -306,7 +313,8 @@ function Login(props) {
                   type="password"
                 />
                 <NotificationText type="error">
-                  {textNotification?.password?.message}
+                  {textNotification.fire?.some((id) => id === 'password') &&
+                    textNotification.message.password}
                 </NotificationText>
               </FlexDiv>
               <Button styled="primary" onClick={isSignUp ? signUp : signIn}>

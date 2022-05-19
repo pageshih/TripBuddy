@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
-import { useNavigate, useParams, Outlet } from 'react-router-dom';
+import { useContext, useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 // import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 // import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
@@ -63,24 +63,14 @@ import {
   DepartController,
   MoveScheduleController,
 } from './EditItinerary';
-import {
-  defaultNotification,
-  notificationReducer,
-  Notification,
-} from './styledComponents/Notification';
-import { Alert } from './styledComponents/Modal';
 
 function AddOverView(props) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
   const [step, setStep] = useState(0);
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
 
   const addOverView = [
     {
@@ -128,23 +118,13 @@ function AddOverView(props) {
         type: 'fire',
         playload: {
           message: addOverView[step].alert,
-          id: 'toastifyEmptyValue',
+          id: 'toastify_emptyValue',
         },
       });
     }
   };
   return (
     <Container backgroundColor={palatte.gray[100]}>
-      <Notification
-        type={notification.type}
-        fire={
-          notification.fire && notification.id.match('toastify')?.length > 0
-        }
-        message={notification.message}
-        id={notification.id}
-        duration={notification?.duration}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
       <FlexDiv
         as="form"
         height="100vh"
@@ -508,7 +488,7 @@ function WaitingSpotArea({
 }
 
 function AddSchedule(props) {
-  const { uid, map } = useContext(Context);
+  const { uid, map, dispatchNotification } = useContext(Context);
   const { itineraryId } = useParams();
   const allSchedules = useRef();
   const navigate = useNavigate();
@@ -520,10 +500,6 @@ function AddSchedule(props) {
   const [selectedSchedulesId, setSelectedSchedulesId] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [changeTime, setChangeTime] = useState('');
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
 
   useEffect(() => {
     if (uid && itineraryId) {
@@ -585,7 +561,7 @@ function AddSchedule(props) {
           playload: {
             type: 'warn',
             message: '總行程時間已超過一天，請切換到隔天繼續規劃',
-            id: 'toastifyDurationExceed',
+            id: 'toastify_durationExceed',
             duration: 5000,
           },
         });
@@ -649,9 +625,8 @@ function AddSchedule(props) {
                       playload: {
                         message:
                           '抱歉！此交通方式找不到合適的路線，請切換其他方式',
-                        id: 'alertNoTransport',
+                        id: 'alert_noTransport',
                         btnMessage: '修改交通方式',
-                        width: '100%',
                       },
                     });
                   }
@@ -973,8 +948,7 @@ function AddSchedule(props) {
           playload: {
             message:
               '新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期',
-            id: 'alertUpdateDaysError',
-            width: '100%',
+            id: 'alert_updateDaysError',
           },
         });
 
@@ -1024,7 +998,7 @@ function AddSchedule(props) {
         playload: {
           type: 'warn',
           message: '請選擇要修改的行程日期',
-          id: 'tooltipChangeDay',
+          id: 'tooltip_changeDay',
         },
       });
       return;
@@ -1034,7 +1008,7 @@ function AddSchedule(props) {
         playload: {
           type: 'warn',
           message: '還沒有選取行程喔！',
-          id: 'tooltipChangeDay',
+          id: 'tooltip_changeDay',
         },
       });
       return;
@@ -1090,27 +1064,6 @@ function AddSchedule(props) {
       {overviews && (
         <>
           <Container minHeight="100vh" padding="0 0 150px 0">
-            <Notification
-              type={notification.type}
-              fire={
-                notification.fire &&
-                notification.id.match('toastify')?.length > 0
-              }
-              message={notification.message}
-              id={notification.id}
-              duration={notification?.duration}
-              resetFireState={() => dispatchNotification({ type: 'close' })}
-            />
-            <Alert
-              isShowState={
-                notification.fire && notification.id.match('alert')?.length > 0
-              }
-              alertMessage={notification.message}
-              subMessage={notification?.subMessage}
-              btnMessage={notification?.btnMessage}
-              width={notification?.width}
-              dispatchIsShowReducer={dispatchNotification}
-            />
             {isAllowEdit && (
               <WaitingSpotArea
                 addSpotAction={() => navigate('/explore')}
@@ -1216,8 +1169,6 @@ function AddSchedule(props) {
                             setIsSelectAll={setIsSelectAll}
                             isSelectAll={isSelectAll}
                             changeSchedulesTime={changeSchedulesTime}
-                            notification={notification}
-                            dispatchNotification={dispatchNotification}
                           />
                         </FlexDiv>
                       )}

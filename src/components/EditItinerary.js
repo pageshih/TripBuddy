@@ -223,13 +223,7 @@ function MoveScheduleController(props) {
               </option>
             ))}
         </SelectSmall>
-        <TooltipNotification
-          isOpen={
-            props.notification.fire &&
-            props.notification.id.match('tooltip')?.length > 0
-          }
-          settingReducer={props.notification}
-          resetSettingReducer={props.dispatchNotification}>
+        <TooltipNotification id="changeDay">
           <ButtonSmall
             styled="primary"
             padding="5px 15px"
