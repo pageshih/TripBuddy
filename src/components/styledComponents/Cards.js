@@ -2,16 +2,9 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import {
-  styles,
-  palatte,
-  H5,
-  H6,
-  P,
-  mediaQuery,
-  Rating,
-  TextWithIcon,
-} from './basicStyle';
+import { styles, palatte, mediaQuery, Rating } from './basic/common';
+import { H5, H6, P } from './basic/Text';
+import TextWithIcon from './basic/TextWithIcon';
 import { timestampToString } from '../../utils/utilities';
 import { FlexChildDiv, FlexDiv, Image } from './Layout';
 import { CheckboxCustom, Select } from './Form';
@@ -34,18 +27,23 @@ const TimeTag = styled.div`
 
 const AddressText = (props) => (
   <TextWithIcon
-    isSmall={props.isSmall}
-    gap={props.withRating ? '4px' : '2px'}
     iconName="location_on"
-    iconColor={palatte.danger.basic}
-    alignItems="flex-start"
-    textSize={!props.isSmall ? '17px' : '16px'}
-    iconSize={props.isSmall ? '18px' : '22px'}
-    mutipleLines
-    iconOffset="20px"
     addCss={{
-      icon: `
+      container: css`
+        gap: ${props.withRating ? '4px' : '2px'};
+        align-items: flex-start;
+      `,
+      text: css`
+        font-size: ${!props.isSmall ? '17px' : '16px'};
+      `,
+      icon: css`
+        color: ${palatte.danger.basic};
+        font-size: ${props.isSmall ? '18px' : '22px'};
         margin: ${props.isSmall ? '3px 3px 3px 0' : '2px 0'};
+        ${mediaQuery[0]} {
+          font-size: 18px;
+          margin: 3px 3px 3px 0;
+        }
       `,
     }}>
     {props.children}
@@ -70,14 +68,18 @@ const RatingText = (props) => (
 );
 const DurationText = (props) => (
   <TextWithIcon
-    gap="4px"
-    iconColor={palatte.gray['500']}
-    iconSize="22px"
     iconName="schedule"
-    textColor={palatte.gray['700']}
-    textSize="14px"
     addCss={{
-      icon: `margin: 1px 0;`,
+      container: css`
+        gap: 4px;
+        font-size: 14px;
+        color: ${palatte.gray['700']};
+      `,
+      icon: css`
+        font-size: 22px;
+        color: ${palatte.gray['500']};
+        margin: 1px 0;
+      `,
     }}>
     停留 {Math.floor(props.duration / 6) / 10} 小時
   </TextWithIcon>
@@ -541,10 +543,9 @@ const DurationController = ({
     ) : (
       <TextWithIcon
         iconName="watch_later"
-        iconSize="40px"
-        color={palatte.primary.basic}
         addCss={{
           container: css`
+            color: ${palatte.primary.basic};
             flex-grow: 1;
             margin: 15px 0 0 0;
             padding: 10px 0px;
@@ -561,6 +562,9 @@ const DurationController = ({
               padding: 0;
               margin: 0;
             }
+          `,
+          icon: css`
+            font-size: 40px;
           `,
         }}
         onClick={changeEditStatus}>
@@ -744,6 +748,5 @@ export {
   RatingText,
   AddressText,
   DurationText,
-  TextWithIcon,
   transportMode,
 };

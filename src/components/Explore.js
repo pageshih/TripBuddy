@@ -18,14 +18,9 @@ import {
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
 import { SpotCard, RatingText, AddressText } from './styledComponents/Cards';
 import { SelectAllCheckBox } from './styledComponents/Form';
-import {
-  P,
-  H2,
-  H3,
-  palatte,
-  TextWithIcon,
-  mediaQuery,
-} from './styledComponents/basicStyle';
+import { palatte, mediaQuery } from './styledComponents/basic/common';
+import { P, H2, H3 } from './styledComponents/basic/Text';
+import TextWithIcon from '../components/styledComponents/basic/TextWithIcon';
 import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';
 
 function Map({
@@ -191,16 +186,23 @@ const PlaceOverview = ({
 
           {openingHours && (
             <TextWithIcon
-              gap="6px"
-              iconGap="4px"
               iconName="access_time"
               iconLabel="營業時間"
-              iconSize="18px"
-              iconColor={palatte.gray[600]}
-              textSize="14px"
-              textColor={palatte.gray[700]}
               addCss={{
+                container: css`
+                  align-items: flex-start;
+                  gap: 6px;
+                  font-size: 14px;
+                `,
+                iconContainer: css`
+                  gap: 4px;
+                  color: ${palatte.gray[600]};
+                `,
+                icon: css`
+                  font-size: 18px;
+                `,
                 text: css`
+                  color: ${palatte.gray[700]};
                   & span {
                     color: inherit;
                   }

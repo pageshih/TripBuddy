@@ -5,7 +5,7 @@ import { firestore } from '../utils/firebase';
 import { Image } from './styledComponents/Layout';
 import { OverviewCard } from './styledComponents/Cards';
 import { FlexDiv } from './styledComponents/Layout';
-import { palatte, styles, Loader } from './styledComponents/basicStyle';
+import { palatte, styles, Loader } from './styledComponents/basic/common';
 import { timestampToString } from '../utils/utilities';
 
 function TravelJournals() {

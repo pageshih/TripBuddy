@@ -25,11 +25,10 @@ import {
 } from './styledComponents/Button';
 import {
   palatte,
-  P,
-  H6,
   mediaQuery,
   PendingLoader,
-} from './styledComponents/basicStyle';
+} from './styledComponents/basic/common';
+import { P, H6 } from './styledComponents/basic/Text';
 
 function ReviewTags(props) {
   const tagContainer = useRef();

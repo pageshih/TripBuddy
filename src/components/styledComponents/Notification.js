@@ -9,7 +9,9 @@ import 'animate.css';
 import '../../css/animation.css';
 import '../../css/toastify.css';
 import { Context } from '../../App';
-import { palatte, P, TextWithIcon } from './basicStyle';
+import { palatte } from './basic/common';
+import { P } from './basic/Text';
+import TextWithIcon from './basic/TextWithIcon';
 import { Container, FlexDiv } from './Layout';
 
 const defaultNotification = {
@@ -180,10 +182,16 @@ function NotificationText(props) {
       <div ref={notificationRef}>
         <TextWithIcon
           iconName={tooltipMap[props.type].icon}
-          color={tooltipMap[props.type].basicColor}
-          textSize="14px"
-          iconSize="18px"
-          gap="5px">
+          addCss={{
+            container: css`
+              gap: 5px;
+              font-size: 14px;
+              color: ${tooltipMap[props.type].basicColor};
+            `,
+            icon: css`
+              font-size: 18px;
+            `,
+          }}>
           {props.children}
         </TextWithIcon>
       </div>

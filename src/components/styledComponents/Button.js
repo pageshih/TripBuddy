@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, mediaQuery, P } from './basicStyle';
+import { palatte, mediaQuery } from './basic/common';
+import { P } from './basic/Text';
 import PropTypes from 'prop-types';
 import { FlexChildDiv, FlexDiv } from './Layout';
 

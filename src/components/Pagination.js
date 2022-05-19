@@ -2,7 +2,8 @@
 import { css, jsx } from '@emotion/react';
 import { FlexDiv } from './styledComponents/Layout';
 import { RoundButtonSmall } from './styledComponents/Button';
-import { P, palatte } from './styledComponents/basicStyle';
+import { palatte } from './styledComponents/basic/common';
+import { P } from './styledComponents/basic/Text';
 
 const PaginationButton = (props) => (
   <RoundButtonSmall

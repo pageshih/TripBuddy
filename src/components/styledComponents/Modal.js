@@ -3,7 +3,8 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { palatte, P, mediaQuery } from './basicStyle';
+import { palatte, mediaQuery } from './basic/common';
+import { P } from './basic/Text';
 import 'animate.css';
 import '../../css/animation.css';
 import { Context } from '../../App';

@@ -1,10 +1,6 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { useNavigate } from 'react-router-dom';
-import { FlexDiv, FlexChildDiv, Container } from './Layout';
-// import { SaveAndCancelButton } from './Button';
-import underline from '../../images/logoDecorationUnderline.svg';
 import PropTypes from 'prop-types';
 
 const palatte = {
@@ -65,236 +61,6 @@ const styles = {
     padding-right: 20px;
   `,
 };
-const Logo = (props) => {
-  const navigate = useNavigate();
-  const logoName = css`
-    font-family: 'Caveat', cursive;
-    font-size: 64px;
-    color: ${palatte.primary.basic};
-    ${mediaQuery[0]} {
-      font-size: ${!props.small && !props.underline && '48px'};
-    }
-  `;
-  const ellipse = css`
-    width: 8px;
-    height: 8px;
-    background-color: ${palatte.primary.basic};
-    border-radius: 50%;
-    ${mediaQuery[0]} {
-      width: 6px;
-      height: 6px;
-    }
-  `;
-  const slogan = css`
-    color: ${palatte.gray['500']};
-    letter-spacing: 0.3em;
-    font-size: 14px;
-    ${mediaQuery[0]} {
-      font-size: 12px;
-      letter-spacing: 0.15em;
-    }
-  `;
-  const underlineDeco = css`
-    position: absolute;
-    bottom: 1px;
-    width: 220px;
-  `;
-  const LogoNameCh = css`
-    color: ${palatte.gray['600']};
-    font-size: 14px;
-    margin-bottom: 5px;
-  `;
-  return (
-    <>
-      {props.small && (
-        <FlexDiv
-          alignItems="center"
-          gap="10px"
-          height="fit-content"
-          addCss={css`
-            cursor: pointer;
-            ${props.addCss}
-          `}
-          onClick={() => navigate('/itineraries')}>
-          <div
-            css={css`
-              ${ellipse}
-              width: 4px;
-              height: 4px;
-            `}></div>
-          <h1
-            css={css`
-              ${logoName}
-              font-size:28px;
-            `}>
-            TripBuddy
-          </h1>
-        </FlexDiv>
-      )}
-      {props.underline && (
-        <FlexDiv
-          alignItems="flex-end"
-          gap="20px"
-          addCss={css`
-            cursor: pointer;
-            ${props.addCss}
-          `}
-          onClick={() => navigate('/itineraries')}>
-          <FlexDiv alignItems="center">
-            <div css={ellipse}></div>
-            <Container position="relative">
-              <h1 css={logoName}>TripBuddy</h1>
-              <img src={underline} alt="deco" css={underlineDeco} />
-            </Container>
-          </FlexDiv>
-          <p css={LogoNameCh}>伴旅</p>
-        </FlexDiv>
-      )}
-      {!props.underline && !props.small && (
-        <FlexDiv
-          direction="column"
-          alignItems="center"
-          gap="12px"
-          css={css`
-            gap: 5px;
-            cursor: pointer;
-            ${props.addCss}
-          `}
-          onClick={() => navigate('/itineraries')}>
-          <FlexDiv alignItems="center" gap="10px">
-            <div css={ellipse}></div>
-            <h1 css={logoName}>TripBuddy</h1>
-          </FlexDiv>
-          <p css={slogan}>幫你記住旅行中的每一刻</p>
-        </FlexDiv>
-      )}
-    </>
-  );
-};
-const headingFontSize = {
-  desktop: {
-    2: '52px',
-    3: '40px',
-    4: '32px',
-    5: '28px',
-    6: '24px',
-  },
-  mobile: {
-    2: '42px',
-    3: '30px',
-    4: '28px',
-    5: '24px',
-    6: '20px',
-  },
-};
-const heading = (props) => css`
-  font-weight: ${props.fontWeight || 700};
-  color: ${props.color};
-  text-align: ${props.textAlign};
-  line-height: ${props.lineHeight};
-  margin: ${props.margin};
-  white-space: ${props.whiteSpace};
-  ${props.addCss};
-`;
-const H2 = styled.h2`
-  font-size: ${(props) => props.fontSize || headingFontSize.desktop[2]};
-  ${heading}
-  ${mediaQuery[0]} {
-    font-size: ${headingFontSize.mobile[2]};
-  }
-`;
-const H3 = styled.h3`
-  font-size: ${(props) => props.fontSize || headingFontSize.desktop[3]};
-  ${heading}
-  ${mediaQuery[0]} {
-    font-size: ${headingFontSize.mobile[3]};
-  }
-`;
-
-const H4 = styled.h4`
-  font-size: ${(props) => props.fontSize || headingFontSize.desktop[4]};
-  ${heading}
-  ${mediaQuery[0]} {
-    font-size: ${headingFontSize.mobile[4]};
-  }
-`;
-const H5 = styled.h5`
-  font-size: ${(props) => props.fontSize || headingFontSize.desktop[5]};
-  ${heading}
-  ${mediaQuery[0]} {
-    font-size: ${headingFontSize.mobile[5]};
-  }
-`;
-const H6 = styled.h6`
-  font-size: ${(props) => props.fontSize || headingFontSize.desktop[6]};
-  ${heading}
-  ${mediaQuery[0]} {
-    font-size: ${headingFontSize.mobile[6]};
-  }
-`;
-const P = styled.p`
-  font-weight: ${(props) => props.fontWeight || 400};
-  font-size: ${(props) => props.fontSize || '16px'};
-  color: ${(props) => props.color};
-  margin: ${(props) => props.margin};
-  text-align: ${(props) => props.textAlign};
-  whitespace: ${(props) => props.whiteSpace};
-  ${mediaQuery[0]} {
-    font-size: ${(props) => props.mobileFontSize || '14px'};
-    margin: ${(props) => props.margin};
-  }
-  ${(props) => props.addCss}
-`;
-
-const TextWithIcon = (props) => (
-  <FlexChildDiv
-    gap={props.gap}
-    grow={props.grow}
-    direction={props.direction}
-    margin={props.margin}
-    padding={props.padding}
-    justifyContent={props.justifyContent}
-    addCss={props.addCss?.container}
-    alignItems={
-      props.alignItems ||
-      (!props.isSmall && typeof props.children === 'string'
-        ? 'center'
-        : 'flex-start')
-    }
-    onClick={props.onClick}>
-    <FlexDiv alignItems={'center'} gap={props.iconGap || props.gap}>
-      {props.iconLabel && (
-        <P
-          fontSize={props.labelSize || props.textSize}
-          color={props.labelColor || props.iconColor}
-          css={props.addCss.iconLabel}>
-          {props.iconLabel}
-        </P>
-      )}
-      <span
-        className="material-icons"
-        css={css`
-          color: ${props.color || props.iconColor};
-          font-size: ${props.iconSize};
-          text-align: ${props.textAlign};
-          ${props.addCss?.icon};
-        `}>
-        {props.iconName}
-      </span>
-    </FlexDiv>
-    {typeof props.children === 'string' ? (
-      <P
-        fontSize={props.textSize}
-        textAlign={props.textAlign}
-        color={props.color || props.textColor}
-        addCss={props.addCss?.text}>
-        {props.children}
-      </P>
-    ) : (
-      props.children
-    )}
-  </FlexChildDiv>
-);
 
 const Loader = (props) => (
   <svg
@@ -570,15 +336,6 @@ const PendingLoader = (props) => (
   </svg>
 );
 
-const textComponents = {
-  2: H2,
-  3: H3,
-  4: H4,
-  5: H5,
-  6: H6,
-  P: P,
-};
-
 const Rating = (props) => {
   return (
     <svg
@@ -624,20 +381,10 @@ const Rating = (props) => {
 
 export {
   palatte,
-  Logo,
-  H2,
-  H3,
-  H4,
-  H5,
-  H6,
-  P,
-  TextWithIcon,
   styles,
   mediaQuery,
   breakpoints,
   Loader,
   PendingLoader,
-  textComponents,
-  headingFontSize,
   Rating,
 };

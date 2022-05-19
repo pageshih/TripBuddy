@@ -3,7 +3,7 @@ import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
 import { SelectSmall } from '../styledComponents/Form';
 
-export function ItinerarySelector({
+function ItinerarySelector({
   choseItinerary,
   onChangeItinerary,
   createdItineraries,
@@ -33,3 +33,5 @@ ItinerarySelector.propTypes = {
   onChangeItinerary: PropTypes.func.isRequired,
   createdItineraries: PropTypes.array.isRequired,
 };
+
+export default ItinerarySelector;

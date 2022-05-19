@@ -5,13 +5,9 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
-import {
-  Logo,
-  P,
-  styles,
-  palatte,
-  mediaQuery,
-} from './styledComponents/basicStyle';
+import { styles, palatte, mediaQuery } from './styledComponents/basic/common';
+import { Logo } from './styledComponents/basic/Logo';
+import { P } from './styledComponents/basic/Text';
 import { Button, ButtonOutline } from './styledComponents/Button';
 import { TextInput } from './styledComponents/Form';
 import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';

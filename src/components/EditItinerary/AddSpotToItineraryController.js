@@ -4,8 +4,8 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
 import { Context } from '../../App';
-import { ItinerarySelector } from './ItinerarySelector';
-import { mediaQuery, palatte } from '../styledComponents/basicStyle';
+import ItinerarySelector from './ItinerarySelector';
+import { mediaQuery, palatte } from '../styledComponents/basic/common';
 import {
   NotificationText,
   TooltipNotification,

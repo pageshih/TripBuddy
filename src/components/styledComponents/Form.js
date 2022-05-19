@@ -7,7 +7,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
-import { palatte, mediaQuery, P } from './basicStyle';
+import { palatte, mediaQuery } from './basic/common';
+import { P } from './basic/Text';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
 import {
   RoundButtonSmallWhite,

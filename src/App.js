@@ -18,7 +18,7 @@ import { AddOverView, AddSchedule } from './components/AddItinerary';
 import NotFound from './components/404';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
-import { palatte, Loader } from './components/styledComponents/basicStyle';
+import { palatte, Loader } from './components/styledComponents/basic/common';
 import { FlexDiv } from './components/styledComponents/Layout';
 import {
   defaultNotification,

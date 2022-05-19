@@ -28,14 +28,8 @@ import {
   ButtonSmall,
   RoundButtonSmall,
 } from './styledComponents/Button';
-import {
-  Loader,
-  H3,
-  H5,
-  P,
-  styles,
-  palatte,
-} from './styledComponents/basicStyle';
+import { Loader, styles, palatte } from './styledComponents/basic/common';
+import { H3, H5, P } from './styledComponents/basic/Text';
 import { Accordion } from './styledComponents/Accordion';
 import { Select, TextInput, CustomTimePicker } from './styledComponents/Form';
 

@@ -7,11 +7,10 @@ import { Context } from '../App';
 import {
   styles,
   palatte,
-  H4,
-  P,
   mediaQuery,
   Loader,
-} from './styledComponents/basicStyle';
+} from './styledComponents/basic/common';
+import { H4, P } from './styledComponents/basic/Text';
 import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
 import { AddReview } from './EditReview';

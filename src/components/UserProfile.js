@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -18,19 +18,10 @@ import {
   ReviewTagRemoveButton,
 } from './styledComponents/Button';
 import { AddImageRoundBtn, TextInput, Select } from './styledComponents/Form';
-import {
-  Logo,
-  styles,
-  palatte,
-  mediaQuery,
-  P,
-  H5,
-  H6,
-} from './styledComponents/basicStyle';
-import {
-  EditableText,
-  ChangeTravelModeSelect,
-} from './styledComponents/EditableText';
+import { styles, palatte, mediaQuery } from './styledComponents/basic/common';
+import { Logo } from './styledComponents/basic/Logo';
+import { P, H5, H6 } from './styledComponents/basic/Text';
+import { EditableText } from './styledComponents/EditableText';
 import { Modal } from './styledComponents/Modal';
 import Footer from './styledComponents/Footer';
 import { Accordion } from './styledComponents/Accordion';

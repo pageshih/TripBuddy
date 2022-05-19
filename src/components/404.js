@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { Button } from './styledComponents/Button';
-import { H5, Logo } from './styledComponents/basicStyle';
+import { Logo } from './styledComponents/basic/Logo';
+import { H5 } from './styledComponents/basic/Text';
 import { Container, FlexDiv } from './styledComponents/Layout';
 function NotFound(errorCode) {
   const navigate = useNavigate();

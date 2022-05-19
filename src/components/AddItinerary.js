@@ -46,23 +46,14 @@ import {
 } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
-import {
-  palatte,
-  styles,
-  H2,
-  H3,
-  H5,
-  H6,
-  P,
-  TextWithIcon,
-  mediaQuery,
-  breakpoints,
-} from './styledComponents/basicStyle';
+import { palatte, styles, mediaQuery } from './styledComponents/basic/common';
+import { P, H5 } from './styledComponents/basic/Text';
 import {
   Overview,
   DepartController,
   MoveScheduleController,
 } from './EditItinerary';
+import WaitingSpotArea from './EditItinerary/WaitingSpotArea';
 
 function AddOverView(props) {
   const { uid, dispatchNotification } = useContext(Context);
@@ -267,38 +258,6 @@ function AddOverView(props) {
   );
 }
 
-const SpotCardDraggable = (props) => {
-  return (
-    <Draggable draggableId={props.id} index={props.index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          css={css`
-            min-width: 90%;
-          `}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}>
-          <SpotCard
-            isSmall
-            isShowCloseBtn
-            onCloseClick={() => props.deleteSpot(props.id)}
-            id={props.id}
-            imgSrc={props.spot.photos[0]}
-            imgAlt={props.spot.name}
-            title={props.spot.name}
-            address={props.spot.formatted_address}
-            rating={props.spot.rating}
-            width={snapshot.isDragging && '300px'}
-            addCss={css`
-              cursor: grab;
-            `}
-          />
-        </div>
-      )}
-    </Draggable>
-  );
-};
-
 const ScheduleWapper = styled.li`
   padding: 30px;
   display: flex;
@@ -378,114 +337,6 @@ const ScheduleCardDrag = (props) => {
     </Draggable>
   );
 };
-
-function WaitingSpotArea({
-  addSpotAction,
-  closeAction,
-  waitingSpots,
-  deleteSpot,
-}) {
-  const [isMobile, setIsMobile] = useState();
-  useEffect(() => {
-    const checkWindowSize = () => {
-      if (window.innerWidth < breakpoints[0]) setIsMobile(true);
-    };
-    checkWindowSize();
-    console.log(window.innerWidth, breakpoints[0]);
-    window.addEventListener('resize', checkWindowSize);
-    return () => {
-      window.removeEventListener('resize', checkWindowSize);
-    };
-  }, []);
-  return (
-    <FlexChildDiv
-      addCss={css`
-        padding: 20px;
-        flex-direction: column;
-        background-color: ${palatte.gray[100]};
-        gap: 20px;
-        position: fixed;
-        right: 0;
-        height: 100vh;
-        width: 340px;
-        ${mediaQuery[0]} {
-          height: 40vh;
-          width: 100%;
-          bottom: 0;
-          z-index: 5;
-          box-shadow: 0 -2px 2px 2px ${palatte.shadow};
-          gap: 10px;
-        }
-      `}>
-      <FlexDiv
-        addCss={css`
-          justify-content: space-between;
-          align-items: center;
-        `}>
-        <H6 fontSize="22px">待定景點</H6>
-        <FlexDiv
-          addCss={css`
-            justify-content: flex-end;
-            align-items: center;
-            gap: 15px;
-          `}>
-          <ButtonIconColumn
-            type="button"
-            styled="primary"
-            iconName="explore"
-            onClick={addSpotAction}>
-            新增景點
-          </ButtonIconColumn>
-          <ButtonIconColumn
-            type="button"
-            styled="danger"
-            iconName="cancel"
-            onClick={closeAction}>
-            結束編輯
-          </ButtonIconColumn>
-        </FlexDiv>
-      </FlexDiv>
-      <Droppable
-        droppableId="waitingSpotsArea"
-        direction={isMobile && 'horizontal'}>
-        {(provided, snapshot) => (
-          <FlexChildDiv
-            addCss={css`
-              flex-direction: column;
-              flex-grow: 1;
-              gap: 20px;
-              padding: 10px;
-              max-width: 300px;
-              overflow-y: auto;
-              &::-webkit-scrollbar {
-                display: none;
-              }
-              ${mediaQuery[0]} {
-                flex-direction: row;
-                overflow-y: initial;
-                overflow-x: auto;
-                max-width: 100%;
-              }
-              background-color: ${snapshot.isDraggingOver && palatte.gray[300]};
-            `}
-            ref={provided.innerRef}
-            {...provided.droppableProps}>
-            {waitingSpots?.map((spot, index) => (
-              <SpotCardDraggable
-                spot={spot}
-                key={spot.place_id}
-                index={index}
-                id={spot.place_id}
-                deleteSpot={deleteSpot}
-              />
-            ))}
-            {provided.placeholder}
-          </FlexChildDiv>
-        )}
-      </Droppable>
-    </FlexChildDiv>
-  );
-}
 
 function AddSchedule(props) {
   const { uid, map, dispatchNotification } = useContext(Context);

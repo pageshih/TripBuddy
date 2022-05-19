@@ -3,13 +3,8 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import {
-  textComponents,
-  palatte,
-  headingFontSize,
-  mediaQuery,
-  P,
-} from './basicStyle';
+import { palatte, mediaQuery } from './basic/common';
+import { P, textComponents, headingFontSize } from './basic/Text';
 import {
   TextInput,
   inputBaseSmall,

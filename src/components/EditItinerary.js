@@ -2,7 +2,8 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, H3, P, mediaQuery } from './styledComponents/basicStyle';
+import { palatte, mediaQuery } from './styledComponents/basic/common';
+import { H3, P } from './styledComponents/basic/Text';
 import {
   timestampToString,
   setTimeToTimestamp,

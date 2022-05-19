@@ -6,7 +6,10 @@ import '../css/marker.css';
 import { inputBase } from '../components/styledComponents/Form';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { mediaQuery, palatte } from '../components/styledComponents/basicStyle';
+import {
+  mediaQuery,
+  palatte,
+} from '../components/styledComponents/basic/common';
 
 const googleMap = {
   svgMarker(color) {

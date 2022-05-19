@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, P } from './basicStyle';
+import { palatte } from './basic/common';
+import { P } from './basic/Text';
 import { Container, FlexDiv } from './Layout';
 
 function Footer() {
