@@ -8,21 +8,14 @@ import {
   mediaQuery,
   palatte,
   breakpoints,
+  styles,
 } from '../styledComponents/basic/common';
 import { H6 } from '../styledComponents/basic/Text';
 import { ButtonIconColumn } from '../styledComponents/Button';
 import { SpotCard } from '../styledComponents/Cards';
 
-const flexColumn = css`
-  display: flex;
-  flex-direction: column;
-`;
-const flex = css`
-  display: flex;
-`;
-
 const WaitingSpotContainer = styled.div`
-  ${flexColumn};
+  ${styles.flexColumn};
   padding: 20px;
   background-color: ${palatte.gray[100]};
   gap: 20px;
@@ -40,19 +33,19 @@ const WaitingSpotContainer = styled.div`
   }
 `;
 const HeaderContainer = styled.div`
-  ${flex}
+  ${styles.flex}
   justify-content: space-between;
   align-items: center;
 `;
 const HeaderButtonContainer = styled.div`
-  ${flex}
+  ${styles.flex}
   justify-content: flex-end;
   align-items: center;
   gap: 15px;
 `;
 
 const SpotsArea = styled.div`
-  ${flexColumn}
+  ${styles.flexColumn}
   flex-grow: 1;
   gap: 20px;
   padding: 10px;

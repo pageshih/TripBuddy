@@ -5,7 +5,7 @@ import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
 import { Context } from '../../App';
 import ItinerarySelector from './ItinerarySelector';
-import { mediaQuery, palatte } from '../styledComponents/basic/common';
+import { mediaQuery, palatte, styles } from '../styledComponents/basic/common';
 import {
   NotificationText,
   TooltipNotification,
@@ -13,7 +13,7 @@ import {
 import { ButtonSmall } from '../styledComponents/Button';
 
 const common = (props) => css`
-  display: flex;
+  ${styles.flex};
   flex-direction: ${props.isColumn ? 'column' : undefined};
   align-items: ${!props.isColumn ? 'center' : undefined};
   gap: 10px;
@@ -62,6 +62,39 @@ export function AddSpotToItineraryController({
       flex-grow: ${isColumn ? '1' : undefined};
     }
   `;
+  const onClickDelete = () => {
+    if (selectedSpots.length > 0) {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'danger',
+          message: '確定要刪除這些景點嗎？',
+          subMessage: '(此動作無法復原）',
+          yesAction: async () => {
+            await deleteAction();
+            dispatchNotification({
+              type: 'fire',
+              playload: {
+                type: 'success',
+                message: '景點已刪除',
+                id: 'toastify_deleted',
+              },
+            });
+          },
+          id: 'confirm_deleteSpots',
+        },
+      });
+    } else {
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'warn',
+          message: '還沒有選擇景點喔！',
+          id: 'tooltip_deleteSpots',
+        },
+      });
+    }
+  };
   return (
     <Container isColumn={isColumn}>
       {isShowShadow && <ShadowBottom />}
@@ -86,41 +119,7 @@ export function AddSpotToItineraryController({
           </ButtonSmall>
         </TooltipNotification>
         <TooltipNotification id="deleteSpots" addCss={ButtonOfController}>
-          <ButtonSmall
-            styled="danger"
-            onClick={() => {
-              if (selectedSpots.length > 0) {
-                dispatchNotification({
-                  type: 'fire',
-                  playload: {
-                    type: 'danger',
-                    message: '確定要刪除這些景點嗎？',
-                    subMessage: '(此動作無法復原）',
-                    yesAction: async () => {
-                      await deleteAction();
-                      dispatchNotification({
-                        type: 'fire',
-                        playload: {
-                          type: 'success',
-                          message: '景點已刪除',
-                          id: 'toastify_deleted',
-                        },
-                      });
-                    },
-                    id: 'confirm_deleteSpots',
-                  },
-                });
-              } else {
-                dispatchNotification({
-                  type: 'fire',
-                  playload: {
-                    type: 'warn',
-                    message: '還沒有選擇景點喔！',
-                    id: 'tooltip_deleteSpots',
-                  },
-                });
-              }
-            }}>
+          <ButtonSmall styled="danger" onClick={onClickDelete}>
             刪除景點
           </ButtonSmall>
         </TooltipNotification>

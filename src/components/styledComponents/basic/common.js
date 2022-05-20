@@ -52,6 +52,13 @@ const styles = {
   shadow: `2px 2px 2px 2px ${palatte.shadow}`,
   container_maxWidth: '1090px',
   container_padding: '20px',
+  flex: css`
+    display: flex;
+  `,
+  flexColumn: css`
+    display: flex;
+    flex-direction: column;
+  `,
   containerSetting: css`
     max-width: 1090px;
     margin-left: auto;

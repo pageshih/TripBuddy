@@ -14,7 +14,8 @@ import Itineraries from './components/Itineraries';
 import SavedSpots from './components/SavedSpots';
 import TravelJournals from './components/TravelJournals';
 import Explore from './components/Explore';
-import { AddOverView, AddSchedule } from './components/AddItinerary';
+import { AddSchedule } from './components/AddItinerary';
+import AddOverview from './components/EditItinerary/AddOverview';
 import NotFound from './components/404';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
@@ -166,7 +167,7 @@ function App() {
               element={
                 <LoginOrPage
                   element={
-                    <AddOverView
+                    <AddOverview
                       waitingSpots={waitingSpots}
                       setWaitingSpots={setWaitingSpots}
                     />
@@ -176,11 +177,11 @@ function App() {
             />
             <Route
               path="/add/:itineraryId"
-              element={<LoginOrPage element={<AddSchedule />} />}
+              element={<LoginOrPage element={<AddSchedule isAllowEdit />} />}
             />
             <Route
               path="/itinerary/:itineraryId"
-              element={<LoginOrPage element={<AddSchedule browse />} />}
+              element={<LoginOrPage element={<AddSchedule />} />}
             />
             <Route
               path="/travel-journals/:journalID"
