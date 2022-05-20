@@ -1,7 +1,6 @@
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
+import { Wrapper } from '@googlemaps/react-wrapper';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { googleMapApiKey } from '../utils/apiKey';
@@ -55,7 +54,7 @@ function Map({
                 getPlaceShowOnMap(detail);
               })
               .catch((status) => {
-                console.log(status);
+                console.error(status);
               });
           }
         } else {
@@ -667,7 +666,7 @@ function Explore({ setWaitingSpots }) {
       .then(() => {
         setSavedSpots(newSavedSpots);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   };
 
   const getSavedSpotDetail = (spot) => {

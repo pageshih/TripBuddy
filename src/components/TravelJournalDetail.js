@@ -1,27 +1,16 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useOutletContext } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useContext, useEffect, useRef, useState, useReducer } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import {
-  Container,
-  FlexDiv,
-  Image,
-  FlexChildDiv,
-} from './styledComponents/Layout';
+import { Container, FlexDiv, FlexChildDiv } from './styledComponents/Layout';
 import { SpotCard, DurationText } from './styledComponents/Cards';
-import {
-  timestampToString,
-  filterDaySchedules,
-  timestampToTimeInput,
-  timestampToDateInput,
-} from '../utils/utilities';
-import { AddReview, AddReviewTags } from './EditReview';
+import { timestampToString, filterDaySchedules } from '../utils/utilities';
+import { AddReview } from './EditReview';
 import { Overview } from './EditItinerary';
 import { Pagination } from './Pagination';
-import { Modal, Confirm } from './styledComponents/Modal';
+import { Modal } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
 import {
   Button,
@@ -259,7 +248,6 @@ function TravelJournalDetail() {
                     <CustomTimePicker
                       value={addSchedule.start_time}
                       onChange={(newValue) => {
-                        console.log(newValue);
                         dispatchAddSchedule({
                           type: 'choseTime',
                           playload: newValue,
@@ -400,10 +388,7 @@ function TravelJournalDetail() {
                       schedule.reviews
                         ? false
                         : true
-                    }
-                    isShowAddIcon={schedulesExpand?.every(
-                      (id) => id !== schedule.schedule_id
-                    )}>
+                    }>
                     <FlexDiv padding="0 20px 20px 70px">
                       <AddReview
                         isEdit={isAllowEdit}

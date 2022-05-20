@@ -1,11 +1,10 @@
+import { useRef, useState } from 'react';
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { CSSTransition } from 'react-transition-group';
 import PropTypes from 'prop-types';
-import { palatte, mediaQuery } from './basic/common';
-import { FlexDiv, Container, FlexChildDiv, Image } from './Layout';
+import { palatte } from './basic/common';
+import { FlexDiv, Container } from './Layout';
 import '../../css/animation.css';
 import Collapse from '@mui/material/Collapse';
 

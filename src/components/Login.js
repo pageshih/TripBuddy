@@ -85,7 +85,6 @@ function Login(props) {
     }
   }, [email, password, userName]);
   const emptyVerify = () => {
-    console.log('login');
     if (!email) {
       dispatchTextNotification({
         type: 'fire',
@@ -115,7 +114,6 @@ function Login(props) {
     }
   };
   const errorVerify = (error) => {
-    console.log(error.code);
     if (error.code.match('password')?.length > 0) {
       dispatchTextNotification({
         type: 'fire',
@@ -148,7 +146,6 @@ function Login(props) {
       firebaseAuth
         .signIn(email, password)
         .then((res) => {
-          console.log(res);
           setUid(res.user.uid);
           setIsLogInOut(false);
           navigate(`/itineraries`);
@@ -165,7 +162,6 @@ function Login(props) {
       firebaseAuth
         .signUp(email, password, userName)
         .then((uid) => {
-          console.log(uid);
           setUid(uid);
           setIsLogInOut(false);
           navigate(`/itineraries`);
@@ -181,13 +177,11 @@ function Login(props) {
     firebaseAuth
       .googleLogIn()
       .then((uid) => {
-        console.log(uid);
         setUid(uid);
         setIsLogInOut(false);
         navigate(`/itineraries`);
       })
       .catch((error) => {
-        console.log(error.code, error.message);
         dispatchNotification({
           type: 'fire',
           playload: {
@@ -201,8 +195,6 @@ function Login(props) {
 
   useEffect(() => {
     if (goLogin || isLogInOut) {
-      console.log('goLigoin', goLogin);
-      console.log('isLogInOut', isLogInOut);
       dispatchNotification({
         type: 'fire',
         playload: {

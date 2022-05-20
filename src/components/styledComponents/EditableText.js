@@ -1,19 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { palatte, mediaQuery } from './basic/common';
 import { P, textComponents, headingFontSize } from './basic/Text';
-import {
-  TextInput,
-  inputBaseSmall,
-  CustomDateRangePicker,
-  CustomTimePicker,
-} from './Form';
+import { TextInput, CustomDateRangePicker, CustomTimePicker } from './Form';
 import { ButtonSmall } from './Button';
 import { timestampToString } from '../../utils/utilities';
-import { Container, FlexDiv } from './Layout';
+import { FlexDiv } from './Layout';
 
 const hoverEffect = css`
   width: fit-content;
@@ -37,7 +31,6 @@ function EditableText(props) {
     setIsEdit(false);
     if (value && !value.match(/^ +$/)) {
       if (value !== props.children && value.length > 0) {
-        console.log('submit');
         props.onSubmit(value);
       }
     } else {

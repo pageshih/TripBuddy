@@ -16,11 +16,7 @@ import {
   ButtonOutline,
   RoundButtonSmall,
 } from './Button';
-import {
-  compressImages,
-  timestampToTimeInput,
-  timestampToDateInput,
-} from '../../utils/utilities';
+import { compressImages, timestampToDateInput } from '../../utils/utilities';
 import { Modal } from './Modal';
 
 const inputBase = css`
@@ -147,7 +143,6 @@ const CheckboxCustom = (props) => {
         onChange={(e) => {
           if (props.isSelectAllBox) {
             props.onChange(e);
-            console.log(props.isSelectAll);
           } else {
             if (e.target.checked) {
               props.setSelectedList([...props.selectedList, props.id]);
@@ -529,7 +524,6 @@ function CustomTimePicker(props) {
         value={new Date(props.value)}
         ampmInClock={true}
         onChange={(value) => {
-          console.log(value);
           props.onChange(new Date(value).getTime());
         }}
         renderInput={(params) => (

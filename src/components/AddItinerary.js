@@ -1,49 +1,25 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-// import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
-// import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
-import {
-  TextInput,
-  SelectAllCheckBox,
-  AddImageRoundBtn,
-  SelectSmall,
-  CustomDateRangePicker,
-} from './styledComponents/Form';
+import { TextInput, CustomDateRangePicker } from './styledComponents/Form';
 import {
   Button,
-  RoundButtonSmallWhite,
   ButtonOutline,
   HyperLink,
-  RoundButtonSmall,
-  ButtonSmall,
-  ButtonIconColumn,
   RoundButtonSmallWithLabel,
 } from './styledComponents/Button';
-import {
-  Container,
-  FlexDiv,
-  FlexChildDiv,
-  Image,
-} from './styledComponents/Layout';
+import { Container, FlexDiv, FlexChildDiv } from './styledComponents/Layout';
 import {
   ScheduleCard,
   SpotCard,
   transportMode,
 } from './styledComponents/Cards';
-import {
-  timestampToString,
-  timestampToDateInput,
-  filterDaySchedules,
-  setTimeToTimestamp,
-  createDepartTimeAry,
-  updateItineraryCoverPhoto,
-} from '../utils/utilities';
+import { filterDaySchedules, createDepartTimeAry } from '../utils/utilities';
 import { googleMap } from '../utils/googleMap';
 import { Pagination } from './Pagination';
 import { palatte, styles, mediaQuery } from './styledComponents/basic/common';
@@ -94,7 +70,7 @@ function AddOverView(props) {
         navigate(`/add/${itineraryId}`);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   };
   const nextStep = () => {
@@ -405,7 +381,6 @@ function AddSchedule(props) {
       const departTimeMinutes =
         Number(new Date(departTime).getHours()) * 60 +
         Number(new Date(departTime).getMinutes());
-      console.log(departTimeMinutes);
       if (totalDuration >= 1440 - departTimeMinutes) {
         dispatchNotification({
           type: 'fire',
@@ -552,7 +527,6 @@ function AddSchedule(props) {
         newSchedules[i + 1].start_time = newSchedules[i].end_time;
       }
       if (isSetSchedule) {
-        console.log(newSchedules);
         setSchedules(newSchedules);
         allSchedules.current[day] = newSchedules;
       }
@@ -600,7 +574,6 @@ function AddSchedule(props) {
     };
     firestore
       .addSchedule(uid, itineraryId, addData, true)
-      .then(() => console.log('success'))
       .catch((error) => console.error(error));
     newScheduleList.splice(scheduleIndex, 0, addData);
     return {
@@ -628,7 +601,6 @@ function AddSchedule(props) {
         remove.schedule_id,
         !isRepeatSpot && remove.placeDetail
       )
-      .then(() => console.log('removed'))
       .catch((error) => console.error(error));
     return {
       newSpotsList: !isRepeatSpot && newSpotsList,
@@ -658,9 +630,7 @@ function AddSchedule(props) {
         getTransportDetail(newScheduleList, {
           isSetSchedule: true,
           isUploadFirebase: true,
-        })
-          .then((res) => console.log(res))
-          .catch((error) => console.error(error));
+        }).catch((error) => console.error(error));
       } else {
         const updatedTimeSchedules = updateTimeOfSchedule(newScheduleList);
         setSchedules(updatedTimeSchedules);
@@ -679,9 +649,7 @@ function AddSchedule(props) {
         getTransportDetail(updatedTimeSchedules, {
           isSetSchedule: true,
           isUploadFirebase: true,
-        })
-          .then((res) => console.log(res))
-          .catch((error) => console.error(error));
+        }).catch((error) => console.error(error));
       } else {
         setWaitingSpots(items);
       }
@@ -723,14 +691,9 @@ function AddSchedule(props) {
     setOverviews({ ...overviews, ...keyValuePair });
     firestore
       .editOverviews(uid, itineraryId, keyValuePair)
-      .then(() => console.log('updated overviews'))
       .catch((error) => console.error(error));
   };
   const deleteSchedule = (scheduleId) => {
-    // updateTimeOfSchedule(
-    //   schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-    //   { isSetSchedule: true, isUploadFirebase: true }
-    // );
     getTransportDetail(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
       {
@@ -740,16 +703,12 @@ function AddSchedule(props) {
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
-      .then(() => {
-        console.log('刪除成功！');
-      })
       .catch((error) => console.error(error));
   };
   const deleteSpot = (placeId) => {
     setWaitingSpots(waitingSpots.filter((spot) => spot.place_id !== placeId));
     firestore
       .deleteWaitingSpots(uid, itineraryId, placeId)
-      .then(() => console.log('刪除成功！'))
       .catch((error) => console.error(error));
   };
   const updateDate = (
@@ -760,12 +719,10 @@ function AddSchedule(props) {
     setIsEdit
   ) => {
     let updateDate;
-    console.log(start, end);
     const resetTime = {
       start: new Date(start).setHours(8, 0, 0, 0),
       end: new Date(end).setHours(8, 0, 0, 0),
     };
-    console.log(resetTime);
     if (overviews.start_date !== start && overviews.end_date !== end) {
       updateDate = {
         start_date: resetTime.start,
@@ -843,7 +800,6 @@ function AddSchedule(props) {
   };
   const changeSchedulesTime = async () => {
     if (!changeTime) {
-      console.log('yes');
       dispatchNotification({
         type: 'fire',
         playload: {
@@ -954,9 +910,7 @@ function AddSchedule(props) {
                   day={day}
                   isAllowEdit={isAllowEdit}
                   onSubmit={(newTime) => {
-                    console.log(newTime);
                     if (newTime !== overviews.depart_times[day]) {
-                      console.log('update');
                       updateTimeOfSchedule(
                         schedules,
                         { isSetSchedule: true, isUploadFirebase: true },

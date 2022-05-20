@@ -104,9 +104,7 @@ function App() {
   );
 
   useEffect(() => {
-    if (uid) {
-      console.log(uid);
-    } else if (isLogInOut === undefined) {
+    if (isLogInOut === undefined) {
       firebaseAuth.checkIsLogIn(
         (userImpl) => {
           if (userImpl) {
@@ -115,10 +113,10 @@ function App() {
             setUid('');
           }
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     }
-  }, [uid, setUid]);
+  }, [uid, setUid, isLogInOut]);
 
   return (
     <>

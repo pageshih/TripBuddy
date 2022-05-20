@@ -2,25 +2,23 @@ import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import { Image } from './styledComponents/Layout';
 import { OverviewCard } from './styledComponents/Cards';
 import { FlexDiv } from './styledComponents/Layout';
-import { palatte, styles, Loader } from './styledComponents/basic/common';
-import { timestampToString } from '../utils/utilities';
+import { styles, Loader } from './styledComponents/basic/common';
 
 function TravelJournals() {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
   const [journals, setJournals] = useState();
-  const now = new Date().getTime();
   useEffect(() => {
+    const now = new Date().getTime();
     firestore
       .getItineraries(uid, now, true)
       .then((overviews) => {
         setJournals(overviews);
       })
       .catch((error) => console.error(error));
-  }, []);
+  }, [uid]);
   return (
     <>
       {journals ? (

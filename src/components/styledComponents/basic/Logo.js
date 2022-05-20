@@ -53,7 +53,7 @@ const LogoName = (props) => (
       font-size: ${props.isSmall ? '28px' : '64px'};
       color: ${palatte.primary.basic};
       ${mediaQuery[0]} {
-        font-size: ${!props.small && !props.underline && '48px'};
+        font-size: ${!props.isSmall && !props.underline && '48px'};
       }
     `}>
     TripBuddy
@@ -89,20 +89,24 @@ export const Logo = (props) => {
   return (
     <>
       {props.small && (
-        <SmallLogoContainer onClick={() => navigate('/itineraries')}>
+        <SmallLogoContainer
+          css={props.addCss}
+          onClick={() => navigate('/itineraries')}>
           <Ellipse isSmall />
-          <LogoName />
+          <LogoName isSmall />
         </SmallLogoContainer>
       )}
       {props.underline && (
-        <UnderlineLogoContainer onClick={() => navigate('/itineraries')}>
+        <UnderlineLogoContainer
+          css={props.addCss}
+          onClick={() => navigate('/itineraries')}>
           <FlexAlignCenter>
             <Ellipse />
             <div
               css={css`
                 position: relative;
               `}>
-              <LogoName />
+              <LogoName underline />
               <img src={underline} alt="deco" css={underlineDeco} />
             </div>
           </FlexAlignCenter>
@@ -110,7 +114,9 @@ export const Logo = (props) => {
         </UnderlineLogoContainer>
       )}
       {!props.underline && !props.small && (
-        <LargeLogoContainer onClick={() => navigate('/itineraries')}>
+        <LargeLogoContainer
+          css={props.addCss}
+          onClick={() => navigate('/itineraries')}>
           <FlexAlignCenter
             css={css`
               gap: 10px;

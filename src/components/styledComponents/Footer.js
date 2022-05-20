@@ -2,7 +2,7 @@
 import { css, jsx } from '@emotion/react';
 import { palatte } from './basic/common';
 import { P } from './basic/Text';
-import { Container, FlexDiv } from './Layout';
+import { FlexDiv } from './Layout';
 
 function Footer() {
   return (

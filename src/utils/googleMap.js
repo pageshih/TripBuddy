@@ -73,7 +73,6 @@ const googleMap = {
     'url',
   ],
   composePlaceDetailData(place) {
-    console.log(place);
     return {
       place_id: place?.place_id || '未提供',
       name: place?.name || '未提供',

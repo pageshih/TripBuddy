@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
@@ -111,6 +110,9 @@ const Loader = (props) => (
     </circle>
   </svg>
 );
+Loader.propTypes = {
+  size: PropTypes.string,
+};
 
 const PendingLoader = (props) => (
   <svg
@@ -335,6 +337,10 @@ const PendingLoader = (props) => (
     </g>
   </svg>
 );
+PendingLoader.propTypes = {
+  size: PropTypes.string,
+  color: PropTypes.string,
+};
 
 const Rating = (props) => {
   return (
@@ -377,6 +383,10 @@ const Rating = (props) => {
       />
     </svg>
   );
+};
+PendingLoader.propTypes = {
+  size: PropTypes.string,
+  rating: PropTypes.number,
 };
 
 export {

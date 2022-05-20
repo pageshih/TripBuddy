@@ -1,14 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { palatte, mediaQuery } from './styledComponents/basic/common';
 import { H3, P } from './styledComponents/basic/Text';
-import {
-  timestampToString,
-  setTimeToTimestamp,
-  updateItineraryCoverPhoto,
-} from '../utils/utilities';
+import { timestampToString } from '../utils/utilities';
+import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { Container, FlexDiv, Image } from './styledComponents/Layout';
 import { RoundButtonSmallWhite, ButtonSmall } from './styledComponents/Button';
@@ -25,12 +22,12 @@ function Overview(props) {
   const navigate = useNavigate();
   const { uid } = useContext(Context);
   const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
-    const upload = new updateItineraryCoverPhoto({
+    const upload = {
       uid,
       itineraryId: props.overviews.itinerary_id,
       imageBuffer,
-    });
-    upload.uploadFirestore().then((cover_photo) => {
+    };
+    firestore.uploadItinerariesCoverPhoto(upload).then((cover_photo) => {
       setIsShowModal(false);
       props.updateOverviewsFields({ cover_photo });
     });

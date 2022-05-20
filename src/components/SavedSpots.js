@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -56,7 +56,6 @@ function SavedSpots(props) {
           .catch((error) => console.error(error));
       }
     } else {
-      console.log('no');
       const playload = {
         type: 'warn',
         message: '還沒有選擇景點喔！',

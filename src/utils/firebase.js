@@ -516,6 +516,23 @@ const firestore = {
     const defaultTravelModeRef = doc(this.db, 'itineraries', userUID);
     return setDoc(defaultTravelModeRef, newSetting, { merge: 'merge' });
   },
+  async uploadItinerariesCoverPhoto({ uid, itineraryId, imageBuffer }) {
+    const urlAry = imageBuffer
+      ? await firebaseStorage.uploadImages(
+          [uid, itineraryId],
+          imageBuffer,
+          'cover_photo'
+        )
+      : [];
+    return firestore
+      .editOverviews(uid, itineraryId, {
+        cover_photo: urlAry[0],
+      })
+      .then(() => {
+        return Promise.resolve(urlAry[0]);
+      })
+      .catch((error) => console.error(error));
+  },
 };
 
 export { firebaseAuth, firestore, firebaseStorage };

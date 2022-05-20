@@ -13,7 +13,6 @@ import {
   ButtonSmallOutlineIcon,
   ButtonSmall,
 } from './Button';
-import { EditableText } from './EditableText';
 
 const TimeTag = styled.div`
   font-weight: 700;

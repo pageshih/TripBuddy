@@ -126,7 +126,6 @@ function WaitingSpotArea({
       if (window.innerWidth < breakpoints[0]) setIsMobile(true);
     };
     checkWindowSize();
-    console.log(window.innerWidth, breakpoints[0]);
     window.addEventListener('resize', checkWindowSize);
     return () => {
       window.removeEventListener('resize', checkWindowSize);

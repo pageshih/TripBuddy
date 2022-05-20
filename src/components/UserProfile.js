@@ -1,6 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState, useRef } from 'react';
-import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import defaultUserIcon from '../images/user-avatar-filled.svg';
@@ -63,11 +62,10 @@ function UserSetting(props) {
       });
       setIsShowModal(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   const updateUserName = async (value) => {
-    console.log(value);
     await firestore.editProfile(uid, { name: value });
     props.setProfile({ ...props.profile, name: value });
   };
@@ -75,7 +73,7 @@ function UserSetting(props) {
     firestore.getItinerariesSetting(uid).then((res) => {
       setTravelMode(res.default_travel_mode);
     });
-  }, []);
+  }, [uid]);
 
   return (
     <>
@@ -352,14 +350,14 @@ function UserProfile(props) {
         setIsLogInOut(true);
         setGoLogin(false);
       })
-      .catch((res) => console.log(res));
+      .catch((error) => console.error(error));
   };
   useEffect(() => {
     if (isLogInOut && !goLogin) {
       setUid(undefined);
       navigate('/login');
     }
-  }, [isLogInOut, goLogin]);
+  }, [isLogInOut, goLogin, navigate, setUid]);
 
   return (
     <>

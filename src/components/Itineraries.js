@@ -86,10 +86,6 @@ function Itineraries() {
                   if (scheduleProcessing) {
                     const todaySchedule = scheduleProcessing.filter(
                       (schedule) => {
-                        console.log(
-                          new Date(schedule.start_time).getDate(),
-                          new Date(now).getDate()
-                        );
                         return (
                           new Date(schedule.start_time).getDate() ===
                           new Date(now).getDate()
