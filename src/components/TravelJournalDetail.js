@@ -8,7 +8,7 @@ import { Container, FlexDiv, FlexChildDiv } from './styledComponents/Layout';
 import { SpotCard, DurationText } from './styledComponents/Cards';
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import { AddReview } from './EditReview';
-import { Overview } from './EditItinerary';
+import Overview from './EditItinerary/AddOverview';
 import { Pagination } from './Pagination';
 import { Modal } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
@@ -29,7 +29,6 @@ function TravelJournalDetail() {
   const allSchedules = useRef();
   const [overviews, setOverviews] = useState();
   const [day, setDay] = useState(0);
-  const [schedulesExpand, setSchedulesExpand] = useState();
   const [isAllowEdit, setIsAllowEdit] = useState(false);
   const [reviewTags, setReviewTags] = useState();
   const [uploadedReview, setUploadedReview] = useState();

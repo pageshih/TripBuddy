@@ -576,7 +576,21 @@ const DurationController = ({
     )}
   </FlexChildDiv>
 );
-function ScheduleCard(props) {
+function ScheduleCard({
+  isDragging,
+  durationControllerConfig,
+  as,
+  schedule,
+  isEdit,
+  isShowCloseBtn,
+  onClick,
+  onCloseClick,
+  isSmall,
+  selectedList,
+  setSelectedList,
+  children,
+  changeTrasitWay,
+}) {
   return (
     <FlexDiv
       addCss={css`
@@ -592,46 +606,46 @@ function ScheduleCard(props) {
             flex-direction: column;
           }
         `}>
-        {!props.isDragging && props.durationControllerConfig && (
+        {!isDragging && durationControllerConfig && (
           <DurationController
-            isEditStatus={props.durationControllerConfig.isEditStatus}
-            isAllowEdit={props.isEdit}
-            duration={props.schedule.duration}
-            isUpdate={props.durationControllerConfig.isUpdate}
-            changeEditStatus={props.durationControllerConfig.changeEditStatus}
-            decreaseAction={props.durationControllerConfig.decreaseAction}
-            increaseAction={props.durationControllerConfig.increaseAction}
-            updateAction={props.durationControllerConfig.updateAction}
+            isEditStatus={durationControllerConfig.isEditStatus}
+            isAllowEdit={isEdit}
+            duration={durationControllerConfig.duration}
+            isUpdate={durationControllerConfig.isUpdate}
+            changeEditStatus={durationControllerConfig.changeEditStatus}
+            decreaseAction={durationControllerConfig.decreaseAction}
+            increaseAction={durationControllerConfig.increaseAction}
+            updateAction={durationControllerConfig.updateAction}
           />
         )}
         <SpotCard
-          as={props.as}
-          time={props.schedule.start_time}
-          onClick={props.onClick}
-          imgSrc={props.schedule.placeDetail.photos[0]}
-          imgAlt={props.schedule.placeDetail.name}
-          title={props.schedule.placeDetail.name}
-          address={props.schedule.placeDetail.formatted_address}
-          duration={props.duration}
-          isEdit={props.isEdit}
-          cardGap={props.isEdit && '20px'}
-          isShowCloseBtn={props.isShowCloseBtn}
-          onCloseClick={props.onCloseClick}
-          isSmall={props.isSmall || props.isDragging}
-          width={props.isDragging && '300px'}
-          id={props.schedule.schedule_id}
-          selectedList={props.selectedList}
-          setSelectedList={props.setSelectedList}>
-          {props.children}
+          as={as}
+          time={schedule.start_time}
+          onClick={onClick}
+          imgSrc={schedule.placeDetail.photos[0]}
+          imgAlt={schedule.placeDetail.name}
+          title={schedule.placeDetail.name}
+          address={schedule.placeDetail.formatted_address}
+          duration={schedule.duration}
+          isEdit={isEdit}
+          cardGap={isEdit && '20px'}
+          isShowCloseBtn={isShowCloseBtn}
+          onCloseClick={onCloseClick}
+          isSmall={isSmall || isDragging}
+          width={isDragging && '300px'}
+          id={schedule.schedule_id}
+          selectedList={selectedList}
+          setSelectedList={setSelectedList}>
+          {children}
         </SpotCard>
       </FlexDiv>
-      {!props.isDragging && props.transitDetail && props.travelMode && (
+      {!isDragging && schedule.transit_detail && schedule.travel_mode && (
         <TransitCard
-          transitDetail={props.transitDetail}
-          travelMode={props.travelMode}
-          changeTrasitWay={props.changeTrasitWay}
-          scheduleId={props.schedule.schedule_id}
-          isEdit={props.isEdit}
+          transitDetail={schedule.transit_detail}
+          travelMode={schedule.travel_mode}
+          changeTrasitWay={changeTrasitWay}
+          scheduleId={schedule.schedule_id}
+          isEdit={isEdit}
         />
       )}
     </FlexDiv>
@@ -639,20 +653,36 @@ function ScheduleCard(props) {
 }
 
 ScheduleCard.propTypes = {
-  schedule: PropTypes.object.isRequired,
-  imgSrc: PropTypes.string.isRequired,
-  imgAlt: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  address: PropTypes.string.isRequired,
-  as: PropTypes.string,
-  isEdit: PropTypes.bool,
+  schedule: PropTypes.shape({
+    duration: PropTypes.number,
+    start_time: PropTypes.number,
+    end_time: PropTypes.number,
+    placeDetail: PropTypes.object,
+    place_id: PropTypes.string,
+    schedule_id: PropTypes.string,
+    transit_detail: PropTypes.object,
+    travel_mode: PropTypes.string,
+  }).isRequired,
+  durationControllerConfig: PropTypes.shape({
+    duration: PropTypes.number,
+    isEditStatus: PropTypes.bool,
+    isUpdate: PropTypes.bool,
+    changeEditStatus: PropTypes.func,
+    decreaseAction: PropTypes.func,
+    increaseAction: PropTypes.func,
+    updateAction: PropTypes.func,
+  }),
   selectedList: PropTypes.array,
   setSelectedList: PropTypes.func,
   onClick: PropTypes.func,
-  time: PropTypes.number,
-  duration: PropTypes.number,
-  transit: PropTypes.object,
+  onCloseClick: PropTypes.func,
+  changeTrasitWay: PropTypes.func,
+  as: PropTypes.string,
   children: PropTypes.element,
+  isEdit: PropTypes.bool,
+  isDragging: PropTypes.bool,
+  isShowCloseBtn: PropTypes.bool,
+  isSmall: PropTypes.bool,
 };
 
 function OverviewCard(props) {
