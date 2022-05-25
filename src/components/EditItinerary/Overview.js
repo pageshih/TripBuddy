@@ -7,7 +7,7 @@ import { palatte, styles } from '../styledComponents/basic/common';
 import { H3 } from '../styledComponents/basic/Text';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
-import { Container, FlexDiv, Image } from '../styledComponents/Layout';
+import { Image } from '../styledComponents/Layout';
 import { RoundButtonSmallWhite } from '../styledComponents/Button';
 import { AddImageRoundBtn } from '../styledComponents/Form';
 import { EditableText, EditableDate } from '../styledComponents/EditableText';

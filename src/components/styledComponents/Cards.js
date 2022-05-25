@@ -635,10 +635,10 @@ function ScheduleCard({
           width={isDragging && '300px'}
           id={schedule.schedule_id}
           selectedList={selectedList}
-          setSelectedList={setSelectedList}>
-          {children}
-        </SpotCard>
+          setSelectedList={setSelectedList}
+        />
       </FlexDiv>
+      {children}
       {!isDragging && schedule.transit_detail && schedule.travel_mode && (
         <TransitCard
           transitDetail={schedule.transit_detail}

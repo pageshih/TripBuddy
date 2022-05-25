@@ -13,7 +13,7 @@ import {
 import { H4, P } from './styledComponents/basic/Text';
 import { FlexDiv, Container, FlexChildDiv } from './styledComponents/Layout';
 import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
-import { AddReview } from './EditReview';
+import AddReview from './EditReview/AddReview';
 import { Button } from './styledComponents/Button';
 import { Accordion } from './styledComponents/Accordion';
 
@@ -57,7 +57,7 @@ function Itineraries() {
   const [coming, setComing] = useState();
   const [future, setFuture] = useState();
   const now = new Date().getTime();
-  const [showReview, setShowReview] = useState(false);
+  const [isShowReview, setIsShowReview] = useState(false);
 
   useEffect(() => {
     firestore
@@ -163,54 +163,53 @@ function Itineraries() {
                                   `/itinerary/${progressing.overview.itinerary_id}`
                                 )
                               }>
-                              {schedule.end_time > now &&
-                                schedule.start_time < now && (
-                                  <>
-                                    <Button
-                                      styled="primary"
-                                      addCss={css`
-                                        display: none;
-                                        ${mediaQuery[0]} {
-                                          display: block;
-                                        }
-                                      `}
-                                      onClick={() =>
-                                        setShowReview((prev) => !prev)
-                                      }>
-                                      添加心得
-                                    </Button>
-                                    <AddReview
-                                      showReview={showReview}
-                                      setShowReview={setShowReview}
-                                      key={schedule.schedule_id}
-                                      itineraryId={
-                                        progressing.overview.itinerary_id
+                              {schedule.start_time < now && (
+                                <>
+                                  <Button
+                                    styled="primary"
+                                    addCss={css`
+                                      display: none;
+                                      ${mediaQuery[0]} {
+                                        display: block;
                                       }
-                                      updateOriginReviewState={(
-                                        updatedSchedule
-                                      ) => {
-                                        setProgressing({
-                                          ...progressing,
-                                          schedule: progressing.schedule.map(
-                                            (schedule) =>
-                                              schedule.schedule_id ===
-                                              updatedSchedule.schedule_id
-                                                ? {
-                                                    ...schedule,
-                                                    ...updatedSchedule,
-                                                  }
-                                                : schedule
-                                          ),
-                                        });
-                                      }}
-                                      scheduleId={schedule.schedule_id}
-                                      allReviewTags={reviewTags}
-                                      showReviewTags={schedule.review_tags}
-                                      reviews={reviews}
-                                      isEdit
-                                    />
-                                  </>
-                                )}
+                                    `}
+                                    onClick={() =>
+                                      setIsShowReview((prev) => !prev)
+                                    }>
+                                    添加心得
+                                  </Button>
+                                  <AddReview
+                                    isShowReview={isShowReview}
+                                    setIsShowReview={setIsShowReview}
+                                    key={schedule.schedule_id}
+                                    itineraryId={
+                                      progressing.overview.itinerary_id
+                                    }
+                                    updateOriginReviewState={(
+                                      updatedSchedule
+                                    ) => {
+                                      setProgressing({
+                                        ...progressing,
+                                        schedule: progressing.schedule.map(
+                                          (schedule) =>
+                                            schedule.schedule_id ===
+                                            updatedSchedule.schedule_id
+                                              ? {
+                                                  ...schedule,
+                                                  ...updatedSchedule,
+                                                }
+                                              : schedule
+                                        ),
+                                      });
+                                    }}
+                                    scheduleId={schedule.schedule_id}
+                                    allReviewTags={reviewTags}
+                                    showReviewTags={schedule.review_tags}
+                                    reviews={reviews}
+                                    isEdit
+                                  />
+                                </>
+                              )}
                             </ScheduleCard>
                           );
                         })

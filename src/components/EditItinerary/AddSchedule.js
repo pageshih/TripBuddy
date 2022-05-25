@@ -2,21 +2,19 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext } from 'react-beautiful-dnd';
 import styled from '@emotion/styled';
-/** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
-import { firestore } from '../utils/firebase';
-import { Context } from '../App';
-import { filterDaySchedules, createDepartTimeAry } from '../utils/utilities';
-import { Pagination } from './Pagination';
-import { styles, mediaQuery } from './styledComponents/basic/common';
-import Overview from './EditItinerary/Overview';
-import WaitingSpotArea from './EditItinerary/WaitingSpotArea';
-import DepartController from './EditItinerary/DepartController';
+import { firestore } from '../../utils/firebase';
+import { Context } from '../../App';
+import { filterDaySchedules, createDepartTimeAry } from '../../utils/utilities';
+import { Pagination } from '../Pagination';
+import { styles, mediaQuery } from '../styledComponents/basic/common';
+import Overview from './Overview';
+import WaitingSpotArea from './WaitingSpotArea';
+import DepartController from './DepartController';
 import {
   useGetTransportDetail,
   useUpdateTimeOfSchedule,
-} from './EditItinerary/editScheduleHooks';
-import ScheduleArea from './EditItinerary/ScheduleArea';
+} from './editScheduleHooks';
+import ScheduleArea from './ScheduleArea';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -401,4 +399,4 @@ function AddSchedule(props) {
   );
 }
 
-export { AddSchedule };
+export default AddSchedule;
