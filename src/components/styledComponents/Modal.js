@@ -37,6 +37,10 @@ const CenterContainer = styled.div`
     flex-basis: 95%;
   }
 `;
+const ContentWrapper = styled.div`
+  overflow-y: auto;
+  height: 100%;
+`;
 
 const CloseBtn = styled.button`
   position: absolute;
@@ -114,9 +118,7 @@ function Modal(props) {
               className="material-icons">
               close
             </CloseBtn>
-            <Container overflowY="auto" height="100%">
-              {props.children}
-            </Container>
+            <ContentWrapper>{props.children}</ContentWrapper>
           </CenterContainer>
         </CSSTransition>
       </FadeBg>

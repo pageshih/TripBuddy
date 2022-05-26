@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { palatte, styles } from '../styledComponents/basic/common';
 import { H3 } from '../styledComponents/basic/Text';
 import { firestore } from '../../utils/firebase';
@@ -11,7 +12,6 @@ import { Image } from '../styledComponents/Layout';
 import { RoundButtonSmallWhite } from '../styledComponents/Button';
 import { AddImageRoundBtn } from '../styledComponents/Form';
 import { EditableText, EditableDate } from '../styledComponents/EditableText';
-import PropTypes from 'prop-types';
 
 const BackgroundContainer = styled.div`
   position: relative;

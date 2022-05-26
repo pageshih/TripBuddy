@@ -3,18 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { Context } from '../../App';
-import { firestore } from '../../utils/firebase';
-import { palatte, styles, mediaQuery } from '../styledComponents/basic/common';
-import { H5, P } from '../styledComponents/basic/Text';
+import { Context } from '../App';
+import { firestore } from '../utils/firebase';
+import { palatte, styles, mediaQuery } from './styledComponents/basic/common';
+import { H5, P } from './styledComponents/basic/Text';
 import {
   RoundButtonSmallWithLabel,
   Button,
   ButtonOutline,
   HyperLink,
-} from '../styledComponents/Button';
-import { SpotCard } from '../styledComponents/Cards';
-import { TextInput, CustomDateRangePicker } from '../styledComponents/Form';
+} from './styledComponents/Button';
+import { SpotCard } from './styledComponents/Cards';
+import { TextInput, CustomDateRangePicker } from './styledComponents/Form';
 
 const Wrapper = styled.form`
   ${styles.flexColumn};

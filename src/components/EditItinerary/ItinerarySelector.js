@@ -29,9 +29,9 @@ function ItinerarySelector({
 }
 
 ItinerarySelector.propTypes = {
-  choseItinerary: PropTypes.string.isRequired,
-  onChangeItinerary: PropTypes.func.isRequired,
-  createdItineraries: PropTypes.array.isRequired,
+  choseItinerary: PropTypes.string,
+  onChangeItinerary: PropTypes.func,
+  createdItineraries: PropTypes.array,
 };
 
 export default ItinerarySelector;
