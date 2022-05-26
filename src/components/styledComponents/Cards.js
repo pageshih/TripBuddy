@@ -200,7 +200,7 @@ function SpotCard(props) {
           close
           type="button"
           onClick={props.onCloseClick}
-          addCss={closeButton}>
+          css={closeButton}>
           cancel
         </RoundButtonSmall>
       )}
@@ -499,8 +499,10 @@ const DurationController = ({
           <RoundButtonSmall
             type="button"
             size="20px"
-            padding="5px 5px 7px 5px"
             styled="transparent"
+            css={css`
+              padding: 5px 5px 7px 5px;
+            `}
             onClick={decreaseAction}>
             −
           </RoundButtonSmall>
@@ -520,7 +522,9 @@ const DurationController = ({
           <RoundButtonSmall
             size="20px"
             styled="transparent"
-            padding="5px 5px 7px 7px"
+            css={css`
+              padding: 5px 5px 7px 5px;
+            `}
             type="button"
             onClick={increaseAction}>
             +

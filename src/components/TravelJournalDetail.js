@@ -9,7 +9,7 @@ import { SpotCard, DurationText } from './styledComponents/Cards';
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';
-import { Pagination } from './Pagination';
+import { Pagination } from './styledComponents/Pagination';
 import { Modal } from './styledComponents/Modal';
 import { SearchBar } from '../utils/googleMap';
 import {
@@ -417,9 +417,9 @@ function TravelJournalDetail() {
                       styled="transparent"
                       size="30px"
                       close
-                      padding="2px 0 0 2px"
-                      fontSize="24px"
-                      addCss={css`
+                      css={css`
+                        padding: 2px 0 0 2px;
+                        font-size: 24px;
                         margin-top: 18px;
                         &:hover {
                           background-color: ${palatte.white};

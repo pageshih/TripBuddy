@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
 import { filterDaySchedules, createDepartTimeAry } from '../../utils/utilities';
-import { Pagination } from '../Pagination';
+import { Pagination } from '../styledComponents/Pagination';
 import { styles, mediaQuery } from '../styledComponents/basic/common';
 import Overview from './Overview';
 import WaitingSpotArea from './WaitingSpotArea';

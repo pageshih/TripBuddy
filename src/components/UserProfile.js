@@ -190,7 +190,7 @@ function UserSetting(props) {
                     <RoundButtonSmall
                       className="material-icons"
                       type="submit"
-                      addCss={css`
+                      css={css`
                         color: ${palatte.gray['500']};
                         &:hover {
                           color: ${palatte.primary.basic};
@@ -201,7 +201,7 @@ function UserSetting(props) {
                     <RoundButtonSmall
                       className="material-icons"
                       type="button"
-                      addCss={css`
+                      css={css`
                         color: ${palatte.gray['500']};
                         &:hover {
                           color: ${palatte.danger.basic};

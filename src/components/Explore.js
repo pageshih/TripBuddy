@@ -132,7 +132,7 @@ const ExpandButton = (props) => (
     size="30px"
     className="material-icons"
     styled="gray700"
-    addCss={css`
+    css={css`
       position: absolute;
       right: -15px;
       top: 10px;

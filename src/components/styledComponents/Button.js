@@ -187,8 +187,8 @@ const RoundButtonSmall = styled.button`
     props.styled
       ? buttonSmallColorMap[props.styled].default.backgroundColor
       : 'transparent'};
-  padding: ${(props) => props.padding || '0px'};
-  border-radius: ${(props) => props.borderRadius || '50%'};
+  padding: 0;
+  border-radius: 50%;
   width: ${(props) => props.size || '24px'};
   height: ${(props) => props.size || '24px'};
   font-size: ${(props) => props.fontSize || props.size || '24px'};
@@ -206,7 +206,6 @@ const RoundButtonSmall = styled.button`
     box-shadow: ${(props) =>
       props.styled ? `1px 1px 1px 1px ${palatte.shadow}` : null};
   }
-  ${(props) => props.addCss}
 `;
 const RoundButtonSmallWhite = styled(RoundButtonSmall)`
   font-size: ${(props) => props.size || '20px'};
@@ -294,7 +293,7 @@ const ReviewTagRemoveButton = (props) => (
     {props.children}
     <RoundButtonSmall
       size="20px"
-      addCss={css`
+      css={css`
         font-size: 20px;
         color: ${palatte.white};
         opacity: 0.7;

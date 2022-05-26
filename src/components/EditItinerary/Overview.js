@@ -82,7 +82,7 @@ function Overview(props) {
                   <RoundButtonSmallWhite
                     className="material-icons"
                     type="button"
-                    addCss={css`
+                    css={css`
                       &:hover {
                         background-color: ${palatte.danger.basic};
                         color: ${palatte.white};
