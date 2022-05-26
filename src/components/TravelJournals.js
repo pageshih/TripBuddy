@@ -1,11 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
+import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { OverviewCard } from './styledComponents/Cards';
-import { FlexDiv } from './styledComponents/Layout';
 import { styles, Loader } from './styledComponents/basic/common';
 
+const Container = styled.ul`
+  ${styles.flex}
+  ${styles.containerSetting}
+  flex-wrap:wrap;
+  gap: 30px;
+  margin: auto auto 100px auto;
+`;
 function TravelJournals() {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
@@ -22,17 +31,14 @@ function TravelJournals() {
   return (
     <>
       {journals ? (
-        <FlexDiv
-          as="ul"
-          wrap="wrap"
-          gap="30px"
-          addCss={styles.containerSetting}
-          margin="auto auto 100px auto">
+        <Container>
           {journals?.map((journal) => (
             <OverviewCard
               as="li"
-              basis="calc(50% - 15px)"
-              margin="0 0 20px 0"
+              addCss={css`
+                flex-basis: calc(50% - 15px);
+                margin-bottom: 20px;
+              `}
               key={journal.itinerary_id}
               src={journal.cover_photo}
               alt={journal.title}
@@ -44,7 +50,7 @@ function TravelJournals() {
               }
             />
           ))}
-        </FlexDiv>
+        </Container>
       ) : (
         <Loader />
       )}
