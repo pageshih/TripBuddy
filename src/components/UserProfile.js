@@ -70,9 +70,11 @@ function UserSetting(props) {
     props.setProfile({ ...props.profile, name: value });
   };
   useEffect(() => {
-    firestore.getItinerariesSetting(uid).then((res) => {
-      setTravelMode(res.default_travel_mode);
-    });
+    if (uid) {
+      firestore.getItinerariesSetting(uid).then((res) => {
+        setTravelMode(res.default_travel_mode);
+      });
+    }
   }, [uid]);
 
   return (
@@ -341,23 +343,18 @@ function UserProfile(props) {
         })
         .catch((error) => console.error(error));
     }
-  }, [uid, setUid]);
+  }, [uid]);
 
   const logout = () => {
     firebaseAuth
       .userSignOut()
       .then(() => {
-        setIsLogInOut(true);
         setGoLogin(false);
+        setIsLogInOut(true);
+        navigate('/login');
       })
       .catch((error) => console.error(error));
   };
-  useEffect(() => {
-    if (isLogInOut && !goLogin) {
-      setUid(undefined);
-      navigate('/login');
-    }
-  }, [isLogInOut, goLogin, navigate, setUid]);
 
   return (
     <>

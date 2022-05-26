@@ -10,9 +10,72 @@ import { Logo } from './styledComponents/basic/Logo';
 import { P } from './styledComponents/basic/Text';
 import { Button, ButtonOutline } from './styledComponents/Button';
 import { TextInput } from './styledComponents/Form';
-import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
+import { Image } from './styledComponents/Layout';
 import { NotificationText } from './styledComponents/Notification';
 
+const Container = styled.div`
+  ${styles.flex}
+  ${mediaQuery[0]} {
+    display: block;
+    position: relative;
+    background-color: ${palatte.secondary['100']};
+    height: 100vh;
+  }
+`;
+
+const EntryImage = ({ src }) => (
+  <Image
+    src={src}
+    alt="TripBuddy"
+    addCss={css`
+      width: 52%;
+      height: 100vh;
+      ${mediaQuery[0]} {
+        height: 200px;
+        width: 100%;
+      }
+    `}
+  />
+);
+
+const EntryContainer = styled.div`
+  ${styles.flex}
+  flex-grow: 1;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  ${mediaQuery[0]} {
+    position: absolute;
+    top: 120px;
+    width: 100%;
+    height: fit-content;
+    align-items: flex-start;
+    padding: 0 20px;
+  }
+`;
+const EntryContentWrapper = styled.div`
+  ${styles.flexColumn}
+  gap:60px;
+  flex-basis: 450px;
+  padding: 30px;
+  ${mediaQuery[0]} {
+    background-color: ${palatte.white};
+    flex-basis: 400px;
+    padding: 40px 30px;
+    border-radius: 30px;
+    box-shadow: ${styles.shadow};
+    gap: 40px;
+  }
+`;
+
+const EntryFormWrapper = styled.div`
+  ${styles.flexColumn};
+  gap: 20px;
+`;
+const EntryInputWrapper = styled.div`
+  ${styles.flexColumn};
+  gap: 15px;
+`;
 const ContainerTopLine = styled.div`
   display: flex;
   border-top: ${styles.border};
@@ -45,7 +108,7 @@ const textNotificationReducer = (state, action) => {
   }
 };
 
-function Login(props) {
+function Login() {
   const { dispatchNotification } = useContext(Context);
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
@@ -207,70 +270,13 @@ function Login(props) {
   }, []);
   return (
     <>
-      <FlexDiv
-        css={css`
-          ${mediaQuery[0]} {
-            display: block;
-            position: relative;
-            background-color: ${palatte.secondary['100']};
-            height: 100vh;
-          }
-        `}>
-        <Image
-          src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          alt="TripBuddy"
-          addCss={css`
-            width: 52%;
-            height: 100vh;
-            ${mediaQuery[0]} {
-              height: 200px;
-              width: 100%;
-            }
-          `}
-        />
-        <FlexChildDiv
-          addCss={css`
-            flex-grow: 1;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-            ${mediaQuery[0]} {
-              position: absolute;
-              top: 120px;
-              width: 100%;
-              height: fit-content;
-              align-items: flex-start;
-              padding: 0 20px;
-            }
-          `}>
-          <FlexChildDiv
-            direction="column"
-            gap="60px"
-            basis="450px"
-            padding="30px"
-            addCss={css`
-              ${mediaQuery[0]} {
-                background-color: ${palatte.white};
-                flex-basis: 400px;
-                padding: 40px 30px;
-                border-radius: 30px;
-                box-shadow: ${styles.shadow};
-                gap: 40px;
-              }
-            `}>
+      <Container>
+        <EntryImage src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" />
+        <EntryContainer>
+          <EntryContentWrapper>
             <Logo />
-            <FlexDiv
-              direction="column"
-              gap="30px"
-              addCss={css`
-                gap: 20px;
-              `}>
-              <FlexDiv
-                direction="column"
-                gap="20px"
-                addCss={css`
-                  gap: 15px;
-                `}>
+            <EntryFormWrapper>
+              <EntryInputWrapper>
                 {isSignUp && (
                   <>
                     <TextInput
@@ -304,7 +310,7 @@ function Login(props) {
                   {textNotification.fire?.some((id) => id === 'password') &&
                     textNotification.message.password}
                 </NotificationText>
-              </FlexDiv>
+              </EntryInputWrapper>
               <Button styled="primary" onClick={isSignUp ? signUp : signIn}>
                 {isSignUp ? '註冊' : ' Email 登入'}
               </Button>
@@ -314,17 +320,26 @@ function Login(props) {
                 </P>
                 <ButtonOutline
                   styled="primary"
-                  onClick={() => setIsSignUp((prev) => !prev)}>
+                  onClick={() => {
+                    if (!isSignUp) {
+                      setEmail('');
+                      setPassword('');
+                    } else {
+                      setEmail('test@mail.com');
+                      setPassword('test123');
+                    }
+                    setIsSignUp((prev) => !prev);
+                  }}>
                   {isSignUp ? 'Email 登入' : 'Email 註冊'}
                 </ButtonOutline>
                 <ButtonOutline styled="primary" onClick={logInWithGoogle}>
                   使用 Google 登入
                 </ButtonOutline>
               </ContainerTopLine>
-            </FlexDiv>
-          </FlexChildDiv>
-        </FlexChildDiv>
-      </FlexDiv>
+            </EntryFormWrapper>
+          </EntryContentWrapper>
+        </EntryContainer>
+      </Container>
     </>
   );
 }

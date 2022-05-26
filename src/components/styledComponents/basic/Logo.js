@@ -26,7 +26,7 @@ const UnderlineLogoContainer = styled.div`
 `;
 const LargeLogoContainer = styled.div`
   ${common}
-  direction:column;
+  flex-direction:column;
   align-items: center;
   gap: 5px;
 `;

@@ -38,7 +38,7 @@ const LoginOrPage = (props) => {
     } else if (uid === '') {
       setGoLogin(true);
     }
-  }, [uid]);
+  }, [uid, setGoLogin]);
   return (
     <>
       {goLogin && !isLogInOut ? (
@@ -117,7 +117,7 @@ function App() {
         (error) => console.error(error)
       );
     }
-  }, [uid, setUid, isLogInOut]);
+  }, [isLogInOut]);
 
   return (
     <>

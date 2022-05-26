@@ -58,7 +58,7 @@ const ExploreSpot = ({ isNothing }) => {
   );
 };
 ExploreSpot.propTypes = {
-  nothing: PropTypes.bool,
+  isNothing: PropTypes.bool,
 };
 
 const foldContainer = css`
