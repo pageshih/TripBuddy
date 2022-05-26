@@ -124,7 +124,7 @@ EditableText.propTypes = {
   fontSize: PropTypes.string,
   color: PropTypes.string,
   isAllowEdit: PropTypes.bool,
-  addCss: PropTypes.string,
+  addCss: PropTypes.object,
 };
 
 function EditableDate(props) {

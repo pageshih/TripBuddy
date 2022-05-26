@@ -14,7 +14,7 @@ const Container = styled.div`
 const HeaderWrapper = styled.div`
   ${styles.flex};
   justify-content: space-between;
-  max-width: ${(props) => (props.isAllowEdit ? '200px' : undefined)};
+  max-width: ${(props) => (props.isAllowEdit ? '200px' : null)};
   & > * {
     color: ${palatte.gray['700']};
   }

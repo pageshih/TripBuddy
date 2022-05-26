@@ -26,16 +26,16 @@ const MainEditAreaContainer = styled.div`
   flex-direction: column;
   gap: 20px;
   min-height: 100vh;
-  width: ${(props) => props.isAllowEdit && 'calc(100% - 340px)'};
+  width: ${(props) => (props.isAllowEdit ? 'calc(100% - 340px)' : null)};
   ${mediaQuery[0]} {
     width: 100%;
-    padding-bottom: ${(props) => props.isAllowEdit && '25vh'};
+    padding-bottom: ${(props) => (props.isAllowEdit ? '25vh' : null)};
   }
 `;
 const DepartAndPaginationWrapper = styled.div`
   ${styles.flex}
   ${styles.containerSetting}
-    max-width: ${(props) => props.isAllowEdit && '1280px'};
+    max-width: ${(props) => (props.isAllowEdit ? '1280px' : null)};
   width: 100%;
   justify-content: space-between;
   align-items: flex-end;

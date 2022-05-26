@@ -30,7 +30,6 @@ import {
   where,
   deleteDoc,
   writeBatch,
-  WriteBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
 import { createDepartTimeAry } from './utilities';
@@ -131,16 +130,20 @@ const firestore = {
     );
     batch.set(
       doc(this.db, 'itineraries', userUID),
-      { default_travel_mode: 'DRIVING', uid: userUID },
+      { default_travel_mode: 'DRIVING', review_tags: null },
       { merge: 'merge' }
     );
     return batch.commit();
   },
   getProfile(userUID) {
-    return new Promise((resolve) => {
-      getDoc(doc(this.db, 'profile', userUID)).then((profileSnap) => {
-        resolve(profileSnap.data());
-      });
+    const profile = getDoc(doc(this.db, 'profile', userUID));
+    const setting = getDoc(doc(this.db, 'itineraries', userUID));
+    return Promise.all([profile, setting]).then((res) => {
+      const profileSetting = res.reduce((finalData, doc) => {
+        finalData = { ...finalData, ...doc.data() };
+        return finalData;
+      }, {});
+      return profileSetting;
     });
   },
   editProfile(userUID, newProfile) {

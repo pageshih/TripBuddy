@@ -126,7 +126,7 @@ function AddReview({
       setCheckedReviewTags(
         checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
       );
-      firestore.editProfile(uid, {
+      firestore.setItinerariesSetting(uid, {
         review_tags: reviewTags ? [addTag, ...reviewTags] : [addTag],
       });
       setAddTag('');

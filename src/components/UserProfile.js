@@ -1,7 +1,9 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState, useRef } from 'react';
+import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import defaultUserIcon from '../images/user-avatar-filled.svg';
 import { firebaseAuth, firestore, firebaseStorage } from '../utils/firebase';
 import { Context } from '../App';
@@ -32,13 +34,103 @@ const activeStyle = (isActive) => {
 };
 const SettingTitle = (props) => (
   <>
-    <H6 fontSize="20px" fontWeight={500} color={palatte.gray['800']}>
+    <H6
+      css={css`
+        font-size: 20px;
+        font-weight: 500;
+        color: ${palatte.gray['800']};
+      `}>
       {props.title}
     </H6>
-    <P color={palatte.gray['600']}>{props.subTitle}</P>
+    <P
+      css={css`
+        color: ${palatte.gray['600']};
+      `}>
+      {props.subTitle}
+    </P>
   </>
 );
-function UserSetting(props) {
+const UserSettingContentContainer = styled.div`
+  ${styles.flexColumn};
+  padding: 20px 0;
+  gap: 20px;
+  height: 100%;
+`;
+const UserProfileWrapper = styled.div`
+  ${styles.flex}
+  gap: 20px;
+  align-items: center;
+  padding: 0 0 30px 0;
+  border-bottom: 1px solid ${palatte.gray['400']};
+`;
+const UserProfileTextWrapper = styled.div`
+  ${styles.flexColumn}
+  gap:8px;
+`;
+const Title = ({ iconName, children }) => (
+  <div
+    css={css`
+      ${styles.flex}
+      align-items: center;
+      gap: 5px;
+    `}>
+    <span
+      className="material-icons"
+      css={css`
+        color: ${palatte.gray['700']};
+        margin-top: 4px;
+      `}>
+      {iconName}
+    </span>
+    <H5
+      css={css`
+        font-size: 24px;
+        font-weight: 500;
+      `}>
+      {children}
+    </H5>
+  </div>
+);
+const SettingContainer = styled.div`
+  ${styles.flexColumn};
+  gap: 30px;
+  grow: 1;
+  overflow-y: auto;
+`;
+const SettingReviewTagsContainer = styled.div`
+  ${styles.flexColumn};
+  gap: 15px;
+  height: 100%;
+`;
+const SettingReviewButtonWrapper = styled.div`
+  ${styles.flex}
+  gap:5px;
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 12px);
+`;
+const SettingReviewTagsWrapper = styled.div`
+  ${styles.flex}
+  gap:5px;
+  width: 100%;
+  flex-wrap: wrap;
+`;
+
+const SettingReviewButton = styled(RoundButtonSmall)`
+  color: ${palatte.gray['500']};
+  &:hover {
+    color: ${(props) =>
+      props.danger ? palatte.danger.basic : palatte.primary.basic};
+  }
+`;
+function UserSetting({
+  profile,
+  setProfile,
+  isShowState,
+  setIsShowSetting,
+  reviewTags,
+  setReviewTags,
+}) {
   const { uid, dispatchNotification } = useContext(Context);
   const [addTag, setAddTag] = useState('');
   const addTagInput = useRef();
@@ -51,7 +143,7 @@ function UserSetting(props) {
         'profile_photo'
       );
       await firestore.editProfile(uid, { photo: urlAry[0] });
-      props.setProfile({ ...props.profile, photo: urlAry[0] });
+      setProfile({ ...profile, photo: urlAry[0] });
       dispatchNotification({
         type: 'fire',
         playload: {
@@ -67,7 +159,7 @@ function UserSetting(props) {
   };
   const updateUserName = async (value) => {
     await firestore.editProfile(uid, { name: value });
-    props.setProfile({ ...props.profile, name: value });
+    setProfile({ ...profile, name: value });
   };
   useEffect(() => {
     if (uid) {
@@ -82,19 +174,14 @@ function UserSetting(props) {
       <Modal
         addCss={css`
           min-width: 70%;
+          flex-basis: 70%;
           height: 80%;
           padding: 20px 40px;
         `}
-        isShowState={props.isShowState}
-        close={() => props.setIsShowSetting(false)}>
-        <FlexDiv direction="column" padding="20px 0" gap="20px" height="100%">
-          <FlexDiv
-            addCss={css`
-              gap: 20px;
-              align-items: center;
-              padding: 0 0 30px 0;
-              border-bottom: 1px solid ${palatte.gray['400']};
-            `}>
+        isShowState={isShowState}
+        close={() => setIsShowSetting(false)}>
+        <UserSettingContentContainer>
+          <UserProfileWrapper>
             <div
               css={css`
                 position: relative;
@@ -106,8 +193,8 @@ function UserSetting(props) {
                 addCss={css`
                   border: 1px solid ${palatte.gray['100']};
                 `}
-                src={props.profile.photo || defaultUserIcon}
-                alt={props.profile.name}
+                src={profile.photo || defaultUserIcon}
+                alt={profile.name}
               />
               <AddImageRoundBtn
                 addCss={css`
@@ -122,33 +209,22 @@ function UserSetting(props) {
                 upload={updateProfilePhoto}
               />
             </div>
-            <FlexDiv direction="column" gap="8px">
+            <UserProfileTextWrapper>
               <EditableText
                 isAllowEdit
                 defaultShowText
                 level="5"
                 fontSize="24px"
                 onSubmit={updateUserName}>
-                {props.profile.name || ''}
+                {profile.name || ''}
               </EditableText>
               <P fontSize="14px" color={palatte.gray['400']}>
-                用戶ID：{props.profile.uid}
+                用戶ID：{profile.uid}
               </P>
-            </FlexDiv>
-          </FlexDiv>
-          <FlexDiv alignItems="center" gap="5px">
-            <span
-              className="material-icons"
-              css={css`
-                color: ${palatte.gray['700']};
-              `}>
-              settings
-            </span>
-            <H5 fontSize="24px" fontWeight={500}>
-              設置
-            </H5>
-          </FlexDiv>
-          <FlexChildDiv direction="column" gap="30px" grow="1" overflowY="auto">
+            </UserProfileTextWrapper>
+          </UserProfileWrapper>
+          <Title iconName="settings">設置</Title>
+          <SettingContainer>
             <Accordion
               titleElement={
                 <SettingTitle
@@ -156,7 +232,7 @@ function UserSetting(props) {
                   subTitle="預設顯示在遊記的標籤，幫助你快速紀錄當下景點的心得"
                 />
               }>
-              <FlexDiv direction="column" gap="15px" height="100%">
+              <SettingReviewTagsContainer>
                 <form
                   css={css`
                     position: relative;
@@ -164,13 +240,13 @@ function UserSetting(props) {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     if (addTag) {
-                      const newReviewTags = props.reviewTags
-                        ? [...props.reviewTags, addTag]
+                      const newReviewTags = reviewTags
+                        ? [...reviewTags, addTag]
                         : [addTag];
                       await firestore.editProfile(uid, {
                         review_tags: newReviewTags,
                       });
-                      props.setReviewTags(newReviewTags);
+                      setReviewTags(newReviewTags);
                       setAddTag('');
                     }
                   }}>
@@ -180,64 +256,52 @@ function UserSetting(props) {
                     ref={addTagInput}
                     onChange={(e) => setAddTag(e.target.value)}
                   />
-                  <FlexDiv
-                    gap="5px"
-                    addCss={css`
-                      position: absolute;
-                      right: 12px;
-                      top: calc(50% - 12px);
-                    `}>
-                    <RoundButtonSmall
+                  <SettingReviewButtonWrapper>
+                    <SettingReviewButton
                       className="material-icons"
-                      type="submit"
-                      css={css`
-                        color: ${palatte.gray['500']};
-                        &:hover {
-                          color: ${palatte.primary.basic};
-                        }
-                      `}>
+                      type="submit">
                       done
-                    </RoundButtonSmall>
-                    <RoundButtonSmall
+                    </SettingReviewButton>
+                    <SettingReviewButton
                       className="material-icons"
                       type="button"
-                      css={css`
-                        color: ${palatte.gray['500']};
-                        &:hover {
-                          color: ${palatte.danger.basic};
-                        }
-                      `}
+                      danger
                       onClick={() => {
                         setAddTag('');
                         addTagInput.current.focus();
                       }}>
                       close
-                    </RoundButtonSmall>
-                  </FlexDiv>
+                    </SettingReviewButton>
+                  </SettingReviewButtonWrapper>
                 </form>
-                <FlexDiv gap="5px" width="100%" wrap="wrap">
-                  {props.reviewTags?.length > 0 ? (
-                    props.reviewTags.map((tag) => (
+                <SettingReviewTagsWrapper>
+                  {reviewTags?.length > 0 ? (
+                    reviewTags.map((tag) => (
                       <ReviewTagRemoveButton
                         styled="primary"
                         key={tag}
                         onClick={async () => {
-                          const newReviewTags = props.reviewTags.filter(
+                          const newReviewTags = reviewTags.filter(
                             (originTag) => originTag !== tag
                           );
                           await firestore.editProfile(uid, {
                             review_tags: newReviewTags,
                           });
-                          props.setReviewTags(newReviewTags);
+                          setReviewTags(newReviewTags);
                         }}>
                         {tag}
                       </ReviewTagRemoveButton>
                     ))
                   ) : (
-                    <P color={palatte.gray['500']}>尚未添加心得標籤</P>
+                    <P
+                      css={css`
+                        color: ${palatte.gray['500']};
+                      `}>
+                      尚未添加心得標籤
+                    </P>
                   )}
-                </FlexDiv>
-              </FlexDiv>
+                </SettingReviewTagsWrapper>
+              </SettingReviewTagsContainer>
             </Accordion>
             <Accordion
               titleElement={
@@ -268,70 +332,81 @@ function UserSetting(props) {
                 <option value="BICYCLING">騎自行車</option>
               </Select>
             </Accordion>
-          </FlexChildDiv>
-        </FlexDiv>
+          </SettingContainer>
+        </UserSettingContentContainer>
       </Modal>
     </>
   );
 }
+
+UserSetting.propTypes = {
+  profile: PropTypes.objectOf(PropTypes.string),
+  setProfile: PropTypes.func,
+  isShowState: PropTypes.bool,
+  setIsShowSetting: PropTypes.func,
+  reviewTags: PropTypes.array,
+  setReviewTags: PropTypes.func,
+};
+
+const UserProfileCardWrapper = styled.div`
+  border-radius: 30px;
+  padding: 25px 20px 25px 25px;
+  background-color: ${palatte.secondary.basic};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  box-shadow: ${styles.shadow};
+  ${mediaQuery[0]} {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+`;
+const DecoOfPage = styled.div`
+  width: 100%;
+  height: 60px;
+  background-color: ${palatte.white};
+  border-radius: 30px 30px 0 0;
+  box-shadow: 0px -2px 2px 2px ${palatte.shadow};
+`;
+const NavTag = styled(NavLink)`
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  color: ${palatte.white};
+  text-decoration: none;
+  background-color: ${palatte.gray['400']};
+  box-shadow: 0px -2px 2px 2px ${palatte.shadow};
+  span {
+    display: none;
+  }
+  ${mediaQuery[0]} {
+    font-size: 14px;
+    padding: 10px;
+    flex-grow: 1;
+    display: block;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: center;
+    border-right: 1px solid ${palatte.gray['100']};
+    span {
+      display: block;
+      font-size: 32px;
+      color: ${palatte.white};
+      text-align: center;
+      margin-bottom: 3px;
+    }
+  }
+`;
+
 function UserProfile(props) {
-  const { uid, setUid, setGoLogin, isLogInOut, goLogin, setIsLogInOut } =
-    useContext(Context);
+  const { uid, setGoLogin, setIsLogInOut } = useContext(Context);
   const [profile, setProfile] = useState();
   const [reviewTags, setReviewTags] = useState();
   const [isShowSetting, setIsShowSetting] = useState();
   const navigate = useNavigate();
-  const userProfileWrapper = css`
-    border-radius: 30px;
-    padding: 25px 20px 25px 25px;
-    background-color: ${palatte.secondary.basic};
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    box-shadow: ${styles.shadow};
-    ${mediaQuery[0]} {
-      background-color: transparent;
-      box-shadow: none;
-      padding: 0;
-    }
-  `;
-  const decoOfPage = css`
-    width: 100%;
-    height: 60px;
-    background-color: ${palatte.white};
-    border-radius: 30px 30px 0 0;
-    box-shadow: 0px -2px 2px 2px ${palatte.shadow};
-  `;
-  const navLink = css`
-    font-size: 18px;
-    padding: 10px 20px;
-    border-radius: 10px 10px 0 0;
-    color: ${palatte.white};
-    text-decoration: none;
-    background-color: ${palatte.gray['400']};
-    box-shadow: 0px -2px 2px 2px ${palatte.shadow};
-    span {
-      display: none;
-    }
-    ${mediaQuery[0]} {
-      font-size: 14px;
-      padding: 10px;
-      flex-grow: 1;
-      display: block;
-      border-radius: 0;
-      box-shadow: none;
-      text-align: center;
-      border-right: 1px solid ${palatte.gray['100']};
-      span {
-        display: block;
-        font-size: 32px;
-        color: ${palatte.white};
-        text-align: center;
-        margin-bottom: 3px;
-      }
-    }
-  `;
+
   useEffect(() => {
     if (uid) {
       firestore
@@ -414,7 +489,7 @@ function UserProfile(props) {
                       }
                     `}
                   />
-                  <div css={userProfileWrapper}>
+                  <UserProfileCardWrapper>
                     <FlexChildDiv
                       gap="20px"
                       alignItems="center"
@@ -458,7 +533,7 @@ function UserProfile(props) {
                         settings
                       </RoundButtonSmall>
                     </FlexDiv>
-                  </div>
+                  </UserProfileCardWrapper>
                 </FlexDiv>
                 <FlexDiv
                   gap="15px"
@@ -472,19 +547,17 @@ function UserProfile(props) {
                       z-index: 10;
                     }
                   `}>
-                  <NavLink
-                    css={navLink}
+                  <NavTag
                     style={({ isActive }) => {
                       return activeStyle(isActive);
                     }}
                     to={`/itineraries`}>
                     <span className="material-icons">event_note</span>
                     所有行程
-                  </NavLink>
-                  <NavLink
+                  </NavTag>
+                  <NavTag
                     css={css`
                       display: none;
-                      ${navLink}
                     `}
                     style={({ isActive }) => {
                       return activeStyle(isActive);
@@ -492,28 +565,26 @@ function UserProfile(props) {
                     to={`/explore`}>
                     <span className="material-icons">explore</span>
                     探索景點
-                  </NavLink>
-                  <NavLink
-                    css={navLink}
+                  </NavTag>
+                  <NavTag
                     style={({ isActive }) => {
                       return activeStyle(isActive);
                     }}
                     to={`/saved-spots`}>
                     <span className="material-icons">add_location</span>
                     候補景點
-                  </NavLink>
-                  <NavLink
-                    css={navLink}
+                  </NavTag>
+                  <NavTag
                     style={({ isActive }) => {
                       return activeStyle(isActive);
                     }}
                     to={`/travel-journals`}>
                     <span className="material-icons">article</span>
                     旅行回憶
-                  </NavLink>
+                  </NavTag>
                 </FlexDiv>
               </FlexDiv>
-              <div css={decoOfPage}></div>
+              <DecoOfPage />
             </Container>
 
             <Outlet context={{ reviewTags }} />

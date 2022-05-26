@@ -361,7 +361,7 @@ function TravelJournalDetail() {
                   <Accordion
                     isDefualtExpand
                     addCss={css`
-                      max-width: ${isAllowEdit && 'calc(100% - 40px)'};
+                      max-width: ${isAllowEdit ? 'calc(100% - 40px)' : null};
                     `}
                     isHideContent={
                       (!schedule.review_tags ||

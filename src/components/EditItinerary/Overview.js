@@ -19,7 +19,7 @@ const BackgroundContainer = styled.div`
 `;
 const ContentContainer = styled.div`
   ${styles.containerSetting}
-  max-width: ${(props) => props.isAllowEdit && '1280px'};
+  max-width: ${(props) => (props.isAllowEdit ? '1280px' : null)};
   padding: 40px 20px 50px 20px;
 `;
 const ButtonWrapper = styled.div`

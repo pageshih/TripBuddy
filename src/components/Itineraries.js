@@ -194,7 +194,7 @@ function Itineraries() {
                                 `/itinerary/${progressing.overview.itinerary_id}`
                               )
                             }>
-                            {schedule.start_time < now && (
+                            {schedule.start_time < now ? (
                               <>
                                 <AddReviewButton
                                   styled="primary"
@@ -234,7 +234,7 @@ function Itineraries() {
                                   isEdit
                                 />
                               </>
-                            )}
+                            ) : null}
                           </ScheduleCard>
                         );
                       })

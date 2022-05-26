@@ -129,12 +129,12 @@ export function AddSpotToItineraryController({
 }
 
 AddSpotToItineraryController.propTypes = {
-  choseItinerary: PropTypes.string.isRequired,
-  onChangeItinerary: PropTypes.func.isRequired,
-  createdItineraries: PropTypes.array.isRequired,
-  addAction: PropTypes.func.isRequired,
-  deleteAction: PropTypes.func.isRequired,
-  selectedSpots: PropTypes.array.isRequired,
-  isShowShadow: PropTypes.bool.isRequired,
-  isColumn: PropTypes.bool.isRequired,
+  choseItinerary: PropTypes.string,
+  onChangeItinerary: PropTypes.func,
+  createdItineraries: PropTypes.array,
+  addAction: PropTypes.func,
+  deleteAction: PropTypes.func,
+  selectedSpots: PropTypes.array,
+  isShowShadow: PropTypes.bool,
+  isColumn: PropTypes.bool,
 };

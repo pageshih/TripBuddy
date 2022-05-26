@@ -119,7 +119,7 @@ ScheduleCardDrag.propsTypes = {
 
 const Container = styled.div`
   ${styles.containerSetting}
-  max-width: ${(props) => props.isAllowEdit && '1280px'};
+  max-width: ${(props) => (props.isAllowEdit ? '1280px' : null)};
   width: 100%;
 `;
 const ScheduleAreaBackground = styled.div`
