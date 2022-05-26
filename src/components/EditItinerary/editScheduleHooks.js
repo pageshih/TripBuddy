@@ -8,7 +8,12 @@ import { transportMode } from '../styledComponents/Cards';
 const useGetTransportDetail = (updateScheduleState) => {
   const { dispatchNotification, uid } = useContext(Context);
   const { itineraryId } = useParams();
-  return (schedules, isSetSchedule, changeSingleScheduleId, newMode) => {
+  return (
+    schedules,
+    { isSetSchedule, isUploadFirebase },
+    changeSingleScheduleId,
+    newMode
+  ) => {
     const schedulesPromise = schedules.map((schedule, index, array) => {
       if (index < array.length - 1) {
         if (changeSingleScheduleId) {
@@ -78,7 +83,6 @@ const useGetTransportDetail = (updateScheduleState) => {
             distance: transitDetails[index].distance,
             direction_url: transitDetails[index].direction_url,
           };
-          console.log(schedule.start_time + schedule.duration * 60 * 1000);
           return {
             ...schedule,
             transit_detail: transitDetail,
@@ -110,7 +114,9 @@ const useGetTransportDetail = (updateScheduleState) => {
       if (isSetSchedule) {
         updateScheduleState(newSchedules);
       }
-      firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+      if (isUploadFirebase) {
+        firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+      }
       return newSchedules;
     });
   };

@@ -177,6 +177,22 @@ function AddSchedule(props) {
       newScheduleList,
     };
   };
+  const updateTransitWayAndTime = async (newScheduleList) => {
+    let updateTransportDetail = newScheduleList;
+    if (schedules?.length > 0) {
+      updateTransportDetail = await getTransportDetail(
+        newScheduleList,
+        {}
+      ).catch((error) => console.error(error));
+    }
+    const updatedTimeSchedules = updateTimeOfSchedule(
+      updateTransportDetail,
+      overviews.depart_times[day],
+      true
+    );
+    setSchedules(updatedTimeSchedules);
+    allSchedules.current[day] = updatedTimeSchedules;
+  };
   const onDragEnd = (result) => {
     const startAndEnd = {
       startId: result.source.droppableId,
@@ -196,18 +212,7 @@ function AddSchedule(props) {
         startAndEnd.endIndex
       );
       setWaitingSpots(newSpotsList);
-      if (schedules?.length > 0) {
-        getTransportDetail(newScheduleList, true).catch((error) =>
-          console.error(error)
-        );
-      } else {
-        const updatedTimeSchedules = updateTimeOfSchedule(
-          newScheduleList,
-          overviews.depart_times[day]
-        );
-        setSchedules(updatedTimeSchedules);
-        allSchedules.current[day] = updatedTimeSchedules;
-      }
+      updateTransitWayAndTime(newScheduleList);
     } else if (startAndEnd.startId === startAndEnd.endId) {
       const list =
         startAndEnd.startId === 'scheduleArea' ? schedules : waitingSpots;
@@ -221,9 +226,10 @@ function AddSchedule(props) {
           items,
           overviews.depart_times[day]
         );
-        getTransportDetail(updatedTimeSchedules, true).catch((error) =>
-          console.error(error)
-        );
+        getTransportDetail(updatedTimeSchedules, {
+          isSetSchedule: true,
+          isUploadFirebase: true,
+        }).catch((error) => console.error(error));
       } else {
         setWaitingSpots(items);
       }
@@ -235,7 +241,7 @@ function AddSchedule(props) {
         startAndEnd.startIndex,
         startAndEnd.endIndex
       );
-      getTransportDetail(newScheduleList, true);
+      updateTransitWayAndTime(newScheduleList);
       if (newSpotsList) {
         setWaitingSpots(newSpotsList);
       }

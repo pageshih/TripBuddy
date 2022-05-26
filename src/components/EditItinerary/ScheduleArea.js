@@ -155,7 +155,7 @@ function ScheduleArea({
   const deleteSchedule = (scheduleId) => {
     getTransportDetail(
       schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      true
+      { isSetSchedule: true, isUploadFirebase: true }
     );
     firestore
       .deleteSchedule(uid, itineraryId, scheduleId)
@@ -240,7 +240,12 @@ function ScheduleArea({
         return schedule;
       }
     });
-    getTransportDetail(newScheduleList, true, scheduleId, mode);
+    getTransportDetail(
+      newScheduleList,
+      { isSetSchedule: true, isUploadFirebase: true },
+      scheduleId,
+      mode
+    );
   };
 
   return (
