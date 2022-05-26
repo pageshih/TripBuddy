@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, mediaQuery } from './basic/common';
+import { palatte, mediaQuery, styles } from './basic/common';
 import { P } from './basic/Text';
 import PropTypes from 'prop-types';
-import { FlexChildDiv, FlexDiv } from './Layout';
+import { FlexDiv } from './Layout';
 
 const colorMap = {
   backgroundColor: {
@@ -371,18 +371,20 @@ const LinkIcon = styled.span`
 `;
 function HyperLink(props) {
   return (
-    <FlexChildDiv
-      as="a"
+    <a
       href={props.href}
       target={props.target || '_blank'}
       onClick={props.onClick}
-      addCss={linkTextColor}
-      alignItems="center"
-      gap="2px"
-      alignSelf={props.alignSelf}>
+      css={css`
+        ${linkTextColor}
+        ${styles.flex}
+        align-items:center;
+        gap: 2px;
+        ${props.addCss};
+      `}>
       <LinkText>{props.children}</LinkText>
       <LinkIcon className="material-icons">{props.iconName}</LinkIcon>
-    </FlexChildDiv>
+    </a>
   );
 }
 

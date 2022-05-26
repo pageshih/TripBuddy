@@ -239,7 +239,7 @@ function AddReview({
       <CSSTransition
         nodeRef={addReviewRef}
         timeout={600}
-        in={isDesktop ? true : isShowReview}
+        in={isDesktop || isJournal ? true : isShowReview}
         classNames={{
           enter: 'animate__animated',
           enterActive: 'animate__fadeInUp',

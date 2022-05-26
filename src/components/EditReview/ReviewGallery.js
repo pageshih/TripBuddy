@@ -17,8 +17,10 @@ const CloseButton = styled(RoundButtonSmall)`
   border-radius: 50%;
   color: ${palatte.gray['300']};
 `;
-const GalleryImage = () => (
+const GalleryImage = ({ src, alt }) => (
   <Image
+    src={src}
+    alt={alt}
     addCss={css`
       ${uploadImageStyle}
       width:250px;
@@ -28,8 +30,10 @@ const GalleryImage = () => (
     `}
   />
 );
-const PreviewImage = () => (
+const PreviewImage = ({ src, alt }) => (
   <Image
+    src={src}
+    alt={alt}
     addCss={css`
       ${uploadImageStyle}
       width:250px;
