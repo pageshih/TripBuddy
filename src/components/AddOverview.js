@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { palatte, styles, mediaQuery } from './styledComponents/basic/common';
@@ -16,18 +17,22 @@ import {
 import { SpotCard } from './styledComponents/Cards';
 import { TextInput, CustomDateRangePicker } from './styledComponents/Form';
 
+const Container = styled.div`
+  ${styles.flex}
+  background-color: ${palatte.gray[100]};
+`;
 const Wrapper = styled.form`
   ${styles.flexColumn};
   ${styles.containerSetting};
-  height: 100vh;
-  gap: 60px;
-  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  justify-content: space-between;
   position: relative;
+  padding: 40px;
 `;
 const ContentWrapper = styled.div`
   ${styles.flexColumn};
   gap: 20px;
-  padding: 80px 0 0 0;
 `;
 const ButtonWrapper = styled.div`
   ${styles.flex};
@@ -43,7 +48,7 @@ const SpotsCardWrapper = styled.div`
   basis: 60vh;
   max-height: 100%;
   ${mediaQuery[0]} {
-    max-height: 200px;
+    max-height: 500px;
     overflow-y: unset;
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -54,7 +59,34 @@ const DateRangePickerWrapper = styled.div`
   gap: 20px;
   align-items: center;
 `;
-function AddOverview(props) {
+const BackToExplore = ({ children, onClick }) => (
+  <RoundButtonSmallWithLabel
+    onClick={onClick}
+    iconName="chevron_left"
+    styled="gray700"
+    addCss={css`
+      padding: 0;
+    `}
+    type="button">
+    {children}
+  </RoundButtonSmallWithLabel>
+);
+const PrevButton = styled(ButtonOutline)`
+  padding: 10px 20px 10px 10px;
+  width: fit-content;
+`;
+const NextButton = styled(Button)`
+  width: fit-content;
+  padding: ${(props) => props.isNotLastStep && '10px 10px 10px 20px'};
+`;
+const SpotCardWrapper = styled.div`
+  flex-basis: 30%;
+  ${mediaQuery[0]} {
+    flex-basis: 90%;
+    min-width: 90%;
+  }
+`;
+function AddOverview({ waitingSpots, setWaitingSpots }) {
   const { uid, dispatchNotification } = useContext(Context);
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
@@ -88,7 +120,7 @@ function AddOverview(props) {
       end_date: getTimestamp(endDate),
     };
     firestore
-      .createItinerary(uid, basicInfo, props.waitingSpots)
+      .createItinerary(uid, basicInfo, waitingSpots)
       .then((itineraryId) => {
         navigate(`/add/${itineraryId}`);
       })
@@ -99,7 +131,7 @@ function AddOverview(props) {
   const nextStep = () => {
     if (
       (step === 0 && title) ||
-      (step === 1 && props.waitingSpots?.length > 0) ||
+      (step === 1 && waitingSpots?.length > 0) ||
       (step === 2 && startDate && endDate)
     ) {
       setStep((prev) => prev + 1);
@@ -107,6 +139,7 @@ function AddOverview(props) {
       dispatchNotification({
         type: 'fire',
         playload: {
+          type: 'warn',
           message: addOverView[step].alert,
           id: 'toastify_emptyValue',
         },
@@ -114,10 +147,7 @@ function AddOverview(props) {
     }
   };
   return (
-    <div
-      css={css`
-        background-color: ${palatte.gray[100]};
-      `}>
+    <Container>
       <Wrapper
         onSubmit={(e) => {
           e.preventDefault();
@@ -127,23 +157,11 @@ function AddOverview(props) {
             createItinerary();
           }
         }}>
-        <RoundButtonSmallWithLabel
-          styled="gray700"
-          type="button"
-          iconName="chevron_left"
-          addCss={css`
-            position: absolute;
-            top: 50px;
-            left: -10px;
-            ${mediaQuery[0]} {
-              left: 10px;
-            }
-          `}
-          onClick={() => navigate('/explore')}>
+        <BackToExplore onClick={() => navigate('/explore')}>
           回探索景點
-        </RoundButtonSmallWithLabel>
+        </BackToExplore>
         <ContentWrapper>
-          {step === 1 && !props.waitingSpots?.length > 0 ? null : (
+          {step === 1 && !waitingSpots?.length > 0 ? null : (
             <H5>{addOverView[step].title}</H5>
           )}
 
@@ -158,31 +176,30 @@ function AddOverview(props) {
             />
           )}
           {addOverView[step].type === 'cards' &&
-            (props.waitingSpots?.length > 0 ? (
+            (waitingSpots?.length > 0 ? (
               <SpotsCardWrapper>
-                {props.waitingSpots?.map((spot) => {
+                {waitingSpots?.map((spot) => {
                   return (
-                    <SpotCard
-                      imgSrc={spot.photos[0]}
-                      imgAlt={spot.name}
-                      title={spot.name}
-                      address={spot.formatted_address}
-                      rating={spot.rating}
-                      id={spot.place_id}
-                      key={spot.place_id}
-                      isSmall
-                      isShowCloseBtn
-                      onCloseClick={() =>
-                        props.setWaitingSpots((prev) =>
-                          prev.filter(
-                            (oldSpot) => oldSpot.place_id !== spot.place_id
+                    <SpotCardWrapper>
+                      <SpotCard
+                        imgSrc={spot.photos[0]}
+                        imgAlt={spot.name}
+                        title={spot.name}
+                        address={spot.formatted_address}
+                        rating={spot.rating}
+                        id={spot.place_id}
+                        key={spot.place_id}
+                        isSmall
+                        isShowCloseBtn
+                        onCloseClick={() =>
+                          setWaitingSpots((prev) =>
+                            prev.filter(
+                              (oldSpot) => oldSpot.place_id !== spot.place_id
+                            )
                           )
-                        )
-                      }
-                      addCss={css`
-                        flex-basis: 30%;
-                      `}
-                    />
+                        }
+                      />
+                    </SpotCardWrapper>
                   );
                 })}
               </SpotsCardWrapper>
@@ -192,7 +209,9 @@ function AddOverview(props) {
                 <HyperLink
                   onClick={() => navigate('/explore')}
                   iconName="chevron_right"
-                  alignSelf="flex-start">
+                  addCss={css`
+                    align-items: flex-start;
+                  `}>
                   前往探索景點
                 </HyperLink>
               </>
@@ -212,11 +231,9 @@ function AddOverview(props) {
         </ContentWrapper>
         <ButtonWrapper isFirstStep={step < 1}>
           {step > 0 && (
-            <ButtonOutline
+            <PrevButton
               type="button"
-              width="fit-content"
               styled="gray"
-              padding="10px 20px 10px 10px"
               onClick={() => setStep((prev) => prev - 1)}>
               <span
                 className="material-icons"
@@ -226,13 +243,9 @@ function AddOverview(props) {
                 chevron_left
               </span>
               上一步
-            </ButtonOutline>
+            </PrevButton>
           )}
-          <Button
-            styled="primary"
-            type="submit"
-            width="fit-content"
-            padding={step < 2 && '10px 10px 10px 20px'}>
+          <NextButton styled="primary" type="submit" isNotLastStep={step < 2}>
             {step < 2 ? '下一步' : '新建行程'}
             {step < 2 && (
               <span
@@ -243,11 +256,14 @@ function AddOverview(props) {
                 chevron_right
               </span>
             )}
-          </Button>
+          </NextButton>
         </ButtonWrapper>
       </Wrapper>
-    </div>
+    </Container>
   );
 }
-
+AddOverview.propTypes = {
+  waitingSpots: PropTypes.array,
+  setWaitingSpots: PropTypes.func,
+};
 export default AddOverview;
