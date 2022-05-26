@@ -130,7 +130,7 @@ const firestore = {
     );
     batch.set(
       doc(this.db, 'itineraries', userUID),
-      { default_travel_mode: 'DRIVING', review_tags: null },
+      { default_travel_mode: 'DRIVING', review_tags: null, uid: userUID },
       { merge: 'merge' }
     );
     return batch.commit();

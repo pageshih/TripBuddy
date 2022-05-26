@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -17,7 +18,7 @@ import { SelectAllCheckBox } from './styledComponents/Form';
 import { Button } from './styledComponents/Button';
 import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';
 
-function SavedSpots(props) {
+function SavedSpots({ setWaitingSpots }) {
   const { uid, map, dispatchNotification } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
@@ -47,7 +48,7 @@ function SavedSpots(props) {
       );
 
       if (addAction === 'add') {
-        props.setWaitingSpots(waitingSpots);
+        setWaitingSpots(waitingSpots);
         navigate('/add');
       } else {
         firestore
@@ -165,5 +166,9 @@ function SavedSpots(props) {
     </>
   );
 }
+
+SavedSpots.propTypes = {
+  setWaitingSpots: PropTypes.func,
+};
 
 export default SavedSpots;
