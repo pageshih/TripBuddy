@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
 import { palatte, styles } from '../styledComponents/basic/common';
 import { ReviewTag, inputBaseSmall } from '../styledComponents/Form';
