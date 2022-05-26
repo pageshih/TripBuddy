@@ -2,6 +2,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext } from 'react-beautiful-dnd';
 import styled from '@emotion/styled';
+import PropTypes from 'prop-types';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { filterDaySchedules, createDepartTimeAry } from '../utils/utilities';
@@ -404,5 +405,7 @@ function AddSchedule(props) {
     </DragDropContext>
   );
 }
-
+AddSchedule.propTypes = {
+  isAllowEdit: PropTypes.bool,
+};
 export default AddSchedule;
