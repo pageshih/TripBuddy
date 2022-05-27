@@ -115,7 +115,7 @@ function Overview({
               addInputCss={css`
                 color: ${palatte.gray[800]};
               `}
-              defaultShowText={isJournal}
+              isDefaultShowText={isJournal}
               isAllowEdit={isAllowEdit}
               onSubmit={(title) => {
                 if (title !== overviews.title) {
@@ -125,7 +125,7 @@ function Overview({
               {overviews.title}
             </EditableText>
             <EditableDate
-              defaultShowText={isJournal}
+              isDefaultShowText={isJournal}
               start={overviews.start_date}
               end={overviews.end_date}
               onSubmit={updateDate}

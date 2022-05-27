@@ -27,7 +27,7 @@ function DepartController({ isAllowEdit, departTimes, day, onSubmit }) {
         <P>{timestampToString(departTimes[day], 'simpleDate')}</P>
       </HeaderWrapper>
       <EditableDate
-        time
+        isTime
         start={departTimes[day]}
         onSubmit={onSubmit}
         isAllowEdit={isAllowEdit}

@@ -244,9 +244,11 @@ function UserSetting({
             <UserProfileTextWrapper>
               <EditableText
                 isAllowEdit
-                defaultShowText
+                isDefaultShowText
                 level="5"
-                fontSize="24px"
+                addCss={css`
+                  font-size: 24px;
+                `}
                 onSubmit={updateUserName}>
                 {profile.name || ''}
               </EditableText>
