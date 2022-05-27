@@ -77,7 +77,7 @@ const SpotCardDraggable = ({ id, index, deleteSpot, spot }) => {
           <SpotCard
             isSmall
             isShowCloseBtn
-            onCloseClick={() => deleteSpot(id)}
+            onDeleteClick={() => deleteSpot(id)}
             id={id}
             imgSrc={spot.photos[0]}
             imgAlt={spot.name}

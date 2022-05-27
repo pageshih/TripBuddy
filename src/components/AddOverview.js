@@ -191,7 +191,7 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
                         key={spot.place_id}
                         isSmall
                         isShowCloseBtn
-                        onCloseClick={() =>
+                        onDeleteClick={() =>
                           setWaitingSpots((prev) =>
                             prev.filter(
                               (oldSpot) => oldSpot.place_id !== spot.place_id

@@ -32,7 +32,7 @@ const ScheduleCardDrag = ({
   selectedList,
   setSelectedList,
   onClick,
-  onCloseClick,
+  onDeleteClick,
   changeTrasitWay,
   updateDuration,
 }) => {
@@ -87,7 +87,7 @@ const ScheduleCardDrag = ({
             isShowCloseBtn={isAllowEdit}
             hideDuration
             onClick={onClick}
-            onCloseClick={onCloseClick}
+            onDeleteClick={onDeleteClick}
             changeTrasitWay={changeTrasitWay}
             isDragging={snapshot.isDragging}
           />
@@ -113,7 +113,7 @@ ScheduleCardDrag.propsTypes = {
   selectedList: PropTypes.array,
   setSelectedList: PropTypes.func,
   onClick: PropTypes.func,
-  onCloseClick: PropTypes.func,
+  onDeleteClick: PropTypes.func,
   changeTrasitWay: PropTypes.func,
   updateDuration: PropTypes.func,
 };
@@ -153,14 +153,25 @@ function ScheduleArea({
   const getTransportDetail = useGetTransportDetail(updateScheduleState);
   const updateTimeOfSchedule = useUpdateTimeOfSchedule(updateScheduleState);
 
-  const deleteSchedule = (scheduleId) => {
-    getTransportDetail(
-      schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
-      { isSetSchedule: true, isUploadFirebase: true }
-    );
-    firestore
-      .deleteSchedule(uid, itineraryId, scheduleId)
-      .catch((error) => console.error(error));
+  const deleteSchedule = (scheduleId, scheduleName) => {
+    dispatchNotification({
+      type: 'fire',
+      playload: {
+        type: 'danger',
+        message: `確定要刪除 ${scheduleName} 這筆行程嗎？`,
+        subMessage: '(此動作無法復原)',
+        yesAction: () => {
+          getTransportDetail(
+            schedules.filter((schedule) => schedule.schedule_id !== scheduleId),
+            { isSetSchedule: true, isUploadFirebase: true }
+          );
+          firestore
+            .deleteSchedule(uid, itineraryId, scheduleId)
+            .catch((error) => console.error(error));
+        },
+        id: 'confirm_delete',
+      },
+    });
   };
   const changeSchedulesTime = async (changeTime) => {
     if (!changeTime) {
@@ -297,8 +308,11 @@ function ScheduleArea({
                   onClick={() =>
                     window.open(schedule.placeDetail.url, '_blank')
                   }
-                  onCloseClick={() =>
-                    deleteSchedule(schedule.schedule_id)
+                  onDeleteClick={() =>
+                    deleteSchedule(
+                      schedule.schedule_id,
+                      schedule.placeDetail.name
+                    )
                   }></ScheduleCardDrag>
               ))
             ) : (

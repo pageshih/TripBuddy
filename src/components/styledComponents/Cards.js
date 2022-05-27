@@ -198,7 +198,7 @@ function SpotCard(props) {
           className="material-icons"
           close
           type="button"
-          onClick={props.onCloseClick}
+          onClick={props.onDeleteClick}
           css={closeButton}>
           cancel
         </RoundButtonSmall>
@@ -256,7 +256,7 @@ SpotCard.propTypes = {
   id: PropTypes.string,
   selectedList: PropTypes.array,
   setSelectedList: PropTypes.func,
-  onCloseClick: PropTypes.func,
+  onDeleteClick: PropTypes.func,
 };
 
 const transportMode = (schedule) => {
@@ -588,7 +588,7 @@ function ScheduleCard({
   isShowCloseBtn,
   hideDuration,
   onClick,
-  onCloseClick,
+  onDeleteClick,
   isSmall,
   selectedList,
   setSelectedList,
@@ -634,7 +634,7 @@ function ScheduleCard({
           isEdit={isEdit}
           cardGap={isEdit && '20px'}
           isShowCloseBtn={isShowCloseBtn}
-          onCloseClick={onCloseClick}
+          onDeleteClick={onDeleteClick}
           isSmall={isSmall || isDragging}
           width={isDragging && '300px'}
           id={schedule.schedule_id}
@@ -679,7 +679,7 @@ ScheduleCard.propTypes = {
   selectedList: PropTypes.array,
   setSelectedList: PropTypes.func,
   onClick: PropTypes.func,
-  onCloseClick: PropTypes.func,
+  onDeleteClick: PropTypes.func,
   changeTrasitWay: PropTypes.func,
   as: PropTypes.string,
   children: PropTypes.element,

@@ -294,6 +294,7 @@ function TravelJournalDetail() {
                           playload: {
                             id: 'confirm_delete',
                             message: `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`,
+                            subMessage: '(此動作無法復原)',
                             yesAction: () => {
                               deleteSchedule(schedule.schedule_id);
                             },
