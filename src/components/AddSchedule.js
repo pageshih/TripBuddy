@@ -14,6 +14,7 @@ import DepartController from './EditItinerary/DepartController';
 import {
   useGetTransportDetail,
   useUpdateTimeOfSchedule,
+  useUpdateOverviewsFields,
 } from './EditItinerary/editScheduleHooks';
 import ScheduleArea from './EditItinerary/ScheduleArea';
 
@@ -58,6 +59,10 @@ function AddSchedule({ isDefaultAllowEdit }) {
   };
   const getTransportDetail = useGetTransportDetail(updateScheduleState);
   const updateTimeOfSchedule = useUpdateTimeOfSchedule(updateScheduleState);
+  const updateOverviewsFields = useUpdateOverviewsFields(
+    overviews,
+    setOverviews
+  );
 
   useEffect(() => {
     if (uid && itineraryId) {
@@ -249,12 +254,6 @@ function AddSchedule({ isDefaultAllowEdit }) {
     }
   };
 
-  const updateOverviewsFields = (keyValuePair) => {
-    setOverviews({ ...overviews, ...keyValuePair });
-    firestore
-      .editOverviews(uid, itineraryId, keyValuePair)
-      .catch((error) => console.error(error));
-  };
   const deleteSpot = (placeId) => {
     setWaitingSpots(waitingSpots.filter((spot) => spot.place_id !== placeId));
     firestore
@@ -364,8 +363,9 @@ function AddSchedule({ isDefaultAllowEdit }) {
                 isAllowEdit={isAllowEdit}
                 setIsAllowEdit={setIsAllowEdit}
                 overviews={overviews}
-                updateDate={updateDate}
+                setOverviews={setOverviews}
                 updateOverviewsFields={updateOverviewsFields}
+                updateDate={updateDate}
                 day={day}
               />
               <DepartAndPaginationWrapper isAllowEdit={isAllowEdit}>

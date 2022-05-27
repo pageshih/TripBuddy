@@ -377,28 +377,14 @@ function AddImages(props) {
 }
 
 function AddImageRoundBtn(props) {
-  const { dispatchNotification } = useContext(Context);
   const [imageBuffer, setImageBuffer] = useState([]);
+  const [isShowModal, setIsShowModal] = useState();
 
   useEffect(() => {
     if (imageBuffer.length > 0) {
-      dispatchNotification({
-        type: 'fire',
-        playload: {
-          type: 'primary',
-          id: 'confirm_image',
-          message: props.confirmMessage,
-          imgSrc:
-            imageBuffer.length > 0 ? URL.createObjectURL(imageBuffer[0]) : null,
-          imgAlt: 'preview-cover-photo',
-          yesMessage: '上傳圖片',
-          yesAction: () => props.upload(imageBuffer),
-        },
-      });
+      setIsShowModal(true);
     } else {
-      dispatchNotification({
-        type: 'close',
-      });
+      setIsShowModal(false);
     }
   }, [imageBuffer]);
   const button = css`
@@ -432,6 +418,57 @@ function AddImageRoundBtn(props) {
           />
           {props.icon}
         </RoundButtonSmall>
+      )}
+      {isShowModal && (
+        <Modal
+          addCss={css`
+            width: fit-content;
+            height: fit-content;
+            max-width: 1000px;
+            max-height: 90vh;
+          `}
+          isShowState={isShowModal}
+          close={() => setIsShowModal(false)}>
+          <Image
+            height="400px"
+            src={
+              imageBuffer.length > 0
+                ? URL.createObjectURL(imageBuffer[0])
+                : null
+            }
+            alt="preview-cover-photo"
+          />
+          <div
+            css={css`
+              ${styles.flexColumn}
+              width:400px;
+              gap: 20px;
+              margin: 20px auto;
+              align-items: center;
+            `}>
+            <P fontSize="20px" textAlign="center">
+              {props.confirmMessage}
+            </P>
+            <div
+              css={css`
+                ${styles.flex}
+                width:100%;
+                justify-content: center;
+                gap: 20px;
+              `}>
+              <ButtonOutline
+                styled="danger"
+                onClick={() => setIsShowModal(false)}>
+                取消
+              </ButtonOutline>
+              <Button
+                styled="primary"
+                onClick={() => props.upload(imageBuffer, setIsShowModal)}>
+                確定
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </>
   );

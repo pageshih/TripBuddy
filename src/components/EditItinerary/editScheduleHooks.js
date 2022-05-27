@@ -154,4 +154,19 @@ const useUpdateTimeOfSchedule = (updateScheduleState) => {
   };
 };
 
-export { useGetTransportDetail, useUpdateTimeOfSchedule };
+function useUpdateOverviewsFields(overviews, setOverviews) {
+  const { uid } = useContext(Context);
+  const { itineraryId } = useParams();
+  const { journalId } = useParams();
+  return (keyValuePair) => {
+    setOverviews({ ...overviews, ...keyValuePair });
+    firestore
+      .editOverviews(uid, itineraryId || journalId, keyValuePair)
+      .catch((error) => console.error(error));
+  };
+}
+export {
+  useGetTransportDetail,
+  useUpdateTimeOfSchedule,
+  useUpdateOverviewsFields,
+};

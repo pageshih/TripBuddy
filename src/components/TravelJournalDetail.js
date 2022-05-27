@@ -9,6 +9,7 @@ import { DurationText } from './styledComponents/Cards/SpotCard';
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';
+import { useUpdateOverviewsFields } from './EditItinerary/editScheduleHooks';
 import { Pagination } from './styledComponents/Pagination';
 import { RoundButtonSmall } from './styledComponents/Buttons/RoundButton';
 import {
@@ -101,6 +102,10 @@ function TravelJournalDetail() {
   const [isAllowEdit, setIsAllowEdit] = useState(false);
   const [reviewTags, setReviewTags] = useState();
   const [uploadedReview, setUploadedReview] = useState();
+  const updateOverviewsFields = useUpdateOverviewsFields(
+    overviews,
+    setOverviews
+  );
 
   const deleteSchedule = (scheduleId) => {
     firestore
@@ -164,9 +169,11 @@ function TravelJournalDetail() {
           <Overview
             containerCss={styles.containerSetting}
             overviews={overviews}
+            setOverviews={setOverviews}
             day={day}
             isAllowEdit={isAllowEdit}
             setIsAllowEdit={setIsAllowEdit}
+            updateOverviewsFields={updateOverviewsFields}
             isShowCloseBtn
             isHideDay
             isJournal

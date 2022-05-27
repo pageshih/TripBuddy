@@ -38,6 +38,7 @@ const TextContainer = styled.div`
 `;
 function Overview({
   overviews,
+  setOverviews,
   updateOverviewsFields,
   isJournal,
   isAllowEdit,
@@ -49,14 +50,15 @@ function Overview({
 }) {
   const navigate = useNavigate();
   const { uid } = useContext(Context);
-  const uploadCoverPhoto = (imageBuffer) => {
+  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
     const upload = {
       uid,
       itineraryId: overviews.itinerary_id,
       imageBuffer,
     };
     firestore.uploadItinerariesCoverPhoto(upload).then((cover_photo) => {
-      updateOverviewsFields({ cover_photo });
+      setIsShowModal(false);
+      setOverviews({ ...overviews, cover_photo });
     });
   };
   return (
