@@ -42,7 +42,7 @@ const DepartAndPaginationWrapper = styled.div`
   align-items: flex-end;
   margin: 0 auto;
 `;
-function AddSchedule(props) {
+function AddSchedule({ isDefaultAllowEdit }) {
   const { uid, map, dispatchNotification } = useContext(Context);
   const { itineraryId } = useParams();
   const allSchedules = useRef();
@@ -51,7 +51,7 @@ function AddSchedule(props) {
   const [waitingSpots, setWaitingSpots] = useState();
   const [schedules, setSchedules] = useState([]);
   const [day, setDay] = useState(0);
-  const [isAllowEdit, setIsAllowEdit] = useState(props.isAllowEdit);
+  const [isAllowEdit, setIsAllowEdit] = useState(isDefaultAllowEdit);
   const updateScheduleState = (newSchedules) => {
     setSchedules(newSchedules);
     allSchedules.current[day] = newSchedules;
@@ -406,6 +406,6 @@ function AddSchedule(props) {
   );
 }
 AddSchedule.propTypes = {
-  isAllowEdit: PropTypes.bool,
+  isDefaultAllowEdit: PropTypes.bool,
 };
 export default AddSchedule;

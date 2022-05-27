@@ -88,7 +88,7 @@ const CardWrapper = styled.div`
   display: flex;
   position: relative;
   gap: 20px;
-  width: ${(props) => props.width || '100%'};
+  width: 100%;
   ${mediaQuery[0]} {
     min-width: 90%;
     height: 100%;
@@ -164,7 +164,7 @@ const SpotTitle = styled(H6)`
   }
 `;
 const SpotCardContainer = styled(Card)`
-  gap: ${(props) => (props.isSmall ? '0px' : '40px')};
+  gap: ${(props) => (props.isSmall ? '0px' : props.isEdit ? '20px' : '40px')};
   ${mediaQuery[0]} {
     gap: 0px;
     flex-direction: ${(props) => (props.isSmall ? 'row' : null)};
@@ -173,54 +173,61 @@ const SpotCardContainer = styled(Card)`
   }
 `;
 
-function SpotCard(props) {
+function SpotCard({
+  as,
+  addCss,
+  isShowCloseBtn,
+  isSmall,
+  onDeleteClick,
+  isEdit,
+  time,
+  id,
+  selectedList,
+  setSelectedList,
+  onClick,
+  imgSrc,
+  imgAlt,
+  title,
+  rating,
+  address,
+  duration,
+}) {
   return (
-    <CardWrapper as={props.as} width={props.width}>
-      {props.isShowCloseBtn && (
+    <CardWrapper as={as} css={addCss}>
+      {isShowCloseBtn && (
         <CloseButton
           className="material-icons"
           close
           type="button"
-          isSmall={props.isSmall}
-          onClick={props.onDeleteClick}>
+          isSmall={isSmall}
+          onClick={onDeleteClick}>
           cancel
         </CloseButton>
       )}
-      <TagAndCheckboxContainer
-        isSmall={props.isSmall}
-        isEdit={props.isEdit}
-        time={props.time}>
-        {props.isEdit && (
+      <TagAndCheckboxContainer isSmall={isSmall} isEdit={isEdit} time={time}>
+        {isEdit && (
           <CheckboxCustom
-            id={props.id}
-            selectedList={props.selectedList}
-            setSelectedList={props.setSelectedList}
+            id={id}
+            selectedList={selectedList}
+            setSelectedList={setSelectedList}
             addCss={css`
-              box-shadow: ${!props.time && props.isEdit
+              box-shadow: ${!time && isEdit
                 ? `0 0 0 1px ${palatte.gray['300']}`
                 : null};
             `}
           />
         )}
-        {props.time && (
-          <TimeTag>{timestampToString(props.time, 'time')}</TimeTag>
-        )}
+        {time && <TimeTag>{timestampToString(time, 'time')}</TimeTag>}
       </TagAndCheckboxContainer>
-      <SpotCardContainer isSmall={props.isSmall} onClick={props.onClick}>
-        <SpotImage
-          isSmall={props.isSmall}
-          src={props.imgSrc}
-          alt={props.imgAlt}
-        />
-        <TextContainer isSmall={props.isSmall}>
-          <SpotTitle isSmall={props.isSmall}>{props.title}</SpotTitle>
-          <AddressText withRating={props.rating} isSmall={props.isSmall}>
-            {props.address}
+      <SpotCardContainer isEdit={isEdit} isSmall={isSmall} onClick={onClick}>
+        <SpotImage isSmall={isSmall} src={imgSrc} alt={imgAlt} />
+        <TextContainer isSmall={isSmall}>
+          <SpotTitle isSmall={isSmall}>{title}</SpotTitle>
+          <AddressText withRating={rating} isSmall={isSmall}>
+            {address}
           </AddressText>
-          {props.duration && <DurationText duration={props.duration} />}
-          {props.rating && (
-            <RatingText rating={props.rating} isSmall={props.isSmall} />
-          )}
+          {duration && <DurationText duration={duration} />}
+          {rating && <RatingText rating={rating} isSmall={isSmall} />}
         </TextContainer>
       </SpotCardContainer>
     </CardWrapper>
@@ -232,6 +239,7 @@ SpotCard.propTypes = {
   title: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   as: PropTypes.string,
+  addCss: PropTypes.object,
   onClick: PropTypes.func,
   time: PropTypes.number,
   duration: PropTypes.number,

@@ -198,11 +198,12 @@ function ScheduleCard({
           address={schedule.placeDetail.formatted_address}
           duration={hideDuration ? null : schedule.duration}
           isEdit={isEdit}
-          cardGap={isEdit && '20px'}
           isShowCloseBtn={isShowCloseBtn}
           onDeleteClick={onDeleteClick}
           isSmall={isSmall || isDragging}
-          width={isDragging && '300px'}
+          addCss={css`
+            width: ${isDragging ? '300px' : null};
+          `}
           id={schedule.schedule_id}
           selectedList={selectedList}
           setSelectedList={setSelectedList}

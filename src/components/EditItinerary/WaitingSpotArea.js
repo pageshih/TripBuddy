@@ -134,8 +134,8 @@ const SpotCardDraggable = ({ id, index, deleteSpot, spot }) => {
             title={spot.name}
             address={spot.formatted_address}
             rating={spot.rating}
-            width={snapshot.isDragging && '300px'}
             addCss={css`
+              width: ${snapshot.isDragging ? '300px' : null};
               cursor: grab;
             `}
           />

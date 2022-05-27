@@ -36,18 +36,28 @@ const TextContainer = styled.div`
   gap: 10px;
   align-items: center;
 `;
-function Overview(props) {
+function Overview({
+  overviews,
+  updateOverviewsFields,
+  isJournal,
+  isAllowEdit,
+  setIsAllowEdit,
+  isShowCloseBtn,
+  updateDate,
+  isHideDay,
+  day,
+}) {
   const navigate = useNavigate();
   const { uid } = useContext(Context);
   const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
     const upload = {
       uid,
-      itineraryId: props.overviews.itinerary_id,
+      itineraryId: overviews.itinerary_id,
       imageBuffer,
     };
     firestore.uploadItinerariesCoverPhoto(upload).then((cover_photo) => {
       setIsShowModal(false);
-      props.updateOverviewsFields({ cover_photo });
+      updateOverviewsFields({ cover_photo });
     });
   };
   return (
@@ -59,15 +69,15 @@ function Overview(props) {
               className="material-icons"
               type="button"
               onClick={() =>
-                navigate(props.isJournal ? '/travel-journals' : '/itineraries')
+                navigate(isJournal ? '/travel-journals' : '/itineraries')
               }>
               navigate_before
             </RoundButtonSmallWhite>
-            {!props.isAllowEdit ? (
+            {!isAllowEdit ? (
               <RoundButtonSmallWhite
                 className="material-icons"
                 type="button"
-                onClick={() => props.setIsAllowEdit(true)}>
+                onClick={() => setIsAllowEdit(true)}>
                 edit
               </RoundButtonSmallWhite>
             ) : (
@@ -78,7 +88,7 @@ function Overview(props) {
                   icon="insert_photo"
                   confirmMessage="確定要將封面更換成這張圖嗎？"
                 />
-                {props.isShowCloseBtn && (
+                {isShowCloseBtn && (
                   <RoundButtonSmallWhite
                     className="material-icons"
                     type="button"
@@ -88,7 +98,7 @@ function Overview(props) {
                         color: ${palatte.white};
                       }
                     `}
-                    onClick={() => props.setIsAllowEdit(false)}>
+                    onClick={() => setIsAllowEdit(false)}>
                     close
                   </RoundButtonSmallWhite>
                 )}
@@ -105,34 +115,39 @@ function Overview(props) {
               addInputCss={css`
                 color: ${palatte.gray[800]};
               `}
-              defaultShowText={props.isJournal}
-              isAllowEdit={props.isAllowEdit}
+              defaultShowText={isJournal}
+              isAllowEdit={isAllowEdit}
               onSubmit={(title) => {
-                if (title !== props.overviews.title) {
-                  props.updateOverviewsFields({ title });
+                if (title !== overviews.title) {
+                  updateOverviewsFields({ title });
                 }
               }}>
-              {props.overviews.title}
+              {overviews.title}
             </EditableText>
             <EditableDate
-              defaultShowText={props.isJournal}
-              start={props.overviews.start_date}
-              end={props.overviews.end_date}
-              onSubmit={props.updateDate}
-              isAllowEdit={props.isAllowEdit}
+              defaultShowText={isJournal}
+              start={overviews.start_date}
+              end={overviews.end_date}
+              onSubmit={updateDate}
+              isAllowEdit={isAllowEdit}
               addCss={css`
                 color: ${palatte.white};
                 font-weight: 700;
                 text-align: center;
               `}
             />
-            {!props.hideDay && (
-              <H3 color={palatte.white}>Day {props.day + 1}</H3>
+            {!isHideDay && (
+              <H3
+                css={css`
+                  color: ${palatte.white};
+                `}>
+                Day {day + 1}
+              </H3>
             )}
           </TextContainer>
         </ContentContainer>
         <Image
-          src={props.overviews.cover_photo}
+          src={overviews.cover_photo}
           alt="cover"
           blur
           addCss={css`
@@ -148,9 +163,12 @@ function Overview(props) {
   );
 }
 Overview.propTypes = {
+  isJournal: PropTypes.bool,
+  isShowCloseBtn: PropTypes.bool,
+  isHideDay: PropTypes.bool,
+  isAllowEdit: PropTypes.bool,
   overviews: PropTypes.object,
   day: PropTypes.number,
-  isAllowEdit: PropTypes.bool,
   setIsAllowEdit: PropTypes.func,
   updateDate: PropTypes.func,
   updateOverviewsFields: PropTypes.func,

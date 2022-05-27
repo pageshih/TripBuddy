@@ -168,7 +168,7 @@ function TravelJournalDetail() {
             isAllowEdit={isAllowEdit}
             setIsAllowEdit={setIsAllowEdit}
             isShowCloseBtn
-            hideDay
+            isHideDay
             isJournal
           />
           <ScheduleAreaContainer>

@@ -30,7 +30,7 @@ import { Alert, Confirm } from './components/styledComponents/Modal';
 
 const Context = createContext();
 
-const LoginOrPage = (props) => {
+const LoginOrPage = ({ element }) => {
   const { uid, goLogin, setGoLogin, isLogInOut } = useContext(Context);
   useEffect(() => {
     if (uid) {
@@ -44,7 +44,7 @@ const LoginOrPage = (props) => {
       {goLogin && !isLogInOut ? (
         <Navigate to="/login" replace={true} />
       ) : goLogin !== undefined ? (
-        props.element
+        element
       ) : (
         <FlexDiv justifyContent="center" padding="100px 0">
           <Loader />
@@ -177,7 +177,9 @@ function App() {
             />
             <Route
               path="/add/:itineraryId"
-              element={<LoginOrPage element={<AddSchedule isAllowEdit />} />}
+              element={
+                <LoginOrPage element={<AddSchedule isDefaultAllowEdit />} />
+              }
             />
             <Route
               path="/itinerary/:itineraryId"
