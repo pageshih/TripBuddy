@@ -140,7 +140,7 @@ function AddSchedule(props) {
       place_id: remove.place_id,
       duration,
       placeDetail: remove,
-      schedule_id: 'unknown',
+      schedule_id: null,
       travel_mode: overviews.default_travel_mode,
     };
     firestore
@@ -179,7 +179,7 @@ function AddSchedule(props) {
     };
   };
   const updateTransitWayAndTime = async (newScheduleList) => {
-    let updateTransportDetail = newScheduleList;
+    let updateTransportDetail;
     if (schedules?.length > 0) {
       updateTransportDetail = await getTransportDetail(
         newScheduleList,
@@ -187,7 +187,7 @@ function AddSchedule(props) {
       ).catch((error) => console.error(error));
     }
     const updatedTimeSchedules = updateTimeOfSchedule(
-      updateTransportDetail,
+      updateTransportDetail || newScheduleList,
       overviews.depart_times[day],
       true
     );

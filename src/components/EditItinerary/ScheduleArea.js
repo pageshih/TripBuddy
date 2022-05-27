@@ -85,6 +85,7 @@ const ScheduleCardDrag = ({
             selectedList={selectedList}
             setSelectedList={setSelectedList}
             isShowCloseBtn={isAllowEdit}
+            hideDuration
             onClick={onClick}
             onCloseClick={onCloseClick}
             changeTrasitWay={changeTrasitWay}
@@ -203,17 +204,28 @@ function ScheduleArea({
         newTargetDaySchedules,
         overviews.depart_times[targetDay]
       );
-      newTargetDaySchedules = await getTransportDetail(newTargetDaySchedules);
+      if (newTargetDaySchedules.length > 1) {
+        newTargetDaySchedules = await getTransportDetail(
+          newTargetDaySchedules,
+          {}
+        );
+      }
       const removedDaySchedules = schedules.filter(
         (schedule) =>
           selectedSchedulesId.every((id) => id !== schedule.schedule_id) &&
           schedule
       );
       const newCurrentDaySchedule = await getTransportDetail(
-        removedDaySchedules
+        removedDaySchedules,
+        {}
       );
-      allSchedules.current[day] = newCurrentDaySchedule;
-      setSchedules(newCurrentDaySchedule);
+      const updatedTimeCurrentDaySchedule = updateTimeOfSchedule(
+        newCurrentDaySchedule,
+        overviews.depart_times[day]
+      );
+
+      allSchedules.current[day] = updatedTimeCurrentDaySchedule;
+      setSchedules(updatedTimeCurrentDaySchedule);
       allSchedules.current[targetDay] = newTargetDaySchedules;
       setSelectedSchedulesId([]);
     }

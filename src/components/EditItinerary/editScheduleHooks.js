@@ -106,7 +106,9 @@ const useGetTransportDetail = (updateScheduleState) => {
               60 *
               1000;
         } else {
-          schedule.start_time = array[index - 1].end_time;
+          if (index > 0) {
+            schedule.start_time = array[index - 1].end_time;
+          }
           schedule.end_time =
             schedule.start_time + schedule.duration * 60 * 1000;
         }

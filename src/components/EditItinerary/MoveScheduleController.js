@@ -51,6 +51,7 @@ function MoveScheduleController({
   useEffect(() => {
     setIsSelectAll(false);
     setSelectedSchedulesId([]);
+    setChangeTime('');
   }, [day, setSelectedSchedulesId]);
 
   return (
@@ -88,7 +89,10 @@ function MoveScheduleController({
             styled="primary"
             padding="5px 15px"
             type="button"
-            onClick={() => changeSchedulesTime(changeTime)}>
+            onClick={() => {
+              changeSchedulesTime(changeTime);
+              setChangeTime('');
+            }}>
             移動行程
           </ButtonSmall>
         </TooltipNotification>

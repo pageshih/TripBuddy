@@ -176,18 +176,17 @@ function SpotCard(props) {
     }
   `;
   const title = css`
-    margin: 0 0 10px 0;
-    font-size: ${props.isSmall && '20px'};
-    margin-bottom: ${props.isSmall && '0'};
+    font-size: ${props.isSmall ? '20px' : null};
+    margin-bottom: ${props.isSmall ? '0' : '10px'};
     ${mediaQuery[0]} {
       font-size: ${props.isSmall ? '16px' : '20px'};
     }
   `;
   const card = css`
-    gap: ${(props.isSmall && '0px') || props.cardGap};
+    gap: ${(props.isSmall ? '0px' : null) || props.cardGap};
     ${mediaQuery[0]} {
       gap: 0px;
-      flex-direction: ${props.isSmall && 'row'};
+      flex-direction: ${props.isSmall ? 'row' : null};
       align-items: stretch;
       height: 100%;
     }
@@ -211,9 +210,9 @@ function SpotCard(props) {
             selectedList={props.selectedList}
             setSelectedList={props.setSelectedList}
             addCss={css`
-              box-shadow: ${!props.time &&
-              props.isEdit &&
-              `0 0 0 1px ${palatte.gray['300']}`};
+              box-shadow: ${!props.time && props.isEdit
+                ? `0 0 0 1px ${palatte.gray['300']}`
+                : null};
             `}
           />
         )}
@@ -587,6 +586,7 @@ function ScheduleCard({
   schedule,
   isEdit,
   isShowCloseBtn,
+  hideDuration,
   onClick,
   onCloseClick,
   isSmall,
@@ -630,7 +630,7 @@ function ScheduleCard({
           imgAlt={schedule.placeDetail.name}
           title={schedule.placeDetail.name}
           address={schedule.placeDetail.formatted_address}
-          duration={schedule.duration}
+          duration={hideDuration ? null : schedule.duration}
           isEdit={isEdit}
           cardGap={isEdit && '20px'}
           isShowCloseBtn={isShowCloseBtn}
@@ -687,6 +687,7 @@ ScheduleCard.propTypes = {
   isDragging: PropTypes.bool,
   isShowCloseBtn: PropTypes.bool,
   isSmall: PropTypes.bool,
+  hideDuration: PropTypes.bool,
 };
 
 function OverviewCard(props) {
