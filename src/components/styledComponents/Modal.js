@@ -10,6 +10,7 @@ import 'animate.css';
 import '../../css/animation.css';
 import { Context } from '../../App';
 import { Button, ButtonOutline } from './Buttons/Button';
+import { Image } from './Layout';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
@@ -156,6 +157,7 @@ function Confirm() {
   const close = () => {
     dispatchNotification({ type: 'close' });
   };
+
   return (
     <Modal
       close={close}
@@ -165,6 +167,13 @@ function Confirm() {
       addCss={css`
         height: fit-content;
       `}>
+      {notification.imgSrc && (
+        <Image
+          height="400px"
+          src={notification.imgSrc}
+          alt={notification.imgAlt}
+        />
+      )}
       <ConfirmContainer>
         <MessageWrapper>
           <Message>{notification.message}</Message>
@@ -177,7 +186,7 @@ function Confirm() {
             {notification.noMessage || '取消'}
           </ButtonOutline>
           <Button
-            styled={notification.yesBtnStyle || 'danger'}
+            styled={notification.yesBtnStyle || notification.type}
             onClick={() => {
               notification.yesAction();
               close();

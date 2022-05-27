@@ -142,7 +142,7 @@ function TransitCard({
                   {transportMode()[travelMode].icon}
                 </TransitIcon>
                 <Select
-                  addCss={css`
+                  css={css`
                     ${mediaQuery[0]} {
                       width: 100px;
                     }

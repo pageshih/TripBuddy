@@ -167,7 +167,7 @@ function PlaceOverview({
           {openingHours && (
             <OpeningHours>
               <AccordionSmall
-                filled
+                isFilledArrow
                 titleElement={
                   <OpeningHoursText
                     key={openingHours[today]}

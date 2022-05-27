@@ -1,12 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte } from './basic/common';
+import { palatte, styles } from './basic/common';
 import { P } from './basic/Text';
 
 function Footer() {
   return (
     <div
       css={css`
+        ${styles.flex}
         justify-content: center;
         padding: 15px;
         background-color: ${palatte.gray['800']};

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -7,13 +7,14 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
-import { palatte, mediaQuery } from './basic/common';
+import { Context } from '../../App';
+import { palatte, mediaQuery, styles } from './basic/common';
 import { P } from './basic/Text';
-import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
+import { Image } from './Layout';
 import { Button, ButtonOutline } from './Buttons/Button';
 import { RoundButtonSmallWhite, RoundButtonSmall } from './Buttons/RoundButton';
 import { compressImages, timestampToDateInput } from '../../utils/utilities';
-import { Modal } from './Modal';
+import { Modal, Confirm } from './Modal';
 
 const inputBase = css`
   padding: 10px 20px;
@@ -62,20 +63,16 @@ function TextField({ children, placeholder, value, onChange, type }) {
 
 const TextInput = styled.input`
   ${inputBase}
-  width: ${(props) => props.width || '100%'};
-  color: ${(props) => props.color};
-  font-size: ${(props) => props.fontSize};
-  ${(props) => props.addCss};
+  width:  100%;
 `;
 const Select = styled.select`
   ${inputBase}
-  width: ${(props) => props.width || '100%'};
+  width: 100%;
   min-width: fit-content;
   color: ${(props) => (props.value ? palatte.dark : palatte.gray[600])};
   & option:disabled {
     color: ${palatte.gray[400]};
   }
-  ${(props) => props.addCss};
 `;
 const SelectSmall = styled(Select)`
   font-size: 14px;
@@ -172,7 +169,12 @@ function SelectAllCheckBox(props) {
     }
   };
   return (
-    <FlexDiv gap="12px" alignItems="center" padding={props.padding}>
+    <div
+      css={css`
+        ${styles.flex}
+        gap: 12px;
+        align-items: center;
+      `}>
       <CheckboxCustom
         size={props.size}
         isSelectAll={props.isSelectAll}
@@ -180,14 +182,14 @@ function SelectAllCheckBox(props) {
         onChange={selectAllItems}
       />
       <P
-        fontSize={`calc(${props.size} - '6px')` || '18px'}
-        color={palatte.gray[800]}
-        addCss={css`
+        css={css`
+          font-size: ${`calc(${props.size} - '6px')` || '18px'};
+          color: ${palatte.gray[800]};
           white-space: nowrap;
         `}>
         全選
       </P>
-    </FlexDiv>
+    </div>
   );
 }
 
@@ -323,8 +325,11 @@ const UploadImageBg = styled.div`
   ${(props) => props.addCss};
 `;
 
-const UploadText = (props) => (
-  <FlexDiv direction="column">
+const UploadText = () => (
+  <div
+    css={css`
+      ${styles.flexColumn}
+    `}>
     <span
       className="material-icons"
       css={css`
@@ -333,7 +338,7 @@ const UploadText = (props) => (
       add_circle
     </span>
     <p>添加照片</p>
-  </FlexDiv>
+  </div>
 );
 
 const FileInputHidden = (props) => (
@@ -370,15 +375,30 @@ function AddImages(props) {
     </UploadImageBg>
   );
 }
+
 function AddImageRoundBtn(props) {
+  const { dispatchNotification } = useContext(Context);
   const [imageBuffer, setImageBuffer] = useState([]);
-  const [isShowModal, setIsShowModal] = useState();
 
   useEffect(() => {
     if (imageBuffer.length > 0) {
-      setIsShowModal(true);
+      dispatchNotification({
+        type: 'fire',
+        playload: {
+          type: 'primary',
+          id: 'confirm_image',
+          message: props.confirmMessage,
+          imgSrc:
+            imageBuffer.length > 0 ? URL.createObjectURL(imageBuffer[0]) : null,
+          imgAlt: 'preview-cover-photo',
+          yesMessage: '上傳圖片',
+          yesAction: () => props.upload(imageBuffer),
+        },
+      });
     } else {
-      setIsShowModal(false);
+      dispatchNotification({
+        type: 'close',
+      });
     }
   }, [imageBuffer]);
   const button = css`
@@ -413,49 +433,6 @@ function AddImageRoundBtn(props) {
           {props.icon}
         </RoundButtonSmall>
       )}
-      {isShowModal && (
-        <Modal
-          addCss={css`
-            width: fit-content;
-            height: fit-content;
-            max-width: 1000px;
-            max-height: 90vh;
-          `}
-          isShowState={isShowModal}
-          close={() => setIsShowModal(false)}>
-          <Image
-            height="400px"
-            src={
-              imageBuffer.length > 0
-                ? URL.createObjectURL(imageBuffer[0])
-                : null
-            }
-            alt="preview-cover-photo"
-          />
-          <FlexDiv
-            width="400px"
-            gap="20px"
-            margin="20px auto"
-            alignItems="center"
-            direction="column">
-            <P fontSize="20px" textAlign="center">
-              {props.confirmMessage}
-            </P>
-            <FlexChildDiv width="100%" justifyContent="center" gap="20px">
-              <ButtonOutline
-                styled="danger"
-                onClick={() => setIsShowModal(false)}>
-                取消
-              </ButtonOutline>
-              <Button
-                styled="primary"
-                onClick={() => props.upload(imageBuffer, setIsShowModal)}>
-                確定
-              </Button>
-            </FlexChildDiv>
-          </FlexDiv>
-        </Modal>
-      )}
     </>
   );
 }
@@ -478,23 +455,27 @@ const ChangeTravelModeSelect = (props) => {
 };
 
 const DateTimeTextInput = (props) => (
-  <Container position="relative" width={props.width}>
+  <div
+    css={css`
+      position: relative;
+      width: ${props.width};
+    `}>
     <TextInput
       color={props.color}
       ref={props.inputRef}
-      addCss={props.addCss}
+      css={props.addCss}
       fontSize={props.fontSize}
       {...props.inputProps}
     />
-    <Container
-      position="absolute"
-      addCss={css`
+    <div
+      css={css`
+        position: absolute;
         right: 15px;
         top: calc(50%);
       `}>
       {props.InputProps?.endAdornment}
-    </Container>
-  </Container>
+    </div>
+  </div>
 );
 function CustomDatePicker(props) {
   return (
@@ -565,14 +546,14 @@ function CustomDateRangePicker(props) {
 }
 
 export {
-  TextField,
+  inputBase,
+  inputBaseSmall,
   TextInput,
+  TextField,
   CheckboxCustom,
   TextAreaReview,
   SelectAllCheckBox,
-  inputBase,
   ReviewTag,
-  inputBaseSmall,
   AddImages,
   uploadImageStyle,
   AddImageRoundBtn,

@@ -239,7 +239,12 @@ function AddScheduleController({
         </ModalContentWrapper>
       </Modal>
       <AddScheduleContorllerWrapper>
-        <P>有計畫外的行程？</P>
+        <P
+          css={css`
+            white-space: nowrap;
+          `}>
+          有計畫外的行程？
+        </P>
         <ButtonSmall
           styled="primary"
           width="fit-content"
