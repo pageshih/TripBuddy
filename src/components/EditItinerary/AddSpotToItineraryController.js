@@ -10,7 +10,7 @@ import {
   NotificationText,
   TooltipNotification,
 } from '../styledComponents/Notification';
-import { ButtonSmall } from '../styledComponents/Button';
+import { ButtonSmall } from '../styledComponents/Buttons/Button';
 
 const common = (props) => css`
   ${styles.flex};

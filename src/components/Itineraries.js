@@ -16,7 +16,7 @@ import { H4, P } from './styledComponents/basic/Text';
 import ScheduleCard from './styledComponents/Cards/ScheduleCard';
 import OverviewCard from './styledComponents/Cards/OverviewCard';
 import AddReview from './EditReview/AddReview';
-import { Button } from './styledComponents/Button';
+import { Button } from './styledComponents/Buttons/Button';
 import { Accordion } from './styledComponents/Accordion';
 
 const Container = styled.div`

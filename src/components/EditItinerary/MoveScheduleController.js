@@ -7,7 +7,7 @@ import { mediaQuery, styles } from '../styledComponents/basic/common';
 import { timestampToString } from '../../utils/utilities';
 import { SelectAllCheckBox, SelectSmall } from '../styledComponents/Form';
 import { TooltipNotification } from '../styledComponents/Notification';
-import { ButtonSmall } from '../styledComponents/Button';
+import { ButtonSmall } from '../styledComponents/Buttons/Button';
 
 const Container = styled.div`
   ${styles.flex};
@@ -87,7 +87,9 @@ function MoveScheduleController({
         <TooltipNotification id="changeDay">
           <ButtonSmall
             styled="primary"
-            padding="5px 15px"
+            css={css`
+              padding: 5px 15px;
+            `}
             type="button"
             onClick={() => {
               changeSchedulesTime(changeTime);

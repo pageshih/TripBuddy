@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { RoundButtonSmall } from './Button';
+import { RoundButtonSmall } from './Buttons/RoundButton';
 import { palatte, styles } from './basic/common';
 import { P } from './basic/Text';
 

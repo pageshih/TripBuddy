@@ -5,7 +5,7 @@ import { css, jsx } from '@emotion/react';
 import { palatte, mediaQuery } from './basic/common';
 import { P, textComponents, headingFontSize } from './basic/Text';
 import { TextInput, CustomDateRangePicker, CustomTimePicker } from './Form';
-import { ButtonSmall } from './Button';
+import { ButtonSmall } from './Buttons/Button';
 import { timestampToString } from '../../utils/utilities';
 import { FlexDiv } from './Layout';
 
@@ -127,6 +127,18 @@ EditableText.propTypes = {
   addCss: PropTypes.object,
 };
 
+const UpdateDurationButton = ({ children }) => (
+  <ButtonSmall
+    styled="gray"
+    css={css`
+      width: fit-content;
+      padding: 10px 15px;
+      margin: auto auto auto 10px;
+    `}>
+    {children}
+  </ButtonSmall>
+);
+
 function EditableDate(props) {
   const [isEdit, setIsEdit] = useState();
   const [startTimestamp, setStartTimestamp] = useState();
@@ -185,13 +197,7 @@ function EditableDate(props) {
                 `}
               />
               {startTimestamp !== props.start && (
-                <ButtonSmall
-                  styled="gray"
-                  width="fit-content"
-                  padding="10px 15px"
-                  margin="auto auto auto 10px">
-                  更新時間
-                </ButtonSmall>
+                <UpdateDurationButton>更新時間</UpdateDurationButton>
               )}
             </>
           ) : (
@@ -205,13 +211,7 @@ function EditableDate(props) {
               />
               {(startTimestamp !== props.start ||
                 endTimestamp !== props.end) && (
-                <ButtonSmall
-                  styled="gray"
-                  width="fit-content"
-                  padding="10px 15px"
-                  margin="auto auto auto 10px">
-                  更新日期
-                </ButtonSmall>
+                <UpdateDurationButton>更新日期</UpdateDurationButton>
               )}
             </>
           )}

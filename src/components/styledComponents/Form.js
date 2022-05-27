@@ -10,12 +10,8 @@ import PropTypes from 'prop-types';
 import { palatte, mediaQuery } from './basic/common';
 import { P } from './basic/Text';
 import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
-import {
-  RoundButtonSmallWhite,
-  Button,
-  ButtonOutline,
-  RoundButtonSmall,
-} from './Button';
+import { Button, ButtonOutline } from './Buttons/Button';
+import { RoundButtonSmallWhite, RoundButtonSmall } from './Buttons/RoundButton';
 import { compressImages, timestampToDateInput } from '../../utils/utilities';
 import { Modal } from './Modal';
 

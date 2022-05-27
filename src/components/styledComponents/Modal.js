@@ -8,8 +8,8 @@ import { P } from './basic/Text';
 import 'animate.css';
 import '../../css/animation.css';
 import { Context } from '../../App';
-import { Button, ButtonOutline } from './Button';
-import { FlexChildDiv, FlexDiv, Container } from './Layout';
+import { Button, ButtonOutline } from './Buttons/Button';
+import { FlexChildDiv, FlexDiv } from './Layout';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);

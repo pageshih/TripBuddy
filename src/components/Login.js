@@ -8,7 +8,7 @@ import { Context } from '../App';
 import { styles, palatte, mediaQuery } from './styledComponents/basic/common';
 import { Logo } from './styledComponents/basic/Logo';
 import { P } from './styledComponents/basic/Text';
-import { Button, ButtonOutline } from './styledComponents/Button';
+import { Button, ButtonOutline } from './styledComponents/Buttons/Button';
 import { TextInput } from './styledComponents/Form';
 import { Image } from './styledComponents/Layout';
 import { NotificationText } from './styledComponents/Notification';

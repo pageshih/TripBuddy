@@ -8,7 +8,7 @@ import { Context } from '../../App';
 import { Modal } from '../styledComponents/Modal';
 import { Loader, styles } from '../styledComponents/basic/common';
 import { Select, TextInput, CustomTimePicker } from '../styledComponents/Form';
-import { Button, ButtonSmall } from '../styledComponents/Button';
+import { Button, ButtonSmall } from '../styledComponents/Buttons/Button';
 import { SearchBar } from '../../utils/googleMap';
 import { SpotCard } from '../styledComponents/Cards/SpotCard';
 import { timestampToString } from '../../utils/utilities';

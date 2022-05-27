@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import { styles, palatte, mediaQuery } from '../basic/common';
 import TextWithIcon from '../basic/TextWithIcon';
 import { P } from '../basic/Text';
-import { RoundButtonSmall, ButtonSmall } from '../Button';
+import { RoundButtonSmall } from '../Buttons/RoundButton';
+import { ButtonSmall } from '../Buttons/Button';
 import { SpotCard } from './SpotCard';
 import { TransitCard } from './TransitCard';
 

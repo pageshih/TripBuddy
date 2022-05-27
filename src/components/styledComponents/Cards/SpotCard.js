@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { styles, palatte, mediaQuery, Rating } from '../basic/common';
 import { timestampToString } from '../../../utils/utilities';
 import { Image } from '../Layout';
-import { RoundButtonSmall } from '../Button';
+import { RoundButtonSmall } from '../Buttons/RoundButton';
 import { CheckboxCustom } from '../Form';
 import TextWithIcon from '../basic/TextWithIcon';
 import { H6, P } from '../basic/Text';

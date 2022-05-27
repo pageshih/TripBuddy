@@ -8,12 +8,9 @@ import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { palatte, styles, mediaQuery } from './styledComponents/basic/common';
 import { H5, P } from './styledComponents/basic/Text';
-import {
-  RoundButtonSmallWithLabel,
-  Button,
-  ButtonOutline,
-  HyperLink,
-} from './styledComponents/Button';
+import { RoundButtonSmallWithLabel } from './styledComponents/Buttons/RoundButton';
+import HyperLink from './styledComponents/Buttons/HyperLink';
+import { Button, ButtonOutline } from './styledComponents/Buttons/Button';
 import { SpotCard } from './styledComponents/Cards/SpotCard';
 import { TextInput, CustomDateRangePicker } from './styledComponents/Form';
 

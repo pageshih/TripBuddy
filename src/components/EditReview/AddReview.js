@@ -13,7 +13,8 @@ import {
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
 import { TextAreaReview } from '../styledComponents/Form';
-import { RoundButtonSmall, Button } from '../styledComponents/Button';
+import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
+import { Button } from '../styledComponents/Buttons/Button';
 import {
   palatte,
   styles,

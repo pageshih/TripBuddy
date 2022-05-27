@@ -11,12 +11,49 @@ import { EditableText } from '../styledComponents/EditableText';
 import { P, H5, H6 } from '../styledComponents/basic/Text';
 import { palatte, styles } from '../styledComponents/basic/common';
 import { AddImageRoundBtn, TextInput, Select } from '../styledComponents/Form';
-import {
-  RoundButtonSmall,
-  ReviewTagRemoveButton,
-} from '../styledComponents/Button';
+import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
+import { roundSmallButtonColorMap } from '../styledComponents/Buttons/buttonColorMaps';
 import { Image } from '../styledComponents/Layout';
 import defaultUserIcon from '../../images/user-avatar-filled.svg';
+
+const CapsuleTag = styled.div`
+  border-radius: 30px;
+  white-space: nowrap;
+  background-color: ${(props) =>
+    props.styled
+      ? roundSmallButtonColorMap[props.styled].default.backgroundColor
+      : 'inherit'};
+  color: ${(props) =>
+    props.styled
+      ? roundSmallButtonColorMap[props.styled].default.color
+      : 'inherit'};
+  padding: 5px 10px 5px 15px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 16px;
+  line-height: 0.9;
+`;
+const ReviewTagRemoveButton = (props) => (
+  <CapsuleTag styled={props.styled}>
+    {props.children}
+    <RoundButtonSmall
+      size="20px"
+      css={css`
+        font-size: 20px;
+        color: ${palatte.white};
+        opacity: 0.7;
+        &:hover {
+          opacity: 1;
+          color: ${palatte.white};
+        }
+      `}
+      onClick={props.onClick}
+      className="material-icons">
+      cancel
+    </RoundButtonSmall>
+  </CapsuleTag>
+);
 
 const SettingTitle = ({ title, subTitle }) => (
   <>

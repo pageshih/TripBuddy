@@ -7,7 +7,7 @@ import { palatte, styles } from '../styledComponents/basic/common';
 import { AddImages, uploadImageStyle } from '../styledComponents/Form';
 import { Image } from '../styledComponents/Layout';
 import { P } from '../styledComponents/basic/Text';
-import { RoundButtonSmall } from '../styledComponents/Button';
+import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
 
 const CloseButton = styled(RoundButtonSmall)`
   position: absolute;

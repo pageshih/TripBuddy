@@ -9,7 +9,7 @@ import { H3 } from '../styledComponents/basic/Text';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
 import { Image } from '../styledComponents/Layout';
-import { RoundButtonSmallWhite } from '../styledComponents/Button';
+import { RoundButtonSmallWhite } from '../styledComponents/Buttons/RoundButton';
 import { AddImageRoundBtn } from '../styledComponents/Form';
 import { EditableText, EditableDate } from '../styledComponents/EditableText';
 

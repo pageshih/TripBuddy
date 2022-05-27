@@ -8,7 +8,10 @@ import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
 import { googleMap, SearchBar } from '../utils/googleMap';
 import { Context } from '../App';
-import { RoundButton, RoundButtonSmall } from './styledComponents/Button';
+import {
+  RoundButton,
+  RoundButtonSmall,
+} from './styledComponents/Buttons/RoundButton';
 import { palatte, mediaQuery, styles } from './styledComponents/basic/common';
 import { P } from './styledComponents/basic/Text';
 import Map from './Explore/Map';

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { styles, palatte, mediaQuery } from '../basic/common';
 import { P } from '../basic/Text';
 import { Select } from '../Form';
-import { ButtonSmallOutlineIcon } from '../Button';
+import { ButtonSmallOutlineIcon } from '../Buttons/Button';
 
 const transportMode = (schedule) => {
   const departureTime =

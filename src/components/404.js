@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from './styledComponents/Button';
+import { Button } from './styledComponents/Buttons/Button';
 import { Logo } from './styledComponents/basic/Logo';
 import { H5 } from './styledComponents/basic/Text';
 import { Container, FlexDiv } from './styledComponents/Layout';

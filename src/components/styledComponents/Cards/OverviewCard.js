@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { styles, palatte, mediaQuery, Rating } from '../basic/common';
+import { styles, palatte, mediaQuery } from '../basic/common';
 import { timestampToString } from '../../../utils/utilities';
 import { Image } from '../Layout';
 import { H5, P } from '../basic/Text';

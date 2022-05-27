@@ -8,7 +8,7 @@ import { ReviewTag, inputBaseSmall } from '../styledComponents/Form';
 import {
   RoundButtonSmall,
   RoundButtonSmallOutline,
-} from '../styledComponents/Button';
+} from '../styledComponents/Buttons/RoundButton';
 const Container = styled.div`
   ${styles.flex};
   align-items: center;

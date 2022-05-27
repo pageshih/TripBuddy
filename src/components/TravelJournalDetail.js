@@ -10,7 +10,7 @@ import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';
 import { Pagination } from './styledComponents/Pagination';
-import { RoundButtonSmall } from './styledComponents/Button';
+import { RoundButtonSmall } from './styledComponents/Buttons/RoundButton';
 import {
   Loader,
   styles,

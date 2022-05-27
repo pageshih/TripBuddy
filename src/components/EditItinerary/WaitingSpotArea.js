@@ -10,8 +10,8 @@ import {
   breakpoints,
   styles,
 } from '../styledComponents/basic/common';
-import { H6 } from '../styledComponents/basic/Text';
-import { ButtonIconColumn } from '../styledComponents/Button';
+import { H6, P } from '../styledComponents/basic/Text';
+import { ButtonSmallIcon } from '../styledComponents/Buttons/Button';
 import { SpotCard } from '../styledComponents/Cards/SpotCard';
 
 const WaitingSpotContainer = styled.div`
@@ -62,6 +62,55 @@ const SpotsArea = styled.div`
   }
   background-color: ${(props) => props.isDraggingOver && palatte.gray[300]};
 `;
+
+const iconButtonColorMap = {
+  danger: {
+    color: palatte.danger.basic,
+    hoverColor: palatte.danger[400],
+  },
+  primary: {
+    color: palatte.primary.basic,
+    hoverColor: palatte.primary[800],
+  },
+};
+
+const ButtonIconColumn = (props) => (
+  <ButtonSmallIcon
+    styled="transparent"
+    type={props.type}
+    onClick={props.onClick}
+    addCss={css`
+      padding: 0;
+      width: fit-content;
+      flex-direction: column;
+      align-items: center;
+      gap: 0px;
+      & > * {
+        color: ${iconButtonColorMap[props.styled].color};
+      }
+      &:hover {
+        background-color: transparent;
+        box-shadow: none;
+        & > * {
+          color: ${iconButtonColorMap[props.styled].hoverColor};
+        }
+      }
+      ${mediaQuery[0]} {
+        flex-direction: row;
+        gap: 5px;
+      }
+    `}
+    title={props.children}>
+    <span
+      css={css`
+        font-size: ${props.size};
+      `}
+      className="material-icons">
+      {props.iconName}
+    </span>
+    <P fontSize={`calc(${props.size || '24px'} - 12px)`}>{props.children}</P>
+  </ButtonSmallIcon>
+);
 
 const SpotCardDraggable = ({ id, index, deleteSpot, spot }) => {
   return (
