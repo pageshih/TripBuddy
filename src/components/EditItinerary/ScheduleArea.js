@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { Context } from '../../App';
 import { firestore } from '../../utils/firebase';
 import { mediaQuery, palatte, styles } from '../styledComponents/basic/common';
-import { ScheduleCard } from '../styledComponents/Cards';
+import ScheduleCard from '../styledComponents/Cards/ScheduleCard';
 import { P } from '../styledComponents/basic/Text';
 import MoveScheduleController from '../EditItinerary/MoveScheduleController';
 import {

@@ -14,7 +14,7 @@ import {
   ButtonOutline,
   HyperLink,
 } from './styledComponents/Button';
-import { SpotCard } from './styledComponents/Cards';
+import { SpotCard } from './styledComponents/Cards/SpotCard';
 import { TextInput, CustomDateRangePicker } from './styledComponents/Form';
 
 const Container = styled.div`

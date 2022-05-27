@@ -10,7 +10,7 @@ import { Loader, styles } from '../styledComponents/basic/common';
 import { Select, TextInput, CustomTimePicker } from '../styledComponents/Form';
 import { Button, ButtonSmall } from '../styledComponents/Button';
 import { SearchBar } from '../../utils/googleMap';
-import { SpotCard } from '../styledComponents/Cards';
+import { SpotCard } from '../styledComponents/Cards/SpotCard';
 import { timestampToString } from '../../utils/utilities';
 import { P } from '../styledComponents/basic/Text';
 

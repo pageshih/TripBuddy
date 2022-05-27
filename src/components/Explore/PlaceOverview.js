@@ -8,7 +8,7 @@ import { P, H2 } from '../styledComponents/basic/Text';
 import { Image } from '../styledComponents/Layout';
 import { Button, HyperLink } from '../styledComponents/Button';
 import { AccordionSmall } from '../styledComponents/Accordion';
-import { RatingText, AddressText } from '../styledComponents/Cards';
+import { RatingText, AddressText } from '../styledComponents/Cards/SpotCard';
 import TextWithIcon from '../styledComponents/basic/TextWithIcon';
 
 const OpeningHoursText = ({ openingText }) => {

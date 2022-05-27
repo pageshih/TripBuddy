@@ -13,7 +13,7 @@ import {
 } from './styledComponents/basic/common';
 import { P } from './styledComponents/basic/Text';
 import { FlexDiv } from './styledComponents/Layout';
-import { SpotCard } from './styledComponents/Cards';
+import { SpotCard } from './styledComponents/Cards/SpotCard';
 import { SelectAllCheckBox } from './styledComponents/Form';
 import { Button } from './styledComponents/Button';
 import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';

@@ -13,7 +13,8 @@ import {
   Loader,
 } from './styledComponents/basic/common';
 import { H4, P } from './styledComponents/basic/Text';
-import { ScheduleCard, OverviewCard } from './styledComponents/Cards';
+import ScheduleCard from './styledComponents/Cards/ScheduleCard';
+import OverviewCard from './styledComponents/Cards/OverviewCard';
 import AddReview from './EditReview/AddReview';
 import { Button } from './styledComponents/Button';
 import { Accordion } from './styledComponents/Accordion';

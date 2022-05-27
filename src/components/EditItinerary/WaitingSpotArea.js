@@ -12,7 +12,7 @@ import {
 } from '../styledComponents/basic/common';
 import { H6 } from '../styledComponents/basic/Text';
 import { ButtonIconColumn } from '../styledComponents/Button';
-import { SpotCard } from '../styledComponents/Cards';
+import { SpotCard } from '../styledComponents/Cards/SpotCard';
 
 const WaitingSpotContainer = styled.div`
   ${styles.flexColumn};

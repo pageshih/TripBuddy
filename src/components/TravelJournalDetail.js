@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import { DurationText } from './styledComponents/Cards';
+import { DurationText } from './styledComponents/Cards/SpotCard';
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';

@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import { OverviewCard } from './styledComponents/Cards';
+import OverviewCard from './styledComponents/Cards/OverviewCard';
 import { styles, Loader } from './styledComponents/basic/common';
 
 const Container = styled.ul`

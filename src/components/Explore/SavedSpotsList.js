@@ -7,7 +7,7 @@ import { firestore } from '../../utils/firebase';
 import { styles, mediaQuery } from '../styledComponents/basic/common';
 import { H2 } from '../styledComponents/basic/Text';
 import { SelectAllCheckBox } from '../styledComponents/Form';
-import { SpotCard } from '../styledComponents/Cards';
+import { SpotCard } from '../styledComponents/Cards/SpotCard';
 import { AddSpotToItineraryController } from '../EditItinerary/AddSpotToItineraryController';
 
 const Container = styled.div`

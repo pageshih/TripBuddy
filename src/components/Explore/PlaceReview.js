@@ -5,7 +5,7 @@ import { palatte, styles, mediaQuery } from '../styledComponents/basic/common';
 import PropTypes from 'prop-types';
 import { P, H3 } from '../styledComponents/basic/Text';
 import { Image } from '../styledComponents/Layout';
-import { RatingText } from '../styledComponents/Cards';
+import { RatingText } from '../styledComponents/Cards/SpotCard';
 const Container = styled.div`
   ${styles.flexColumn}
   padding: 0 30px 30px 30px;

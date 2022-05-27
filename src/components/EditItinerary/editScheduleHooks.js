@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Context } from '../../App';
 import { googleMap } from '../../utils/googleMap';
 import { firestore } from '../../utils/firebase';
-import { transportMode } from '../styledComponents/Cards';
+import { transportMode } from '../styledComponents/Cards/TransitCard';
 
 const useGetTransportDetail = (updateScheduleState) => {
   const { dispatchNotification, uid } = useContext(Context);
