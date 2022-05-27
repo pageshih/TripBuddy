@@ -14,12 +14,12 @@ import { ButtonSmall } from '../styledComponents/Buttons/Button';
 
 const common = (props) => css`
   ${styles.flex};
-  flex-direction: ${props.isColumn ? 'column' : undefined};
-  align-items: ${!props.isColumn ? 'center' : undefined};
+  flex-direction: ${props.isColumn ? 'column' : null};
+  align-items: ${!props.isColumn ? 'center' : null};
   gap: 10px;
   ${mediaQuery[0]} {
     flex-wrap: wrap;
-    justify-content: ${!props.isColumn ? 'flex-end' : undefined};
+    justify-content: ${!props.isColumn ? 'flex-end' : null};
   }
 `;
 const Container = styled.div`

@@ -122,18 +122,18 @@ function TooltipNotification(props) {
         position: relative;
         ${props.addCss}
       `}>
-      <CSSTransition
-        nodeRef={tooltipRef}
-        in={isOpen}
-        classNames={{
-          enter: 'animate__animated',
-          enterActive: 'animate__fadeIn',
-          exit: 'animate__animated',
-          exitActive: 'animate__fadeOut',
-        }}
-        timeout={300}
-        unmountOnExit>
-        {tooltipMap[notification.type] && (
+      {tooltipMap[notification.type] && (
+        <CSSTransition
+          nodeRef={tooltipRef}
+          in={isOpen}
+          classNames={{
+            enter: 'animate__animated',
+            enterActive: 'animate__fadeIn',
+            exit: 'animate__animated',
+            exitActive: 'animate__fadeOut',
+          }}
+          timeout={300}
+          unmountOnExit>
           <Container
             addCss={css`
               position: absolute;
@@ -151,8 +151,8 @@ function TooltipNotification(props) {
               <P>{notification.message}</P>
             </TooltipContent>
           </Container>
-        )}
-      </CSSTransition>
+        </CSSTransition>
+      )}
       {props.children}
     </div>
   );

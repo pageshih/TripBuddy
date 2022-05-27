@@ -32,18 +32,19 @@ const Container = styled.div`
   position: relative;
   border-radius: 30px;
   ${(props) =>
-    !props.isJournal &&
-    `background-color: ${palatte.white};
+    !props.isJournal
+      ? `background-color: ${palatte.white};
     border: 1px solid ${palatte.primary.basic};
     padding: 30px 40px 40px 40px;
-    `}
+    `
+      : null}
   max-width: 100%;
   flex: 1;
   position: relative;
   ${mediaQuery[0]} {
     ${(props) =>
-      !props.isJournal &&
-      `
+      !props.isJournal
+        ? `
       margin-top: 0;
       position: fixed;
       border-radius: 0;
@@ -52,7 +53,8 @@ const Container = styled.div`
       left: 0;
       z-index: 10;
       gap: 10px;
-      `}
+      `
+        : null}
   }
 `;
 const DialogTriangle = styled.div`

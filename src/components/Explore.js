@@ -40,13 +40,13 @@ const SideBarContainer = styled.div`
     `
       : null}
   padding: ${(props) =>
-    props.isShowSavedSpots ? '30px' : props.placeDetail && '0px'};
+    props.isShowSavedSpots ? '30px' : props.placeDetail ? '0px' : null};
   border-right: 1px solid ${palatte.white};
   ${mediaQuery[0]} {
     order: 1;
     height: 30%;
     max-width: 100%;
-    padding: ${(props) => props.isShowSavedSpots && '20px'};
+    padding: ${(props) => (props.isShowSavedSpots ? '20px' : null)};
   }
 `;
 const MapContainer = styled.div`

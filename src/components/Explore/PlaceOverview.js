@@ -23,6 +23,7 @@ const OpeningHoursText = ({ openingText }) => {
           if (index === 0) {
             final.push(
               <span
+                key={text}
                 css={css`
                   margin-right: 6px;
                 `}>

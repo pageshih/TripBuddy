@@ -60,7 +60,8 @@ const SpotsArea = styled.div`
     overflow-x: auto;
     max-width: 100%;
   }
-  background-color: ${(props) => props.isDraggingOver && palatte.gray[300]};
+  background-color: ${(props) =>
+    props.isDraggingOver ? palatte.gray[300] : null};
 `;
 
 const iconButtonColorMap = {

@@ -3,8 +3,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { palatte } from './basic/common';
-import { FlexDiv, Container } from './Layout';
+import { palatte, styles } from './basic/common';
 import '../../css/animation.css';
 import Collapse from '@mui/material/Collapse';
 
@@ -19,41 +18,53 @@ const ExpandIcon = styled.span`
 const ExpandAddIcon = styled(ExpandIcon)`
   transform: ${(props) => (props.isExpand ? 'rotateZ(135deg)' : null)};
   &:hover {
-    color: ${(props) => props.isExpand && palatte.danger.basic};
+    color: ${(props) => (props.isExpand ? palatte.danger.basic : null)};
   }
 `;
-const AccordionContainer = styled(FlexDiv)`
-  flex-direction: column;
+const AccordionContainer = styled.div`
+  ${styles.flexColumn}
   padding: 20px;
   border-radius: 10px;
   background-color: ${palatte.gray['100']};
   width: 100%;
-  ${(props) => props.addCss}
 `;
-
-function Accordion(props) {
-  const [isExpand, setIsExpand] = useState(props.isDefualtExpand || false);
+const HeaderContainer = styled.div`
+  ${styles.flex}
+  justify-content:space-between;
+  cursor: ${(props) => (props.pointerCursor ? 'pointer' : 'normal')};
+`;
+const TitleContainer = styled.div`
+  ${styles.flexColumn}
+  grow:1;
+  gap: 3px;
+`;
+const Gap = styled.div`
+  height: ${(props) => props.gap || '20px'};
+`;
+function Accordion({
+  isDefualtExpand,
+  addCss,
+  isDisableExpand,
+  isAllowEdit,
+  titleElement,
+  isFilledArrow,
+  isHideContent,
+  gap,
+  children,
+}) {
+  const [isExpand, setIsExpand] = useState(isDefualtExpand || false);
   const contentRef = useRef();
 
   return (
-    <AccordionContainer addCss={props.addCss}>
-      <FlexDiv
-        justifyContent="space-between"
-        addCss={css`
-          cursor: ${!props.isDisableExpand || props.isAllowEdit
-            ? 'pointer'
-            : 'normal'};
-        `}
+    <AccordionContainer css={addCss}>
+      <HeaderContainer
+        pointerCursor={!isDisableExpand || isAllowEdit}
         onClick={() =>
-          !props.isDisableExpand || props.isAllowEdit
-            ? setIsExpand((prev) => !prev)
-            : null
+          !isDisableExpand || isAllowEdit ? setIsExpand((prev) => !prev) : null
         }>
-        <FlexDiv direction="column" grow="1" gap="3px">
-          {props.titleElement}
-        </FlexDiv>
-        {props.isAllowEdit ? (
-          props.isDisableExpand ? (
+        <TitleContainer>{titleElement}</TitleContainer>
+        {isAllowEdit ? (
+          isDisableExpand ? (
             <ExpandAddIcon className="material-icons" isExpand={isExpand}>
               add_circle
             </ExpandAddIcon>
@@ -62,74 +73,89 @@ function Accordion(props) {
               expand_more
             </ExpandIcon>
           )
-        ) : props.isDisableExpand ? null : (
+        ) : isDisableExpand ? null : (
           <ExpandIcon className="material-icons" isExpand={isExpand}>
-            {props.filled ? 'arrow_drop_down' : 'expand_more'}
+            {isFilledArrow ? 'arrow_drop_down' : 'expand_more'}
           </ExpandIcon>
         )}
-      </FlexDiv>
-      {(!props.isAllowEdit && !props.isHideContent) ||
-      props.isAllowEdit ||
-      props.isHideContent === undefined ? (
+      </HeaderContainer>
+      {(!isAllowEdit && !isHideContent) ||
+      isAllowEdit ||
+      isHideContent === undefined ? (
         <Collapse
           nodeRef={contentRef}
           in={isExpand}
           timeout={300}
           unmountOnExit>
-          <Container ref={contentRef}>
-            <div
-              css={css`
-                height: ${props.gap || '20px'};
-              `}></div>
-            {props.children}
-          </Container>
+          <div ref={contentRef}>
+            <Gap gap={gap} />
+            {children}
+          </div>
         </Collapse>
       ) : null}
     </AccordionContainer>
   );
 }
 Accordion.propTypes = {
+  addCss: PropTypes.object,
+  isHideContent: PropTypes.bool,
+  gap: PropTypes.string,
   isDefualtExpand: PropTypes.bool,
   isAllowEdit: PropTypes.bool,
   isDisableExpand: PropTypes.bool,
-  filled: PropTypes.bool,
+  isFilledArrow: PropTypes.bool,
   titleElement: PropTypes.any,
   children: PropTypes.any,
 };
-function AccordionSmall(props) {
+
+const AccordionSmallContainer = styled.div`
+  ${styles.flexColumn};
+`;
+const AccordionSmallHeaderContainer = styled.div`
+  ${styles.flex};
+  justify-content: space-between;
+  cursor: pointer;
+`;
+const AccordionSmallTitleWrapper = styled.div`
+  ${styles.flexColumn};
+  grow: 1;
+  gap: 3px;
+`;
+const AccordionContentContainer = styled.div`
+  ${styles.flexColumn};
+  gap: ${(props) => props.gap || '10px'};
+`;
+function AccordionSmall({ titleElement, isFilledArrow, gap, children }) {
   const [isExpand, setIsExpand] = useState(false);
   const contentRef = useRef();
   return (
-    <FlexDiv direction="column">
-      <FlexDiv
-        justifyContent="space-between"
-        addCss={css`
-          cursor: pointer;
-        `}
+    <AccordionSmallContainer>
+      <AccordionSmallHeaderContainer
         onClick={() => setIsExpand((prev) => !prev)}>
-        <FlexDiv direction="column" grow="1" gap="3px">
-          {props.titleElement}
-        </FlexDiv>
+        <AccordionSmallTitleWrapper>{titleElement}</AccordionSmallTitleWrapper>
         <ExpandIcon
           className="material-icons"
           isExpand={isExpand}
           addCss={css`
             font-size: 20px;
           `}>
-          {props.filled ? 'arrow_drop_down' : 'expand_more'}
+          {isFilledArrow ? 'arrow_drop_down' : 'expand_more'}
         </ExpandIcon>
-      </FlexDiv>
+      </AccordionSmallHeaderContainer>
       <Collapse nodeRef={contentRef} in={isExpand} timeout={300} unmountOnExit>
-        <div
-          css={css`
-            height: ${props.gap || '10px'};
-          `}></div>
-        <FlexDiv direction="column" gap={props.gap || '10px'} ref={contentRef}>
-          {props.children}
-        </FlexDiv>
+        <Gap gap={gap || '10px'} />
+        <AccordionContentContainer gap={gap} ref={contentRef}>
+          {children}
+        </AccordionContentContainer>
       </Collapse>
-    </FlexDiv>
+    </AccordionSmallContainer>
   );
 }
+AccordionSmall.propTypes = {
+  isFilledArrow: PropTypes.bool,
+  gap: PropTypes.string,
+  titleElement: PropTypes.any,
+  children: PropTypes.any,
+};
 
 export { Accordion, AccordionSmall };
