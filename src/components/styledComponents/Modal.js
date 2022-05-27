@@ -2,14 +2,14 @@ import { useEffect, useRef, useState, useContext } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
-import { palatte, mediaQuery } from './basic/common';
+import { palatte, mediaQuery, styles } from './basic/common';
 import { P } from './basic/Text';
 import 'animate.css';
 import '../../css/animation.css';
 import { Context } from '../../App';
 import { Button, ButtonOutline } from './Buttons/Button';
-import { FlexChildDiv, FlexDiv } from './Layout';
 
 const FadeBg = styled.div`
   background-color: rgba(0, 0, 0, 0.8);
@@ -58,19 +58,19 @@ const CloseBtn = styled.button`
     background-color: ${palatte.danger.basic};
   }
 `;
-function Modal(props) {
+function Modal({ isShowState, close, addCss, children }) {
   const [isFlyIn, setIsFlyIn] = useState();
   const [isShowBg, setIsShowBg] = useState();
   const bgRef = useRef();
   const containerRef = useRef();
   useEffect(() => {
     let clear;
-    if (!props.isShowState && isFlyIn && isShowBg) {
+    if (!isShowState && isFlyIn && isShowBg) {
       setIsFlyIn(false);
       clear = setTimeout(() => {
         setIsShowBg(false);
       }, 300);
-    } else if (props.isShowState && !isFlyIn && !isShowBg) {
+    } else if (isShowState && !isFlyIn && !isShowBg) {
       setIsShowBg(true);
       clear = setTimeout(() => {
         setIsFlyIn(true);
@@ -79,7 +79,7 @@ function Modal(props) {
     return () => {
       clearTimeout(clear);
     };
-  }, [props.isShowState]);
+  }, [isShowState]);
   return (
     <CSSTransition
       in={isShowBg}
@@ -97,7 +97,7 @@ function Modal(props) {
         ref={bgRef}
         onClick={(e) => {
           if (e.target.id === 'close') {
-            props.close();
+            close();
           }
         }}>
         <CSSTransition
@@ -111,14 +111,11 @@ function Modal(props) {
           }}
           timeout={1000}
           unmountOnExit>
-          <CenterContainer ref={containerRef} css={props.addCss}>
-            <CloseBtn
-              type="button"
-              onClick={props.close}
-              className="material-icons">
+          <CenterContainer ref={containerRef} css={addCss}>
+            <CloseBtn type="button" onClick={close} className="material-icons">
               close
             </CloseBtn>
-            <ContentWrapper>{props.children}</ContentWrapper>
+            <ContentWrapper>{children}</ContentWrapper>
           </CenterContainer>
         </CSSTransition>
       </FadeBg>
@@ -126,6 +123,34 @@ function Modal(props) {
   );
 }
 
+Modal.propTypes = {
+  isShowState: PropTypes.bool,
+  close: PropTypes.func,
+  addCss: PropTypes.object,
+  children: PropTypes.any,
+};
+
+const ConfirmContainer = styled.div`
+  ${styles.flexColumn}
+  gap: 20px;
+  padding: 30px 20px 15px 20px;
+`;
+
+const MessageWrapper = styled.div`
+  ${styles.flexColumn}
+  align-items:center;
+  gap: 5px;
+`;
+const ButtonWrapper = styled.div`
+  ${styles.flex}
+  gap: 20px;
+`;
+const Message = styled(P)`
+  font-size: 18px;
+`;
+const SubMessage = styled(P)`
+  color: ${palatte.gray[600]};
+`;
 function Confirm() {
   const { dispatchNotification, notification } = useContext(Context);
   const close = () => {
@@ -140,17 +165,12 @@ function Confirm() {
       addCss={css`
         height: fit-content;
       `}>
-      <FlexDiv
-        addCss={css`
-          flex-direction: column;
-          gap: 20px;
-          padding: 30px 20px 15px 20px;
-        `}>
-        <FlexDiv direction="column" alignItems="center" gap="5px">
-          <P fontSize="18px">{notification.message}</P>
-          <P color={palatte.gray[600]}>{notification.subMessage}</P>
-        </FlexDiv>
-        <FlexChildDiv gap="20px">
+      <ConfirmContainer>
+        <MessageWrapper>
+          <Message>{notification.message}</Message>
+          <SubMessage>{notification.subMessage}</SubMessage>
+        </MessageWrapper>
+        <ButtonWrapper>
           <ButtonOutline
             styled={notification.noBtnStyle || 'gray'}
             onClick={close}>
@@ -164,13 +184,13 @@ function Confirm() {
             }}>
             {notification.yesMessage || '刪除'}
           </Button>
-        </FlexChildDiv>
-      </FlexDiv>
+        </ButtonWrapper>
+      </ConfirmContainer>
     </Modal>
   );
 }
 
-function Alert(props) {
+function Alert() {
   const { dispatchNotification, notification } = useContext(Context);
   const close = () => {
     dispatchNotification({ type: 'close' });
@@ -185,23 +205,20 @@ function Alert(props) {
         height: fit-content;
         max-width: 90%;
       `}>
-      <FlexDiv
-        addCss={css`
-          flex-direction: column;
-          gap: 20px;
-          padding: 30px 20px 15px 20px;
-          width: 100%;
-        `}>
-        <FlexDiv direction="column" alignItems="center" gap="5px">
-          <P fontSize="20px">{notification.message}</P>
+      <ConfirmContainer>
+        <MessageWrapper
+          css={css`
+            width: 100%;
+          `}>
+          <Message>{notification.message}</Message>
           {notification.subMessage && (
-            <P color={palatte.gray[600]}>{notification.subMessage}</P>
+            <SubMessage>{notification.subMessage}</SubMessage>
           )}
-        </FlexDiv>
+        </MessageWrapper>
         <Button styled={notification.btnStyle || 'primary'} onClick={close}>
           {notification.btnMessage || '確認'}
         </Button>
-      </FlexDiv>
+      </ConfirmContainer>
     </Modal>
   );
 }
