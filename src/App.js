@@ -186,7 +186,7 @@ function App() {
               element={<LoginOrPage element={<AddSchedule />} />}
             />
             <Route
-              path="/travel-journals/:journalID"
+              path="/travel-journals/:journalId"
               element={<LoginOrPage element={<TravelJournalDetail />} />}
             />
             <Route path="error" element={<NotFound />} />

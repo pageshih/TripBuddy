@@ -9,7 +9,11 @@ import { DurationText } from './styledComponents/Cards/SpotCard';
 import { timestampToString, filterDaySchedules } from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';
-import { useUpdateOverviewsFields } from './EditItinerary/editScheduleHooks';
+import {
+  useUpdateOverviewsFields,
+  useUpdateTimeOfSchedule,
+  useUpdateDate,
+} from './EditItinerary/editScheduleHooks';
 import { Pagination } from './styledComponents/Pagination';
 import { RoundButtonSmall } from './styledComponents/Buttons/RoundButton';
 import {
@@ -94,7 +98,7 @@ const DeleteButton = styled(RoundButtonSmall)`
 `;
 function TravelJournalDetail() {
   const { uid, dispatchNotification } = useContext(Context);
-  const { journalID } = useParams();
+  const { journalId } = useParams();
   const [scheduleList, setScheduleList] = useState();
   const allSchedules = useRef();
   const [overviews, setOverviews] = useState();
@@ -106,10 +110,24 @@ function TravelJournalDetail() {
     overviews,
     setOverviews
   );
+  const updateScheduleState = (newSchedules) => {
+    setScheduleList(newSchedules);
+    allSchedules.current[day] = newSchedules;
+  };
+  const updateTimeOfSchedule = useUpdateTimeOfSchedule(updateScheduleState);
+  const updateDate = useUpdateDate({
+    overviews,
+    allSchedules,
+    setSchedules: setScheduleList,
+    day,
+    setDay,
+    updateOverviewsFields,
+    updateTimeOfSchedule,
+  });
 
   const deleteSchedule = (scheduleId) => {
     firestore
-      .deleteSchedule(uid, journalID, scheduleId)
+      .deleteSchedule(uid, journalId, scheduleId)
       .then(() => {
         const newScheduleList = scheduleList.filter(
           (oldSchedule) => oldSchedule.schedule_id !== scheduleId
@@ -130,7 +148,7 @@ function TravelJournalDetail() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const itineraryRes = await firestore.getItinerary(uid, journalID);
+        const itineraryRes = await firestore.getItinerary(uid, journalId);
         setOverviews(itineraryRes.overviews);
         allSchedules.current = filterDaySchedules(
           itineraryRes.schedules,
@@ -174,6 +192,7 @@ function TravelJournalDetail() {
             isAllowEdit={isAllowEdit}
             setIsAllowEdit={setIsAllowEdit}
             updateOverviewsFields={updateOverviewsFields}
+            updateDate={updateDate}
             isShowCloseBtn
             isHideDay
             isJournal
@@ -218,7 +237,7 @@ function TravelJournalDetail() {
               {isAllowEdit && (
                 <AddScheduleController
                   departTimes={overviews.depart_times}
-                  itineraryId={journalID}
+                  itineraryId={journalId}
                   allSchedules={allSchedules}
                   setScheduleList={setScheduleList}
                   day={day}
@@ -277,7 +296,7 @@ function TravelJournalDetail() {
                             ? schedule.review_tags
                             : reviewTags
                         }
-                        itineraryId={journalID}
+                        itineraryId={journalId}
                         scheduleId={schedule.schedule_id}
                         updateOriginReviewState={setUploadedReview}
                         reviews={{
@@ -299,6 +318,7 @@ function TravelJournalDetail() {
                         dispatchNotification({
                           type: 'fire',
                           playload: {
+                            type: 'danger',
                             id: 'confirm_delete',
                             message: `確定要刪除 ${schedule.placeDetail.name} 這筆行程嗎？`,
                             subMessage: '(此動作無法復原)',

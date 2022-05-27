@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom';
 import { Context } from '../../App';
 import { googleMap } from '../../utils/googleMap';
 import { firestore } from '../../utils/firebase';
+import { createDepartTimeAry } from '../../utils/utilities';
 import { transportMode } from '../styledComponents/Cards/TransitCard';
 
 const useGetTransportDetail = (updateScheduleState) => {
   const { dispatchNotification, uid } = useContext(Context);
-  const { itineraryId } = useParams();
+  const { itineraryId, journalId } = useParams();
   return (
     schedules,
     { isSetSchedule, isUploadFirebase },
@@ -117,7 +118,12 @@ const useGetTransportDetail = (updateScheduleState) => {
         updateScheduleState(newSchedules);
       }
       if (isUploadFirebase) {
-        firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+        firestore.editSchedules(
+          uid,
+          itineraryId || journalId,
+          newSchedules,
+          'merge'
+        );
       }
       return newSchedules;
     });
@@ -125,7 +131,7 @@ const useGetTransportDetail = (updateScheduleState) => {
 };
 const useUpdateTimeOfSchedule = (updateScheduleState) => {
   const { uid } = useContext(Context);
-  const { itineraryId } = useParams();
+  const { itineraryId, journalId } = useParams();
   return (list, departTime, isSetSchedule) => {
     const newSchedules = list.map((schedule, index, array) => {
       if (index === 0) {
@@ -149,15 +155,20 @@ const useUpdateTimeOfSchedule = (updateScheduleState) => {
     if (isSetSchedule) {
       updateScheduleState(newSchedules);
     }
-    firestore.editSchedules(uid, itineraryId, newSchedules, 'merge');
+    firestore.editSchedules(
+      uid,
+      itineraryId || journalId,
+      newSchedules,
+      'merge'
+    );
     return newSchedules;
   };
 };
 
 function useUpdateOverviewsFields(overviews, setOverviews) {
   const { uid } = useContext(Context);
-  const { itineraryId } = useParams();
-  const { journalId } = useParams();
+  const { itineraryId, journalId } = useParams();
+
   return (keyValuePair) => {
     setOverviews({ ...overviews, ...keyValuePair });
     firestore
@@ -165,8 +176,96 @@ function useUpdateOverviewsFields(overviews, setOverviews) {
       .catch((error) => console.error(error));
   };
 }
+
+function useUpdateDate({
+  overviews,
+  allSchedules,
+  setSchedules,
+  day,
+  setDay,
+  updateOverviewsFields,
+  updateTimeOfSchedule,
+}) {
+  const { dispatchNotification } = useContext(Context);
+
+  return (start, end, setEndTimestamp, setStartTimestamp, setIsEdit) => {
+    let updateDate;
+    const resetTime = {
+      start: new Date(start).setHours(8, 0, 0, 0),
+      end: new Date(end).setHours(8, 0, 0, 0),
+    };
+    if (overviews.start_date !== start && overviews.end_date !== end) {
+      updateDate = {
+        start_date: resetTime.start,
+        end_date: resetTime.end,
+        depart_times: createDepartTimeAry({ start_date: start, end_date: end }),
+      };
+    } else if (overviews.start_date !== start && overviews.end_date === end) {
+      updateDate = {
+        start_date: resetTime.start,
+        depart_times: createDepartTimeAry({
+          start_date: resetTime.start,
+          end_date: overviews.end_date,
+        }),
+      };
+    } else if (overviews.start_date === start && overviews.end_date !== end) {
+      updateDate = {
+        end_date: resetTime.end,
+        depart_times: createDepartTimeAry({
+          start_date: overviews.start_date,
+          end_date: resetTime.end,
+        }),
+      };
+    }
+    if (updateDate) {
+      const dayScheduleHad = Object.values(allSchedules.current).filter(
+        (day) => day.length > 0
+      );
+      if (dayScheduleHad.length > updateDate.depart_times.length) {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            message:
+              '新的旅遊天數少於已安排的行程天數，請先移除行程，再修改日期',
+            id: 'alert_updateDaysError',
+          },
+        });
+
+        setEndTimestamp(overviews.end_date);
+        setStartTimestamp(overviews.start_date);
+      } else {
+        updateOverviewsFields(updateDate);
+        const oldDayKeys = Object.keys(allSchedules.current);
+        const removeDays = oldDayKeys.length - updateDate.depart_times.length;
+        let newAllSchedules = { ...allSchedules.current };
+        if (removeDays > 0) {
+          setDay(0);
+          newAllSchedules = dayScheduleHad.reduce((acc, day, index) => {
+            acc[index] = day;
+            return acc;
+          }, {});
+        }
+        for (let i = 0; i < updateDate.depart_times.length; i++) {
+          if (i < oldDayKeys.length && newAllSchedules[i]) {
+            newAllSchedules[i] = updateTimeOfSchedule(
+              newAllSchedules[i],
+              updateDate.depart_times[i],
+              true
+            );
+          } else {
+            newAllSchedules[i] = [];
+          }
+        }
+        allSchedules.current = newAllSchedules;
+        setSchedules(newAllSchedules[removeDays > 0 ? 0 : day]);
+        setIsEdit(false);
+      }
+    }
+  };
+}
 export {
   useGetTransportDetail,
   useUpdateTimeOfSchedule,
   useUpdateOverviewsFields,
+  useUpdateDate,
 };
