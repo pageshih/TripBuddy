@@ -3,22 +3,11 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import {
-  textComponents,
-  palatte,
-  headingFontSize,
-  mediaQuery,
-  P,
-} from './basicStyle';
-import {
-  TextInput,
-  inputBaseSmall,
-  CustomDateRangePicker,
-  CustomTimePicker,
-} from './Form';
-import { ButtonSmall } from './Button';
+import { palatte, mediaQuery, styles } from './basic/common';
+import { P, textComponents, headingFontSize } from './basic/Text';
+import { TextInput, CustomDateRangePicker, CustomTimePicker } from './Form';
+import { ButtonSmall } from './Buttons/Button';
 import { timestampToString } from '../../utils/utilities';
-import { Container, FlexDiv } from './Layout';
 
 const hoverEffect = css`
   width: fit-content;
@@ -29,38 +18,64 @@ const hoverEffect = css`
   }
 `;
 
-function EditableText(props) {
+const EditableTextInput = styled(TextInput)`
+  max-width: 100%;
+  border: none;
+  outline: 1px solid ${palatte.gray['400']};
+  outline-offset: 2px;
+  font-weight: 700;
+  padding: 0;
+  text-align: center;
+  font-size: ${(props) => headingFontSize.desktop[props.level]};
+  &:focus {
+    outline: 2px solid ${palatte.primary.basic};
+  }
+  ${mediaQuery[0]} {
+    font-size: ${(props) => headingFontSize.mobile[props.level]};
+  }
+  ${(props) => props.addCss}
+  ${(props) => props.addInputCss}
+`;
+function EditableText({
+  level,
+  children,
+  onSubmit,
+  isDefaultShowText,
+  isAllowEdit,
+  as,
+  addCss,
+  addInputCss,
+}) {
   const [isEdit, setIsEdit] = useState(true);
   const [value, setValue] = useState('');
   const inputRef = useRef();
-  const Text = textComponents[props.level];
+  const Text = textComponents[level];
   useEffect(() => {
-    setValue(props.children);
-  }, [props.children]);
+    setValue(children);
+  }, [children]);
   const submit = (e) => {
     e?.preventDefault();
     setIsEdit(false);
     if (value && !value.match(/^ +$/)) {
-      if (value !== props.children && value.length > 0) {
-        console.log('submit');
-        props.onSubmit(value);
+      if (value !== children && value.length > 0) {
+        onSubmit(value);
       }
     } else {
-      setValue(props.children);
+      setValue(children);
     }
   };
 
   useEffect(() => {
-    if (props.defaultShowText) {
+    if (isDefaultShowText) {
       setIsEdit(false);
     } else {
       setIsEdit(true);
     }
-    if (!props.isAllowEdit) {
+    if (!isAllowEdit) {
       setIsEdit(false);
       submit();
     }
-  }, [props.isAllowEdit]);
+  }, [isDefaultShowText, isAllowEdit]);
 
   useEffect(() => {
     if (inputRef.current && isEdit) {
@@ -68,30 +83,13 @@ function EditableText(props) {
     }
   }, [inputRef, isEdit]);
 
-  const inputStyle = css`
-    border: none;
-    outline: 1px solid ${palatte.gray['400']};
-    outline-offset: 2px;
-    font-weight: 700;
-    padding: 0;
-    text-align: center;
-    font-size: ${props.fontSize || headingFontSize.desktop[props.level]};
-    &:focus {
-      outline: 2px solid ${palatte.primary.basic};
-    }
-    ${mediaQuery[0]} {
-      font-size: ${headingFontSize.mobile[props.level]};
-    }
-    ${props.addInputCss || props.addCss}
-  `;
-
   const countTextLength = (text) => {
     const encodedText = encodeURIComponent(text);
     return encodedText.replace(/%[A-F\d]{2}/g, 'U').length;
   };
   return (
     <>
-      {isEdit && props.isAllowEdit ? (
+      {isEdit && isAllowEdit ? (
         <form
           onSubmit={submit}
           css={css`
@@ -99,13 +97,14 @@ function EditableText(props) {
             gap: 10px;
             align-items: center;
           `}>
-          <TextInput
+          <EditableTextInput
+            level={level}
             ref={inputRef}
-            type={props.type}
+            type="text"
+            addInputCss={addInputCss}
+            addCss={addCss}
             size={countTextLength(value) > 0 ? countTextLength(value) : 1}
             value={value}
-            width="auto"
-            css={inputStyle}
             onChange={(e) => {
               setValue(e.target.value);
             }}
@@ -113,14 +112,14 @@ function EditableText(props) {
         </form>
       ) : (
         <Text
-          as={props.as}
+          as={as}
           addCss={css`
             padding: 0 12px 0 0;
-            ${props.isAllowEdit && hoverEffect}
-            ${props.addCss}
+            ${isAllowEdit && hoverEffect}
+            ${addCss}
           `}
           onClick={() => {
-            if (props.isAllowEdit) setIsEdit(true);
+            if (isAllowEdit) setIsEdit(true);
           }}>
           {value}
         </Text>
@@ -129,40 +128,70 @@ function EditableText(props) {
   );
 }
 EditableText.propTypes = {
-  children: PropTypes.string.isRequired,
-  level: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  onSubmit: PropTypes.func.isRequired,
+  children: PropTypes.string,
+  level: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onSubmit: PropTypes.func,
   as: PropTypes.string,
-  fontSize: PropTypes.string,
-  color: PropTypes.string,
+  isDefaultShowText: PropTypes.bool,
   isAllowEdit: PropTypes.bool,
-  addCss: PropTypes.string,
+  addCss: PropTypes.object,
+  addInputCss: PropTypes.object,
 };
 
-function EditableDate(props) {
+const UpdateDurationButton = ({ children }) => (
+  <ButtonSmall
+    styled="gray"
+    css={css`
+      width: fit-content;
+      padding: 10px 15px;
+      margin: auto auto auto 10px;
+    `}>
+    {children}
+  </ButtonSmall>
+);
+
+const EditableDateContainer = styled.form`
+  ${styles.flex};
+  gap: 5px;
+  align-items: center;
+`;
+
+function EditableDate({
+  start,
+  end,
+  isDefaultShowText,
+  isAllowEdit,
+  isTime,
+  onSubmit,
+  inputFontSize,
+  fontSize,
+  color,
+  width,
+  addCss,
+}) {
   const [isEdit, setIsEdit] = useState();
   const [startTimestamp, setStartTimestamp] = useState();
   const [endTimestamp, setEndTimestamp] = useState();
   useEffect(() => {
-    setStartTimestamp(props.start);
-    setEndTimestamp(props.end);
-  }, [props.start, props.end]);
+    setStartTimestamp(start);
+    setEndTimestamp(end);
+  }, [start, end]);
   useEffect(() => {
-    if (props.defaultShowText) {
+    if (isDefaultShowText) {
       setIsEdit(false);
     } else {
-      setIsEdit(props.isAllowEdit);
+      setIsEdit(isAllowEdit);
     }
-  }, [props.isAllowEdit]);
+  }, [isAllowEdit]);
 
   const submit = useCallback(
     (e) => {
       e?.preventDefault();
-      if (props.time) {
-        props.onSubmit(startTimestamp);
+      if (isTime) {
+        onSubmit(startTimestamp);
         setIsEdit(false);
-      } else if (props.start !== startTimestamp || props.end !== endTimestamp) {
-        props.onSubmit(
+      } else if (start !== startTimestamp || end !== endTimestamp) {
+        onSubmit(
           startTimestamp,
           endTimestamp,
           setEndTimestamp,
@@ -171,39 +200,35 @@ function EditableDate(props) {
         );
       }
     },
-    [startTimestamp, endTimestamp, props, setEndTimestamp, setStartTimestamp]
+    [startTimestamp, endTimestamp, setEndTimestamp, setStartTimestamp]
   );
 
   return (
     <>
       {isEdit ? (
-        <FlexDiv as="form" gap="5px" alignItems="center" onSubmit={submit}>
-          {props.time ? (
+        <EditableDateContainer onSubmit={submit}>
+          {isTime ? (
             <>
               <CustomTimePicker
                 value={startTimestamp}
                 onChange={(newTimestamp) => {
                   setStartTimestamp(newTimestamp);
                 }}
-                addCss={css`
-                  font-size: ${props.inputFontSize || props.fontSize};
-                  color: ${props.color};
-                  width: ${props.width};
-                  ${mediaQuery[0]} {
-                    width: ${`calc(${props.width} - 30px)`};
-                    font-size: ${`calc(${props.fontSize} - 20px)`};
-                  }
-                  ${props.addCss}
-                `}
+                addCss={{
+                  input: css`
+                    font-size: ${inputFontSize || fontSize};
+                    color: ${color};
+                    width: ${width};
+                    ${mediaQuery[0]} {
+                      width: ${`calc(${width} - 30px)`};
+                      font-size: ${`calc(${fontSize} - 20px)`};
+                    }
+                    ${addCss?.input || addCss}
+                  `,
+                }}
               />
-              {startTimestamp !== props.start && (
-                <ButtonSmall
-                  styled="gray"
-                  width="fit-content"
-                  padding="10px 15px"
-                  margin="auto auto auto 10px">
-                  更新時間
-                </ButtonSmall>
+              {startTimestamp !== start && (
+                <UpdateDurationButton>更新時間</UpdateDurationButton>
               )}
             </>
           ) : (
@@ -213,36 +238,34 @@ function EditableDate(props) {
                 endTimestamp={endTimestamp}
                 setEndTimestamp={setEndTimestamp}
                 setStartTimestamp={setStartTimestamp}
-                color={props.color}
+                color={color}
+                addCss={{
+                  input: css`
+                    ${addCss?.input || addCss}
+                  `,
+                }}
               />
-              {(startTimestamp !== props.start ||
-                endTimestamp !== props.end) && (
-                <ButtonSmall
-                  styled="gray"
-                  width="fit-content"
-                  padding="10px 15px"
-                  margin="auto auto auto 10px">
-                  更新日期
-                </ButtonSmall>
+              {(startTimestamp !== start || endTimestamp !== end) && (
+                <UpdateDurationButton>更新日期</UpdateDurationButton>
               )}
             </>
           )}
-        </FlexDiv>
+        </EditableDateContainer>
       ) : (
         <>
-          {props.time ? (
+          {isTime ? (
             <P
-              fontSize={props.fontSize}
-              color={props.color}
+              fontSize={fontSize}
+              color={color}
               addCss={css`
-                ${props.isAllowEdit && hoverEffect}
+                ${isAllowEdit && hoverEffect}
                 ${mediaQuery[0]} {
-                  font-size: ${`calc(${props.fontSize} - 12px)`};
+                  font-size: ${`calc(${fontSize} - 12px)`};
                 }
-                ${props.addCss}
+                ${addCss?.text || addCss}
               `}
               onClick={(e) => {
-                if (e.target.id !== 'submit' && props.isAllowEdit) {
+                if (e.target.id !== 'submit' && isAllowEdit) {
                   setIsEdit(true);
                 }
               }}>
@@ -250,14 +273,13 @@ function EditableDate(props) {
             </P>
           ) : (
             <P
-              color={props.color}
+              color={color}
               addCss={css`
-                ${props.isAllowEdit && hoverEffect}
-                ${props.addCss}
+                ${isAllowEdit && hoverEffect}
+                ${addCss?.text || addCss}
               `}
-              textAlign={props.textAlign}
               onClick={(e) => {
-                if (e.target.id !== 'submit' && props.isAllowEdit) {
+                if (e.target.id !== 'submit' && isAllowEdit) {
                   setIsEdit(true);
                 }
               }}>
@@ -270,5 +292,19 @@ function EditableDate(props) {
     </>
   );
 }
+
+EditableDate.propTypes = {
+  start: PropTypes.number,
+  end: PropTypes.number,
+  isDefaultShowText: PropTypes.bool,
+  isAllowEdit: PropTypes.bool,
+  isTime: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  inputFontSize: PropTypes.string,
+  fontSize: PropTypes.string,
+  color: PropTypes.string,
+  width: PropTypes.string,
+  addCss: PropTypes.object,
+};
 
 export { EditableText, EditableDate };

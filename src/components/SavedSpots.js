@@ -1,7 +1,9 @@
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import {
@@ -9,39 +11,45 @@ import {
   palatte,
   styles,
   Loader,
-} from './styledComponents/basicStyle';
-import { FlexDiv } from './styledComponents/Layout';
-import { SpotCard } from './styledComponents/Cards';
-import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
-import {
-  Button,
-  ButtonSmallOutline,
-  ButtonSmall,
-} from './styledComponents/Button';
-import { Confirm } from './styledComponents/Modal';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-  TooltipNotification,
-} from './styledComponents/Notification';
+} from './styledComponents/basic/common';
+import { P } from './styledComponents/basic/Text';
+import { SpotCard } from './styledComponents/Cards/SpotCard';
+import { SelectAllCheckBox } from './styledComponents/Form';
+import { Button } from './styledComponents/Buttons/Button';
+import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';
 
-function SavedSpots(props) {
-  const { uid, map } = useContext(Context);
+const Container = styled.div`
+  ${styles.flexColumn};
+  ${styles.containerSetting};
+  gap: 40px;
+  padding-bottom: 80px;
+`;
+const ControllerWrapper = styled.div`
+  ${styles.flex}
+  gap: 20px;
+  justify-content: space-between;
+  padding: 0 10px 20px 10px;
+  border-bottom: 1px solid ${palatte.gray['400']};
+`;
+const Description = styled(P)`
+  text-align: center;
+  color: ${palatte.gray[700]};
+`;
+const ExploreButton = styled(Button)`
+  margin: 20px auto;
+  width: fit-content;
+  ${mediaQuery[0]} {
+    width: 100%;
+  }
+`;
+function SavedSpots({ setWaitingSpots }) {
+  const { uid, map, dispatchNotification } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
   const [selectedSpotList, setSelectedSpotList] = useState([]);
   const [addAction, setAddAction] = useState('');
   const [createdItineraries, setCreatedItineraries] = useState();
   const [isSelectAll, setIsSelectAll] = useState(false);
-  const [isDeleteConfirm, setIsDeleteConfirm] = useState();
-  const [notificationSetting, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
-  const [tooltipAlert, dispatchTooltipAlert] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
+
   const navigate = useNavigate();
   const deleteSpots = () => {
     const newSavedSpots = savedSpots.filter((spot) => {
@@ -53,18 +61,6 @@ function SavedSpots(props) {
     setSavedSpots(newSavedSpots);
     firestore
       .deleteSavedSpots(uid, selectedSpotList)
-      .then(() => {
-        dispatchNotification({
-          type: 'fire',
-          playload: {
-            type: 'success',
-            message: '景點已刪除',
-            id: 'taostifyDeleted',
-          },
-        });
-        dispatchNotification({ type: 'close' });
-        setIsDeleteConfirm(false);
-      })
       .catch((error) => console.error(error));
   };
   const addSelectSpotsToItinerary = () => {
@@ -76,7 +72,7 @@ function SavedSpots(props) {
       );
 
       if (addAction === 'add') {
-        props.setWaitingSpots(waitingSpots);
+        setWaitingSpots(waitingSpots);
         navigate('/add');
       } else {
         firestore
@@ -85,20 +81,19 @@ function SavedSpots(props) {
           .catch((error) => console.error(error));
       }
     } else {
-      console.log('no');
       const playload = {
         type: 'warn',
         message: '還沒有選擇景點喔！',
-        id: 'addSpots',
+        id: 'tooltip_addSpots',
       };
       if (selectedSpotList?.length <= 0) {
-        dispatchTooltipAlert({
+        dispatchNotification({
           type: 'fire',
           playload,
         });
       } else if (!addAction) {
         playload.message = '請選擇要加入景點的行程';
-        dispatchTooltipAlert({
+        dispatchNotification({
           type: 'fire',
           playload,
         });
@@ -117,48 +112,10 @@ function SavedSpots(props) {
         .catch((error) => console.error(error));
     }
   }, [map]);
-  const moveScheduleControllerWrapper = css`
-    gap: 20px;
-    align-items: center;
-    ${mediaQuery[0]} {
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-  `;
   return (
     <>
-      <Notification
-        type={notificationSetting.type}
-        fire={notificationSetting.fire}
-        message={notificationSetting.message}
-        id={notificationSetting.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
-      <Confirm
-        isShowState={isDeleteConfirm}
-        setIsShowState={setIsDeleteConfirm}
-        confirmMessage="確定要刪除這些景點嗎？"
-        subMessage="(此動作無法復原）"
-        yesMessage="刪除"
-        yesBtnStyle="danger"
-        noBtnStyle="gray"
-        yesAction={deleteSpots}
-      />
-      <FlexDiv
-        direction="column"
-        gap="40px"
-        addCss={css`
-          ${styles.containerSetting};
-          padding-bottom: 80px;
-        `}>
-        <FlexDiv
-          addCss={css`
-            gap: 20px;
-            justify-content: space-between;
-            padding: 0 10px 20px 10px;
-            border-bottom: 1px solid ${palatte.gray['400']};
-          `}>
+      <Container>
+        <ControllerWrapper>
           <SelectAllCheckBox
             isSelectAll={isSelectAll}
             setIsSelectAll={setIsSelectAll}
@@ -167,66 +124,15 @@ function SavedSpots(props) {
             }
             setAllUnchecked={() => setSelectedSpotList([])}
           />
-          <FlexDiv addCss={moveScheduleControllerWrapper}>
-            <FlexDiv addCss={moveScheduleControllerWrapper}>
-              <SelectSmall
-                addCss={css`
-                  flex-basis: fit-content;
-                `}
-                value={addAction}
-                onChange={(e) => setAddAction(e.target.value)}>
-                <option value="" disabled>
-                  ---選擇要加入景點的行程---
-                </option>
-                <option value="add">建立一個新行程</option>
-                {createdItineraries?.map((itinerary) => (
-                  <option
-                    key={itinerary.itinerary_id}
-                    value={itinerary.itinerary_id}>
-                    {itinerary.title}
-                  </option>
-                ))}
-              </SelectSmall>
-
-              <TooltipNotification
-                settingReducer={tooltipAlert}
-                resetSettingReducer={dispatchTooltipAlert}
-                isOpen={tooltipAlert.id === 'addSpots'}>
-                <ButtonSmall
-                  styled="primary"
-                  type="click"
-                  onClick={addSelectSpotsToItinerary}>
-                  加入行程
-                </ButtonSmall>
-              </TooltipNotification>
-            </FlexDiv>
-
-            <TooltipNotification
-              settingReducer={tooltipAlert}
-              resetSettingReducer={dispatchTooltipAlert}
-              isOpen={tooltipAlert.id === 'deleteSpots'}>
-              <ButtonSmallOutline
-                styled="danger"
-                type="click"
-                onClick={() => {
-                  if (selectedSpotList?.length > 0) {
-                    setIsDeleteConfirm(true);
-                  } else {
-                    dispatchTooltipAlert({
-                      type: 'fire',
-                      playload: {
-                        type: 'warn',
-                        message: '還沒有選擇景點喔！',
-                        id: 'deleteSpots',
-                      },
-                    });
-                  }
-                }}>
-                刪除景點
-              </ButtonSmallOutline>
-            </TooltipNotification>
-          </FlexDiv>
-        </FlexDiv>
+          <AddSpotToItineraryController
+            createdItineraries={createdItineraries}
+            choseItinerary={addAction}
+            onChangeItinerary={(e) => setAddAction(e.target.value)}
+            addAction={addSelectSpotsToItinerary}
+            deleteAction={deleteSpots}
+            selectedSpots={selectedSpotList}
+          />
+        </ControllerWrapper>
 
         {savedSpots?.map((spot) => (
           <SpotCard
@@ -242,23 +148,26 @@ function SavedSpots(props) {
             isEdit
           />
         ))}
-        {!savedSpots && <Loader />}
-        <Button
+        {savedSpots ? (
+          savedSpots.length === 0 && (
+            <Description>沒有已儲存的候補景點</Description>
+          )
+        ) : (
+          <Loader />
+        )}
+        <ExploreButton
           styled="primary"
           type="click"
-          addCss={css`
-            margin: 20px auto;
-            width: fit-content;
-            ${mediaQuery[0]} {
-              width: 100%;
-            }
-          `}
           onClick={() => navigate('/explore')}>
           新增景點
-        </Button>
-      </FlexDiv>
+        </ExploreButton>
+      </Container>
     </>
   );
 }
+
+SavedSpots.propTypes = {
+  setWaitingSpots: PropTypes.func,
+};
 
 export default SavedSpots;

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { palatte, styles } from './basicStyle';
+import { palatte, styles } from './basic/common';
 
 const layout = (props) => css`
   display: ${props.display};

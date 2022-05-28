@@ -28,17 +28,21 @@ function setTimeToTimestamp(timestamp, timeString) {
   return new Date(timestamp).setHours(hour, minute);
 }
 function filterDaySchedules(allSchedules, departTimes) {
-  const newAllSchedules = departTimes.reduce((acc, _, index) => {
-    acc[index] = allSchedules
-      .filter(
-        (schedule) =>
-          new Date(schedule.end_time).getDate() ===
-          new Date(departTimes[index]).getDate()
-      )
-      .sort((a, b) => a.start_time - b.start_time);
-    return acc;
-  }, {});
-  return newAllSchedules;
+  try {
+    const newAllSchedules = departTimes.reduce((acc, _, index) => {
+      acc[index] = allSchedules
+        .filter(
+          (schedule) =>
+            new Date(schedule.end_time).getDate() ===
+            new Date(departTimes[index]).getDate()
+        )
+        .sort((a, b) => a.start_time - b.start_time);
+      return acc;
+    }, {});
+    return newAllSchedules;
+  } catch {
+    return;
+  }
 }
 const createDepartTimeAry = (dateObj) => {
   let departTimes = [];
@@ -124,34 +128,6 @@ class uploadReviewFirestore {
   }
 }
 
-class updateItineraryCoverPhoto {
-  constructor({ uid, itineraryId, imageBuffer }) {
-    this.uid = uid;
-    this.itineraryId = itineraryId;
-    this.imageBuffer = imageBuffer;
-  }
-  async uploadStorage() {
-    return this.imageBuffer
-      ? await firebaseStorage.uploadImages(
-          [this.uid, this.itineraryId],
-          this.imageBuffer,
-          'cover_photo'
-        )
-      : [];
-  }
-  async uploadFirestore() {
-    const urlAry = await this.uploadStorage();
-    return firestore
-      .editOverviews(this.uid, this.itineraryId, {
-        cover_photo: urlAry[0],
-      })
-      .then(() => {
-        return Promise.resolve(urlAry[0]);
-      })
-      .catch((error) => console.error(error));
-  }
-}
-
 export {
   timestampToString,
   compressImages,
@@ -160,7 +136,6 @@ export {
   setTimeToTimestamp,
   createDepartTimeAry,
   timestampToTimeInput,
-  updateItineraryCoverPhoto,
   uploadReviewFirestore,
   checkArraysIsTheSame,
 };

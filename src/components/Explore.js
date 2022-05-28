@@ -1,628 +1,82 @@
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useContext, useEffect, useState, useRef, useReducer } from 'react';
+import { Wrapper } from '@googlemaps/react-wrapper';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
-import { googleMap, SearchBar } from '../utils/googleMap';
+import { googleMap } from '../utils/googleMap';
+import GoogleMapSearchBar from './styledComponents/GoogleMapSearchBar';
 import { Context } from '../App';
-import { AccordionSmall } from './styledComponents/Accordion';
 import {
   RoundButton,
-  Button,
-  ButtonSmall,
   RoundButtonSmall,
-  HyperLink,
-} from './styledComponents/Button';
-import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
-import { SpotCard, RatingText, AddressText } from './styledComponents/Cards';
-import { SelectAllCheckBox, SelectSmall } from './styledComponents/Form';
-import {
-  P,
-  H2,
-  H3,
-  palatte,
-  TextWithIcon,
-  mediaQuery,
-} from './styledComponents/basicStyle';
-import {
-  Notification,
-  defaultNotification,
-  notificationReducer,
-  NotificationText,
-} from './styledComponents/Notification';
-import { Confirm } from './styledComponents/Modal';
+} from './styledComponents/Buttons/RoundButton';
+import { palatte, mediaQuery, styles } from './styledComponents/basic/common';
+import { P } from './styledComponents/basic/Text';
+import Map from './Explore/Map';
+import PlaceOverview from './Explore/PlaceOverview';
+import PlaceReview from './Explore/PlaceReview';
+import SavedSpotsList from './Explore/SavedSpotsList';
 
-function Map({
-  setMap,
-  map,
-  marker,
-  setIsShowSavedSpots,
-  resetMap,
-  getPlaceShowOnMap,
-}) {
-  const ref = useRef();
-
-  useEffect(() => {
-    if (ref.current && !map) {
-      setMap(googleMap.initMap(ref.current));
-    } else {
-      googleMap.setMapStyle(map, 'default');
-    }
-  }, [ref, map]);
-
-  useEffect(() => {
-    if (ref.current && map) {
-      window.google.maps.event.addListener(map, 'click', (e) => {
-        if (e.placeId) {
-          setIsShowSavedSpots(false);
-          if (marker) {
-            googleMap.deleteMarker(marker);
-          } else {
-            googleMap
-              .getPlaceDetails(map, e.placeId)
-              .then((detail) => {
-                getPlaceShowOnMap(detail);
-              })
-              .catch((status) => {
-                console.log(status);
-              });
-          }
-        } else {
-          if (marker) {
-            resetMap(true);
-          }
-        }
-        e.stop();
-      });
-    }
-  }, [map, marker]);
-
-  return <div style={{ width: '100%', height: '100%' }} ref={ref} />;
-}
-
-const GetTodayOpeningHours = (props) => {
-  const splitOpeningTextAry = useRef();
-  const [today, setToday] = useState();
-  useEffect(() => {
-    if (props.openingText) {
-      splitOpeningTextAry.current = props.openingText.split(/: |,/);
-      setToday(
-        splitOpeningTextAry.current.reduce((final, text, index) => {
-          if (index === 0) {
-            final.push(
-              <span
-                css={css`
-                  margin-right: 6px;
-                `}>
-                {text}
-              </span>
-            );
-          } else {
-            final.push(text);
-          }
-          return final;
-        }, [])
-      );
-    }
-  }, [props.openingText]);
-  return (
-    <P
-      key={props.key}
-      fontSize="14px"
-      color={palatte.gray[700]}
-      addCss={css`
-        & span {
-          color: inherit;
-        }
-      `}>
-      {today}
-    </P>
-  );
-};
-
-const PlaceOverview = ({
-  imgUrl,
-  openingHours,
-  spotName,
-  address,
-  rating,
-  website,
-  buttonAction,
-  isSavedSpot,
-}) => {
-  let today = new Date().getDay();
-  today = today ? today - 1 : 6;
-  const restOpeningText = () => {
-    const restDays = openingHours.filter((_, index) => index !== today);
-    const newOrderRestDays =
-      today < 6
-        ? [
-            ...[...restDays].splice(0, today - 1),
-            ...[...restDays].splice(today),
-          ]
-        : restDays;
-    return newOrderRestDays;
-  };
-  return (
-    <FlexDiv
-      css={css`
-        flex-direction: column;
-        gap: 10px;
-        ${mediaQuery[0]} {
-        }
-      `}>
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          ${mediaQuery[0]} {
-            flex-direction: row;
-            justify-content: space-between;
-            flex-basis: 200px;
-            gap: 10px;
-          }
-        `}>
-        <Image
-          src={imgUrl}
-          alt="placePhoto"
-          addCss={css`
-            ${mediaQuery[0]} {
-              flex-basis: 50%;
-              height: 160px;
-            }
-          `}
-        />
-        <FlexChildDiv
-          css={css`
-            flex-direction: column;
-            gap: 12px;
-            padding: 0 20px;
-            ${mediaQuery[0]} {
-              order: -1;
-              padding: 0;
-            }
-          `}>
-          <H2
-            css={css`
-              font-size: 22px;
-              ${mediaQuery[0]} {
-                font-size: 16px;
-              }
-            `}>
-            {spotName}
-          </H2>
-
-          {openingHours && (
-            <TextWithIcon
-              gap="6px"
-              iconGap="4px"
-              iconName="access_time"
-              iconLabel="營業時間"
-              iconSize="18px"
-              iconColor={palatte.gray[600]}
-              textSize="14px"
-              textColor={palatte.gray[700]}
-              addCss={{
-                text: css`
-                  & span {
-                    color: inherit;
-                  }
-                `,
-                iconLabel: css`
-                  ${mediaQuery[0]} {
-                    display: none;
-                  }
-                `,
-              }}>
-              <AccordionSmall
-                filled
-                titleElement={
-                  <GetTodayOpeningHours
-                    key={`opening_hours_day_today`}
-                    openingText={openingHours[today]}
-                  />
-                }>
-                {restOpeningText().map((text, index) => (
-                  <GetTodayOpeningHours
-                    key={`opening_hours_day${index + 1}`}
-                    openingText={text}
-                  />
-                ))}
-              </AccordionSmall>
-            </TextWithIcon>
-          )}
-          <AddressText withRating isSmall>
-            {address}
-          </AddressText>
-
-          <RatingText rating={rating} isSmall />
-          {website && (
-            <HyperLink
-              href={website}
-              alignSelf="flex-start"
-              iconName="open_in_new">
-              官方網站
-            </HyperLink>
-          )}
-        </FlexChildDiv>
-      </div>
-      <Button
-        styled={isSavedSpot ? 'danger' : 'primary'}
-        type="button"
-        css={css`
-          width: calc(100% - 60px);
-          margin: 0 30px;
-          ${mediaQuery[0]} {
-            width: 100%;
-            margin: 0;
-          }
-        `}
-        onClick={buttonAction}>
-        <span
-          className="material-icons"
-          css={css`
-            color: inherit;
-            font-size: 28px;
-          `}>
-          {isSavedSpot ? 'wrong_location' : 'add_location_alt'}
-        </span>
-        {isSavedSpot ? '從候補景點中移除' : '加入候補景點'}
-      </Button>
-    </FlexDiv>
-  );
-};
-const PlaceReview = ({ reviews }) => {
-  return (
-    <FlexChildDiv
-      css={css`
-        flex-direction: column;
-        padding: 0 30px 30px 30px;
-        gap: 20px;
-        ${mediaQuery[0]} {
-          padding: 0;
-        }
-      `}>
-      <H3
-        css={css`
-          font-size: 18px;
-          ${mediaQuery[0]} {
-            font-size: 18px;
-          }
-        `}>
-        評論
-      </H3>
-      <FlexDiv as="ul" direction="column" gap="20px">
-        {reviews ? (
-          reviews.map((review) => (
-            <FlexDiv
-              as="li"
-              direction="column"
-              padding="20px"
-              gap="10px"
-              key={review.time}
-              css={css`
-                background-color: ${palatte.white};
-                border-radius: 10px;
-                border: 1px solid ${palatte.gray[400]};
-              `}>
-              <FlexDiv gap="12px" alignItems="center">
-                <Image
-                  size="40px"
-                  round
-                  shadow
-                  addCss={css`
-                    border: 1px solid ${palatte.gray['100']};
-                  `}
-                  src={review.profile_photo_url}
-                  alt={review.author_name}
-                />
-                <a
-                  css={css`
-                    text-decoration: none;
-                  `}
-                  href={review.author_url}>
-                  {review.author_name}
-                </a>
-              </FlexDiv>
-              <FlexDiv alignItems="center" gap="6px">
-                <RatingText rating={review.rating} size="18" isNoText />
-                <P fontSize="14px" color={palatte.gray[700]}>
-                  {review.relative_time_description}
-                </P>
-              </FlexDiv>
-              <P>{review.text}</P>
-            </FlexDiv>
-          ))
-        ) : (
-          <P>找不到評論</P>
-        )}
-      </FlexDiv>
-    </FlexChildDiv>
-  );
-};
-function PlaceDetail({
-  placeDetail,
-  removeFromSavedSpots,
-  addToSavedSpots,
-  checkIsSavedSpot,
-}) {
-  return (
-    <FlexDiv
-      css={css`
-        height: 100%;
-        flex-direction: column;
-        gap: 20px;
-        overflow-y: auto;
-        &::-webkit-scrollbar {
-          display: none;
-        }
-        ${mediaQuery[0]} {
-          padding: 30px 20px;
-        }
-      `}>
-      <PlaceOverview
-        isSavedSpot={checkIsSavedSpot(placeDetail.place_id)}
-        spotName={placeDetail.name}
-        address={placeDetail.formatted_address}
-        imgUrl={placeDetail.photos[0]}
-        rating={placeDetail.rating}
-        website={placeDetail.website !== '未提供' && placeDetail.website}
-        buttonAction={() =>
-          checkIsSavedSpot(placeDetail.place_id)
-            ? removeFromSavedSpots([placeDetail.place_id])
-            : addToSavedSpots()
-        }
-        openingHours={
-          placeDetail.opening_hours.weekday_text !== '未提供' &&
-          placeDetail.opening_hours.weekday_text
-        }
-      />
-      <PlaceReview
-        reviews={placeDetail.reviews !== '未提供' && placeDetail.reviews}
-      />
-    </FlexDiv>
-  );
-}
-const ShadowBottom = styled.div`
-  position: absolute;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0), ${palatte.gray[800]});
-  opacity: 0.4;
-  width: 100%;
-  height: 20px;
-  top: -40px;
+const Container = styled.div`
+  ${styles.flex}
+  height: 100vh;
   ${mediaQuery[0]} {
-    display: none;
+    flex-direction: column;
   }
 `;
 
-const AddSpotToItineraryController = ({
-  createdItineraries,
-  choseItinerary,
-  showAlertMessage,
-  onChangeItinerary,
-  addAction,
-  deleteAction,
-}) => {
-  const container = css`
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 0 10px 0;
-    position: relative;
-  `;
-  const buttonContainer = css`
-    flex-direction: column;
-    gap: 10px;
-    ${mediaQuery[0]} {
-      flex-direction: row;
-    }
-  `;
-  return (
-    <FlexChildDiv css={container}>
-      <ShadowBottom />
-      <NotificationText type="error">{showAlertMessage}</NotificationText>
-      <SelectSmall value={choseItinerary} onChange={onChangeItinerary}>
-        <option value="" disabled>
-          ---請選擇要加入景點的行程---
-        </option>
-        <option value="add">新建一個行程</option>
-        {createdItineraries?.map((itinerary) => (
-          <option value={itinerary.itinerary_id} key={itinerary.itinerary_id}>
-            {itinerary.title}
-          </option>
-        ))}
-      </SelectSmall>
-      <FlexDiv css={buttonContainer}>
-        <ButtonSmall styled="primary" onClick={addAction}>
-          加入行程
-        </ButtonSmall>
-        <ButtonSmall styled="danger" onClick={deleteAction}>
-          刪除景點
-        </ButtonSmall>
-      </FlexDiv>
-    </FlexChildDiv>
-  );
-};
-function SavedSpotsList(props) {
-  const { uid } = useContext(Context);
-  const navigate = useNavigate();
-  const [selectedSpotList, setSelectedSpotList] = useState([]);
-  const [addAction, setAddAction] = useState('');
-  const [createdItineraries, setCreatedItineraries] = useState();
-  const [isSelectAll, setIsSelectAll] = useState(false);
-  const [showAlertMessage, setShowAlertMessage] = useState();
-  const [isDeleteConfirm, setIsDeleteConfirm] = useState();
+const SideBarContainer = styled.div`
+  ${styles.flexColumn}
+  background-color: ${palatte.gray[100]};
+  height: 100%;
+  position: relative;
+  ${(props) =>
+    props.placeDetail || props.isShowSavedSpots
+      ? `
+    flex-basis: 400px;
+    max-width: 400px;
+    `
+      : null}
+  padding: ${(props) =>
+    props.isShowSavedSpots ? '30px' : props.placeDetail ? '0px' : null};
+  border-right: 1px solid ${palatte.white};
+  ${mediaQuery[0]} {
+    order: 1;
+    height: 30%;
+    max-width: 100%;
+    padding: ${(props) => (props.isShowSavedSpots ? '20px' : null)};
+  }
+`;
+const MapContainer = styled.div`
+  ${styles.flex}
+  flex-grow:1;
+  position: relative;
+  ${mediaQuery[0]} {
+    height: 70%;
+  }
+`;
+const PlaceDetailContainer = styled.div`
+  ${styles.flexColumn};
+  height: 100%;
+  gap: 20px;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  ${mediaQuery[0]} {
+    padding: 30px 20px;
+  }
+`;
 
-  useEffect(() => {
-    firestore
-      .getItineraries(uid, new Date().getTime())
-      .then((res) => setCreatedItineraries(res))
-      .catch((error) => console.error(error));
-  }, []);
-  useEffect(() => {
-    if (
-      selectedSpotList.length === props.savedSpots?.length &&
-      selectedSpotList.length !== 0
-    ) {
-      setIsSelectAll(true);
-    } else {
-      setIsSelectAll(false);
-    }
-  }, [selectedSpotList, props.savedSpots]);
-  const addSelectSpotsToItinerary = () => {
-    if (selectedSpotList?.length > 0 && addAction) {
-      const waitingSpots = props.savedSpots.filter(
-        (spot) =>
-          selectedSpotList.some((selectedId) => spot.place_id === selectedId) &&
-          spot
-      );
-      if (addAction === 'add') {
-        props.setWaitingSpots(waitingSpots);
-        navigate('/add');
-      } else {
-        firestore
-          .setWaitingSpots(uid, addAction, waitingSpots)
-          .then(() => navigate(`/add/${addAction}`))
-          .catch((error) => console.error(error));
-      }
-    } else {
-      if (!addAction) {
-        setShowAlertMessage('請選擇要加入的行程');
-      }
-    }
-  };
-  const spotsContainer = css`
-    flex-direction: column;
-    overflow-y: auto;
-    flex-shrink: 1;
-    gap: 30px;
-    padding: 0 4px 10px 0;
-    position: relative;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    ${mediaQuery[0]} {
-      gap: 15px;
-      flex-direction: row;
-      overflow-y: initial;
-      overflow-x: auto;
-      padding: 0;
-      flex-basis: 100%;
-    }
-  `;
-  const headerContainer = css`
-    justify-content: space-between;
-    align-items: flex-end;
-    ${mediaQuery[0]} {
-      align-items: center;
-    }
-  `;
-  const container = css`
-    flex-direction: column;
-    height: 100%;
-    gap: 25px;
-    ${mediaQuery[0]} {
-      gap: 10px;
-    }
-  `;
-  return (
-    <>
-      <Confirm
-        isShowState={isDeleteConfirm}
-        setIsShowState={setIsDeleteConfirm}
-        confirmMessage="確定要刪除這些景點嗎？"
-        subMessage="(此動作無法復原）"
-        yesMessage="刪除"
-        yesBtnStyle="danger"
-        noBtnStyle="gray"
-        yesAction={() => {
-          props.removeFromSavedSpots(selectedSpotList);
-          setIsDeleteConfirm(false);
-        }}
-      />
-      <FlexDiv css={container}>
-        <FlexDiv css={headerContainer}>
-          <H2
-            css={css`
-              font-size: 24px;
-              ${mediaQuery[0]} {
-                font-size: 20px;
-              }
-            `}>
-            候補景點
-          </H2>
-          <SelectAllCheckBox
-            size="20px"
-            isSelectAll={isSelectAll}
-            setIsSelectAll={setIsSelectAll}
-            setAllChecked={() =>
-              setSelectedSpotList(props.savedSpots.map((spot) => spot.place_id))
-            }
-            setAllUnchecked={() => setSelectedSpotList([])}
-          />
-        </FlexDiv>
-        <FlexChildDiv
-          css={css`
-            flex-direction: column;
-            height: calc(100% - 30px);
-            gap: 20px;
-            ${mediaQuery[0]} {
-              gap: 10px;
-            }
-          `}>
-          <FlexChildDiv css={spotsContainer}>
-            {props.savedSpots.map((spot) => (
-              <SpotCard
-                isSmall
-                key={spot.place_id}
-                title={spot.name}
-                address={spot.formatted_address}
-                id={spot.place_id}
-                selectedList={selectedSpotList}
-                setSelectedList={setSelectedSpotList}
-                imgSrc={spot.photos[0]}
-                imgAlt={spot.name}
-                rating={spot.rating}
-                isEdit
-                onClick={() => props.getSavedSpotDetail(spot)}
-              />
-            ))}
-          </FlexChildDiv>
-
-          {selectedSpotList?.length > 0 && (
-            <AddSpotToItineraryController
-              createdItineraries={createdItineraries}
-              choseItinerary={addAction}
-              showAlertMessage={showAlertMessage}
-              addAction={addSelectSpotsToItinerary}
-              deleteAction={() => setIsDeleteConfirm(true)}
-              onChangeItinerary={(e) => {
-                setAddAction(e.target.value);
-                if (e.target.value) {
-                  setShowAlertMessage('');
-                }
-              }}
-            />
-          )}
-        </FlexChildDiv>
-      </FlexDiv>
-    </>
-  );
-}
 const ButtonOnMap = (props) => (
-  <FlexDiv
-    direction="column"
-    gap="2px"
-    alignItems="center"
+  <div
     css={css`
-      &:hover {
-        & p {
-          color: ${palatte.primary[300]};
-        }
-      }
+      ${styles.flexColumn}
+      gap:2px;
+      align-items: center;
     `}>
     <RoundButton
       className="material-icons"
@@ -637,16 +91,24 @@ const ButtonOnMap = (props) => (
       onClick={props.onClick}>
       {props.iconName}
     </RoundButton>
-    <P fontSize="14px" fontWeight="500" color={palatte.gray[200]}>
+    <P
+      css={css`
+        font-size: 14px;
+        font-weight: 500;
+        color: ${palatte.gray[200]};
+        &:hover {
+          color: ${palatte.primary[300]};
+        }
+      `}>
       {props.children}
     </P>
-  </FlexDiv>
+  </div>
 );
 const NavigateButtonsOnMap = (props) => {
   return (
-    <FlexDiv
+    <div
       css={css`
-        flex-direction: column;
+        ${styles.flexColumn}
         align-items: center;
         gap: 10px;
         padding: 20px 30px 20px 20px;
@@ -666,7 +128,7 @@ const NavigateButtonsOnMap = (props) => {
       <ButtonOnMap iconName="home" onClick={props.onHomeClick}>
         回首頁
       </ButtonOnMap>
-    </FlexDiv>
+    </div>
   );
 };
 const ExpandButton = (props) => (
@@ -674,7 +136,7 @@ const ExpandButton = (props) => (
     size="30px"
     className="material-icons"
     styled="gray700"
-    addCss={css`
+    css={css`
       position: absolute;
       right: -15px;
       top: 10px;
@@ -692,7 +154,7 @@ const ExpandButton = (props) => (
   </RoundButtonSmall>
 );
 function Explore({ setWaitingSpots }) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
@@ -701,10 +163,7 @@ function Explore({ setWaitingSpots }) {
   const [isShowSideColumn, setIsShowSideColumn] = useState(false);
   const sideWindowRef = useRef();
   const navigate = useNavigate();
-  const [notificationSetting, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
+  const [mapCenter, setMapCenter] = useState();
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -716,6 +175,25 @@ function Explore({ setWaitingSpots }) {
         .catch((error) => console.error(error));
     }
   }, [map, savedSpots, uid]);
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setMapCenter(location);
+        },
+        (error) => {
+          console.error(error.code, error.message);
+          setMapCenter(googleMap.center);
+        }
+      );
+    } else {
+      setMapCenter(googleMap.center);
+    }
+  }, []);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
       firestore.setSavedSpots(uid, [placeDetail]);
@@ -743,7 +221,7 @@ function Explore({ setWaitingSpots }) {
       .then(() => {
         setSavedSpots(newSavedSpots);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   };
 
   const getSavedSpotDetail = (spot) => {
@@ -768,42 +246,16 @@ function Explore({ setWaitingSpots }) {
       setIsShowSideColumn(false);
     }
   };
-  const sideBarContainer = css`
-    background-color: ${palatte.gray[100]};
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    flex-basis: ${placeDetail || isShowSavedSpots ? '400px' : null};
-    max-width: ${placeDetail || isShowSavedSpots ? '400px' : null};
-    padding: ${isShowSavedSpots ? '30px' : placeDetail && '0px'};
-    border-right: 1px solid ${palatte.white};
-    ${mediaQuery[0]} {
-      order: 1;
-      height: 30%;
-      max-width: 100%;
-      padding: ${isShowSavedSpots && '20px'};
-    }
-  `;
   return (
     <>
-      <Notification
-        type={notificationSetting.type}
-        fire={notificationSetting.fire}
-        message={notificationSetting.message}
-        id={notificationSetting.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
       {uid && (
         <>
-          <FlexDiv
-            height="100vh"
-            css={css`
-              ${mediaQuery[0]} {
-                flex-direction: column;
-              }
-            `}>
+          <Container>
             {isShowSideColumn && (
-              <FlexChildDiv css={sideBarContainer} ref={sideWindowRef}>
+              <SideBarContainer
+                placeDetail={placeDetail && true}
+                isShowSavedSpots={isShowSavedSpots}
+                ref={sideWindowRef}>
                 <ExpandButton
                   onClick={() => {
                     setIsShowSideColumn(false);
@@ -814,14 +266,31 @@ function Explore({ setWaitingSpots }) {
                   }}
                 />
                 {!isShowSavedSpots && placeDetail && (
-                  <PlaceDetail
-                    placeDetail={placeDetail}
-                    addToSavedSpots={addToSavedSpots}
-                    removeFromSavedSpots={removeFromSavedSpots}
-                    checkIsSavedSpot={(placeId) =>
-                      savedSpots.some((spot) => spot.place_id === placeId)
-                    }
-                  />
+                  <PlaceDetailContainer>
+                    <PlaceOverview
+                      isSavedSpot={savedSpots.some(
+                        (spot) => spot.place_id === placeDetail.place_id
+                      )}
+                      spotName={placeDetail.name}
+                      address={placeDetail.formatted_address}
+                      imgUrl={
+                        placeDetail?.photos?.length > 0
+                          ? placeDetail.photos[0]
+                          : null
+                      }
+                      rating={placeDetail.rating}
+                      website={placeDetail.website}
+                      buttonAction={() =>
+                        savedSpots.some(
+                          (spot) => spot.place_id === placeDetail.place_id
+                        )
+                          ? removeFromSavedSpots([placeDetail.place_id])
+                          : addToSavedSpots()
+                      }
+                      openingHours={placeDetail?.opening_hours?.weekday_text}
+                    />
+                    <PlaceReview reviews={placeDetail?.reviews} />
+                  </PlaceDetailContainer>
                 )}
                 {isShowSavedSpots && savedSpots?.length > 0 && (
                   <SavedSpotsList
@@ -834,16 +303,9 @@ function Explore({ setWaitingSpots }) {
                 {isShowSavedSpots && savedSpots?.length === 0 && (
                   <P>還沒有加入的景點喔！請點選地圖上的圖標加入景點</P>
                 )}
-              </FlexChildDiv>
+              </SideBarContainer>
             )}
-            <FlexChildDiv
-              grow="1"
-              position="relative"
-              css={css`
-                ${mediaQuery[0]} {
-                  height: 70%;
-                }
-              `}>
+            <MapContainer>
               <NavigateButtonsOnMap
                 onWaitingSpotClick={() => {
                   if (!isShowSideColumn) {
@@ -859,18 +321,18 @@ function Explore({ setWaitingSpots }) {
                 }}
                 onHomeClick={() => navigate('/itineraries')}
               />
-              {map && (
-                <SearchBar
+              {map && mapCenter && (
+                <GoogleMapSearchBar
                   placeholder="請輸入地址或關鍵字搜尋"
                   getPlaceShowOnMap={getPlaceShowOnMap}
-                  option="default"
+                  center={mapCenter}
                   addCss={{
-                    container: {
-                      left: '15px',
-                      [mediaQuery[0]]: {
-                        left: '0',
+                    container: css`
+                      left: 15px;
+                      ${mediaQuery[0]} {
+                        left: 0;
                       },
-                    },
+                    `,
                   }}
                 />
               )}
@@ -878,6 +340,7 @@ function Explore({ setWaitingSpots }) {
                 <Map
                   getPlaceShowOnMap={getPlaceShowOnMap}
                   setMap={setMap}
+                  center={mapCenter}
                   map={map}
                   setMarker={setMarker}
                   marker={marker}
@@ -885,8 +348,8 @@ function Explore({ setWaitingSpots }) {
                   resetMap={resetMap}
                 />
               </Wrapper>
-            </FlexChildDiv>
-          </FlexDiv>
+            </MapContainer>
+          </Container>
         </>
       )}
     </>

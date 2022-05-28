@@ -1,15 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { CSSTransition } from 'react-transition-group';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import PropTypes from 'prop-types';
 import 'react-toastify/dist/ReactToastify.css';
 import 'animate.css';
 import '../../css/animation.css';
 import '../../css/toastify.css';
-import { palatte, styles, P, TextWithIcon } from './basicStyle';
-import { Container, FlexDiv } from './Layout';
+import { Context } from '../../App';
+import { palatte, styles } from './basic/common';
+import { P } from './basic/Text';
+import TextWithIcon from './basic/TextWithIcon';
 
 const defaultNotification = {
   fire: false,
@@ -21,7 +24,6 @@ const notificationReducer = (state, action) => {
   switch (action.type) {
     case 'fire':
       return {
-        ...state,
         fire: true,
         ...action.playload,
       };
@@ -30,28 +32,39 @@ const notificationReducer = (state, action) => {
         ...state,
         fire: false,
       };
+    case 'reset':
+      return {
+        ...defaultNotification,
+      };
     default:
       return state;
   }
 };
 
-function Notification(props) {
+function Notification() {
+  const { notification, dispatchNotification } = useContext(Context);
   const slideDown = cssTransition({
     enter: 'animate__animated animate__slideInDown',
     exit: 'animate__animated animate__slideOutUp',
   });
   useEffect(() => {
-    console.log(props.fire);
-    if (props.fire && props.type) {
-      toast[props.type](props.message, {
+    if (
+      notification.fire &&
+      notification.type &&
+      notification.id.match('toastify')?.length > 0
+    ) {
+      toast[notification.type](notification.message, {
         position: toast.POSITION.TOP_CENTER,
-        toastId: props.id,
+        toastId: notification.id,
       });
-      props.resetFireState();
+      dispatchNotification({ type: 'close' });
     }
-  }, [props.fire]);
+  }, [notification, dispatchNotification]);
   return (
-    <ToastContainer autoClose={props.duration || 3000} transition={slideDown} />
+    <ToastContainer
+      autoClose={notification?.duration || 3000}
+      transition={slideDown}
+    />
   );
 }
 
@@ -74,7 +87,16 @@ const tooltipMap = {
   },
 };
 
-const TooltipContent = styled(FlexDiv)`
+const TooltipContainer = styled.div`
+  position: absolute;
+  top: -130%;
+  left: -40%;
+`;
+
+const TooltipContent = styled.div`
+  ${styles.flex}
+  gap:5px;
+  align-items: center;
   color: ${(props) => tooltipMap[props.type].color};
   padding: 6px 10px;
   border-radius: 2px;
@@ -89,63 +111,68 @@ const TooltipContent = styled(FlexDiv)`
   }
   ${(props) => props.addCss}
 `;
-function TooltipNotification(props) {
+function TooltipNotification({ fire, id, addCss, children }) {
   const tooltipRef = useRef();
-  const [isOpen, setIsOpen] = useState(props.isOpen);
+  const [isOpen, setIsOpen] = useState(fire);
+  const { notification, dispatchNotification } = useContext(Context);
+
   useEffect(() => {
-    if (props.isOpen && props.settingReducer.fire) {
+    if (notification.fire && notification.id === `tooltip_${id}`) {
       setIsOpen(true);
       setTimeout(() => {
         setIsOpen(false);
-        props.resetSettingReducer({ type: 'close' });
+        dispatchNotification({ type: 'close' });
       }, 3000);
     }
-  }, [props.isOpen, props.settingReducer.fire]);
+  }, [notification, dispatchNotification, id]);
   return (
-    <Container position="relative">
-      <CSSTransition
-        nodeRef={tooltipRef}
-        in={isOpen}
-        classNames={{
-          enter: 'animate__animated',
-          enterActive: 'animate__fadeIn',
-          exit: 'animate__animated',
-          exitActive: 'animate__fadeOut',
-        }}
-        timeout={300}
-        unmountOnExit>
-        <Container
-          addCss={css`
-            position: absolute;
-            top: -130%;
-            left: -40%;
-          `}>
-          <TooltipContent
-            gap="5px"
-            alignItems="center"
-            ref={tooltipRef}
-            type={props.settingReducer.type}>
-            <span className="material-icons">
-              {tooltipMap[props.settingReducer.type].icon}
-            </span>
-            <P>{props.settingReducer.message}</P>
-          </TooltipContent>
-        </Container>
-      </CSSTransition>
-      {props.children}
-    </Container>
+    <div
+      css={css`
+        position: relative;
+        ${addCss}
+      `}>
+      {tooltipMap[notification.type] && (
+        <CSSTransition
+          nodeRef={tooltipRef}
+          in={isOpen}
+          classNames={{
+            enter: 'animate__animated',
+            enterActive: 'animate__fadeIn',
+            exit: 'animate__animated',
+            exitActive: 'animate__fadeOut',
+          }}
+          timeout={300}
+          unmountOnExit>
+          <TooltipContainer>
+            <TooltipContent ref={tooltipRef} type={notification.type}>
+              <span className="material-icons">
+                {tooltipMap[notification.type].icon}
+              </span>
+              <P>{notification.message}</P>
+            </TooltipContent>
+          </TooltipContainer>
+        </CSSTransition>
+      )}
+      {children}
+    </div>
   );
 }
-function NotificationText(props) {
+TooltipNotification.propsTypes = {
+  fire: PropTypes.bool,
+  id: PropTypes.string,
+  addCss: PropTypes.object,
+  children: PropTypes.any,
+};
+function NotificationText({ children, type }) {
   const notificationRef = useRef();
   const [isOpen, setIsOpen] = useState();
   useEffect(() => {
-    if (props.children) {
+    if (children) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
     }
-  }, [props.children]);
+  }, [children]);
   return (
     <CSSTransition
       nodeRef={notificationRef}
@@ -160,17 +187,27 @@ function NotificationText(props) {
       unmountOnExit>
       <div ref={notificationRef}>
         <TextWithIcon
-          iconName={tooltipMap[props.type].icon}
-          color={tooltipMap[props.type].basicColor}
-          textSize="14px"
-          iconSize="18px"
-          gap="5px">
-          {props.children}
+          iconName={tooltipMap[type].icon}
+          addCss={{
+            container: css`
+              gap: 5px;
+              font-size: 14px;
+              color: ${tooltipMap[type].basicColor};
+            `,
+            icon: css`
+              font-size: 18px;
+            `,
+          }}>
+          {children}
         </TextWithIcon>
       </div>
     </CSSTransition>
   );
 }
+Notification.propTypes = {
+  type: PropTypes.string,
+  children: PropTypes.any,
+};
 
 export {
   Notification,

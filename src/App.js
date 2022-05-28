@@ -14,20 +14,23 @@ import Itineraries from './components/Itineraries';
 import SavedSpots from './components/SavedSpots';
 import TravelJournals from './components/TravelJournals';
 import Explore from './components/Explore';
-import {
-  AddItinerary,
-  AddOverView,
-  AddSchedule,
-} from './components/AddItinerary';
+import AddOverview from './components/AddOverview';
+import AddSchedule from './components/AddSchedule';
 import NotFound from './components/404';
 import TravelJournalDetail from './components/TravelJournalDetail';
 import { EmptyMap } from './utils/googleMap';
-import { palatte, Loader } from './components/styledComponents/basicStyle';
+import { palatte, Loader } from './components/styledComponents/basic/common';
 import { FlexDiv } from './components/styledComponents/Layout';
+import {
+  defaultNotification,
+  notificationReducer,
+  Notification,
+} from './components/styledComponents/Notification';
+import { Alert, Confirm } from './components/styledComponents/Modal';
 
 const Context = createContext();
 
-const LoginOrPage = (props) => {
+const LoginOrPage = ({ element }) => {
   const { uid, goLogin, setGoLogin, isLogInOut } = useContext(Context);
   useEffect(() => {
     if (uid) {
@@ -35,13 +38,13 @@ const LoginOrPage = (props) => {
     } else if (uid === '') {
       setGoLogin(true);
     }
-  }, [uid]);
+  }, [uid, setGoLogin]);
   return (
     <>
       {goLogin && !isLogInOut ? (
         <Navigate to="/login" replace={true} />
       ) : goLogin !== undefined ? (
-        props.element
+        element
       ) : (
         <FlexDiv justifyContent="center" padding="100px 0">
           <Loader />
@@ -51,55 +54,58 @@ const LoginOrPage = (props) => {
   );
 };
 
+const cssReset = css`
+  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+  @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+  * {
+    box-sizing: border-box;
+    font-family: 'Noto Sans TC', sans-serif;
+    &::selection {
+      background-color: rgba(160, 233, 211, 0.6);
+    }
+  }
+  body {
+    margin: 0;
+  }
+  button {
+    border: none;
+    cursor: pointer;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  ul,
+  li,
+  a,
+  select,
+  input,
+  option {
+    margin: 0;
+    color: ${palatte.dark};
+  }
+`;
+
 function App() {
   const [uid, setUid] = useState();
   const [waitingSpots, setWaitingSpots] = useState();
   const [goLogin, setGoLogin] = useState();
   const [isLogInOut, setIsLogInOut] = useState();
   const [map, setMap] = useState();
-  const cssReset = css`
-    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-    @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
-    * {
-      box-sizing: border-box;
-      font-family: 'Noto Sans TC', sans-serif;
-      &::selection {
-        background-color: rgba(160, 233, 211, 0.6);
-      }
-    }
-    body {
-      margin: 0;
-    }
-    button {
-      border: none;
-      cursor: pointer;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    ul,
-    li,
-    a,
-    select,
-    input,
-    option {
-      margin: 0;
-      color: ${palatte.dark};
-    }
-  `;
+  const [notification, dispatchNotification] = useReducer(
+    notificationReducer,
+    defaultNotification
+  );
 
   useEffect(() => {
-    if (uid) {
-      console.log(uid);
-    } else if (isLogInOut === undefined) {
+    if (isLogInOut === undefined) {
       firebaseAuth.checkIsLogIn(
         (userImpl) => {
           if (userImpl) {
@@ -108,10 +114,10 @@ function App() {
             setUid('');
           }
         },
-        (error) => console.log(error)
+        (error) => console.error(error)
       );
     }
-  }, [uid, setUid]);
+  }, [isLogInOut]);
 
   return (
     <>
@@ -126,8 +132,13 @@ function App() {
           setGoLogin,
           isLogInOut,
           setIsLogInOut,
+          dispatchNotification,
+          notification,
         }}>
         <EmptyMap libraries={['places']} />
+        <Notification />
+        <Alert />
+        <Confirm />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Navigate to="/itineraries" replace />} />
@@ -156,7 +167,7 @@ function App() {
               element={
                 <LoginOrPage
                   element={
-                    <AddOverView
+                    <AddOverview
                       waitingSpots={waitingSpots}
                       setWaitingSpots={setWaitingSpots}
                     />
@@ -166,14 +177,16 @@ function App() {
             />
             <Route
               path="/add/:itineraryId"
-              element={<LoginOrPage element={<AddSchedule />} />}
+              element={
+                <LoginOrPage element={<AddSchedule isDefaultAllowEdit />} />
+              }
             />
             <Route
               path="/itinerary/:itineraryId"
-              element={<LoginOrPage element={<AddSchedule browse />} />}
+              element={<LoginOrPage element={<AddSchedule />} />}
             />
             <Route
-              path="/travel-journals/:journalID"
+              path="/travel-journals/:journalId"
               element={<LoginOrPage element={<TravelJournalDetail />} />}
             />
             <Route path="error" element={<NotFound />} />

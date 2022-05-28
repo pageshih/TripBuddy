@@ -1,52 +1,69 @@
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
+import styled from '@emotion/styled';
+/** @jsxImportSource @emotion/react */
+import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
-import { Image } from './styledComponents/Layout';
-import { OverviewCard } from './styledComponents/Cards';
-import { FlexDiv } from './styledComponents/Layout';
-import { palatte, styles, Loader } from './styledComponents/basicStyle';
-import { timestampToString } from '../utils/utilities';
+import OverviewCard from './styledComponents/Cards/OverviewCard';
+import { styles, Loader, palatte } from './styledComponents/basic/common';
+import { P } from './styledComponents/basic/Text';
 
+const Container = styled.ul`
+  ${styles.flex}
+  ${styles.containerSetting}
+  flex-wrap:wrap;
+  gap: 30px;
+  margin: auto auto 100px auto;
+`;
+const Description = styled(P)`
+  text-align: center;
+  color: ${palatte.gray['700']};
+`;
 function TravelJournals() {
   const { uid } = useContext(Context);
   const navigate = useNavigate();
   const [journals, setJournals] = useState();
-  const now = new Date().getTime();
   useEffect(() => {
-    firestore
-      .getItineraries(uid, now, true)
-      .then((overviews) => {
-        setJournals(overviews);
-      })
-      .catch((error) => console.error(error));
-  }, []);
+    if (uid) {
+      const now = new Date().getTime();
+      firestore
+        .getItineraries(uid, now, true)
+        .then((overviews) => {
+          setJournals(overviews);
+        })
+        .catch((error) => console.error(error));
+    }
+  }, [uid]);
   return (
     <>
       {journals ? (
-        <FlexDiv
-          as="ul"
-          wrap="wrap"
-          gap="30px"
-          addCss={styles.containerSetting}
-          margin="auto auto 100px auto">
-          {journals?.map((journal) => (
-            <OverviewCard
-              as="li"
-              basis="calc(50% - 15px)"
-              margin="0 0 20px 0"
-              key={journal.itinerary_id}
-              src={journal.cover_photo}
-              alt={journal.title}
-              title={journal.title}
-              startDate={journal.start_date}
-              endDate={journal.end_date}
-              onClick={() =>
-                navigate(`/travel-journals/${journal.itinerary_id}`)
-              }
-            />
-          ))}
-        </FlexDiv>
+        <>
+          {journals.length > 0 ? (
+            <Container>
+              {journals.map((journal) => (
+                <OverviewCard
+                  as="li"
+                  addCss={css`
+                    flex-basis: calc(50% - 15px);
+                    margin-bottom: 20px;
+                  `}
+                  key={journal.itinerary_id}
+                  src={journal.cover_photo}
+                  alt={journal.title}
+                  title={journal.title}
+                  startDate={journal.start_date}
+                  endDate={journal.end_date}
+                  onClick={() =>
+                    navigate(`/travel-journals/${journal.itinerary_id}`)
+                  }
+                />
+              ))}
+            </Container>
+          ) : (
+            <Description>沒有可顯示的遊記</Description>
+          )}
+        </>
       ) : (
         <Loader />
       )}

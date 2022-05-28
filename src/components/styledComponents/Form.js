@@ -7,19 +7,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
-import { palatte, mediaQuery, P } from './basicStyle';
-import { Container, FlexChildDiv, FlexDiv, Image } from './Layout';
-import {
-  RoundButtonSmallWhite,
-  Button,
-  ButtonOutline,
-  RoundButtonSmall,
-} from './Button';
-import {
-  compressImages,
-  timestampToTimeInput,
-  timestampToDateInput,
-} from '../../utils/utilities';
+import { palatte, mediaQuery, styles } from './basic/common';
+import { P } from './basic/Text';
+import { Image } from './Layout';
+import { Button, ButtonOutline } from './Buttons/Button';
+import { RoundButtonSmallWhite, RoundButtonSmall } from './Buttons/RoundButton';
+import { compressImages, timestampToDateInput } from '../../utils/utilities';
 import { Modal } from './Modal';
 
 const inputBase = css`
@@ -69,20 +62,16 @@ function TextField({ children, placeholder, value, onChange, type }) {
 
 const TextInput = styled.input`
   ${inputBase}
-  width: ${(props) => props.width || '100%'};
-  color: ${(props) => props.color};
-  font-size: ${(props) => props.fontSize};
-  ${(props) => props.addCss};
+  width:  100%;
 `;
 const Select = styled.select`
   ${inputBase}
-  width: ${(props) => props.width || '100%'};
+  width: 100%;
   min-width: fit-content;
   color: ${(props) => (props.value ? palatte.dark : palatte.gray[600])};
   & option:disabled {
     color: ${palatte.gray[400]};
   }
-  ${(props) => props.addCss};
 `;
 const SelectSmall = styled(Select)`
   font-size: 14px;
@@ -146,7 +135,6 @@ const CheckboxCustom = (props) => {
         onChange={(e) => {
           if (props.isSelectAllBox) {
             props.onChange(e);
-            console.log(props.isSelectAll);
           } else {
             if (e.target.checked) {
               props.setSelectedList([...props.selectedList, props.id]);
@@ -180,7 +168,12 @@ function SelectAllCheckBox(props) {
     }
   };
   return (
-    <FlexDiv gap="12px" alignItems="center" padding={props.padding}>
+    <div
+      css={css`
+        ${styles.flex}
+        gap: 12px;
+        align-items: center;
+      `}>
       <CheckboxCustom
         size={props.size}
         isSelectAll={props.isSelectAll}
@@ -188,14 +181,14 @@ function SelectAllCheckBox(props) {
         onChange={selectAllItems}
       />
       <P
-        fontSize={`calc(${props.size} - '6px')` || '18px'}
-        color={palatte.gray[800]}
-        addCss={css`
+        css={css`
+          font-size: ${`calc(${props.size} - '6px')` || '18px'};
+          color: ${palatte.gray[800]};
           white-space: nowrap;
         `}>
         全選
       </P>
-    </FlexDiv>
+    </div>
   );
 }
 
@@ -331,8 +324,11 @@ const UploadImageBg = styled.div`
   ${(props) => props.addCss};
 `;
 
-const UploadText = (props) => (
-  <FlexDiv direction="column">
+const UploadText = () => (
+  <div
+    css={css`
+      ${styles.flexColumn}
+    `}>
     <span
       className="material-icons"
       css={css`
@@ -341,7 +337,7 @@ const UploadText = (props) => (
       add_circle
     </span>
     <p>添加照片</p>
-  </FlexDiv>
+  </div>
 );
 
 const FileInputHidden = (props) => (
@@ -378,6 +374,7 @@ function AddImages(props) {
     </UploadImageBg>
   );
 }
+
 function AddImageRoundBtn(props) {
   const [imageBuffer, setImageBuffer] = useState([]);
   const [isShowModal, setIsShowModal] = useState();
@@ -423,14 +420,26 @@ function AddImageRoundBtn(props) {
       )}
       {isShowModal && (
         <Modal
-          width="fit-content"
-          height="fit-content"
-          maxWidth="1000px"
-          maxHeight="90vh"
+          addCss={css`
+            width: fit-content;
+            height: fit-content;
+            max-width: 1000px;
+            max-height: 90vh;
+            ${mediaQuery[0]} {
+              max-width: 100%;
+            }
+          `}
           isShowState={isShowModal}
           close={() => setIsShowModal(false)}>
           <Image
-            height="400px"
+            addCss={css`
+              margin: auto;
+              width: fit-content;
+              height: 400px;
+              ${mediaQuery[0]} {
+                max-height: 400px;
+              }
+            `}
             src={
               imageBuffer.length > 0
                 ? URL.createObjectURL(imageBuffer[0])
@@ -438,16 +447,24 @@ function AddImageRoundBtn(props) {
             }
             alt="preview-cover-photo"
           />
-          <FlexDiv
-            width="400px"
-            gap="20px"
-            margin="20px auto"
-            alignItems="center"
-            direction="column">
+          <div
+            css={css`
+              ${styles.flexColumn}
+              width:100%;
+              gap: 20px;
+              margin: 20px auto;
+              align-items: center;
+            `}>
             <P fontSize="20px" textAlign="center">
               {props.confirmMessage}
             </P>
-            <FlexChildDiv width="100%" justifyContent="center" gap="20px">
+            <div
+              css={css`
+                ${styles.flex}
+                width:100%;
+                justify-content: center;
+                gap: 20px;
+              `}>
               <ButtonOutline
                 styled="danger"
                 onClick={() => setIsShowModal(false)}>
@@ -458,8 +475,8 @@ function AddImageRoundBtn(props) {
                 onClick={() => props.upload(imageBuffer, setIsShowModal)}>
                 確定
               </Button>
-            </FlexChildDiv>
-          </FlexDiv>
+            </div>
+          </div>
         </Modal>
       )}
     </>
@@ -484,23 +501,30 @@ const ChangeTravelModeSelect = (props) => {
 };
 
 const DateTimeTextInput = (props) => (
-  <Container position="relative" width={props.width}>
+  <div
+    css={css`
+      position: relative;
+      ${props.addCss?.container ? props.addCss.container : null}
+    `}>
     <TextInput
-      color={props.color}
       ref={props.inputRef}
-      addCss={props.addCss}
-      fontSize={props.fontSize}
+      css={css`
+        ${mediaQuery[0]} {
+          padding: 10px 15px;
+        }
+        ${props.addCss?.input ? props.addCss.input : props.addCss}
+      `}
       {...props.inputProps}
     />
-    <Container
-      position="absolute"
-      addCss={css`
+    <div
+      css={css`
+        position: absolute;
         right: 15px;
         top: calc(50%);
       `}>
       {props.InputProps?.endAdornment}
-    </Container>
-  </Container>
+    </div>
+  </div>
 );
 function CustomDatePicker(props) {
   return (
@@ -511,12 +535,7 @@ function CustomDatePicker(props) {
         props.onChange(new Date(value).getTime());
       }}
       renderInput={(params) => (
-        <DateTimeTextInput
-          color={props.color}
-          width={props.width}
-          fontSize={props.fontSize}
-          {...params}
-        />
+        <DateTimeTextInput addCss={props.addCss} {...params} />
       )}
     />
   );
@@ -528,7 +547,6 @@ function CustomTimePicker(props) {
         value={new Date(props.value)}
         ampmInClock={true}
         onChange={(value) => {
-          console.log(value);
           props.onChange(new Date(value).getTime());
         }}
         renderInput={(params) => (
@@ -548,7 +566,7 @@ function CustomDateRangePicker(props) {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <CustomDatePicker
-        width={props.width}
+        addCss={props.addCss}
         value={props.startTimestamp}
         onChange={(newStartTimestamp) => {
           props.setStartTimestamp(newStartTimestamp);
@@ -562,7 +580,7 @@ function CustomDateRangePicker(props) {
       </span>
       <CustomDatePicker
         value={props.endTimestamp}
-        width={props.width}
+        addCss={props.addCss}
         onChange={(newEndTimestamp) => {
           props.setEndTimestamp(newEndTimestamp);
         }}
@@ -572,14 +590,14 @@ function CustomDateRangePicker(props) {
 }
 
 export {
-  TextField,
+  inputBase,
+  inputBaseSmall,
   TextInput,
+  TextField,
   CheckboxCustom,
   TextAreaReview,
   SelectAllCheckBox,
-  inputBase,
   ReviewTag,
-  inputBaseSmall,
   AddImages,
   uploadImageStyle,
   AddImageRoundBtn,

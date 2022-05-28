@@ -6,22 +6,81 @@ import { css, jsx } from '@emotion/react';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
 import {
-  Logo,
-  P,
   styles,
   palatte,
   mediaQuery,
-} from './styledComponents/basicStyle';
-import { Button, ButtonOutline } from './styledComponents/Button';
+  PendingLoader,
+} from './styledComponents/basic/common';
+import { Logo } from './styledComponents/basic/Logo';
+import { P } from './styledComponents/basic/Text';
+import { Button, ButtonOutline } from './styledComponents/Buttons/Button';
 import { TextInput } from './styledComponents/Form';
-import { FlexDiv, FlexChildDiv, Image } from './styledComponents/Layout';
-import {
-  Notification,
-  NotificationText,
-  defaultNotification,
-  notificationReducer,
-} from './styledComponents/Notification';
+import { Image } from './styledComponents/Layout';
+import { NotificationText } from './styledComponents/Notification';
 
+const Container = styled.div`
+  ${styles.flex}
+  ${mediaQuery[0]} {
+    display: block;
+    position: relative;
+    background-color: ${palatte.secondary['100']};
+    height: 100vh;
+  }
+`;
+
+const EntryImage = ({ src }) => (
+  <Image
+    src={src}
+    alt="TripBuddy"
+    addCss={css`
+      width: 52%;
+      height: 100vh;
+      ${mediaQuery[0]} {
+        height: 200px;
+        width: 100%;
+      }
+    `}
+  />
+);
+
+const EntryContainer = styled.div`
+  ${styles.flex}
+  flex-grow: 1;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  ${mediaQuery[0]} {
+    position: absolute;
+    top: 120px;
+    width: 100%;
+    height: fit-content;
+    align-items: flex-start;
+    padding: 0 20px;
+  }
+`;
+const EntryContentWrapper = styled.div`
+  ${styles.flexColumn}
+  gap:60px;
+  flex-basis: 450px;
+  padding: 30px;
+  ${mediaQuery[0]} {
+    background-color: ${palatte.white};
+    flex-basis: 400px;
+    padding: 40px 30px;
+    border-radius: 30px;
+    box-shadow: ${styles.shadow};
+    gap: 40px;
+  }
+`;
+
+const EntryFormWrapper = styled.div`
+  ${styles.flexColumn};
+  gap: 20px;
+`;
+const EntryInputWrapper = styled.div`
+  ${styles.flexColumn};
+  gap: 15px;
+`;
 const ContainerTopLine = styled.div`
   display: flex;
   border-top: ${styles.border};
@@ -34,23 +93,42 @@ const ContainerTopLine = styled.div`
   }
 `;
 
-function Login(props) {
+const textNotificationReducer = (state, action) => {
+  switch (action.type) {
+    case 'fire':
+      return {
+        fire: [...state.fire, action.playload.fire],
+        message: {
+          ...state.message,
+          [action.playload.fire]: action.playload.message,
+        },
+      };
+    case 'close':
+      return {
+        ...state,
+        fire: state.fire.filter((id) => id !== action.playload.close),
+      };
+    default:
+      return state;
+  }
+};
+
+function Login() {
+  const { dispatchNotification, uid } = useContext(Context);
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
   const { setUid, setIsLogInOut, goLogin, isLogInOut } = useContext(Context);
   const [isSignUp, setIsSignUp] = useState();
   const [userName, setUserName] = useState('');
   const navigate = useNavigate();
-  const [notification, dispatchNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
-  );
+  const [isPending, setIsPending] = useState();
   const [textNotification, dispatchTextNotification] = useReducer(
-    notificationReducer,
-    defaultNotification
+    textNotificationReducer,
+    { fire: [], message: {} }
   );
   const authErrorMessage = useRef({
     'auth/email-already-exists': 'Email 已被人使用，請重新輸入',
+    'auth/user-not-found': '找不到符合的帳號，請確認帳號密碼是否正確',
     'auth/internal-error': '伺服器發生錯誤，請稍後再試',
     'auth/invalid-password': '密碼錯誤，請重新輸入至少六個字的密碼',
     'auth/invalid-email': '無效的 Email，請重新輸入',
@@ -61,24 +139,28 @@ function Login(props) {
   });
   useEffect(() => {
     if (email) {
-      dispatchTextNotification({ type: 'fire', playload: { email: '' } });
+      dispatchTextNotification({ type: 'close', playload: { close: 'email' } });
     }
     if (password) {
-      dispatchTextNotification({ type: 'fire', playload: { password: '' } });
+      dispatchTextNotification({
+        type: 'close',
+        playload: { close: 'password' },
+      });
     }
     if (userName) {
-      dispatchTextNotification({ type: 'fire', playload: { userName: '' } });
+      dispatchTextNotification({
+        type: 'close',
+        playload: { close: 'userName' },
+      });
     }
   }, [email, password, userName]);
   const emptyVerify = () => {
-    console.log('login');
     if (!email) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          email: {
-            message: '請輸入 Email',
-          },
+          fire: 'email',
+          message: '請輸入 Email',
         },
       });
     }
@@ -86,9 +168,8 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          password: {
-            message: '請輸入密碼',
-          },
+          fire: 'password',
+          message: '請輸入密碼',
         },
       });
     }
@@ -96,9 +177,8 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          userName: {
-            message: '請輸入用戶名稱',
-          },
+          fire: 'userName',
+          message: '請輸入用戶名稱',
         },
       });
     }
@@ -108,18 +188,16 @@ function Login(props) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          password: {
-            message: authErrorMessage.current[error.code],
-          },
+          fire: 'password',
+          message: authErrorMessage.current[error.code],
         },
       });
     } else if (error.code.match('email')?.length > 0) {
       dispatchTextNotification({
         type: 'fire',
         playload: {
-          email: {
-            message: authErrorMessage.current[error.code],
-          },
+          fire: 'email',
+          message: authErrorMessage.current[error.code],
         },
       });
     } else {
@@ -128,22 +206,23 @@ function Login(props) {
         playload: {
           type: 'warn',
           message: authErrorMessage.current[error.code] || error.message,
-          id: 'toastifyErrorMessage',
+          id: 'toastify_errorMessage',
         },
       });
     }
   };
   const signIn = () => {
     if (email && password) {
+      setIsPending(true);
       firebaseAuth
         .signIn(email, password)
         .then((res) => {
-          console.log(res);
+          setIsPending(false);
           setUid(res.user.uid);
           setIsLogInOut(false);
-          navigate(`/itineraries`);
         })
         .catch((error) => {
+          setIsPending(false);
           errorVerify(error);
         });
     } else {
@@ -151,16 +230,17 @@ function Login(props) {
     }
   };
   const signUp = () => {
+    setIsPending(true);
     if (email && password && userName) {
       firebaseAuth
         .signUp(email, password, userName)
-        .then((uid) => {
-          console.log(uid);
-          setUid(uid);
+        .then((userUid) => {
+          setIsPending(false);
+          setUid(userUid);
           setIsLogInOut(false);
-          navigate(`/itineraries`);
         })
         .catch((error) => {
+          setIsPending(false);
           errorVerify(error);
         });
     } else {
@@ -168,116 +248,54 @@ function Login(props) {
     }
   };
   const logInWithGoogle = () => {
+    setIsPending(true);
     firebaseAuth
       .googleLogIn()
-      .then((uid) => {
-        console.log(uid);
-        setUid(uid);
+      .then((userUid) => {
+        setIsPending(false);
+        setUid(userUid);
         setIsLogInOut(false);
-        navigate(`/itineraries`);
       })
       .catch((error) => {
-        console.log(error.code, error.message);
+        setIsPending(false);
         dispatchNotification({
           type: 'fire',
           playload: {
             type: 'warn',
             message: authErrorMessage.current[error.code],
-            id: 'toastifyErrorMessage',
+            id: 'toastify_errorMessage',
           },
         });
       });
   };
 
   useEffect(() => {
+    if (uid && !isLogInOut) {
+      navigate('/itineraries');
+    }
+  }, [uid, isLogInOut, navigate]);
+
+  useEffect(() => {
     if (goLogin || isLogInOut) {
-      console.log('goLigoin', goLogin);
-      console.log('isLogInOut', isLogInOut);
       dispatchNotification({
         type: 'fire',
         playload: {
           type: isLogInOut ? 'success' : 'warn',
           message: isLogInOut ? '您已登出' : '請先登入',
-          id: 'toastifyLoginFirst',
+          id: 'toastify_loginFirst',
         },
       });
     }
   }, []);
   return (
     <>
-      <Notification
-        fire={
-          notification.fire && notification.id.match('toastify')?.length > 0
-        }
-        type={notification.type}
-        message={notification.message}
-        id={notification.id}
-        resetFireState={() => dispatchNotification({ type: 'close' })}
-      />
-      <FlexDiv
-        css={css`
-          ${mediaQuery[0]} {
-            display: block;
-            position: relative;
-            background-color: ${palatte.secondary['100']};
-            height: 100vh;
-          }
-        `}>
-        <Image
-          src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          alt="TripBuddy"
-          width="52%"
-          height="100vh"
-          addCss={css`
-            ${mediaQuery[0]} {
-              height: 200px;
-              width: 100%;
-            }
-          `}
-        />
-        <FlexChildDiv
-          grow="1"
-          height="100vh"
-          justifyContent="center"
-          alignItems="center"
-          addCss={css`
-            ${mediaQuery[0]} {
-              position: absolute;
-              top: 120px;
-              width: 100%;
-              height: fit-content;
-              align-items: flex-start;
-              padding: 0 20px;
-            }
-          `}>
-          <FlexChildDiv
-            direction="column"
-            gap="60px"
-            basis="450px"
-            padding="30px"
-            addCss={css`
-              ${mediaQuery[0]} {
-                background-color: ${palatte.white};
-                flex-basis: 400px;
-                padding: 40px 30px;
-                border-radius: 30px;
-                box-shadow: ${styles.shadow};
-                gap: 40px;
-              }
-            `}>
+      <Container>
+        <EntryImage src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" />
+        <EntryContainer>
+          <EntryContentWrapper>
             <Logo />
-            <FlexDiv
-              direction="column"
-              gap="30px"
-              addCss={css`
-                gap: 20px;
-              `}>
-              <FlexDiv
-                direction="column"
-                gap="20px"
-                addCss={css`
-                  gap: 15px;
-                `}>
+            <EntryFormWrapper>
+              <EntryInputWrapper>
                 {isSignUp && (
                   <>
                     <TextInput
@@ -286,7 +304,8 @@ function Login(props) {
                       onChange={(e) => setUserName(e.target.value)}
                     />
                     <NotificationText type="error">
-                      {textNotification?.userName?.message}
+                      {textNotification.fire?.some((id) => id === 'userName') &&
+                        textNotification.message.userName}
                     </NotificationText>
                   </>
                 )}
@@ -296,7 +315,8 @@ function Login(props) {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <NotificationText type="error">
-                  {textNotification?.email?.message}
+                  {textNotification.fire?.some((id) => id === 'email') &&
+                    textNotification.message.email}
                 </NotificationText>
 
                 <TextInput
@@ -306,11 +326,18 @@ function Login(props) {
                   type="password"
                 />
                 <NotificationText type="error">
-                  {textNotification?.password?.message}
+                  {textNotification.fire?.some((id) => id === 'password') &&
+                    textNotification.message.password}
                 </NotificationText>
-              </FlexDiv>
+              </EntryInputWrapper>
               <Button styled="primary" onClick={isSignUp ? signUp : signIn}>
-                {isSignUp ? '註冊' : ' Email 登入'}
+                {isPending ? (
+                  <PendingLoader color={palatte.white} size="24" />
+                ) : isSignUp ? (
+                  '註冊'
+                ) : (
+                  ' Email 登入'
+                )}
               </Button>
               <ContainerTopLine>
                 <P color={palatte.gray['700']}>
@@ -318,17 +345,30 @@ function Login(props) {
                 </P>
                 <ButtonOutline
                   styled="primary"
-                  onClick={() => setIsSignUp((prev) => !prev)}>
+                  disabled={isPending}
+                  onClick={() => {
+                    if (!isSignUp) {
+                      setEmail('');
+                      setPassword('');
+                    } else {
+                      setEmail('test@mail.com');
+                      setPassword('test123');
+                    }
+                    setIsSignUp((prev) => !prev);
+                  }}>
                   {isSignUp ? 'Email 登入' : 'Email 註冊'}
                 </ButtonOutline>
-                <ButtonOutline styled="primary" onClick={logInWithGoogle}>
+                <ButtonOutline
+                  styled="primary"
+                  onClick={logInWithGoogle}
+                  disabled={isPending}>
                   使用 Google 登入
                 </ButtonOutline>
               </ContainerTopLine>
-            </FlexDiv>
-          </FlexChildDiv>
-        </FlexChildDiv>
-      </FlexDiv>
+            </EntryFormWrapper>
+          </EntryContentWrapper>
+        </EntryContainer>
+      </Container>
     </>
   );
 }

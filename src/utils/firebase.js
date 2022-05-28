@@ -30,7 +30,6 @@ import {
   where,
   deleteDoc,
   writeBatch,
-  WriteBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
 import { createDepartTimeAry } from './utilities';
@@ -51,7 +50,6 @@ const firebaseAuth = {
           name,
           uid: res.user.uid,
           photo: '',
-          reviews: [],
         });
         return Promise.resolve(res.user.uid);
       }
@@ -131,16 +129,20 @@ const firestore = {
     );
     batch.set(
       doc(this.db, 'itineraries', userUID),
-      { default_travel_mode: 'DRIVING', uid: userUID },
+      { default_travel_mode: 'DRIVING', review_tags: null, uid: userUID },
       { merge: 'merge' }
     );
     return batch.commit();
   },
   getProfile(userUID) {
-    return new Promise((resolve) => {
-      getDoc(doc(this.db, 'profile', userUID)).then((profileSnap) => {
-        resolve(profileSnap.data());
-      });
+    const profile = getDoc(doc(this.db, 'profile', userUID));
+    const setting = getDoc(doc(this.db, 'itineraries', userUID));
+    return Promise.all([profile, setting]).then((res) => {
+      const profileSetting = res.reduce((finalData, doc) => {
+        finalData = { ...finalData, ...doc.data() };
+        return finalData;
+      }, {});
+      return profileSetting;
     });
   },
   editProfile(userUID, newProfile) {
@@ -515,6 +517,23 @@ const firestore = {
   setItinerariesSetting(userUID, newSetting) {
     const defaultTravelModeRef = doc(this.db, 'itineraries', userUID);
     return setDoc(defaultTravelModeRef, newSetting, { merge: 'merge' });
+  },
+  async uploadItinerariesCoverPhoto({ uid, itineraryId, imageBuffer }) {
+    const urlAry = imageBuffer
+      ? await firebaseStorage.uploadImages(
+          [uid, itineraryId],
+          imageBuffer,
+          'cover_photo'
+        )
+      : [];
+    return firestore
+      .editOverviews(uid, itineraryId, {
+        cover_photo: urlAry[0],
+      })
+      .then(() => {
+        return Promise.resolve(urlAry[0]);
+      })
+      .catch((error) => console.error(error));
   },
 };
 
