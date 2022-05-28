@@ -130,7 +130,7 @@ function AddReview({
         checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
       );
       firestore.setItinerariesSetting(uid, {
-        review_tags: reviewTags ? [addTag, ...reviewTags] : [addTag],
+        review_tags: allReviewTags ? [addTag, ...allReviewTags] : [addTag],
       });
       setAddTag('');
     }

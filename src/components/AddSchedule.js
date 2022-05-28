@@ -102,7 +102,7 @@ function AddSchedule({ isDefaultAllowEdit }) {
   }, [uid, itineraryId]);
 
   useEffect(() => {
-    if (overviews) {
+    if (overviews && schedules) {
       const totalDuration = schedules.reduce((acc, schedule) => {
         acc += schedule.duration;
         return acc;

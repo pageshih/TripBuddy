@@ -281,7 +281,7 @@ function UserSetting({
                       const newReviewTags = reviewTags
                         ? [...reviewTags, addTag]
                         : [addTag];
-                      await firestore.editProfile(uid, {
+                      await firestore.setItinerariesSetting(uid, {
                         review_tags: newReviewTags,
                       });
                       setReviewTags(newReviewTags);
@@ -322,7 +322,7 @@ function UserSetting({
                           const newReviewTags = reviewTags.filter(
                             (originTag) => originTag !== tag
                           );
-                          await firestore.editProfile(uid, {
+                          await firestore.setItinerariesSetting(uid, {
                             review_tags: newReviewTags,
                           });
                           setReviewTags(newReviewTags);
