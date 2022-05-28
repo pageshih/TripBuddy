@@ -9,7 +9,7 @@ import { Modal } from '../styledComponents/Modal';
 import { Loader, styles } from '../styledComponents/basic/common';
 import { Select, TextInput, CustomTimePicker } from '../styledComponents/Form';
 import { Button, ButtonSmall } from '../styledComponents/Buttons/Button';
-import { SearchBar } from '../../utils/googleMap';
+import GoogleMapSearchBar from '../styledComponents/GoogleMapSearchBar';
 import { SpotCard } from '../styledComponents/Cards/SpotCard';
 import { timestampToString } from '../../utils/utilities';
 import { P } from '../styledComponents/basic/Text';
@@ -145,7 +145,7 @@ function AddScheduleController({
             <Loader />
           ) : (
             <>
-              <SearchBar
+              <GoogleMapSearchBar
                 placeholder="輸入要加入的景點"
                 dispatch={(place) =>
                   dispatchAddSchedule({
@@ -155,9 +155,12 @@ function AddScheduleController({
                 }
                 map={map}
                 addCss={{
-                  container: { position: 'relative', width: '100%' },
+                  container: css`
+                    position: relative;
+                    width: 100%;
+                  `,
                 }}
-                option={{
+                placeDetailOption={{
                   fields: [
                     'name',
                     'place_id',

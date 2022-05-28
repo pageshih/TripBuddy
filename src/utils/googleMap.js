@@ -1,15 +1,10 @@
 import { Wrapper } from '@googlemaps/react-wrapper';
 import { googleMapApiKey } from './apiKey';
 import { useEffect, useRef, useContext } from 'react';
+import PropTypes from 'prop-types';
 import { Context } from '../App';
 import '../css/marker.css';
-import { inputBase } from '../components/styledComponents/Form';
-/** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
-import {
-  mediaQuery,
-  palatte,
-} from '../components/styledComponents/basic/common';
+import { palatte } from '../components/styledComponents/basic/common';
 
 const googleMap = {
   svgMarker(color) {
@@ -74,24 +69,23 @@ const googleMap = {
   ],
   composePlaceDetailData(place) {
     return {
-      place_id: place?.place_id || '未提供',
-      name: place?.name || '未提供',
-      formatted_address: place?.formatted_address || '未提供',
+      place_id: place?.place_id || null,
+      name: place?.name || null,
+      formatted_address: place?.formatted_address || null,
       geometry: {
-        lat: place?.geometry?.location.lat() || '未提供',
-        lng: place?.geometry?.location.lng() || '未提供',
+        lat: place?.geometry?.location.lat() || null,
+        lng: place?.geometry?.location.lng() || null,
       },
       opening_hours: {
-        periods: place?.opening_hours?.periods || '未提供',
-        weekday_text: place?.opening_hours?.weekday_text || '未提供',
+        periods: place?.opening_hours?.periods || null,
+        weekday_text: place?.opening_hours?.weekday_text || null,
       },
-      photos: place?.photos?.map((item) => item.getUrl()) || '未提供',
-      reviews: place?.reviews || '未提供',
-      website: place?.website || '未提供',
-      rating: place?.rating || '未提供',
-      // types: place.types || '未提供',
+      photos: place?.photos?.map((item) => item.getUrl()) || null,
+      reviews: place?.reviews || null,
+      website: place?.website || null,
+      rating: place?.rating || null,
       created_time: new Date().getTime(),
-      url: place?.url || '未提供',
+      url: place?.url || null,
     };
   },
   initMap(ref, center, zoom) {
@@ -178,7 +172,7 @@ const googleMap = {
     return new window.google.maps.places.Autocomplete(ref, defaultOptions);
   },
 };
-function EmptyMap(props) {
+function EmptyMap({ libraries }) {
   const ref = useRef();
   const { map, setMap } = useContext(Context);
   useEffect(() => {
@@ -189,78 +183,13 @@ function EmptyMap(props) {
   }, [ref.current, map, setMap]);
 
   return (
-    <Wrapper apiKey={googleMapApiKey} libraries={props.libraries}>
+    <Wrapper apiKey={googleMapApiKey} libraries={libraries}>
       <div ref={ref} />
     </Wrapper>
   );
 }
-
-const searchBarStyles = {
-  searchIcon: {
-    position: 'absolute',
-    backgroundColor: 'transparent',
-    left: '32px',
-    top: 'calc(50% - 10px)',
-    color: palatte.gray[800],
-  },
-  container: {
-    position: 'absolute',
-    zIndex: '8',
-    width: '500px',
-    padding: '20px',
-    [mediaQuery[0]]: {
-      width: '100%',
-    },
-  },
-  input: {
-    width: '100%',
-    paddingLeft: '40px',
-    [mediaQuery[0]]: {
-      width: '100%',
-    },
-  },
+EmptyMap.propTypes = {
+  libraries: PropTypes.arrayOf(PropTypes.string),
 };
-function SearchBar(props) {
-  const ref = useRef();
 
-  useEffect(() => {
-    if (ref.current) {
-      const option =
-        props.option === 'default'
-          ? googleMap.placesRequestFields
-          : props.option;
-      const autocomplete = googleMap.initAutocomplete(
-        ref.current,
-        props.center,
-        option
-      );
-      autocomplete.addListener('place_changed', () => {
-        const place = googleMap.composePlaceDetailData(autocomplete.getPlace());
-        if (place.geometry && place.name) {
-          if (props.getPlaceShowOnMap) {
-            props.getPlaceShowOnMap(place);
-          } else if (props.dispatch) {
-            props.dispatch(place);
-          }
-        }
-      });
-    }
-  }, []);
-
-  return (
-    <div css={[searchBarStyles.container, props.addCss?.container]}>
-      <input
-        onFocus={(e) => e.target.select()}
-        css={[inputBase, searchBarStyles.input, props.addCss?.input]}
-        ref={ref}
-        placeholder={props.placeholder}
-      />
-      <div
-        css={[searchBarStyles.searchIcon, props.addCss?.searchIcon]}
-        className="material-icons">
-        search
-      </div>
-    </div>
-  );
-}
-export { googleMap, EmptyMap, SearchBar };
+export { googleMap, EmptyMap };

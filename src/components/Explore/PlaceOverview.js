@@ -60,12 +60,19 @@ const Container = styled.div`
   ${styles.flexColumn}
   gap: 10px;
 `;
-const SpotImage = styled(Image)`
-  ${mediaQuery[0]} {
-    flex-basis: 50%;
-    height: 160px;
-  }
-`;
+const SpotImage = ({ src, alt }) => (
+  <Image
+    src={src}
+    alt={alt}
+    addCss={css`
+      max-height: 300px;
+      ${mediaQuery[0]} {
+        flex-basis: 50%;
+        height: 160px;
+      }
+    `}
+  />
+);
 const ContentWrapper = styled.div`
   ${styles.flexColumn};
   gap: 20px;
@@ -161,7 +168,16 @@ function PlaceOverview({
   return (
     <Container>
       <ContentWrapper>
-        <SpotImage src={imgUrl} alt="placePhoto" />
+        {imgUrl ? (
+          <SpotImage src={imgUrl} alt={spotName} />
+        ) : (
+          <div
+            css={css`
+              height: 20px;
+              width: 100%;
+            `}
+          />
+        )}
         <TextWrapper>
           <PlaceName>{spotName}</PlaceName>
           {openingHours && (
@@ -184,7 +200,7 @@ function PlaceOverview({
             {address}
           </AddressText>
 
-          <RatingText rating={rating} isSmall />
+          {rating && <RatingText rating={rating} isSmall />}
           {website && (
             <HyperLink
               href={website}

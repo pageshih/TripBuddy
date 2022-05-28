@@ -6,7 +6,8 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { googleMapApiKey } from '../utils/apiKey';
 import { firestore } from '../utils/firebase';
-import { googleMap, SearchBar } from '../utils/googleMap';
+import { googleMap } from '../utils/googleMap';
+import GoogleMapSearchBar from './styledComponents/GoogleMapSearchBar';
 import { Context } from '../App';
 import {
   RoundButton,
@@ -153,7 +154,7 @@ const ExpandButton = (props) => (
   </RoundButtonSmall>
 );
 function Explore({ setWaitingSpots }) {
-  const { uid } = useContext(Context);
+  const { uid, dispatchNotification } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
@@ -162,6 +163,7 @@ function Explore({ setWaitingSpots }) {
   const [isShowSideColumn, setIsShowSideColumn] = useState(false);
   const sideWindowRef = useRef();
   const navigate = useNavigate();
+  const [mapCenter, setMapCenter] = useState();
 
   useEffect(() => {
     if (map && !savedSpots && uid) {
@@ -173,6 +175,25 @@ function Explore({ setWaitingSpots }) {
         .catch((error) => console.error(error));
     }
   }, [map, savedSpots, uid]);
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setMapCenter(location);
+        },
+        (error) => {
+          console.error(error.code, error.message);
+          setMapCenter(googleMap.center);
+        }
+      );
+    } else {
+      setMapCenter(googleMap.center);
+    }
+  }, []);
   const addToSavedSpots = () => {
     if (savedSpots.every((spot) => spot.place_id !== placeDetail.place_id)) {
       firestore.setSavedSpots(uid, [placeDetail]);
@@ -252,11 +273,13 @@ function Explore({ setWaitingSpots }) {
                       )}
                       spotName={placeDetail.name}
                       address={placeDetail.formatted_address}
-                      imgUrl={placeDetail.photos[0]}
-                      rating={placeDetail.rating}
-                      website={
-                        placeDetail.website !== '未提供' && placeDetail.website
+                      imgUrl={
+                        placeDetail?.photos?.length > 0
+                          ? placeDetail.photos[0]
+                          : null
                       }
+                      rating={placeDetail.rating}
+                      website={placeDetail.website}
                       buttonAction={() =>
                         savedSpots.some(
                           (spot) => spot.place_id === placeDetail.place_id
@@ -264,16 +287,9 @@ function Explore({ setWaitingSpots }) {
                           ? removeFromSavedSpots([placeDetail.place_id])
                           : addToSavedSpots()
                       }
-                      openingHours={
-                        placeDetail.opening_hours.weekday_text !== '未提供' &&
-                        placeDetail.opening_hours.weekday_text
-                      }
+                      openingHours={placeDetail?.opening_hours?.weekday_text}
                     />
-                    <PlaceReview
-                      reviews={
-                        placeDetail.reviews !== '未提供' && placeDetail.reviews
-                      }
-                    />
+                    <PlaceReview reviews={placeDetail?.reviews} />
                   </PlaceDetailContainer>
                 )}
                 {isShowSavedSpots && savedSpots?.length > 0 && (
@@ -305,18 +321,18 @@ function Explore({ setWaitingSpots }) {
                 }}
                 onHomeClick={() => navigate('/itineraries')}
               />
-              {map && (
-                <SearchBar
+              {map && mapCenter && (
+                <GoogleMapSearchBar
                   placeholder="請輸入地址或關鍵字搜尋"
                   getPlaceShowOnMap={getPlaceShowOnMap}
-                  option="default"
+                  center={mapCenter}
                   addCss={{
-                    container: {
-                      left: '15px',
-                      [mediaQuery[0]]: {
-                        left: '0',
+                    container: css`
+                      left: 15px;
+                      ${mediaQuery[0]} {
+                        left: 0;
                       },
-                    },
+                    `,
                   }}
                 />
               )}
@@ -324,6 +340,7 @@ function Explore({ setWaitingSpots }) {
                 <Map
                   getPlaceShowOnMap={getPlaceShowOnMap}
                   setMap={setMap}
+                  center={mapCenter}
                   map={map}
                   setMarker={setMarker}
                   marker={marker}
