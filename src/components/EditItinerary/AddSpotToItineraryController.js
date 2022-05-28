@@ -104,14 +104,16 @@ export function AddSpotToItineraryController({
             {notification.message}
           </NotificationText>
         )}
-      <ItinerarySelector
-        choseItinerary={choseItinerary}
-        onChangeItinerary={(e) => {
-          onChangeItinerary(e);
-          dispatchNotification({ type: 'close' });
-        }}
-        createdItineraries={createdItineraries}
-      />
+      <div>
+        <ItinerarySelector
+          choseItinerary={choseItinerary}
+          onChangeItinerary={(e) => {
+            onChangeItinerary(e);
+            dispatchNotification({ type: 'close' });
+          }}
+          createdItineraries={createdItineraries}
+        />
+      </div>
       <ButtonContainer isColumn={isColumn}>
         <TooltipNotification id="addSpots" addCss={ButtonOfController}>
           <ButtonSmall styled="primary" onClick={addAction}>
