@@ -30,6 +30,9 @@ const ControllerWrapper = styled.div`
   justify-content: space-between;
   padding: 0 10px 20px 10px;
   border-bottom: 1px solid ${palatte.gray['400']};
+  ${mediaQuery[0]} {
+    flex-wrap: nowrap;
+  }
 `;
 const Description = styled(P)`
   text-align: center;

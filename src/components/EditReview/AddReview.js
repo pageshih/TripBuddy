@@ -188,6 +188,11 @@ function AddReview({
     });
   };
   useEffect(() => {
+    if (!isEdit) {
+      setImageBuffer(undefined);
+    }
+  }, [isEdit]);
+  useEffect(() => {
     const checkDesktop = () => {
       if (window.innerWidth > 992) {
         setIsDesktop(true);

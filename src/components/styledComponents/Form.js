@@ -304,8 +304,11 @@ const UploadImageBg = styled.div`
         position: absolute;
         width: 10px;
         height: calc(100% + 10px);
-        left: -30px;
+        left: -25px;
         background: linear-gradient(90deg, rgba(0, 0, 0, 0), ${palatte.shadow});
+        ${mediaQuery[0]} {
+          display: none;
+        }
       }
     `}
   & * {
@@ -321,22 +324,40 @@ const UploadImageBg = styled.div`
       color: ${palatte.gray['800']};
     }
   }
-  ${(props) => props.addCss};
+  ${mediaQuery[0]} {
+    height: fit-content;
+    flex-basis: fit-content;
+    background-color: transparent;
+    &:hover {
+      background-color: transparent;
+      * {
+        color: ${palatte.gray['900']};
+      }
+    }
+  }
 `;
 
 const UploadText = () => (
   <div
     css={css`
       ${styles.flexColumn}
+      ${mediaQuery[0]} {
+        gap: 5px;
+        flex-direction: row;
+        align-items: center;
+      }
     `}>
     <span
       className="material-icons"
       css={css`
         font-size: 48px;
+        ${mediaQuery[0]} {
+          font-size: 30px;
+        }
       `}>
       add_circle
     </span>
-    <p>添加照片</p>
+    <P>添加照片</P>
   </div>
 );
 

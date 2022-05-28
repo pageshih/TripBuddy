@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { palatte, styles } from '../styledComponents/basic/common';
+import { mediaQuery, palatte, styles } from '../styledComponents/basic/common';
 import { AddImages, uploadImageStyle } from '../styledComponents/Form';
 import { Image } from '../styledComponents/Layout';
 import { P } from '../styledComponents/basic/Text';
@@ -30,6 +30,7 @@ const GalleryImage = ({ src, alt }) => (
     `}
   />
 );
+
 const PreviewImage = ({ src, alt }) => (
   <Image
     src={src}
@@ -72,13 +73,26 @@ const PreviewTag = styled(P)`
 const Container = styled.div`
   ${styles.flex};
   gap: 15px;
+  position: relative;
 `;
-const GalleryWrapper = styled(Container)`
+const GalleryContainer = styled(Container)`
   overflow-y: auto;
 `;
 const ImageWrapper = styled.div`
   position: relative;
   margin-right: 5px;
+`;
+const ShadowLeft = styled.div`
+  display: none;
+  ${mediaQuery[0]} {
+    display: block;
+    position: absolute;
+    top: -10px;
+    right: 0px;
+    width: 10px;
+    height: 220px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0), ${palatte.shadow});
+  }
 `;
 function ReviewGallery({
   gallery,
@@ -108,9 +122,14 @@ function ReviewGallery({
   }, [galleryContainer]);
 
   return (
-    <Container>
+    <Container
+      css={css`
+        ${mediaQuery[0]} {
+          flex-direction: column;
+        }
+      `}>
       {(gallery?.length > 0 || imageBuffer?.length > 0) && (
-        <GalleryWrapper ref={galleryContainer}>
+        <GalleryContainer ref={galleryContainer}>
           {gallery?.length > 0 && (
             <Container>
               {gallery?.map((url, index) => (
@@ -157,8 +176,9 @@ function ReviewGallery({
               })}
             </Container>
           )}
-        </GalleryWrapper>
+        </GalleryContainer>
       )}
+      {isShowShadow && <ShadowLeft />}
       {isEdit && (
         <AddImages
           imageBuffer={imageBuffer}

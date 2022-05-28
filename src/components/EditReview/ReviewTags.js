@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { palatte, styles } from '../styledComponents/basic/common';
+import { mediaQuery, palatte, styles } from '../styledComponents/basic/common';
 import { ReviewTag, inputBaseSmall } from '../styledComponents/Form';
 import {
   RoundButtonSmall,
@@ -20,6 +20,9 @@ const ReviewTagsWrapper = styled.div`
   gap: 12px;
   overflow-y: auto;
   position: relative;
+  ${mediaQuery[0]} {
+    gap: 5px;
+  }
 `;
 const AddReviewTagControllerWrapper = styled.div`
   ${styles.flex};
@@ -32,7 +35,7 @@ const AddReviewTagsForm = styled.form`
 `;
 const ShadowLeft = styled.div`
   position: absolute;
-  top: -6px;
+  top: ${(props) => (!props.isEdit ? '-19px' : '-6px')};
   left: -18px;
   width: 10px;
   height: 38px;
@@ -86,7 +89,7 @@ function ReviewTags({
         ))}
       </ReviewTagsWrapper>
       <AddReviewTagControllerWrapper>
-        {isShowShadow && <ShadowLeft />}
+        {isShowShadow && <ShadowLeft isEdit={isEdit} />}
         {isEdit &&
           (isShowInput ? (
             <AddReviewTagsForm onSubmit={onSubmit}>
