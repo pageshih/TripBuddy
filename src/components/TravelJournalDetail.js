@@ -67,6 +67,7 @@ const ScheduleHeaderWrapper = styled.div`
   gap:30px;
   align-items: center;
   ${mediaQuery[0]} {
+    gap: 15px;
     align-items: flex-start;
   }
 `;
@@ -86,6 +87,9 @@ const ScheduleTime = styled(P)`
 const AddReviewContainer = styled.div`
   ${styles.flex};
   padding: 0 20px 20px 70px;
+  ${mediaQuery[0]} {
+    padding: 0 0 5px 0;
+  }
 `;
 
 const DeleteButton = styled(RoundButtonSmall)`
