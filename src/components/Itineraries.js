@@ -41,7 +41,9 @@ const ExploreSpot = ({ isNothing }) => {
         margin: 30px auto;
         align-self: center;
         ${mediaQuery[0]} {
-          display: none;
+          gap: 40px;
+          width: 100%;
+          display: ${isNothing ? 'flex' : 'none'};
         }
       `}>
       {isNothing ? (

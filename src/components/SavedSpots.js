@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
@@ -12,12 +13,35 @@ import {
   Loader,
 } from './styledComponents/basic/common';
 import { P } from './styledComponents/basic/Text';
-import { FlexDiv } from './styledComponents/Layout';
 import { SpotCard } from './styledComponents/Cards/SpotCard';
 import { SelectAllCheckBox } from './styledComponents/Form';
 import { Button } from './styledComponents/Buttons/Button';
 import { AddSpotToItineraryController } from './EditItinerary/AddSpotToItineraryController';
 
+const Container = styled.div`
+  ${styles.flexColumn};
+  ${styles.containerSetting};
+  gap: 40px;
+  padding-bottom: 80px;
+`;
+const ControllerWrapper = styled.div`
+  ${styles.flex}
+  gap: 20px;
+  justify-content: space-between;
+  padding: 0 10px 20px 10px;
+  border-bottom: 1px solid ${palatte.gray['400']};
+`;
+const Description = styled(P)`
+  text-align: center;
+  color: ${palatte.gray[700]};
+`;
+const ExploreButton = styled(Button)`
+  margin: 20px auto;
+  width: fit-content;
+  ${mediaQuery[0]} {
+    width: 100%;
+  }
+`;
 function SavedSpots({ setWaitingSpots }) {
   const { uid, map, dispatchNotification } = useContext(Context);
   const [savedSpots, setSavedSpots] = useState();
@@ -90,20 +114,8 @@ function SavedSpots({ setWaitingSpots }) {
   }, [map]);
   return (
     <>
-      <FlexDiv
-        direction="column"
-        gap="40px"
-        addCss={css`
-          ${styles.containerSetting};
-          padding-bottom: 80px;
-        `}>
-        <FlexDiv
-          addCss={css`
-            gap: 20px;
-            justify-content: space-between;
-            padding: 0 10px 20px 10px;
-            border-bottom: 1px solid ${palatte.gray['400']};
-          `}>
+      <Container>
+        <ControllerWrapper>
           <SelectAllCheckBox
             isSelectAll={isSelectAll}
             setIsSelectAll={setIsSelectAll}
@@ -120,7 +132,7 @@ function SavedSpots({ setWaitingSpots }) {
             deleteAction={deleteSpots}
             selectedSpots={selectedSpotList}
           />
-        </FlexDiv>
+        </ControllerWrapper>
 
         {savedSpots?.map((spot) => (
           <SpotCard
@@ -138,31 +150,18 @@ function SavedSpots({ setWaitingSpots }) {
         ))}
         {savedSpots ? (
           savedSpots.length === 0 && (
-            <P
-              addCss={css`
-                text-align: center;
-                color: ${palatte.gray[800]};
-              `}>
-              沒有已儲存的候補景點
-            </P>
+            <Description>沒有已儲存的候補景點</Description>
           )
         ) : (
           <Loader />
         )}
-        <Button
+        <ExploreButton
           styled="primary"
           type="click"
-          addCss={css`
-            margin: 20px auto;
-            width: fit-content;
-            ${mediaQuery[0]} {
-              width: 100%;
-            }
-          `}
           onClick={() => navigate('/explore')}>
           新增景點
-        </Button>
-      </FlexDiv>
+        </ExploreButton>
+      </Container>
     </>
   );
 }
