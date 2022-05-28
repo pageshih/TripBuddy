@@ -215,7 +215,11 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
           {addOverView[step].type === 'calendar' && (
             <DateRangePickerWrapper>
               <CustomDateRangePicker
-                width="100%"
+                addCss={{
+                  container: css`
+                    width: 100%;
+                  `,
+                }}
                 conjunction="到"
                 startTimestamp={startDate}
                 endTimestamp={endDate}

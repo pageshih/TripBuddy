@@ -425,11 +425,21 @@ function AddImageRoundBtn(props) {
             height: fit-content;
             max-width: 1000px;
             max-height: 90vh;
+            ${mediaQuery[0]} {
+              max-width: 100%;
+            }
           `}
           isShowState={isShowModal}
           close={() => setIsShowModal(false)}>
           <Image
-            height="400px"
+            addCss={css`
+              margin: auto;
+              width: fit-content;
+              height: 400px;
+              ${mediaQuery[0]} {
+                max-height: 400px;
+              }
+            `}
             src={
               imageBuffer.length > 0
                 ? URL.createObjectURL(imageBuffer[0])
@@ -440,7 +450,7 @@ function AddImageRoundBtn(props) {
           <div
             css={css`
               ${styles.flexColumn}
-              width:400px;
+              width:100%;
               gap: 20px;
               margin: 20px auto;
               align-items: center;
@@ -494,9 +504,18 @@ const DateTimeTextInput = (props) => (
   <div
     css={css`
       position: relative;
-      width: ${props.width};
+      ${props.addCss?.container ? props.addCss.container : null}
     `}>
-    <TextInput ref={props.inputRef} css={props.addCss} {...props.inputProps} />
+    <TextInput
+      ref={props.inputRef}
+      css={css`
+        ${mediaQuery[0]} {
+          padding: 10px 15px;
+        }
+        ${props.addCss?.input ? props.addCss.input : props.addCss}
+      `}
+      {...props.inputProps}
+    />
     <div
       css={css`
         position: absolute;
@@ -516,7 +535,7 @@ function CustomDatePicker(props) {
         props.onChange(new Date(value).getTime());
       }}
       renderInput={(params) => (
-        <DateTimeTextInput css={props.addCss} {...params} />
+        <DateTimeTextInput addCss={props.addCss} {...params} />
       )}
     />
   );
@@ -561,7 +580,7 @@ function CustomDateRangePicker(props) {
       </span>
       <CustomDatePicker
         value={props.endTimestamp}
-        adCss={props.addCss}
+        addCss={props.addCss}
         onChange={(newEndTimestamp) => {
           props.setEndTimestamp(newEndTimestamp);
         }}

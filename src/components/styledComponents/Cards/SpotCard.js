@@ -137,6 +137,7 @@ const SpotImage = ({ src, alt, isSmall }) => (
         width: 100%;
         min-width: ${isSmall ? '30%' : '100%'};
         max-height: ${isSmall ? '100%' : '200px'};
+        flex-basis: ${isSmall ? '100%' : '200px'};
       }
     `}
   />

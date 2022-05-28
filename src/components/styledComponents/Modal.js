@@ -169,7 +169,9 @@ function Confirm() {
       `}>
       {notification.imgSrc && (
         <Image
-          height="400px"
+          addCss={css`
+            height: 400px;
+          `}
           src={notification.imgSrc}
           alt={notification.imgAlt}
         />

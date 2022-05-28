@@ -19,7 +19,7 @@ const hoverEffect = css`
 `;
 
 const EditableTextInput = styled(TextInput)`
-  width: auto;
+  max-width: 100%;
   border: none;
   outline: 1px solid ${palatte.gray['400']};
   outline-offset: 2px;
@@ -214,16 +214,18 @@ function EditableDate({
                 onChange={(newTimestamp) => {
                   setStartTimestamp(newTimestamp);
                 }}
-                addCss={css`
-                  font-size: ${inputFontSize || fontSize};
-                  color: ${color};
-                  width: ${width};
-                  ${mediaQuery[0]} {
-                    width: ${`calc(${width} - 30px)`};
-                    font-size: ${`calc(${fontSize} - 20px)`};
-                  }
-                  ${addCss}
-                `}
+                addCss={{
+                  input: css`
+                    font-size: ${inputFontSize || fontSize};
+                    color: ${color};
+                    width: ${width};
+                    ${mediaQuery[0]} {
+                      width: ${`calc(${width} - 30px)`};
+                      font-size: ${`calc(${fontSize} - 20px)`};
+                    }
+                    ${addCss?.input || addCss}
+                  `,
+                }}
               />
               {startTimestamp !== start && (
                 <UpdateDurationButton>更新時間</UpdateDurationButton>
@@ -237,6 +239,11 @@ function EditableDate({
                 setEndTimestamp={setEndTimestamp}
                 setStartTimestamp={setStartTimestamp}
                 color={color}
+                addCss={{
+                  input: css`
+                    ${addCss?.input || addCss}
+                  `,
+                }}
               />
               {(startTimestamp !== start || endTimestamp !== end) && (
                 <UpdateDurationButton>更新日期</UpdateDurationButton>
@@ -255,7 +262,7 @@ function EditableDate({
                 ${mediaQuery[0]} {
                   font-size: ${`calc(${fontSize} - 12px)`};
                 }
-                ${addCss}
+                ${addCss?.text || addCss}
               `}
               onClick={(e) => {
                 if (e.target.id !== 'submit' && isAllowEdit) {
@@ -269,7 +276,7 @@ function EditableDate({
               color={color}
               addCss={css`
                 ${isAllowEdit && hoverEffect}
-                ${addCss}
+                ${addCss?.text || addCss}
               `}
               onClick={(e) => {
                 if (e.target.id !== 'submit' && isAllowEdit) {

@@ -128,6 +128,7 @@ function Login() {
   );
   const authErrorMessage = useRef({
     'auth/email-already-exists': 'Email 已被人使用，請重新輸入',
+    'auth/user-not-found': '找不到符合的帳號，請確認帳號密碼是否正確',
     'auth/internal-error': '伺服器發生錯誤，請稍後再試',
     'auth/invalid-password': '密碼錯誤，請重新輸入至少六個字的密碼',
     'auth/invalid-email': '無效的 Email，請重新輸入',

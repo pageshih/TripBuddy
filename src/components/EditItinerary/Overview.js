@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
 import PropTypes from 'prop-types';
-import { palatte, styles } from '../styledComponents/basic/common';
+import { mediaQuery, palatte, styles } from '../styledComponents/basic/common';
 import { H3 } from '../styledComponents/basic/Text';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
@@ -26,6 +26,9 @@ const ButtonWrapper = styled.div`
   ${styles.flex}
   justify-content: space-between;
   margin-bottom: 10px;
+  ${mediaQuery[0]} {
+    margin-bottom: 30px;
+  }
 `;
 const EditButtonWrapper = styled.div`
   ${styles.flex}
@@ -131,11 +134,13 @@ function Overview({
               end={overviews.end_date}
               onSubmit={updateDate}
               isAllowEdit={isAllowEdit}
-              addCss={css`
-                color: ${palatte.white};
-                font-weight: 700;
-                text-align: center;
-              `}
+              color={palatte.white}
+              addCss={{
+                text: css`
+                  font-weight: 700;
+                  text-align: center;
+                `,
+              }}
             />
             {!isHideDay && (
               <H3
