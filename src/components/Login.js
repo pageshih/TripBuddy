@@ -216,8 +216,8 @@ function Login() {
       firebaseAuth
         .signIn(email, password)
         .then((res) => {
-          setUid(res.user.uid);
           setIsPending(false);
+          setUid(res.user.uid);
           setIsLogInOut(false);
         })
         .catch((error) => {
@@ -234,8 +234,8 @@ function Login() {
       firebaseAuth
         .signUp(email, password, userName)
         .then((userUid) => {
-          setUid(userUid);
           setIsPending(false);
+          setUid(userUid);
           setIsLogInOut(false);
         })
         .catch((error) => {
@@ -251,8 +251,8 @@ function Login() {
     firebaseAuth
       .googleLogIn()
       .then((userUid) => {
-        setUid(userUid);
         setIsPending(false);
+        setUid(userUid);
         setIsLogInOut(false);
       })
       .catch((error) => {
