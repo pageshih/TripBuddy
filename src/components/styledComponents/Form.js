@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -7,14 +7,13 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
-import { Context } from '../../App';
 import { palatte, mediaQuery, styles } from './basic/common';
 import { P } from './basic/Text';
 import { Image } from './Layout';
 import { Button, ButtonOutline } from './Buttons/Button';
 import { RoundButtonSmallWhite, RoundButtonSmall } from './Buttons/RoundButton';
 import { compressImages, timestampToDateInput } from '../../utils/utilities';
-import { Modal, Confirm } from './Modal';
+import { Modal } from './Modal';
 
 const inputBase = css`
   padding: 10px 20px;
@@ -497,13 +496,7 @@ const DateTimeTextInput = (props) => (
       position: relative;
       width: ${props.width};
     `}>
-    <TextInput
-      color={props.color}
-      ref={props.inputRef}
-      css={props.addCss}
-      fontSize={props.fontSize}
-      {...props.inputProps}
-    />
+    <TextInput ref={props.inputRef} css={props.addCss} {...props.inputProps} />
     <div
       css={css`
         position: absolute;
@@ -523,12 +516,7 @@ function CustomDatePicker(props) {
         props.onChange(new Date(value).getTime());
       }}
       renderInput={(params) => (
-        <DateTimeTextInput
-          color={props.color}
-          width={props.width}
-          fontSize={props.fontSize}
-          {...params}
-        />
+        <DateTimeTextInput css={props.addCss} {...params} />
       )}
     />
   );
@@ -559,7 +547,7 @@ function CustomDateRangePicker(props) {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <CustomDatePicker
-        width={props.width}
+        addCss={props.addCss}
         value={props.startTimestamp}
         onChange={(newStartTimestamp) => {
           props.setStartTimestamp(newStartTimestamp);
@@ -573,7 +561,7 @@ function CustomDateRangePicker(props) {
       </span>
       <CustomDatePicker
         value={props.endTimestamp}
-        width={props.width}
+        adCss={props.addCss}
         onChange={(newEndTimestamp) => {
           props.setEndTimestamp(newEndTimestamp);
         }}

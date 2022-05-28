@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
-import { styles, palatte } from '../styledComponents/basic/common';
+import { styles, palatte, Loader } from '../styledComponents/basic/common';
 import { P } from '../styledComponents/basic/Text';
 import { timestampToString } from '../../utils/utilities';
 import { EditableDate } from '../styledComponents/EditableText';
@@ -20,27 +20,31 @@ const HeaderWrapper = styled.div`
   }
 `;
 function DepartController({ isAllowEdit, departTimes, day, onSubmit }) {
-  return (
-    <Container>
-      <HeaderWrapper isAllowEdit={isAllowEdit}>
-        <P>出發時間</P>
-        <P>{timestampToString(departTimes[day], 'simpleDate')}</P>
-      </HeaderWrapper>
-      <EditableDate
-        isTime
-        start={departTimes[day]}
-        onSubmit={onSubmit}
-        isAllowEdit={isAllowEdit}
-        width="210px"
-        fontSize="46px"
-        inputFontSize="32px"
-        color={palatte.info.basic}
-        addCss={css`
-          font-weight: 700;
-        `}
-      />
-    </Container>
-  );
+  try {
+    return (
+      <Container>
+        <HeaderWrapper isAllowEdit={isAllowEdit}>
+          <P>出發時間</P>
+          <P>{timestampToString(departTimes[day], 'simpleDate')}</P>
+        </HeaderWrapper>
+        <EditableDate
+          isTime
+          start={departTimes[day]}
+          onSubmit={onSubmit}
+          isAllowEdit={isAllowEdit}
+          width="210px"
+          fontSize="46px"
+          inputFontSize="32px"
+          color={palatte.info.basic}
+          addCss={css`
+            font-weight: 700;
+          `}
+        />
+      </Container>
+    );
+  } catch (error) {
+    return <Loader />;
+  }
 }
 
 DepartController.propTypes = {

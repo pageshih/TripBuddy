@@ -5,7 +5,12 @@ import styled from '@emotion/styled';
 import { css, jsx } from '@emotion/react';
 import { firebaseAuth } from '../utils/firebase';
 import { Context } from '../App';
-import { styles, palatte, mediaQuery } from './styledComponents/basic/common';
+import {
+  styles,
+  palatte,
+  mediaQuery,
+  PendingLoader,
+} from './styledComponents/basic/common';
 import { Logo } from './styledComponents/basic/Logo';
 import { P } from './styledComponents/basic/Text';
 import { Button, ButtonOutline } from './styledComponents/Buttons/Button';
@@ -109,13 +114,14 @@ const textNotificationReducer = (state, action) => {
 };
 
 function Login() {
-  const { dispatchNotification } = useContext(Context);
+  const { dispatchNotification, uid } = useContext(Context);
   const [email, setEmail] = useState('test@mail.com');
   const [password, setPassword] = useState('test123');
   const { setUid, setIsLogInOut, goLogin, isLogInOut } = useContext(Context);
   const [isSignUp, setIsSignUp] = useState();
   const [userName, setUserName] = useState('');
   const navigate = useNavigate();
+  const [isPending, setIsPending] = useState();
   const [textNotification, dispatchTextNotification] = useReducer(
     textNotificationReducer,
     { fire: [], message: {} }
@@ -206,14 +212,16 @@ function Login() {
   };
   const signIn = () => {
     if (email && password) {
+      setIsPending(true);
       firebaseAuth
         .signIn(email, password)
         .then((res) => {
           setUid(res.user.uid);
+          setIsPending(false);
           setIsLogInOut(false);
-          navigate(`/itineraries`);
         })
         .catch((error) => {
+          setIsPending(false);
           errorVerify(error);
         });
     } else {
@@ -221,15 +229,17 @@ function Login() {
     }
   };
   const signUp = () => {
+    setIsPending(true);
     if (email && password && userName) {
       firebaseAuth
         .signUp(email, password, userName)
-        .then((uid) => {
-          setUid(uid);
+        .then((userUid) => {
+          setUid(userUid);
+          setIsPending(false);
           setIsLogInOut(false);
-          navigate(`/itineraries`);
         })
         .catch((error) => {
+          setIsPending(false);
           errorVerify(error);
         });
     } else {
@@ -237,14 +247,16 @@ function Login() {
     }
   };
   const logInWithGoogle = () => {
+    setIsPending(true);
     firebaseAuth
       .googleLogIn()
-      .then((uid) => {
-        setUid(uid);
+      .then((userUid) => {
+        setUid(userUid);
+        setIsPending(false);
         setIsLogInOut(false);
-        navigate(`/itineraries`);
       })
       .catch((error) => {
+        setIsPending(false);
         dispatchNotification({
           type: 'fire',
           playload: {
@@ -255,6 +267,12 @@ function Login() {
         });
       });
   };
+
+  useEffect(() => {
+    if (uid && !isLogInOut) {
+      navigate('/itineraries');
+    }
+  }, [uid, isLogInOut, navigate]);
 
   useEffect(() => {
     if (goLogin || isLogInOut) {
@@ -312,7 +330,13 @@ function Login() {
                 </NotificationText>
               </EntryInputWrapper>
               <Button styled="primary" onClick={isSignUp ? signUp : signIn}>
-                {isSignUp ? '註冊' : ' Email 登入'}
+                {isPending ? (
+                  <PendingLoader color={palatte.white} size="24" />
+                ) : isSignUp ? (
+                  '註冊'
+                ) : (
+                  ' Email 登入'
+                )}
               </Button>
               <ContainerTopLine>
                 <P color={palatte.gray['700']}>
@@ -320,6 +344,7 @@ function Login() {
                 </P>
                 <ButtonOutline
                   styled="primary"
+                  disabled={isPending}
                   onClick={() => {
                     if (!isSignUp) {
                       setEmail('');
@@ -332,7 +357,10 @@ function Login() {
                   }}>
                   {isSignUp ? 'Email 登入' : 'Email 註冊'}
                 </ButtonOutline>
-                <ButtonOutline styled="primary" onClick={logInWithGoogle}>
+                <ButtonOutline
+                  styled="primary"
+                  onClick={logInWithGoogle}
+                  disabled={isPending}>
                   使用 Google 登入
                 </ButtonOutline>
               </ContainerTopLine>

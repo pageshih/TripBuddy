@@ -177,7 +177,7 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
               <SpotsCardWrapper>
                 {waitingSpots?.map((spot) => {
                   return (
-                    <SpotCardWrapper>
+                    <SpotCardWrapper key={spot.place_id}>
                       <SpotCard
                         imgSrc={spot.photos[0]}
                         imgAlt={spot.name}
@@ -185,7 +185,6 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
                         address={spot.formatted_address}
                         rating={spot.rating}
                         id={spot.place_id}
-                        key={spot.place_id}
                         isSmall
                         isShowCloseBtn
                         onDeleteClick={() =>

@@ -141,7 +141,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="1">
+          fillOpacity="1">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -167,7 +167,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.875">
+          fillOpacity="0.875">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -193,7 +193,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.75">
+          fillOpacity="0.75">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -219,7 +219,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.625">
+          fillOpacity="0.625">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -245,7 +245,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.5">
+          fillOpacity="0.5">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -271,7 +271,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.375">
+          fillOpacity="0.375">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -297,7 +297,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.25">
+          fillOpacity="0.25">
           <animateTransform
             attributeName="transform"
             type="scale"
@@ -323,7 +323,7 @@ const PendingLoader = (props) => (
           cy="0"
           r="6"
           fill={props.color || palatte.gray[600]}
-          fill-opacity="0.125">
+          fillOpacity="0.125">
           <animateTransform
             attributeName="transform"
             type="scale"

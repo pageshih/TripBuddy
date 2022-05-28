@@ -28,17 +28,21 @@ function setTimeToTimestamp(timestamp, timeString) {
   return new Date(timestamp).setHours(hour, minute);
 }
 function filterDaySchedules(allSchedules, departTimes) {
-  const newAllSchedules = departTimes.reduce((acc, _, index) => {
-    acc[index] = allSchedules
-      .filter(
-        (schedule) =>
-          new Date(schedule.end_time).getDate() ===
-          new Date(departTimes[index]).getDate()
-      )
-      .sort((a, b) => a.start_time - b.start_time);
-    return acc;
-  }, {});
-  return newAllSchedules;
+  try {
+    const newAllSchedules = departTimes.reduce((acc, _, index) => {
+      acc[index] = allSchedules
+        .filter(
+          (schedule) =>
+            new Date(schedule.end_time).getDate() ===
+            new Date(departTimes[index]).getDate()
+        )
+        .sort((a, b) => a.start_time - b.start_time);
+      return acc;
+    }, {});
+    return newAllSchedules;
+  } catch {
+    return;
+  }
 }
 const createDepartTimeAry = (dateObj) => {
   let departTimes = [];

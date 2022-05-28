@@ -128,9 +128,9 @@ function EditableText({
   );
 }
 EditableText.propTypes = {
-  children: PropTypes.string.isRequired,
-  level: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  onSubmit: PropTypes.func.isRequired,
+  children: PropTypes.string,
+  level: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onSubmit: PropTypes.func,
   as: PropTypes.string,
   isDefaultShowText: PropTypes.bool,
   isAllowEdit: PropTypes.bool,

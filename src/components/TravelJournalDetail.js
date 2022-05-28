@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useContext, useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
@@ -99,6 +99,7 @@ const DeleteButton = styled(RoundButtonSmall)`
 function TravelJournalDetail() {
   const { uid, dispatchNotification } = useContext(Context);
   const { journalId } = useParams();
+  const navigate = useNavigate();
   const [scheduleList, setScheduleList] = useState();
   const allSchedules = useRef();
   const [overviews, setOverviews] = useState();
@@ -149,14 +150,18 @@ function TravelJournalDetail() {
     async function fetchData() {
       try {
         const itineraryRes = await firestore.getItinerary(uid, journalId);
-        setOverviews(itineraryRes.overviews);
-        allSchedules.current = filterDaySchedules(
-          itineraryRes.schedules,
-          itineraryRes.overviews.depart_times
-        );
-        setScheduleList([...allSchedules.current[day]]);
-        const itinerariesSetting = await firestore.getItinerariesSetting(uid);
-        setReviewTags(itinerariesSetting.review_tags);
+        if (itineraryRes.overviews.depart_times) {
+          setOverviews(itineraryRes.overviews);
+          allSchedules.current = filterDaySchedules(
+            itineraryRes.schedules,
+            itineraryRes.overviews.depart_times
+          );
+          setScheduleList([...allSchedules.current[day]]);
+          const itinerariesSetting = await firestore.getItinerariesSetting(uid);
+          setReviewTags(itinerariesSetting.review_tags);
+        } else {
+          navigate('/error');
+        }
       } catch (error) {
         console.error(error);
       }

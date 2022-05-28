@@ -20,13 +20,15 @@ function TravelJournals() {
   const navigate = useNavigate();
   const [journals, setJournals] = useState();
   useEffect(() => {
-    const now = new Date().getTime();
-    firestore
-      .getItineraries(uid, now, true)
-      .then((overviews) => {
-        setJournals(overviews);
-      })
-      .catch((error) => console.error(error));
+    if (uid) {
+      const now = new Date().getTime();
+      firestore
+        .getItineraries(uid, now, true)
+        .then((overviews) => {
+          setJournals(overviews);
+        })
+        .catch((error) => console.error(error));
+    }
   }, [uid]);
   return (
     <>

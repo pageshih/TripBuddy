@@ -7,7 +7,7 @@ import { firestore } from '../utils/firebase';
 import { Context } from '../App';
 import { filterDaySchedules } from '../utils/utilities';
 import { Pagination } from './styledComponents/Pagination';
-import { styles, mediaQuery } from './styledComponents/basic/common';
+import { styles, mediaQuery, Loader } from './styledComponents/basic/common';
 import Overview from './EditItinerary/Overview';
 import WaitingSpotArea from './EditItinerary/WaitingSpotArea';
 import DepartController from './EditItinerary/DepartController';
@@ -79,30 +79,24 @@ function AddSchedule({ isDefaultAllowEdit }) {
       firestore
         .getItinerary(uid, itineraryId, map, true)
         .then((res) => {
-          if (res) {
+          if (res.overviews.depart_times) {
             setWaitingSpots(res.waitingSpots);
             setOverviews(res.overviews);
-            setSchedules(
-              filterDaySchedules(res.schedules, res.overviews.depart_times)[day]
+            const defaultSchedules = filterDaySchedules(
+              res.schedules,
+              res.overviews.depart_times
             );
+            setSchedules(defaultSchedules[day]);
             allSchedules.current = filterDaySchedules(
               res.schedules,
               res.overviews.depart_times
             );
           } else {
-            dispatchNotification({
-              type: 'fire',
-              playload: {
-                type: 'error',
-                message: '找不到行程資料',
-                id: 'toastifyNotFound',
-              },
-            });
+            navigate(`/error`);
           }
         })
         .catch((error) => {
           console.error(error);
-          navigate(`/error`);
         });
     }
   }, [uid, itineraryId]);
