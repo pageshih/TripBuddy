@@ -94,10 +94,12 @@
 
 ![alt RWD](./README/RWD.gif)
 
-# Future Features
+## Future Features
 
 - Show routes on GoogleMaps in Journal page
 - Show weather of each day of Journals
 - Increase layout of picture to chose in Journals
+
+## Contact
 
 email: [page.acforshop@gmail.com](mailto:page.acforshop@gmail.com)
