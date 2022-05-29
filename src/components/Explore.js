@@ -259,6 +259,7 @@ function Explore({ setWaitingSpots }) {
                 <ExpandButton
                   onClick={() => {
                     setIsShowSideColumn(false);
+                    setIsShowSavedSpots(false);
                     if (placeDetail) {
                       googleMap.deleteMarker(marker);
                       googleMap.setMapStyle(map, 'default');
