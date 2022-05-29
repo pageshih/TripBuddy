@@ -65,6 +65,7 @@
 ### Explore
 
 ![alt explore 1](./README/explore.gif)
+![alt explore 2](./README/explore2.gif)
 
 - Search Attractions and add to Saved Spots
 - Manage Saved Spots list
