@@ -144,11 +144,7 @@ function Itineraries() {
                       (schedule) => {
                         const startDate = new Date(schedule.start_time);
                         const nowDate = new Date(now);
-                        return (
-                          startDate.getFullYear() >= nowDate.getFullYear() &&
-                          startDate.getMonth() >= nowDate.getMonth() &&
-                          startDate.getDate() >= nowDate.getDate()
-                        );
+                        return startDate.getDate() === nowDate.getDate();
                       }
                     );
                     setProgressing({
