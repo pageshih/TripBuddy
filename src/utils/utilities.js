@@ -44,13 +44,26 @@ function filterDaySchedules(allSchedules, departTimes) {
     return;
   }
 }
+
+function resetHourToZero(timestamp) {
+  return new Date(timestamp).setHours(0, 0, 0, 0);
+}
+function countDay(calculation) {
+  return calculation / (24 * 60 * 60 * 1000);
+}
 const createDepartTimeAry = (dateObj) => {
   let departTimes = [];
-  const endDay = Number(new Date(dateObj.end_date).getDate());
-  const startDay = Number(new Date(dateObj.start_date).getDate());
-  const totalDays = endDay - startDay;
+  const endTimestamp = resetHourToZero(dateObj.end_date);
+  const startTimestamp = resetHourToZero(dateObj.start_date);
+  const totalDays = countDay(endTimestamp - startTimestamp);
+
   for (let i = 0; i <= totalDays; i += 1) {
-    const day = new Date(dateObj.start_date).setDate(startDay + i);
+    const day = new Date(startTimestamp + 24 * 60 * 60 * 1000 * i).setHours(
+      8,
+      0,
+      0,
+      0
+    );
     departTimes.push(day);
   }
   return departTimes;
@@ -138,4 +151,6 @@ export {
   timestampToTimeInput,
   uploadReviewFirestore,
   checkArraysIsTheSame,
+  resetHourToZero,
+  countDay,
 };

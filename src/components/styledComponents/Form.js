@@ -557,11 +557,13 @@ function CustomDatePicker(props) {
         inputFormat="yyyy/MM/dd"
         onChange={(value) => {
           const newTimestamp = new Date(value).getTime();
+          const newDate = new Date(newTimestamp);
+          const minDate = new Date(props.minDate);
           const isLargerThanMinDate = props.minDate
-            ? new Date(newTimestamp).getMonth() >=
-                new Date(props.minDate).getMonth() &&
-              new Date(newTimestamp).getDate() >=
-                new Date(props.minDate).getDate()
+            ? newTimestamp > props.minDate ||
+              (newDate.getFullYear() >= minDate.getFullYear() &&
+                newDate.getMonth() >= minDate.getMonth() &&
+                newDate.getDate() >= minDate.getDate())
             : true;
           if (isLargerThanMinDate) {
             props.onChange(newTimestamp);
