@@ -12,6 +12,7 @@ import {
   mediaQuery,
   Loader,
 } from './styledComponents/basic/common';
+import { countDay, resetHourToZero } from '../utils/utilities';
 import { H4, P } from './styledComponents/basic/Text';
 import ScheduleCard from './styledComponents/Cards/ScheduleCard';
 import OverviewCard from './styledComponents/Cards/OverviewCard';
@@ -126,12 +127,14 @@ function Itineraries() {
           };
           setProgressing([]);
           overviews.forEach(async (itinerary) => {
-            const countDownDay =
-              new Date(itinerary.start_date).getDate() -
-              new Date(now).getDate();
-            const tripDays =
-              new Date(itinerary.end_date).getDate() -
-              new Date(itinerary.start_date).getDate();
+            const countDownDay = countDay(
+              resetHourToZero(itinerary.start_date) - resetHourToZero(now)
+            );
+
+            const tripDays = countDay(
+              resetHourToZero(itinerary.end_date) -
+                resetHourToZero(itinerary.start_date)
+            );
             if (countDownDay <= 0 && countDownDay + tripDays >= 0) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
@@ -139,9 +142,12 @@ function Itineraries() {
                   if (scheduleProcessing) {
                     const todaySchedule = scheduleProcessing.filter(
                       (schedule) => {
+                        const startDate = new Date(schedule.start_time);
+                        const nowDate = new Date(now);
                         return (
-                          new Date(schedule.start_time).getDate() ===
-                          new Date(now).getDate()
+                          startDate.getFullYear() >= nowDate.getFullYear() &&
+                          startDate.getMonth() >= nowDate.getMonth() &&
+                          startDate.getDate() >= nowDate.getDate()
                         );
                       }
                     );

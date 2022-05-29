@@ -37,8 +37,11 @@ const addScheduleReducer = (state, action) => {
         start_time: action.playload,
       };
     case 'choseTime':
-      const startTime = new Date(action.playload).setDate(
-        new Date(state.start_time).getDate()
+      const defaultStartTime = new Date(state.start_time);
+      const startTime = new Date(action.playload).setFullYear(
+        defaultStartTime.getFullYear(),
+        defaultStartTime.getMonth(),
+        defaultStartTime.getDate()
       );
       return {
         ...state,
@@ -114,10 +117,13 @@ function AddScheduleController({
             },
           });
           setIsAddingSchedule(false);
-          departTimes.forEach((timestamp, index, array) => {
+          departTimes.forEach((timestamp, index) => {
+            const newDate = new Date(newSchedule.start_time);
+            const currentDate = new Date(timestamp);
             if (
-              new Date(newSchedule.start_time).getDate() ===
-              new Date(timestamp).getDate()
+              newDate.getFullYear() >= currentDate.getFullYear() &&
+              newDate.getMonth() >= currentDate.getMonth() &&
+              newDate.getDate() >= currentDate.getDate()
             ) {
               allSchedules.current[index].push(newSchedule);
               allSchedules.current[index].sort(
@@ -189,6 +195,7 @@ function AddScheduleController({
               <FormWrapper>
                 <Select
                   defaultValue=""
+                  value={addSchedule.start_time}
                   onChange={(e) =>
                     dispatchAddSchedule({
                       type: 'choseDate',
