@@ -6,7 +6,11 @@ import { css, jsx } from '@emotion/react';
 import { Context } from '../App';
 import { firestore } from '../utils/firebase';
 import { DurationText } from './styledComponents/Cards/SpotCard';
-import { timestampToString, filterDaySchedules } from '../utils/utilities';
+import {
+  timestampToString,
+  filterDaySchedules,
+  createDepartTimeAry,
+} from '../utils/utilities';
 import AddReview from './EditReview/AddReview';
 import Overview from './EditItinerary/Overview';
 import {
@@ -155,10 +159,22 @@ function TravelJournalDetail() {
       try {
         const itineraryRes = await firestore.getItinerary(uid, journalId);
         if (itineraryRes.overviews.depart_times) {
-          setOverviews(itineraryRes.overviews);
+          let depart_times = itineraryRes.overviews.depart_times;
+          if (itineraryRes.overviews.depart_times.length === 0) {
+            depart_times = createDepartTimeAry({
+              start_date: itineraryRes.overviews.start_date,
+              end_date: itineraryRes.overviews.end_date,
+            });
+            updateOverviewsFields({
+              ...itineraryRes.overviews,
+              depart_times,
+            });
+          } else {
+            setOverviews(itineraryRes.overviews);
+          }
           allSchedules.current = filterDaySchedules(
             itineraryRes.schedules,
-            itineraryRes.overviews.depart_times
+            depart_times
           );
           setScheduleList([...allSchedules.current[day]]);
           const itinerariesSetting = await firestore.getItinerariesSetting(uid);

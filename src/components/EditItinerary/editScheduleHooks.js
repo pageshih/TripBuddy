@@ -170,6 +170,9 @@ function useUpdateOverviewsFields(overviews, setOverviews) {
   const { itineraryId, journalId } = useParams();
 
   return (keyValuePair) => {
+    if (keyValuePair && keyValuePair.default_travel_mode) {
+      delete keyValuePair.default_travel_mode;
+    }
     setOverviews({ ...overviews, ...keyValuePair });
     firestore
       .editOverviews(uid, itineraryId || journalId, keyValuePair)
