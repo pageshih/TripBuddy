@@ -32,7 +32,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
-import { createDepartTimeAry, resetHourToZero, countDay } from './utilities';
+import { createDepartTimeAry } from './utilities';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
