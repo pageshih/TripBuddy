@@ -135,7 +135,6 @@ function Itineraries() {
               resetHourToZero(itinerary.end_date) -
                 resetHourToZero(itinerary.start_date)
             );
-            console.log(countDownDay, tripDays);
             if (countDownDay <= 0 && countDownDay + tripDays >= 0) {
               firestore
                 .getScheduleWithTime(uid, itinerary.itinerary_id, now, map)
