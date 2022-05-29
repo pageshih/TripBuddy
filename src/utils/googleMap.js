@@ -162,8 +162,8 @@ const googleMap = {
       bounds: {
         north: center?.lat + 0.1 || this.center.lat + 0.1,
         south: center?.lat - 0.1 || this.center.lat - 0.1,
-        east: center?.lat + 0.1 || this.center.lng + 0.1,
-        west: center?.lat - 0.1 || this.center.lng - 0.1,
+        east: center?.lng + 0.1 || this.center.lng + 0.1,
+        west: center?.lng - 0.1 || this.center.lng - 0.1,
       },
       fields: this.placesRequestFields,
       types: ['establishment'],
