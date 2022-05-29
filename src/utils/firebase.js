@@ -32,7 +32,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { googleMap } from './googleMap';
-import { createDepartTimeAry } from './utilities';
+import { createDepartTimeAry, resetHourToZero, countDay } from './utilities';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -165,8 +165,8 @@ const firestore = {
     return batch.commit();
   },
   updatePlaceData(spot, map) {
-    const now = new Date().getDate();
-    const expireDate = new Date().setDate(now - 2);
+    const now = new Date().getTime();
+    const expireDate = new Date(now - 2 * 24 * 60 * 60 * 1000).getTime();
     if (spot.created_time <= expireDate || !spot.created_time) {
       return googleMap
         .getPlaceDetails(map, spot.place_id)
