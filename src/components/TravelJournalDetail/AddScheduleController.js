@@ -195,6 +195,7 @@ function AddScheduleController({
               <FormWrapper>
                 <Select
                   defaultValue=""
+                  value={addSchedule.start_time}
                   onChange={(e) =>
                     dispatchAddSchedule({
                       type: 'choseDate',
