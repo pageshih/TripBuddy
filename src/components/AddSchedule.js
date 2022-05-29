@@ -5,9 +5,9 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { firestore } from '../utils/firebase';
 import { Context } from '../App';
-import { filterDaySchedules } from '../utils/utilities';
+import { filterDaySchedules, createDepartTimeAry } from '../utils/utilities';
 import { Pagination } from './styledComponents/Pagination';
-import { styles, mediaQuery, Loader } from './styledComponents/basic/common';
+import { styles, mediaQuery } from './styledComponents/basic/common';
 import Overview from './EditItinerary/Overview';
 import WaitingSpotArea from './EditItinerary/WaitingSpotArea';
 import DepartController from './EditItinerary/DepartController';
@@ -81,15 +81,27 @@ function AddSchedule({ isDefaultAllowEdit }) {
         .then((res) => {
           if (res.overviews.depart_times) {
             setWaitingSpots(res.waitingSpots);
-            setOverviews(res.overviews);
+            let depart_times = res.overviews.depart_times;
+            if (res.overviews.depart_times.length === 0) {
+              depart_times = createDepartTimeAry({
+                start_date: res.overviews.start_date,
+                end_date: res.overviews.end_date,
+              });
+              updateOverviewsFields({
+                ...res.overviews,
+                depart_times,
+              });
+            } else {
+              setOverviews(res.overviews);
+            }
             const defaultSchedules = filterDaySchedules(
               res.schedules,
-              res.overviews.depart_times
+              depart_times
             );
             setSchedules(defaultSchedules[day]);
             allSchedules.current = filterDaySchedules(
               res.schedules,
-              res.overviews.depart_times
+              depart_times
             );
           } else {
             navigate(`/error`);

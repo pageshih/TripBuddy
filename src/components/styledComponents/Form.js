@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -7,6 +7,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
+import { Context } from '../../App';
 import { palatte, mediaQuery, styles } from './basic/common';
 import { P } from './basic/Text';
 import { Image } from './Layout';
@@ -548,18 +549,41 @@ const DateTimeTextInput = (props) => (
   </div>
 );
 function CustomDatePicker(props) {
-  return (
-    <DatePicker
-      value={timestampToDateInput(props.value)}
-      inputFormat="yyyy/MM/dd"
-      onChange={(value) => {
-        props.onChange(new Date(value).getTime());
-      }}
-      renderInput={(params) => (
-        <DateTimeTextInput addCss={props.addCss} {...params} />
-      )}
-    />
-  );
+  const { dispatchNotification } = useContext(Context);
+  try {
+    return (
+      <DatePicker
+        value={timestampToDateInput(props.value)}
+        inputFormat="yyyy/MM/dd"
+        onChange={(value) => {
+          const newTimestamp = new Date(value).getTime();
+          const isLargerThanMinDate = props.minDate
+            ? new Date(newTimestamp).getMonth() >=
+                new Date(props.minDate).getMonth() &&
+              new Date(newTimestamp).getDate() >=
+                new Date(props.minDate).getDate()
+            : true;
+          if (isLargerThanMinDate) {
+            props.onChange(newTimestamp);
+          } else {
+            dispatchNotification({
+              type: 'fire',
+              playload: {
+                type: 'warn',
+                message: '結束日期不可小於開始日期',
+                id: 'toastify_invalid',
+              },
+            });
+          }
+        }}
+        renderInput={(params) => (
+          <DateTimeTextInput addCss={props.addCss} {...params} />
+        )}
+      />
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }
 function CustomTimePicker(props) {
   return (
@@ -602,6 +626,7 @@ function CustomDateRangePicker(props) {
       <CustomDatePicker
         value={props.endTimestamp}
         addCss={props.addCss}
+        minDate={props.startTimestamp}
         onChange={(newEndTimestamp) => {
           props.setEndTimestamp(newEndTimestamp);
         }}
