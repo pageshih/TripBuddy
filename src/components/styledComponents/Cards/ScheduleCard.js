@@ -39,7 +39,7 @@ const EditorWrapper = styled.div`
   align-items: center;
   gap: 8px;
 `;
-const EditorButton = ({ onClick }) => (
+const EditorButton = ({ onClick, children }) => (
   <RoundButtonSmall
     type="button"
     size="20px"
@@ -48,7 +48,7 @@ const EditorButton = ({ onClick }) => (
       padding: 5px 5px 7px 5px;
     `}
     onClick={onClick}>
-    −
+    {children}
   </RoundButtonSmall>
 );
 const EditorDurationText = styled(P)`
@@ -60,6 +60,10 @@ const EditorDurationText = styled(P)`
   ${mediaQuery[0]} {
     font-size: 28px;
   }
+`;
+const EditorUpdateTimeButton = styled(ButtonSmall)`
+  font-size: 12px;
+  margin: 10px 0 0 0;
 `;
 const DurationController = ({
   isEditStatus,
@@ -84,15 +88,13 @@ const DurationController = ({
         </EditorWrapper>
         <span>{duration < 60 ? '分鐘' : '小時'}</span>
         {isUpdate && (
-          <ButtonSmall
+          <EditorUpdateTimeButton
             styled="gray"
-            fontSize="12px"
-            margin="10px 0 0 0 "
             id="duration"
             type="button"
             onClick={updateAction}>
             更新時間
-          </ButtonSmall>
+          </EditorUpdateTimeButton>
         )}
       </ControllerWrapper>
     ) : (
