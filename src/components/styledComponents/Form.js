@@ -294,8 +294,9 @@ const UploadImageBg = styled.div`
   align-items: center;
   ${(props) =>
     props.isScroll &&
+    props.isScroll !== undefined &&
     css`
-      max-width: fit-content;
+      flex-basis: fit-content;
       align-self: center;
       position: relative;
       overflow: visible;
@@ -358,7 +359,12 @@ const UploadText = () => (
       `}>
       add_circle
     </span>
-    <P>添加照片</P>
+    <P
+      css={css`
+        white-space: nowrap;
+      `}>
+      添加照片
+    </P>
   </div>
 );
 
