@@ -103,23 +103,16 @@ function ReviewGallery({
 }) {
   const galleryContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
+
   useEffect(() => {
     if (galleryContainer.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        if (
-          entries[0].borderBoxSize[0].inlineSize < entries[0].target.scrollWidth
-        ) {
-          setIsShowShadow(true);
-        } else {
-          setIsShowShadow(false);
-        }
-      });
-      resizeObserver.observe(galleryContainer.current, { box: 'border-box' });
-      return function cleanup() {
-        resizeObserver.disconnect();
-      };
+      if (galleryContainer.current.scrollWidth > 600) {
+        setIsShowShadow(true);
+      } else {
+        setIsShowShadow(false);
+      }
     }
-  }, [galleryContainer]);
+  }, [gallery, imageBuffer]);
 
   return (
     <Container
