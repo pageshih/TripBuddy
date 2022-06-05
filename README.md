@@ -12,13 +12,13 @@
 
 - [https://trip-buddy-6be03.web.app](https://trip-buddy-6be03.web.app/)
 
-# Flow Chart
+## Flow Chart
 
 ![alt flow chart](./README/flowChart.drawio.png)
 
-# Technologies
+## Technologies
 
-## Libraries
+### Libraries
 
 - Web APIs
 - React
@@ -30,7 +30,7 @@
 - Emotion
 - Material UI
 
-## Cloud Services
+### Cloud Services
 
 - FireStore Database
 - Firebase Storage
@@ -39,67 +39,68 @@
 - Google Maps Places API
 - Google Maps Directions API
 
-# Demo
+## Demo
 
-## Login Page
+### Login Page
 
 ![alt login](./README/Login.gif)
 
 - Provided native login & Google login
 
-## Itineraries Page
+### Itineraries Page
 
 - User's itineraries are sorted by time
 
 ![alt itineraries](./README/itineraries.gif)
 
-### Processing Itinerary
+#### Processing Itinerary
 
 - List current shcedule and coming schedules today
 - Abled to recored review tag or pictures you took to check in this spot
 
-### Coming Itineraries & Future Itineraries
+#### Coming Itineraries & Future Itineraries
 
 - Itineraries will start in 7 days are sorted under coming Itineraries, and those are beyond 7 days will be sorted under Future Itineraries
 
-## Explore
+### Explore
 
 ![alt explore 1](./README/explore.gif)
+![alt explore 2](./README/explore2.gif)
 
 - Search Attractions and add to Saved Spots
 - Manage Saved Spots list
 - Add to or create a Itinerary with selected saved spots
 
-## Saved Spots
+### Saved Spots
 
 ![alt saveedSpots](./README/savedSpots.gif)
 
 - Able to manage saved sopts list, also can add selected spots to a new or exist Itinerary
 
-## Itinerary
+### Itinerary
 
 ![alt itinerary](./README/Ititnerary.gif)
 
 - Add Schedules by dragging spot card form waiting spots list
 - Able to edit date, depart time, cover photo and other information of Itineraries
 
-## Travel Journals
+### Travel Journals
 
 ![alt travelJournal](./README/travelJournal.gif)
 
 - Show all of Itineraries passed
 - Able to see the check in record previosly, also can edit it here
 
-## RWD
+### RWD
 
 ![alt RWD](./README/RWD.gif)
 
-# Future Features
+## Future Features
 
 - Show routes on GoogleMaps in Journal page
 - Show weather of each day of Journals
 - Increase layout of picture to chose in Journals
 
-# Contact
+## Contact
 
 email: [page.acforshop@gmail.com](mailto:page.acforshop@gmail.com)
