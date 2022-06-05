@@ -303,7 +303,8 @@ function AddReview({
                   isEmptyInput={review && false}
                   readOnly={reviewShowInput}
                   onChange={(e) => {
-                    setReview(e.target.value);
+                    let review = e.target.value;
+                    setReview(review.replace(/[<>"']/, ''));
                   }}
                   onClick={() => {
                     setReviewShowInput(false);

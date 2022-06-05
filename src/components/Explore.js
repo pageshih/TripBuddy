@@ -337,7 +337,10 @@ function Explore({ setWaitingSpots }) {
                   }}
                 />
               )}
-              <Wrapper apiKey={googleMapApiKey} libraries={['places']}>
+              <Wrapper
+                apiKey={googleMapApiKey}
+                language="zh-tw"
+                libraries={['places']}>
                 <Map
                   getPlaceShowOnMap={getPlaceShowOnMap}
                   setMap={setMap}

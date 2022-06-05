@@ -183,7 +183,7 @@ function EmptyMap({ libraries }) {
   }, [ref.current, map, setMap]);
 
   return (
-    <Wrapper apiKey={googleMapApiKey} libraries={libraries}>
+    <Wrapper apiKey={googleMapApiKey} language="zh-tw" libraries={libraries}>
       <div ref={ref} />
     </Wrapper>
   );

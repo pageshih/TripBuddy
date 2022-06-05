@@ -55,8 +55,6 @@ const LoginOrPage = ({ element }) => {
 };
 
 const cssReset = css`
-  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-  @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Noto+Sans+TC:wght@400;500;700&display=swap');
   * {
     box-sizing: border-box;
     font-family: 'Noto Sans TC', sans-serif;

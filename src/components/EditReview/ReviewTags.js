@@ -74,6 +74,7 @@ function ReviewTags({
       };
     }
   }, [tagContainer]);
+
   return (
     <Container>
       <ReviewTagsWrapper ref={tagContainer}>
@@ -99,7 +100,8 @@ function ReviewTags({
                 placeholder="新增心得標籤"
                 value={inputTag}
                 onChange={(e) => {
-                  setInputTag(e.target.value);
+                  let tag = e.target.value;
+                  setInputTag(tag.replace(/[<>"']/g, ''));
                 }}
               />
               <AddReviewTagsButton
