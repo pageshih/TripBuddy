@@ -292,7 +292,10 @@ function UserSetting({
                     placeholder="新增標籤"
                     value={addTag}
                     ref={addTagInput}
-                    onChange={(e) => setAddTag(e.target.value)}
+                    onChange={(e) => {
+                      let tag = e.target.value;
+                      setAddTag(tag.replace(/[<>"']/, ''));
+                    }}
                   />
                   <SettingReviewButtonWrapper>
                     <SettingReviewButton
