@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { Delete, ArrowRightAlt } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -40,6 +41,7 @@ const DayRouteWrapper = styled.div`
   align-items: center;
   margin-bottom: 20px;
 `;
+
 const DayTextWrapper = styled.div`
   ${styles.flexColumn}
   align-items: center;
@@ -48,6 +50,11 @@ const RouteWrapper = styled.div`
   ${styles.flex}
   align-items: center;
   flex-wrap: wrap;
+`;
+const RouteTextWrapper = styled.div`
+  ${styles.flex}
+  align-items: center;
+  color: ${palatte.gray[700]};
 `;
 const ControllerWrapper = styled.div`
   ${styles.flex}
@@ -242,19 +249,10 @@ function TravelJournalDetail() {
               </DayTextWrapper>
               <RouteWrapper>
                 {scheduleList.map((schedule, index, array) => (
-                  <P key={schedule.schedule_id} color={palatte.gray[700]}>
-                    {schedule.placeDetail.name}
-                    {index < array.length - 1 && (
-                      <span
-                        className="material-icons"
-                        css={css`
-                          vertical-align: text-bottom;
-                          color: inherit;
-                        `}>
-                        arrow_right_alt
-                      </span>
-                    )}
-                  </P>
+                  <RouteTextWrapper key={schedule.schedule_id}>
+                    <P>{schedule.placeDetail.name}</P>
+                    {index < array.length - 1 && <ArrowRightAlt />}
+                  </RouteTextWrapper>
                 ))}
               </RouteWrapper>
             </DayRouteWrapper>
@@ -338,7 +336,6 @@ function TravelJournalDetail() {
                       styled="transparent"
                       size="30px"
                       close
-                      className="material-icons"
                       onClick={() => {
                         dispatchNotification({
                           type: 'fire',
@@ -353,7 +350,7 @@ function TravelJournalDetail() {
                           },
                         });
                       }}>
-                      delete
+                      <Delete />
                     </DeleteButton>
                   )}
                 </ScheduleWrapper>

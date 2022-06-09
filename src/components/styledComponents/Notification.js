@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { CSSTransition } from 'react-transition-group';
+import { Warning, Error } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -73,11 +74,11 @@ const tooltipMap = {
     basicColor: palatte.secondary[500],
     color: palatte.gray[900],
     backgroundColor: palatte.secondary.basic,
-    icon: 'warning',
+    icon: Warning,
   },
   error: {
     basicColor: palatte.danger.basic,
-    icon: 'error',
+    icon: Error,
   },
   success: {
     basicColor: palatte.primary.basic,
@@ -115,6 +116,7 @@ function TooltipNotification({ fire, id, addCss, children }) {
   const tooltipRef = useRef();
   const [isOpen, setIsOpen] = useState(fire);
   const { notification, dispatchNotification } = useContext(Context);
+  const TooltipIcon = notification?.type && tooltipMap[notification.type]?.icon;
 
   useEffect(() => {
     if (notification.fire && notification.id === `tooltip_${id}`) {
@@ -145,9 +147,7 @@ function TooltipNotification({ fire, id, addCss, children }) {
           unmountOnExit>
           <TooltipContainer>
             <TooltipContent ref={tooltipRef} type={notification.type}>
-              <span className="material-icons">
-                {tooltipMap[notification.type].icon}
-              </span>
+              {TooltipIcon && <TooltipIcon fontSize="inherit" />}
               <P>{notification.message}</P>
             </TooltipContent>
           </TooltipContainer>
@@ -194,9 +194,7 @@ function NotificationText({ children, type }) {
               font-size: 14px;
               color: ${tooltipMap[type].basicColor};
             `,
-            icon: css`
-              font-size: 18px;
-            `,
+            icon: { fontSize: 18 },
           }}>
           {children}
         </TextWithIcon>

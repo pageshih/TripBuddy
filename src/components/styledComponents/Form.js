@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
+import { AddCircle, Check } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -79,6 +80,9 @@ const SelectSmall = styled(Select)`
   padding: 5px 10px;
 `;
 const checkboxCss = (props) => css`
+  ${styles.flex}
+  justify-content: center;
+  align-items: center;
   color: white;
   border: 1px solid ${palatte.primary.basic};
   border-radius: 6px;
@@ -110,18 +114,16 @@ const CheckboxCustom = (props) => {
         <CheckAllDiv
           size={props.size}
           css={props.addCss}
-          checked={props.isSelectAll}
-          className="material-icons">
-          check
+          checked={props.isSelectAll}>
+          <Check fontSize="inherit" />
         </CheckAllDiv>
       ) : (
         <CheckboxDiv
           size={props.size}
           css={props.addCss}
           id={props.id}
-          selectedList={props.selectedList}
-          className="material-icons">
-          check
+          selectedList={props.selectedList}>
+          <Check fontSize="inherit" />
         </CheckboxDiv>
       )}
       <input
@@ -343,22 +345,20 @@ const UploadText = () => (
   <div
     css={css`
       ${styles.flexColumn}
+      align-items: center;
       ${mediaQuery[0]} {
         gap: 5px;
         flex-direction: row;
-        align-items: center;
       }
     `}>
-    <span
-      className="material-icons"
-      css={css`
-        font-size: 48px;
-        ${mediaQuery[0]} {
-          font-size: 30px;
-        }
-      `}>
-      add_circle
-    </span>
+    <AddCircle
+      sx={{
+        fontSize: 48,
+        [mediaQuery[0]]: {
+          fontSize: 30,
+        },
+      }}
+    />
     <P
       css={css`
         white-space: nowrap;
@@ -403,7 +403,15 @@ function AddImages(props) {
   );
 }
 
-function AddImageRoundBtn(props) {
+function AddImageRoundBtn({
+  icon: Icon,
+  addCss,
+  white,
+  size,
+  styled,
+  confirmMessage,
+  upload,
+}) {
   const [imageBuffer, setImageBuffer] = useState([]);
   const [isShowModal, setIsShowModal] = useState();
 
@@ -416,34 +424,25 @@ function AddImageRoundBtn(props) {
   }, [imageBuffer]);
   const button = css`
     cursor: pointer;
-    ${props.addCss}
+    ${addCss}
   `;
   return (
     <>
-      {props.white ? (
-        <RoundButtonSmallWhite
-          as="label"
-          size={props.size}
-          className="material-icons"
-          css={button}>
+      {white ? (
+        <RoundButtonSmallWhite as="label" size={size} css={button}>
           <FileInputHidden
             setImageBuffer={setImageBuffer}
             imageBuffer={imageBuffer}
           />
-          {props.icon}
+          <Icon fontSize="inherit" />
         </RoundButtonSmallWhite>
       ) : (
-        <RoundButtonSmall
-          as="label"
-          size={props.size}
-          styled={props.styled}
-          className="material-icons"
-          css={button}>
+        <RoundButtonSmall as="label" size={size} styled={styled} css={button}>
           <FileInputHidden
             setImageBuffer={setImageBuffer}
             imageBuffer={imageBuffer}
           />
-          {props.icon}
+          <Icon fontSize="inherit" />
         </RoundButtonSmall>
       )}
       {isShowModal && (
@@ -484,7 +483,7 @@ function AddImageRoundBtn(props) {
               align-items: center;
             `}>
             <P fontSize="20px" textAlign="center">
-              {props.confirmMessage}
+              {confirmMessage}
             </P>
             <div
               css={css`
@@ -500,7 +499,7 @@ function AddImageRoundBtn(props) {
               </ButtonOutline>
               <Button
                 styled="primary"
-                onClick={() => props.upload(imageBuffer, setIsShowModal)}>
+                onClick={() => upload(imageBuffer, setIsShowModal)}>
                 確定
               </Button>
             </div>

@@ -1,3 +1,4 @@
+import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -6,9 +7,8 @@ import { RoundButtonSmall } from './Buttons/RoundButton';
 import { palatte, styles } from './basic/common';
 import { P } from './basic/Text';
 
-const PaginationButton = ({ onClick, disabled, children }) => (
+const PaginationButton = ({ onClick, disabled, children: Icon }) => (
   <RoundButtonSmall
-    className="material-icons"
     size="18px"
     styled="gray700"
     type="button"
@@ -25,13 +25,13 @@ const PaginationButton = ({ onClick, disabled, children }) => (
         }
       }
     `}>
-    {children}
+    <Icon sx={{ color: 'inherit', fontSize: 18 }} />
   </RoundButtonSmall>
 );
 PaginationButton.propTypes = {
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
-  children: PropTypes.string,
+  children: PropTypes.any,
 };
 
 const PaginationContainer = styled.div`
@@ -45,7 +45,7 @@ function Pagination({ switchDay, day, finalDay }) {
   return (
     <PaginationContainer>
       <PaginationButton onClick={() => switchDay(day - 1)} disabled={day === 0}>
-        navigate_before
+        {NavigateBefore}
       </PaginationButton>
       <P
         css={css`
@@ -56,7 +56,7 @@ function Pagination({ switchDay, day, finalDay }) {
       <PaginationButton
         onClick={() => switchDay(day + 1)}
         disabled={day === finalDay}>
-        navigate_next
+        {NavigateNext}
       </PaginationButton>
     </PaginationContainer>
   );

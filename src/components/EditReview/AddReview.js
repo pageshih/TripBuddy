@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
+import { Close } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -262,9 +263,8 @@ function AddReview({
               <H6>你覺得這個景點如何？</H6>
               <CloseButton
                 styled="transparent"
-                className="material-icons"
                 onClick={() => setIsShowReview && setIsShowReview(false)}>
-                close
+                <Close />
               </CloseButton>
             </>
           )}

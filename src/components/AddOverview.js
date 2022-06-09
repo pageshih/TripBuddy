@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -59,7 +60,7 @@ const DateRangePickerWrapper = styled.div`
 const BackToExplore = ({ children, onClick }) => (
   <RoundButtonSmallWithLabel
     onClick={onClick}
-    iconName="chevron_left"
+    iconName={ChevronLeft}
     styled="gray700"
     addCss={css`
       padding: 0;
@@ -204,7 +205,7 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
                 <P>現在景點清單是空的，請加入景點，再創建行程</P>
                 <HyperLink
                   onClick={() => navigate('/explore')}
-                  iconName="chevron_right"
+                  iconName={ChevronRight}
                   addCss={css`
                     align-items: flex-start;
                   `}>
@@ -235,27 +236,13 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
               type="button"
               styled="gray"
               onClick={() => setStep((prev) => prev - 1)}>
-              <span
-                className="material-icons"
-                css={css`
-                  color: inherit;
-                `}>
-                chevron_left
-              </span>
+              <ChevronLeft sx={{ color: 'inherit' }} />
               上一步
             </PrevButton>
           )}
           <NextButton styled="primary" type="submit" isNotLastStep={step < 2}>
             {step < 2 ? '下一步' : '新建行程'}
-            {step < 2 && (
-              <span
-                className="material-icons"
-                css={css`
-                  color: inherit;
-                `}>
-                chevron_right
-              </span>
-            )}
+            {step < 2 && <ChevronRight sx={{ color: 'inherit' }} />}
           </NextButton>
         </ButtonWrapper>
       </Wrapper>

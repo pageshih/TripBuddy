@@ -1,4 +1,5 @@
 import { useEffect, useRef, useContext } from 'react';
+import { Search } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
@@ -40,7 +41,7 @@ const Container = styled.div`
 const SearchInput = styled(TextInput)`
   ${searchBarStyles.input};
 `;
-const SearchIcon = styled.div`
+const SearchIcon = styled.span`
   ${searchBarStyles.searchIcon}
 `;
 function GoogleMapSearchBar({
@@ -96,7 +97,9 @@ function GoogleMapSearchBar({
         ref={ref}
         placeholder={placeholder}
       />
-      <SearchIcon className="material-icons">search</SearchIcon>
+      <SearchIcon>
+        <Search />
+      </SearchIcon>
     </Container>
   );
 }

@@ -1,3 +1,4 @@
+import {} from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -34,21 +35,30 @@ const LinkIcon = styled.span`
     props.fontSize ? `calc(${props.fontSize} + 4px)` : '20px'};
   margin-top: 2px;
 `;
-function HyperLink(props) {
+function HyperLink({
+  href,
+  target,
+  onClick,
+  addCss,
+  children,
+  iconName: Icon,
+}) {
   return (
     <a
-      href={props.href}
-      target={props.target || '_blank'}
-      onClick={props.onClick}
+      href={href}
+      target={target || '_blank'}
+      onClick={onClick}
       css={css`
         ${linkTextColor}
         ${styles.flex}
       align-items:center;
         gap: 2px;
-        ${props.addCss};
+        ${addCss};
       `}>
-      <LinkText>{props.children}</LinkText>
-      <LinkIcon className="material-icons">{props.iconName}</LinkIcon>
+      <LinkText>{children}</LinkText>
+      <LinkIcon>
+        <Icon fontSize="inherit" />
+      </LinkIcon>
     </a>
   );
 }

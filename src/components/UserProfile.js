@@ -1,5 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
+import {
+  Settings,
+  EventNote,
+  Explore,
+  AddLocation,
+  Article,
+} from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -66,10 +73,8 @@ const NavTag = styled(NavLink)`
     border-right: 1px solid ${palatte.gray['100']};
     span {
       display: block;
-      font-size: 32px;
       color: ${palatte.white};
       text-align: center;
-      margin-bottom: 3px;
     }
   }
 `;
@@ -228,10 +233,8 @@ function UserProfile() {
                       <ButtonSmall styled="danger" onClick={logout}>
                         登出
                       </ButtonSmall>
-                      <RoundButtonSmall
-                        className="material-icons"
-                        onClick={() => setIsShowSetting(true)}>
-                        settings
+                      <RoundButtonSmall onClick={() => setIsShowSetting(true)}>
+                        <Settings />
                       </RoundButtonSmall>
                     </UserInfoButtonWrapper>
                   </UserProfileCardWrapper>
@@ -242,7 +245,9 @@ function UserProfile() {
                       return activeStyle(isActive);
                     }}
                     to={`/itineraries`}>
-                    <span className="material-icons">event_note</span>
+                    <span>
+                      <EventNote sx={{ fontSize: 32 }} />
+                    </span>
                     所有行程
                   </NavTag>
                   <NavTag
@@ -253,7 +258,9 @@ function UserProfile() {
                       return activeStyle(isActive);
                     }}
                     to={`/explore`}>
-                    <span className="material-icons">explore</span>
+                    <span>
+                      <Explore sx={{ fontSize: 32 }} />
+                    </span>
                     探索景點
                   </NavTag>
                   <NavTag
@@ -261,7 +268,9 @@ function UserProfile() {
                       return activeStyle(isActive);
                     }}
                     to={`/saved-spots`}>
-                    <span className="material-icons">add_location</span>
+                    <span>
+                      <AddLocation sx={{ fontSize: 32 }} />
+                    </span>
                     候補景點
                   </NavTag>
                   <NavTag
@@ -269,7 +278,9 @@ function UserProfile() {
                       return activeStyle(isActive);
                     }}
                     to={`/travel-journals`}>
-                    <span className="material-icons">article</span>
+                    <span>
+                      <Article sx={{ fontSize: 32 }} />
+                    </span>
                     旅行回憶
                   </NavTag>
                 </NavWrapper>
