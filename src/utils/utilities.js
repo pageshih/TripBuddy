@@ -51,19 +51,15 @@ function resetHourToZero(timestamp) {
 function countDay(calculation) {
   return calculation / (24 * 60 * 60 * 1000);
 }
-const createDepartTimeAry = (dateObj) => {
-  let departTimes = [];
-  const endTimestamp = resetHourToZero(dateObj.end_date);
-  const startTimestamp = resetHourToZero(dateObj.start_date);
+const createDepartTimeAry = ({ end_date, start_date }) => {
+  const endTimestamp = resetHourToZero(end_date);
+  const startTimestamp = resetHourToZero(start_date);
   const totalDays = countDay(endTimestamp - startTimestamp);
+  let departTimes = [];
 
-  for (let i = 0; i <= totalDays; i += 1) {
-    const day = new Date(startTimestamp + 24 * 60 * 60 * 1000 * i).setHours(
-      8,
-      0,
-      0,
-      0
-    );
+  for (let i = 0; i <= totalDays; i++) {
+    const addDay = 24 * 60 * 60 * 1000 * i;
+    const day = new Date(startTimestamp + addDay).setHours(8, 0, 0, 0);
     departTimes.push(day);
   }
   return departTimes;
