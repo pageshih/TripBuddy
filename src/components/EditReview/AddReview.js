@@ -104,6 +104,7 @@ function AddReview({
   setIsShowReview,
   isEdit,
   allReviewTags,
+  setAllReviewTags,
   showReviewTags,
   reviews,
   isJournal,
@@ -120,6 +121,7 @@ function AddReview({
   const [reviewShowInput, setReviewShowInput] = useState(false);
   const addReviewRef = useRef();
   const saveButtonRef = useRef();
+  const addTagsForGlobal = useRef([]);
   const [isDesktop, setIsDesktop] = useState();
   const [isPending, setIsPending] = useState();
 
@@ -130,9 +132,7 @@ function AddReview({
       setCheckedReviewTags(
         checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
       );
-      firestore.setItinerariesSetting(uid, {
-        review_tags: allReviewTags ? [addTag, ...allReviewTags] : [addTag],
-      });
+      addTagsForGlobal.current.push(addTag);
       setAddTag('');
     }
   };
@@ -165,7 +165,17 @@ function AddReview({
             ]
           : checkTagList
       );
-
+      if (addTagsForGlobal.current.length > 0) {
+        firestore
+          .setItinerariesSetting(uid, {
+            review_tags: allReviewTags
+              ? [...addTagsForGlobal.current, ...allReviewTags]
+              : addTagsForGlobal.current,
+          })
+          .then(() => {
+            setAllReviewTags((prev) => [...prev, ...addTagsForGlobal.current]);
+          });
+      }
       if (updateOriginReviewState) {
         updateOriginReviewState({
           schedule_id: scheduleId,
@@ -366,6 +376,7 @@ AddReview.propTypes = {
   setIsShowReview: PropTypes.func,
   isEdit: PropTypes.bool,
   allReviewTags: PropTypes.array,
+  setAllReviewTags: PropTypes.func,
   showReviewTags: PropTypes.array,
   reviews: PropTypes.shape({
     gallery: PropTypes.array,

@@ -312,6 +312,7 @@ function TravelJournalDetail() {
                         isEdit={isAllowEdit}
                         key={schedule.schedule_id}
                         allReviewTags={reviewTags}
+                        setAllReviewTags={setReviewTags}
                         showReviewTags={
                           schedule.review_tags?.length > 0 ||
                           schedule.gallery?.length > 0 ||
