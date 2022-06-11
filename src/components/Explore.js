@@ -239,6 +239,7 @@ function Explore({ setWaitingSpots }) {
     setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
   const getPlaceShowOnMap = (detail) => {
+    setIsShowSavedSpots(false);
     setMarker(googleMap.setSelectedMarker(map, detail.geometry, detail.name));
     map.panTo(detail.geometry);
     setPlaceDetail(detail);
