@@ -61,7 +61,6 @@ const firebaseAuth = {
         name: res.user.displayName,
         uid: res.user.uid,
         photo: res.user.photoURL,
-        reviews: [],
       });
       return Promise.resolve(res.user.uid);
     });
