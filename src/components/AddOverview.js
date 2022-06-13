@@ -84,6 +84,24 @@ const SpotCardWrapper = styled.div`
     min-width: 90%;
   }
 `;
+const addOverView = [
+  {
+    title: '為這趟旅程取個名字吧！',
+    type: 'text',
+    placeholder: '請輸入行程名稱',
+    alert: '行程名稱還沒填喔！',
+  },
+  {
+    title: '您選擇了這些景點：',
+    type: 'cards',
+    alert: '請加入景點再創建行程',
+  },
+  {
+    title: '預計要去玩幾天呢？',
+    type: 'calendar',
+    alert: '日期不完整，請確認後再送出！',
+  },
+];
 function AddOverview({ waitingSpots, setWaitingSpots }) {
   const { uid, dispatchNotification } = useContext(Context);
   const navigate = useNavigate();
@@ -91,25 +109,6 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
   const [step, setStep] = useState(0);
-
-  const addOverView = [
-    {
-      title: '為這趟旅程取個名字吧！',
-      type: 'text',
-      placeholder: '請輸入行程名稱',
-      alert: '行程名稱還沒填喔！',
-    },
-    {
-      title: '您選擇了這些景點：',
-      type: 'cards',
-      alert: '請加入景點再創建行程',
-    },
-    {
-      title: '預計要去玩幾天呢？',
-      type: 'calendar',
-      alert: '日期不完整，請確認後再送出！',
-    },
-  ];
   const createItinerary = () => {
     const getTimestamp = (date) => new Date(date).getTime();
     const basicInfo = {

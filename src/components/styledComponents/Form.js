@@ -622,6 +622,9 @@ function CustomDateRangePicker(props) {
         value={props.startTimestamp}
         onChange={(newStartTimestamp) => {
           props.setStartTimestamp(newStartTimestamp);
+          if (newStartTimestamp > props.endTimestamp) {
+            props.setEndTimestamp(newStartTimestamp);
+          }
         }}
       />
       <span
