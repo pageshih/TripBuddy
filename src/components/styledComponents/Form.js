@@ -9,7 +9,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
 import { Context } from '../../App';
-import { palatte, mediaQuery, styles } from './basic/common';
+import { palatte, mediaQuery, styles, PendingLoader } from './basic/common';
 import { P } from './basic/Text';
 import { Image } from './Layout';
 import { Button, ButtonOutline } from './Buttons/Button';
@@ -414,6 +414,7 @@ function AddImageRoundBtn({
 }) {
   const [imageBuffer, setImageBuffer] = useState([]);
   const [isShowModal, setIsShowModal] = useState();
+  const [isPending, setIsPending] = useState();
 
   useEffect(() => {
     if (imageBuffer.length > 0) {
@@ -458,52 +459,75 @@ function AddImageRoundBtn({
           `}
           isShowState={isShowModal}
           close={() => setIsShowModal(false)}>
-          <Image
-            addCss={css`
-              margin: auto;
-              width: fit-content;
-              height: 400px;
-              ${mediaQuery[0]} {
-                max-height: 400px;
-              }
-            `}
-            src={
-              imageBuffer.length > 0
-                ? URL.createObjectURL(imageBuffer[0])
-                : null
-            }
-            alt="preview-cover-photo"
-          />
-          <div
-            css={css`
-              ${styles.flexColumn}
-              width:100%;
-              gap: 20px;
-              margin: 20px auto;
-              align-items: center;
-            `}>
-            <P fontSize="20px" textAlign="center">
-              {confirmMessage}
-            </P>
+          {isPending ? (
             <div
               css={css`
-                ${styles.flex}
-                width:100%;
-                justify-content: center;
-                gap: 20px;
+                ${styles.flexColumn};
+                padding: 100px;
+                gap: 10px;
+                align-items: center;
               `}>
-              <ButtonOutline
-                styled="danger"
-                onClick={() => setIsShowModal(false)}>
-                取消
-              </ButtonOutline>
-              <Button
-                styled="primary"
-                onClick={() => upload(imageBuffer, setIsShowModal)}>
-                確定
-              </Button>
+              <PendingLoader size="28" />
+              <P
+                css={css`
+                  width: fit-content;
+                `}>
+                上傳中...
+              </P>
             </div>
-          </div>
+          ) : (
+            <>
+              <Image
+                addCss={css`
+                  margin: auto;
+                  width: fit-content;
+                  height: 400px;
+                  ${mediaQuery[0]} {
+                    max-height: 400px;
+                  }
+                `}
+                src={
+                  imageBuffer.length > 0
+                    ? URL.createObjectURL(imageBuffer[0])
+                    : null
+                }
+                alt="preview-cover-photo"
+              />
+              <div
+                css={css`
+                  ${styles.flexColumn}
+                  width:100%;
+                  gap: 20px;
+                  margin: 20px auto;
+                  align-items: center;
+                `}>
+                <P fontSize="20px" textAlign="center">
+                  {confirmMessage}
+                </P>
+                <div
+                  css={css`
+                    ${styles.flex}
+                    width:100%;
+                    justify-content: center;
+                    gap: 20px;
+                  `}>
+                  <ButtonOutline
+                    styled="danger"
+                    onClick={() => setIsShowModal(false)}>
+                    取消
+                  </ButtonOutline>
+                  <Button
+                    styled="primary"
+                    onClick={() => {
+                      setIsPending(true);
+                      upload(imageBuffer, setIsShowModal, setIsPending);
+                    }}>
+                    確定
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </Modal>
       )}
     </>
