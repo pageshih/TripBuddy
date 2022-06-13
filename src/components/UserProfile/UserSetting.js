@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
+import { Cancel, Done, Close, Settings, Edit } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -40,7 +41,6 @@ const ReviewTagRemoveButton = (props) => (
     <RoundButtonSmall
       size="20px"
       css={css`
-        font-size: 20px;
         color: ${palatte.white};
         opacity: 0.7;
         &:hover {
@@ -48,9 +48,8 @@ const ReviewTagRemoveButton = (props) => (
           color: ${palatte.white};
         }
       `}
-      onClick={props.onClick}
-      className="material-icons">
-      cancel
+      onClick={props.onClick}>
+      <Cancel sx={{ fontSize: 20 }} />
     </RoundButtonSmall>
   </CapsuleTag>
 );
@@ -94,21 +93,19 @@ const UserProfileTextWrapper = styled.div`
   ${styles.flexColumn}
   gap:8px;
 `;
-const Title = ({ iconName, children }) => (
+const Title = ({ children, iconName: Icon }) => (
   <div
     css={css`
       ${styles.flex}
       align-items: center;
       gap: 5px;
     `}>
-    <span
-      className="material-icons"
-      css={css`
-        color: ${palatte.gray['700']};
-        margin-top: 4px;
-      `}>
-      {iconName}
-    </span>
+    <Icon
+      sx={{
+        color: palatte.gray['700'],
+        marginTop: '4px',
+      }}
+    />
     <H5
       css={css`
         font-size: 24px;
@@ -236,7 +233,7 @@ function UserSetting({
                   font-size: 16px;
                 `}
                 styled="primary"
-                icon="edit"
+                icon={Edit}
                 confirmMessage="確定上傳大頭照？"
                 upload={updateProfilePhoto}
               />
@@ -261,7 +258,7 @@ function UserSetting({
               </P>
             </UserProfileTextWrapper>
           </UserProfileWrapper>
-          <Title iconName="settings">設置</Title>
+          <Title iconName={Settings}>設置</Title>
           <SettingContainer>
             <Accordion
               titleElement={
@@ -298,20 +295,17 @@ function UserSetting({
                     }}
                   />
                   <SettingReviewButtonWrapper>
-                    <SettingReviewButton
-                      className="material-icons"
-                      type="submit">
-                      done
+                    <SettingReviewButton type="submit">
+                      <Done />
                     </SettingReviewButton>
                     <SettingReviewButton
-                      className="material-icons"
                       type="button"
                       danger
                       onClick={() => {
                         setAddTag('');
                         addTagInput.current.focus();
                       }}>
-                      close
+                      <Close />
                     </SettingReviewButton>
                   </SettingReviewButtonWrapper>
                 </form>

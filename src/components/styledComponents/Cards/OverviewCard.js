@@ -1,3 +1,4 @@
+import { Schedule } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -39,9 +40,6 @@ const TextWrapper = styled.div`
     z-index: 1;
     color: ${palatte.white};
   }
-  & span {
-    font-size: 20px;
-  }
 `;
 const ContentWrapper = styled.div`
   ${styles.flexColumn};
@@ -78,7 +76,7 @@ function OverviewCard(props) {
       <ContentWrapper>
         <Title>{props.title}</Title>
         <TextWrapper>
-          <span className="material-icons">schedule</span>
+          <Schedule sx={{ fontSize: 20 }} />
           <P>
             {timestampToString(props.startDate, 'date')} -{' '}
             {timestampToString(props.endDate, 'date')}

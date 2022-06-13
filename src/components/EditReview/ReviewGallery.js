@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Cancel } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -131,14 +132,13 @@ function ReviewGallery({
                   {isEdit && (
                     <CloseButton
                       close
-                      className="material-icons"
                       onClick={() => {
                         const newGallery = gallery.filter(
                           (_, newIndex) => index !== newIndex
                         );
                         setGallery(newGallery);
                       }}>
-                      cancel
+                      <Cancel />
                     </CloseButton>
                   )}
                 </ImageWrapper>
@@ -154,7 +154,6 @@ function ReviewGallery({
                     <PreviewImage src={blobUrl} alt={blob.name} />
                     <PreviewTag>預覽</PreviewTag>
                     <CloseButton
-                      className="material-icons"
                       close
                       onClick={() => {
                         const newImagesBuffer = imageBuffer.filter(
@@ -162,7 +161,7 @@ function ReviewGallery({
                         );
                         setImageBuffer(newImagesBuffer);
                       }}>
-                      cancel
+                      <Cancel />
                     </CloseButton>
                   </ImageWrapper>
                 );

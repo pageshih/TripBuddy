@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -59,7 +60,7 @@ const DateRangePickerWrapper = styled.div`
 const BackToExplore = ({ children, onClick }) => (
   <RoundButtonSmallWithLabel
     onClick={onClick}
-    iconName="chevron_left"
+    iconName={ChevronLeft}
     styled="gray700"
     addCss={css`
       padding: 0;
@@ -83,6 +84,24 @@ const SpotCardWrapper = styled.div`
     min-width: 90%;
   }
 `;
+const addOverView = [
+  {
+    title: '為這趟旅程取個名字吧！',
+    type: 'text',
+    placeholder: '請輸入行程名稱',
+    alert: '行程名稱還沒填喔！',
+  },
+  {
+    title: '您選擇了這些景點：',
+    type: 'cards',
+    alert: '請加入景點再創建行程',
+  },
+  {
+    title: '預計要去玩幾天呢？',
+    type: 'calendar',
+    alert: '日期不完整，請確認後再送出！',
+  },
+];
 function AddOverview({ waitingSpots, setWaitingSpots }) {
   const { uid, dispatchNotification } = useContext(Context);
   const navigate = useNavigate();
@@ -90,25 +109,6 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
   const [startDate, setStartDate] = useState(new Date().getTime());
   const [endDate, setEndDate] = useState(new Date().getTime());
   const [step, setStep] = useState(0);
-
-  const addOverView = [
-    {
-      title: '為這趟旅程取個名字吧！',
-      type: 'text',
-      placeholder: '請輸入行程名稱',
-      alert: '行程名稱還沒填喔！',
-    },
-    {
-      title: '您選擇了這些景點：',
-      type: 'cards',
-      alert: '請加入景點再創建行程',
-    },
-    {
-      title: '預計要去玩幾天呢？',
-      type: 'calendar',
-      alert: '日期不完整，請確認後再送出！',
-    },
-  ];
   const createItinerary = () => {
     const getTimestamp = (date) => new Date(date).getTime();
     const basicInfo = {
@@ -204,7 +204,7 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
                 <P>現在景點清單是空的，請加入景點，再創建行程</P>
                 <HyperLink
                   onClick={() => navigate('/explore')}
-                  iconName="chevron_right"
+                  iconName={ChevronRight}
                   addCss={css`
                     align-items: flex-start;
                   `}>
@@ -235,27 +235,13 @@ function AddOverview({ waitingSpots, setWaitingSpots }) {
               type="button"
               styled="gray"
               onClick={() => setStep((prev) => prev - 1)}>
-              <span
-                className="material-icons"
-                css={css`
-                  color: inherit;
-                `}>
-                chevron_left
-              </span>
+              <ChevronLeft sx={{ color: 'inherit' }} />
               上一步
             </PrevButton>
           )}
           <NextButton styled="primary" type="submit" isNotLastStep={step < 2}>
             {step < 2 ? '下一步' : '新建行程'}
-            {step < 2 && (
-              <span
-                className="material-icons"
-                css={css`
-                  color: inherit;
-                `}>
-                chevron_right
-              </span>
-            )}
+            {step < 2 && <ChevronRight sx={{ color: 'inherit' }} />}
           </NextButton>
         </ButtonWrapper>
       </Wrapper>

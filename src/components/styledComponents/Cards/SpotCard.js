@@ -1,3 +1,4 @@
+import { Cancel, LocationOn, Schedule } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -22,7 +23,7 @@ const TimeTag = styled.div`
 `;
 const AddressText = (props) => (
   <TextWithIcon
-    iconName="location_on"
+    iconName={LocationOn}
     addCss={{
       container: css`
         gap: ${props.withRating ? '4px' : '2px'};
@@ -31,33 +32,33 @@ const AddressText = (props) => (
       text: css`
         font-size: ${!props.isSmall ? '17px' : '16px'};
       `,
-      icon: css`
-        color: ${palatte.danger.basic};
-        font-size: ${props.isSmall ? '18px' : '22px'};
-        margin: ${props.isSmall ? '3px 3px 3px 0' : '2px 0'};
-        ${mediaQuery[0]} {
-          font-size: 18px;
-          margin: 3px 3px 3px 0;
-        }
-      `,
+      icon: {
+        color: palatte.danger.basic,
+        fontSize: props.isSmall ? 18 : 22,
+        margin: props.isSmall ? '3px 3px 3px 0' : '2px 0',
+        [mediaQuery[0]]: {
+          fontSize: 18,
+          margin: '3px 3px 3px 0',
+        },
+      },
     }}>
     {props.children}
   </TextWithIcon>
 );
 const DurationText = (props) => (
   <TextWithIcon
-    iconName="schedule"
+    iconName={Schedule}
     addCss={{
       container: css`
         gap: 4px;
         font-size: 14px;
         color: ${palatte.gray['700']};
       `,
-      icon: css`
-        font-size: 22px;
-        color: ${palatte.gray['500']};
-        margin: 1px 0;
-      `,
+      icon: {
+        fontSize: 22,
+        color: palatte.gray['500'],
+        margin: '1px 0',
+      },
     }}>
     停留 {Math.floor(props.duration / 6) / 10} 小時
   </TextWithIcon>
@@ -197,12 +198,11 @@ function SpotCard({
     <CardWrapper as={as} css={addCss}>
       {isShowCloseBtn && (
         <CloseButton
-          className="material-icons"
           close
           type="button"
           isSmall={isSmall}
           onClick={onDeleteClick}>
-          cancel
+          <Cancel />
         </CloseButton>
       )}
       <TagAndCheckboxContainer isSmall={isSmall} isEdit={isEdit} time={time}>
