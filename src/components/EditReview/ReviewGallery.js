@@ -107,7 +107,10 @@ function ReviewGallery({
 
   useEffect(() => {
     if (galleryContainer.current) {
-      if (galleryContainer.current.scrollWidth > 600) {
+      if (
+        galleryContainer.current.scrollWidth >
+        galleryContainer.current.clientWidth
+      ) {
         setIsShowShadow(true);
       } else {
         setIsShowShadow(false);

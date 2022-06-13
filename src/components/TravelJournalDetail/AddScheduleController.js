@@ -123,7 +123,7 @@ function AddScheduleController({
             if (
               newDate.getFullYear() >= currentDate.getFullYear() &&
               newDate.getMonth() >= currentDate.getMonth() &&
-              newDate.getDate() >= currentDate.getDate()
+              newDate.getDate() === currentDate.getDate()
             ) {
               allSchedules.current[index].push(newSchedule);
               allSchedules.current[index].sort(

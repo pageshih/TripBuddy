@@ -54,13 +54,14 @@ function Overview({
 }) {
   const navigate = useNavigate();
   const { uid } = useContext(Context);
-  const uploadCoverPhoto = (imageBuffer, setIsShowModal) => {
+  const uploadCoverPhoto = (imageBuffer, setIsShowModal, setIsPending) => {
     const upload = {
       uid,
       itineraryId: overviews.itinerary_id,
       imageBuffer,
     };
     firestore.uploadItinerariesCoverPhoto(upload).then((cover_photo) => {
+      setIsPending(false);
       setIsShowModal(false);
       setOverviews({ ...overviews, cover_photo });
     });
