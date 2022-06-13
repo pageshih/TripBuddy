@@ -1,3 +1,4 @@
+import { WatchLater } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -99,7 +100,7 @@ const DurationController = ({
       </ControllerWrapper>
     ) : (
       <TextWithIcon
-        iconName="watch_later"
+        iconName={WatchLater}
         addCss={{
           container: css`
             color: ${palatte.primary.basic};
@@ -120,9 +121,7 @@ const DurationController = ({
               margin: 0;
             }
           `,
-          icon: css`
-            font-size: 40px;
-          `,
+          icon: { fontSize: 40 },
         }}
         onClick={changeEditStatus}>
         {'停留' +

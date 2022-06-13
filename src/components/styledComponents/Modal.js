@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useContext } from 'react';
+import { Close } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -44,6 +45,9 @@ const ContentWrapper = styled.div`
 `;
 
 const CloseBtn = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: -8px;
   right: -8px;
@@ -113,8 +117,8 @@ function Modal({ isShowState, close, addCss, children }) {
           timeout={1000}
           unmountOnExit>
           <CenterContainer ref={containerRef} css={addCss}>
-            <CloseBtn type="button" onClick={close} className="material-icons">
-              close
+            <CloseBtn type="button" onClick={close}>
+              <Close />
             </CloseBtn>
             <ContentWrapper>{children}</ContentWrapper>
           </CenterContainer>

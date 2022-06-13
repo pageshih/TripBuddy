@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Explore, Cancel } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -13,6 +14,7 @@ import {
 import { H6, P } from '../styledComponents/basic/Text';
 import { ButtonSmallIcon } from '../styledComponents/Buttons/Button';
 import { SpotCard } from '../styledComponents/Cards/SpotCard';
+import { ImportContacts } from '@mui/icons-material';
 
 const WaitingSpotContainer = styled.div`
   ${styles.flexColumn};
@@ -75,11 +77,18 @@ const iconButtonColorMap = {
   },
 };
 
-const ButtonIconColumn = (props) => (
+const ButtonIconColumn = ({
+  type,
+  onClick,
+  styled,
+  children,
+  size,
+  iconName: Icon,
+}) => (
   <ButtonSmallIcon
     styled="transparent"
-    type={props.type}
-    onClick={props.onClick}
+    type={type}
+    onClick={onClick}
     addCss={css`
       padding: 0;
       width: fit-content;
@@ -87,13 +96,13 @@ const ButtonIconColumn = (props) => (
       align-items: center;
       gap: 0px;
       & > * {
-        color: ${iconButtonColorMap[props.styled].color};
+        color: ${iconButtonColorMap[styled].color};
       }
       &:hover {
         background-color: transparent;
         box-shadow: none;
         & > * {
-          color: ${iconButtonColorMap[props.styled].hoverColor};
+          color: ${iconButtonColorMap[styled].hoverColor};
         }
       }
       ${mediaQuery[0]} {
@@ -101,15 +110,13 @@ const ButtonIconColumn = (props) => (
         gap: 5px;
       }
     `}
-    title={props.children}>
-    <span
-      css={css`
-        font-size: ${props.size};
-      `}
-      className="material-icons">
-      {props.iconName}
-    </span>
-    <P fontSize={`calc(${props.size || '24px'} - 12px)`}>{props.children}</P>
+    title={children}>
+    <Icon
+      sx={{
+        fontSize: size,
+      }}
+    />
+    <P fontSize={`calc(${size || '24px'} - 12px)`}>{children}</P>
   </ButtonSmallIcon>
 );
 
@@ -187,14 +194,14 @@ function WaitingSpotArea({
           <ButtonIconColumn
             type="button"
             styled="primary"
-            iconName="explore"
+            iconName={Explore}
             onClick={addSpotAction}>
             新增景點
           </ButtonIconColumn>
           <ButtonIconColumn
             type="button"
             styled="danger"
-            iconName="cancel"
+            iconName={Cancel}
             onClick={closeAction}>
             結束編輯
           </ButtonIconColumn>

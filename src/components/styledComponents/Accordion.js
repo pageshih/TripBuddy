@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { AddCircle, ExpandMore, ArrowDropDown } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -12,8 +13,7 @@ const ExpandIcon = styled.span`
   align-self: flex-start;
   transform: ${(props) => (props.isExpand ? 'rotateZ(180deg)' : null)};
   transition: transform 0.4s ease;
-  font-size: ${(props) => props.fontSize || '24px'};
-  ${(props) => props.addCss}
+  font-size: 18px;
 `;
 const ExpandAddIcon = styled(ExpandIcon)`
   transform: ${(props) => (props.isExpand ? 'rotateZ(135deg)' : null)};
@@ -65,17 +65,17 @@ function Accordion({
         <TitleContainer>{titleElement}</TitleContainer>
         {isAllowEdit ? (
           isDisableExpand ? (
-            <ExpandAddIcon className="material-icons" isExpand={isExpand}>
-              add_circle
+            <ExpandAddIcon isExpand={isExpand}>
+              <AddCircle />
             </ExpandAddIcon>
           ) : (
-            <ExpandIcon className="material-icons" isExpand={isExpand}>
-              expand_more
+            <ExpandIcon isExpand={isExpand}>
+              <ExpandMore />
             </ExpandIcon>
           )
         ) : isDisableExpand ? null : (
-          <ExpandIcon className="material-icons" isExpand={isExpand}>
-            {isFilledArrow ? 'arrow_drop_down' : 'expand_more'}
+          <ExpandIcon isExpand={isExpand}>
+            {isFilledArrow ? <ArrowDropDown /> : <ExpandMore />}
           </ExpandIcon>
         )}
       </HeaderContainer>
@@ -133,13 +133,12 @@ function AccordionSmall({ titleElement, isFilledArrow, gap, children }) {
       <AccordionSmallHeaderContainer
         onClick={() => setIsExpand((prev) => !prev)}>
         <AccordionSmallTitleWrapper>{titleElement}</AccordionSmallTitleWrapper>
-        <ExpandIcon
-          className="material-icons"
-          isExpand={isExpand}
-          addCss={css`
-            font-size: 20px;
-          `}>
-          {isFilledArrow ? 'arrow_drop_down' : 'expand_more'}
+        <ExpandIcon isExpand={isExpand}>
+          {isFilledArrow ? (
+            <ArrowDropDown fontSize="inherit" />
+          ) : (
+            <ExpandMore fontSize="inherit" />
+          )}
         </ExpandIcon>
       </AccordionSmallHeaderContainer>
       <Collapse nodeRef={contentRef} in={isExpand} timeout={300} unmountOnExit>

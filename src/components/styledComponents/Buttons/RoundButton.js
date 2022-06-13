@@ -1,17 +1,17 @@
 import styled from '@emotion/styled';
-/** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
 import { colorMap, roundSmallButtonColorMap } from './buttonColorMaps';
 import { palatte, styles } from '../basic/common';
 import { P } from '../basic/Text';
 
 const RoundButton = styled.button`
   background-color: ${colorMap.button.round};
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: ${colorMap.button.roundHover};
   border-radius: 50%;
   width: ${(props) => props.size || '70px'};
   height: ${(props) => props.size || '70px'};
-  font-size: ${(props) => `calc(${props.size} - 20px)` || '60px'};
   border: ${(props) => props.border && '2px solid white'};
   border-color: ${(props) => props.borderColor};
   box-shadow: 2px 2px 2px 2px ${palatte.shadow};
@@ -98,7 +98,7 @@ const ButtonWrapper = styled.button`
       color: ${(props) =>
         roundSmallButtonColorMap[props.styled].hover.backgroundColor};
     }
-    & span {
+    & svg {
       border-radius: 50%;
       background-color: ${(props) =>
         roundSmallButtonColorMap[props.styled].default.backgroundColor};
@@ -106,14 +106,17 @@ const ButtonWrapper = styled.button`
     }
   }
 `;
-const RoundButtonSmallWithLabel = (props) => (
-  <ButtonWrapper
-    type={props.type}
-    styled={props.styled}
-    onClick={props.onClick}
-    css={props.addCss}>
-    <span className="material-icons">{props.iconName}</span>
-    <P>{props.children}</P>
+const RoundButtonSmallWithLabel = ({
+  type,
+  styled,
+  onClick,
+  addCss,
+  iconName: Icon,
+  children,
+}) => (
+  <ButtonWrapper type={type} styled={styled} onClick={onClick} css={addCss}>
+    <Icon />
+    <P>{children}</P>
   </ButtonWrapper>
 );
 

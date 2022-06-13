@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Close, Edit, NavigateBefore, InsertPhoto } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -70,31 +71,28 @@ function Overview({
         <ContentContainer>
           <ButtonWrapper>
             <RoundButtonSmallWhite
-              className="material-icons"
               type="button"
               onClick={() =>
                 navigate(isJournal ? '/travel-journals' : '/itineraries')
               }>
-              navigate_before
+              <NavigateBefore fontSize="inherit" />
             </RoundButtonSmallWhite>
             {!isAllowEdit ? (
               <RoundButtonSmallWhite
-                className="material-icons"
                 type="button"
                 onClick={() => setIsAllowEdit(true)}>
-                edit
+                <Edit fontSize="inherit" />
               </RoundButtonSmallWhite>
             ) : (
               <EditButtonWrapper>
                 <AddImageRoundBtn
                   upload={uploadCoverPhoto}
                   white
-                  icon="insert_photo"
+                  icon={InsertPhoto}
                   confirmMessage="確定要將封面更換成這張圖嗎？"
                 />
                 {isShowCloseBtn && (
                   <RoundButtonSmallWhite
-                    className="material-icons"
                     type="button"
                     css={css`
                       &:hover {
@@ -103,7 +101,7 @@ function Overview({
                       }
                     `}
                     onClick={() => setIsAllowEdit(false)}>
-                    close
+                    <Close fontSize="inherit" />
                   </RoundButtonSmallWhite>
                 )}
               </EditButtonWrapper>

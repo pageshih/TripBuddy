@@ -1,4 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
+import {
+  AccessTime,
+  WrongLocation,
+  AddLocationAlt,
+  OpenInNew,
+} from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -106,7 +112,7 @@ const ModifyWaitingSpotsIcon = styled.span`
 `;
 const OpeningHours = ({ children }) => (
   <TextWithIcon
-    iconName="access_time"
+    iconName={AccessTime}
     iconLabel="營業時間"
     addCss={{
       container: css`
@@ -118,9 +124,7 @@ const OpeningHours = ({ children }) => (
         gap: 4px;
         color: ${palatte.gray[600]};
       `,
-      icon: css`
-        font-size: 18px;
-      `,
+      icon: { fontSize: 18 },
       text: css`
         color: ${palatte.gray[700]};
         & span {
@@ -207,7 +211,7 @@ function PlaceOverview({
               addCss={css`
                 align-self: flex-start;
               `}
-              iconName="open_in_new">
+              iconName={OpenInNew}>
               官方網站
             </HyperLink>
           )}
@@ -217,8 +221,8 @@ function PlaceOverview({
         styled={isSavedSpot ? 'danger' : 'primary'}
         type="button"
         onClick={buttonAction}>
-        <ModifyWaitingSpotsIcon className="material-icons">
-          {isSavedSpot ? 'wrong_location' : 'add_location_alt'}
+        <ModifyWaitingSpotsIcon>
+          {isSavedSpot ? <WrongLocation /> : <AddLocationAlt />}
         </ModifyWaitingSpotsIcon>
         {isSavedSpot ? '從候補景點中移除' : '加入候補景點'}
       </ModifyWaitingSpotsButton>
