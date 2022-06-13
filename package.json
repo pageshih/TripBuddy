@@ -7,6 +7,7 @@
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@googlemaps/react-wrapper": "^1.1.31",
+    "@mui/icons-material": "^5.8.3",
     "@mui/material": "^5.7.0",
     "@mui/x-date-pickers": "^5.0.0-alpha.2",
     "@testing-library/jest-dom": "^5.16.4",

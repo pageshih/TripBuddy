@@ -19,7 +19,13 @@ const IconContainer = styled.div`
   ${(props) => props.addCss};
 `;
 
-function TextWithIcon({ addCss, onClick, iconLabel, iconName, children }) {
+function TextWithIcon({
+  addCss,
+  onClick,
+  iconLabel,
+  iconName: Icon,
+  children,
+}) {
   return (
     <TextContainer addCss={addCss?.container} onClick={onClick}>
       <IconContainer addCss={addCss?.iconContainer}>
@@ -33,15 +39,7 @@ function TextWithIcon({ addCss, onClick, iconLabel, iconName, children }) {
             {iconLabel}
           </P>
         )}
-        <span
-          className="material-icons"
-          css={css`
-            color: inherit;
-            font-size: inherit;
-            ${addCss?.icon};
-          `}>
-          {iconName}
-        </span>
+        <Icon sx={addCss?.icon} />
       </IconContainer>
       {typeof children === 'string' ? (
         <P
@@ -62,14 +60,7 @@ function TextWithIcon({ addCss, onClick, iconLabel, iconName, children }) {
 TextWithIcon.propTypes = {
   onClick: PropTypes.func,
   addCss: PropTypes.object,
-  addCssWithShape: PropTypes.shape({
-    container: PropTypes.string,
-    iconContainer: PropTypes.string,
-    iconLabel: PropTypes.string,
-    icon: PropTypes.string,
-    text: PropTypes.string,
-  }),
   iconLabel: PropTypes.string,
-  iconName: PropTypes.string,
+  iconName: PropTypes.any,
 };
 export default TextWithIcon;

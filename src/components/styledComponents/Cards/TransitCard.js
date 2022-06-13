@@ -1,3 +1,12 @@
+import { useState } from 'react';
+import {
+  Explore,
+  Directions,
+  DirectionsBike,
+  DirectionsCarFilled,
+  DirectionsBus,
+  DirectionsWalk,
+} from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -6,6 +15,7 @@ import { styles, palatte, mediaQuery } from '../basic/common';
 import { P } from '../basic/Text';
 import { Select } from '../Form';
 import { ButtonSmallOutlineIcon } from '../Buttons/Button';
+import { useEffect } from 'react';
 
 const transportMode = (schedule) => {
   const departureTime =
@@ -15,14 +25,14 @@ const transportMode = (schedule) => {
   return {
     BICYCLING: {
       title: '騎自行車',
-      icon: 'directions_bike',
+      icon: DirectionsBike,
       config: {
         travelMode: 'BICYCLING',
       },
     },
     DRIVING: {
       title: '開車',
-      icon: 'directions_car_filled',
+      icon: DirectionsCarFilled,
       config: {
         travelMode: 'DRIVING',
         drivingOptions: {
@@ -32,7 +42,7 @@ const transportMode = (schedule) => {
     },
     TRANSIT: {
       title: '搭乘大眾運輸',
-      icon: 'directions_bus',
+      icon: DirectionsBus,
       config: {
         travelMode: 'TRANSIT',
         transitOptions: {
@@ -42,7 +52,7 @@ const transportMode = (schedule) => {
     },
     WALKING: {
       title: '走路',
-      icon: 'directions_walk',
+      icon: DirectionsWalk,
       config: {
         travelMode: 'WALKING',
       },
@@ -94,7 +104,7 @@ const Container = styled.div`
     }
   }
 `;
-const TransitIcon = styled.span`
+const TransitIcon = styled.div`
   color: ${palatte.info.basic};
   font-size: 60px;
   ${mediaQuery[0]} {
@@ -131,6 +141,15 @@ function TransitCard({
   scheduleId,
   transitDetail,
 }) {
+  const [TransitIconSvg, setTransitIconSvg] = useState(
+    transportMode()[travelMode].icon
+  );
+
+  useEffect(() => {
+    if (travelMode) {
+      setTransitIconSvg(transportMode()[travelMode].icon);
+    }
+  }, [travelMode]);
   return (
     <Container>
       <TransitTextWrapper>
@@ -138,8 +157,8 @@ function TransitCard({
           {isEdit ? (
             <>
               <TransitDurationWrapper>
-                <TransitIcon className="material-icons">
-                  {transportMode()[travelMode].icon}
+                <TransitIcon>
+                  <TransitIconSvg fontSize="inherit" />
                 </TransitIcon>
                 <Select
                   css={css`
@@ -169,8 +188,8 @@ function TransitCard({
             </>
           ) : (
             <>
-              <TransitIcon className="material-icons">
-                {transportMode()[travelMode].icon}
+              <TransitIcon>
+                <TransitIconSvg fontSize="inherit" />
               </TransitIcon>
               <TransitText>
                 {transportMode()[travelMode].title +
@@ -180,7 +199,9 @@ function TransitCard({
           )}
         </TransitDetailWrapper>
         <TransitDetailWrapper>
-          <TransitIcon className="material-icons">directions</TransitIcon>
+          <TransitIcon>
+            <Directions fontSize="inherit" />
+          </TransitIcon>
           <TransitText>距離{transitDetail.distance.text}</TransitText>
         </TransitDetailWrapper>
       </TransitTextWrapper>
@@ -191,14 +212,7 @@ function TransitCard({
           addCss={css`
             width: fit-content;
           `}>
-          <span
-            className="material-icons"
-            css={css`
-              color: inherit;
-              font-size: 20px;
-            `}>
-            explore
-          </span>
+          <Explore sx={{ fontSize: 20 }} />
           開始導航
         </ButtonSmallOutlineIcon>
       )}

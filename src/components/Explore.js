@@ -1,6 +1,7 @@
 import { Wrapper } from '@googlemaps/react-wrapper';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, AddLocation, Home } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
@@ -71,7 +72,7 @@ const PlaceDetailContainer = styled.div`
   }
 `;
 
-const ButtonOnMap = (props) => (
+const ButtonOnMap = ({ iconName: Icon, onClick, children }) => (
   <div
     css={css`
       ${styles.flexColumn}
@@ -79,28 +80,33 @@ const ButtonOnMap = (props) => (
       align-items: center;
     `}>
     <RoundButton
-      className="material-icons"
       size="60px"
       css={css`
+        &:hover + p {
+          color: ${palatte.primary[300]};
+        }
         ${mediaQuery[0]} {
           width: 40px;
           height: 40px;
-          font-size: 25px;
         }
       `}
-      onClick={props.onClick}>
-      {props.iconName}
+      onClick={onClick}>
+      <Icon
+        sx={{
+          fontSize: 40,
+          [mediaQuery[0]]: {
+            fontSize: 25,
+          },
+        }}
+      />
     </RoundButton>
     <P
       css={css`
         font-size: 14px;
         font-weight: 500;
         color: ${palatte.gray[200]};
-        &:hover {
-          color: ${palatte.primary[300]};
-        }
       `}>
-      {props.children}
+      {children}
     </P>
   </div>
 );
@@ -122,10 +128,10 @@ const NavigateButtonsOnMap = (props) => {
           padding: 15px;
         }
       `}>
-      <ButtonOnMap iconName="add_location" onClick={props.onWaitingSpotClick}>
+      <ButtonOnMap iconName={AddLocation} onClick={props.onWaitingSpotClick}>
         候補景點
       </ButtonOnMap>
-      <ButtonOnMap iconName="home" onClick={props.onHomeClick}>
+      <ButtonOnMap iconName={Home} onClick={props.onHomeClick}>
         回首頁
       </ButtonOnMap>
     </div>
@@ -134,7 +140,6 @@ const NavigateButtonsOnMap = (props) => {
 const ExpandButton = (props) => (
   <RoundButtonSmall
     size="30px"
-    className="material-icons"
     styled="gray700"
     css={css`
       position: absolute;
@@ -150,11 +155,11 @@ const ExpandButton = (props) => (
       }
     `}
     onClick={props.onClick}>
-    chevron_left
+    <ChevronLeft sx={{ color: 'inherit' }} />
   </RoundButtonSmall>
 );
 function Explore({ setWaitingSpots }) {
-  const { uid, dispatchNotification } = useContext(Context);
+  const { uid } = useContext(Context);
   const [map, setMap] = useState();
   const [marker, setMarker] = useState();
   const [placeDetail, setPlaceDetail] = useState();
@@ -234,6 +239,7 @@ function Explore({ setWaitingSpots }) {
     setMarker(googleMap.setSelectedMarker(map, spot.geometry, spot.name));
   };
   const getPlaceShowOnMap = (detail) => {
+    setIsShowSavedSpots(false);
     setMarker(googleMap.setSelectedMarker(map, detail.geometry, detail.name));
     map.panTo(detail.geometry);
     setPlaceDetail(detail);
@@ -332,7 +338,7 @@ function Explore({ setWaitingSpots }) {
                       left: 15px;
                       ${mediaQuery[0]} {
                         left: 0;
-                      },
+                      }
                     `,
                   }}
                 />

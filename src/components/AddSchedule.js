@@ -82,7 +82,15 @@ function AddSchedule({ isDefaultAllowEdit }) {
           if (res.overviews.depart_times) {
             setWaitingSpots(res.waitingSpots);
             let depart_times = res.overviews.depart_times;
-            if (res.overviews.depart_times.length === 0) {
+            const isTheSameDepartTimes = () => {
+              if (depart_times.length > 1) {
+                const removeTheSame = new Set(
+                  depart_times.map((time) => new Date(time).getDate())
+                );
+                return removeTheSame.size !== depart_times.length;
+              }
+            };
+            if (depart_times.length === 0 || isTheSameDepartTimes()) {
               depart_times = createDepartTimeAry({
                 start_date: res.overviews.start_date,
                 end_date: res.overviews.end_date,
@@ -142,7 +150,6 @@ function AddSchedule({ isDefaultAllowEdit }) {
     result.splice(endIndex, 0, removed);
     return result;
   };
-
   const addSchedule = (spotIndex, scheduleIndex) => {
     let startTime;
     let duration = 60;

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Done, Close, AddCircle } from '@mui/icons-material';
 import styled from '@emotion/styled';
 /** @jsxImportSource @emotion/react */
 import { jsx } from '@emotion/react';
@@ -104,28 +105,23 @@ function ReviewTags({
                   setInputTag(tag.replace(/[<>"']/g, ''));
                 }}
               />
-              <AddReviewTagsButton
-                className="material-icons"
-                type="submit"
-                color="primary">
-                done
+              <AddReviewTagsButton type="submit" color="primary">
+                <Done />
               </AddReviewTagsButton>
               <AddReviewTagsButton
-                className="material-icons"
                 type="button"
                 color="danger"
                 onClick={() => setIsShowInput(false)}>
-                close
+                <Close />
               </AddReviewTagsButton>
             </AddReviewTagsForm>
           ) : (
             <RoundButtonSmall
               type="button"
-              className="material-icons"
               onClick={() => {
                 setIsShowInput(true);
               }}>
-              add_circle
+              <AddCircle />
             </RoundButtonSmall>
           ))}
       </AddReviewTagControllerWrapper>
