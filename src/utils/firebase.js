@@ -181,11 +181,46 @@ const firestore = {
     return new Promise((resolve, reject) => {
       const placesRef = collection(this.db, 'savedSpots', userUID, 'places');
       getDocs(placesRef)
-        .then((profileSnap) => {
+        .then(async (profileSnap) => {
           const spots = profileSnap.docs.map((doc) => doc.data());
-          const updateSpots = spots.map((spot) => {
-            return this.updatePlaceData(spot, map);
-          });
+          const now = new Date().getTime();
+          const expireDate = new Date(now - 2 * 24 * 60 * 60 * 1000).getTime();
+          const isUpdatePlacesOverTen =
+            spots.reduce((count, spot) => {
+              if (spot.created_time <= expireDate || !spot.created_time) {
+                count++;
+              }
+              return count;
+            }, 0) > 10;
+          let updateSpots;
+          if (!isUpdatePlacesOverTen) {
+            updateSpots = spots.map((spot) => {
+              return this.updatePlaceData(spot, map);
+            });
+          } else {
+            const getSpotsUpdatePromise = (array, delay) => {
+              return new Promise((resolve) => {
+                const clearId = setTimeout(() => {
+                  resolve(
+                    array.map((spot) => firestore.updatePlaceData(spot, map))
+                  );
+                  clearTimeout(clearId);
+                }, delay);
+              });
+            };
+            const divideSpotsEveryTen = await getSpotsUpdatePromise(
+              spots.slice(0, 10),
+              0
+            );
+            for (let i = 1; i < Math.ceil(spots.length / 10); i++) {
+              const nextTenSpots = await getSpotsUpdatePromise(
+                spots.slice(i * 10, (i + 1) * 10),
+                i * 1000
+              );
+              divideSpotsEveryTen.push(...nextTenSpots);
+            }
+            updateSpots = divideSpotsEveryTen;
+          }
           Promise.all(updateSpots).then((res) => {
             resolve(res);
             this.setSavedSpots(userUID, res).catch((error) =>
