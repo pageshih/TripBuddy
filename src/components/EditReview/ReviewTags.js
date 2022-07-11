@@ -57,6 +57,7 @@ function ReviewTags({
   const tagContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
   const [addTagInputValue, setAddTagInputValue] = useState();
+  const submitTimer = useRef();
 
   useEffect(() => {
     if (tagContainer.current) {
@@ -78,7 +79,11 @@ function ReviewTags({
 
   const onSubmit = (e) => {
     e.preventDefault();
-    addCheckedTag(addTagInputValue, setAddTagInputValue);
+    if (submitTimer.current) clearTimeout(submitTimer.current);
+    submitTimer.current = setTimeout(() => {
+      addCheckedTag(addTagInputValue, setAddTagInputValue);
+      submitTimer.current = '';
+    }, 200);
   };
   return (
     <Container>

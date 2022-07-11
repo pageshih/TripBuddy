@@ -127,11 +127,24 @@ function AddReview({
 
   const addCheckedTag = (addTag, setAddTag) => {
     if (addTag) {
-      setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
-      setCheckedReviewTags(
-        checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
-      );
-      addTagsForGlobal.current.push(addTag);
+      if (!reviewTags.includes(addTag)) {
+        setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
+        setCheckedReviewTags(
+          checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
+        );
+        if (!addTagsForGlobal.current.includes(addTag)) {
+          addTagsForGlobal.current.push(addTag);
+        }
+      } else {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'warning',
+            message: '標籤已存在，請重新輸入',
+            id: 'toastify_tagExsited',
+          },
+        });
+      }
       setAddTag('');
     }
   };
