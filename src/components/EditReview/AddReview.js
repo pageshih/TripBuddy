@@ -13,7 +13,6 @@ import {
 } from '../../utils/utilities';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
-// import { TextAreaReview } from '../styledComponents/Form';
 import ReviewInput from './ReviewInput';
 import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
 import { Button } from '../styledComponents/Buttons/Button';
