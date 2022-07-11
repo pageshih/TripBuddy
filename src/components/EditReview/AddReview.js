@@ -13,7 +13,8 @@ import {
 } from '../../utils/utilities';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
-import { TextAreaReview } from '../styledComponents/Form';
+// import { TextAreaReview } from '../styledComponents/Form';
+import ReviewInput from './ReviewInput';
 import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
 import { Button } from '../styledComponents/Buttons/Button';
 import {
@@ -113,20 +114,18 @@ function AddReview({
   const { uid, dispatchNotification } = useContext(Context);
   const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [addTag, setAddTag] = useState('');
   const [gallery, setGallery] = useState();
   const [imageBuffer, setImageBuffer] = useState();
   const [isShowInput, setIsShowInput] = useState();
   const [review, setReview] = useState();
-  const [reviewShowInput, setReviewShowInput] = useState(false);
+  const [isReviewShowInput, setIsReviewShowInput] = useState(false);
   const addReviewRef = useRef();
   const saveButtonRef = useRef();
   const addTagsForGlobal = useRef([]);
   const [isDesktop, setIsDesktop] = useState();
   const [isPending, setIsPending] = useState();
 
-  const addCheckedTag = (e) => {
-    e.preventDefault();
+  const addCheckedTag = (addTag, setAddTag) => {
     if (addTag) {
       setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
       setCheckedReviewTags(
@@ -152,7 +151,7 @@ function AddReview({
     uploadFirestore.doUpload().then((newGallery) => {
       setGallery(newGallery);
       setImageBuffer([]);
-      setReviewShowInput(false);
+      setIsReviewShowInput(false);
       const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
       setReviewTags(
         allReviewTags
@@ -282,11 +281,9 @@ function AddReview({
             isEdit) && (
             <ReviewTags
               defaultTags={reviewTags}
-              inputTag={addTag}
-              setInputTag={setAddTag}
               checkedTags={checkedReviewTags}
               setCheckedTags={setCheckedReviewTags}
-              onSubmit={addCheckedTag}
+              addCheckedTag={addCheckedTag}
               isEdit={isEdit}
               isShowInput={isShowInput}
               setIsShowInput={setIsShowInput}
@@ -305,7 +302,14 @@ function AddReview({
 
           {((!isEdit && review) || isEdit) && (
             <ReviewWrapper>
-              {isEdit && isJournal ? (
+              <ReviewInput
+                isEdit={isEdit && isJournal}
+                review={review}
+                setReview={setReview}
+                isReviewShowInput={isReviewShowInput}
+              />
+              {/* {isEdit && isJournal ? (
+                
                 <TextAreaReview
                   type="textarea"
                   placeholder="添加一點旅行後的心得吧！"
@@ -322,7 +326,7 @@ function AddReview({
                 />
               ) : (
                 <P>{review}</P>
-              )}
+              )} */}
               <CSSTransition
                 in={
                   isEdit &&

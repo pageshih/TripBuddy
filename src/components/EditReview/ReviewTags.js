@@ -52,12 +52,12 @@ function ReviewTags({
   setCheckedTags,
   isShowInput,
   setIsShowInput,
-  onSubmit,
-  inputTag,
-  setInputTag,
+  addCheckedTag,
 }) {
   const tagContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
+  const [addTagInputValue, setAddTagInputValue] = useState();
+
   useEffect(() => {
     if (tagContainer.current) {
       const resizeObserver = new ResizeObserver((entries) => {
@@ -76,6 +76,10 @@ function ReviewTags({
     }
   }, [tagContainer]);
 
+  const onSubmit = (e) => {
+    e.preventDefault();
+    addCheckedTag(addTagInputValue, setAddTagInputValue);
+  };
   return (
     <Container>
       <ReviewTagsWrapper ref={tagContainer}>
@@ -99,10 +103,10 @@ function ReviewTags({
                 css={inputBaseSmall}
                 type="type"
                 placeholder="新增心得標籤"
-                value={inputTag}
+                value={addTagInputValue}
                 onChange={(e) => {
                   let tag = e.target.value;
-                  setInputTag(tag.replace(/[<>"']/g, ''));
+                  setAddTagInputValue(tag.replace(/[<>"']/g, ''));
                 }}
               />
               <AddReviewTagsButton type="submit" color="primary">
@@ -136,9 +140,7 @@ ReviewTag.propTypes = {
   setCheckedTags: PropTypes.func,
   isShowInput: PropTypes.bool,
   setIsShowInput: PropTypes.func,
-  onSubmit: PropTypes.func,
-  inputTag: PropTypes.string,
-  setInputTag: PropTypes.func,
+  addCheckedTag: PropTypes.func,
 };
 
 export default ReviewTags;
