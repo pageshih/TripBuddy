@@ -13,7 +13,8 @@ import {
 } from '../../utils/utilities';
 import { firestore } from '../../utils/firebase';
 import { Context } from '../../App';
-import { TextAreaReview } from '../styledComponents/Form';
+// import { TextAreaReview } from '../styledComponents/Form';
+import ReviewInput from './ReviewInput';
 import { RoundButtonSmall } from '../styledComponents/Buttons/RoundButton';
 import { Button } from '../styledComponents/Buttons/Button';
 import {
@@ -22,7 +23,7 @@ import {
   mediaQuery,
   PendingLoader,
 } from '../styledComponents/basic/common';
-import { P, H6 } from '../styledComponents/basic/Text';
+import { H6 } from '../styledComponents/basic/Text';
 import ReviewTags from './ReviewTags';
 import ReviewGallery from './ReviewGallery';
 
@@ -113,26 +114,37 @@ function AddReview({
   const { uid, dispatchNotification } = useContext(Context);
   const [reviewTags, setReviewTags] = useState();
   const [checkedReviewTags, setCheckedReviewTags] = useState();
-  const [addTag, setAddTag] = useState('');
   const [gallery, setGallery] = useState();
   const [imageBuffer, setImageBuffer] = useState();
   const [isShowInput, setIsShowInput] = useState();
   const [review, setReview] = useState();
-  const [reviewShowInput, setReviewShowInput] = useState(false);
+  const [isReviewShowInput, setIsReviewShowInput] = useState(false);
   const addReviewRef = useRef();
   const saveButtonRef = useRef();
   const addTagsForGlobal = useRef([]);
   const [isDesktop, setIsDesktop] = useState();
   const [isPending, setIsPending] = useState();
 
-  const addCheckedTag = (e) => {
-    e.preventDefault();
+  const addCheckedTag = (addTag, setAddTag) => {
     if (addTag) {
-      setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
-      setCheckedReviewTags(
-        checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
-      );
-      addTagsForGlobal.current.push(addTag);
+      if (!reviewTags.includes(addTag)) {
+        setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
+        setCheckedReviewTags(
+          checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
+        );
+        if (!addTagsForGlobal.current.includes(addTag)) {
+          addTagsForGlobal.current.push(addTag);
+        }
+      } else {
+        dispatchNotification({
+          type: 'fire',
+          playload: {
+            type: 'warning',
+            message: '標籤已存在，請重新輸入',
+            id: 'toastify_tagExsited',
+          },
+        });
+      }
       setAddTag('');
     }
   };
@@ -152,7 +164,7 @@ function AddReview({
     uploadFirestore.doUpload().then((newGallery) => {
       setGallery(newGallery);
       setImageBuffer([]);
-      setReviewShowInput(false);
+      setIsReviewShowInput(false);
       const checkTagList = checkedReviewTags ? [...checkedReviewTags] : [];
       setReviewTags(
         allReviewTags
@@ -282,11 +294,9 @@ function AddReview({
             isEdit) && (
             <ReviewTags
               defaultTags={reviewTags}
-              inputTag={addTag}
-              setInputTag={setAddTag}
               checkedTags={checkedReviewTags}
               setCheckedTags={setCheckedReviewTags}
-              onSubmit={addCheckedTag}
+              addCheckedTag={addCheckedTag}
               isEdit={isEdit}
               isShowInput={isShowInput}
               setIsShowInput={setIsShowInput}
@@ -305,24 +315,12 @@ function AddReview({
 
           {((!isEdit && review) || isEdit) && (
             <ReviewWrapper>
-              {isEdit && isJournal ? (
-                <TextAreaReview
-                  type="textarea"
-                  placeholder="添加一點旅行後的心得吧！"
-                  value={review}
-                  isEmptyInput={review && false}
-                  readOnly={reviewShowInput}
-                  onChange={(e) => {
-                    let review = e.target.value;
-                    setReview(review.replace(/[<>"']/, ''));
-                  }}
-                  onClick={() => {
-                    setReviewShowInput(false);
-                  }}
-                />
-              ) : (
-                <P>{review}</P>
-              )}
+              <ReviewInput
+                isEdit={isEdit && isJournal}
+                review={review}
+                setReview={setReview}
+                isReviewShowInput={isReviewShowInput}
+              />
               <CSSTransition
                 in={
                   isEdit &&

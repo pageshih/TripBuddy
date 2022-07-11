@@ -123,7 +123,7 @@ UserProfileTextWrapper.propTypes = {
 const SettingContainer = styled.div`
   ${styles.flexColumn};
   gap: 30px;
-  grow: 1;
+  flex-grow: 1;
   overflow-y: auto;
 `;
 const SettingReviewTagsContainer = styled.div`
