@@ -23,7 +23,7 @@ import {
   mediaQuery,
   PendingLoader,
 } from '../styledComponents/basic/common';
-import { P, H6 } from '../styledComponents/basic/Text';
+import { H6 } from '../styledComponents/basic/Text';
 import ReviewTags from './ReviewTags';
 import ReviewGallery from './ReviewGallery';
 
@@ -321,25 +321,6 @@ function AddReview({
                 setReview={setReview}
                 isReviewShowInput={isReviewShowInput}
               />
-              {/* {isEdit && isJournal ? (
-                
-                <TextAreaReview
-                  type="textarea"
-                  placeholder="添加一點旅行後的心得吧！"
-                  value={review}
-                  isEmptyInput={review && false}
-                  readOnly={reviewShowInput}
-                  onChange={(e) => {
-                    let review = e.target.value;
-                    setReview(review.replace(/[<>"']/, ''));
-                  }}
-                  onClick={() => {
-                    setReviewShowInput(false);
-                  }}
-                />
-              ) : (
-                <P>{review}</P>
-              )} */}
               <CSSTransition
                 in={
                   isEdit &&
