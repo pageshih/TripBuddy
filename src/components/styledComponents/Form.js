@@ -268,14 +268,16 @@ const ReviewTag = (props) => {
         style={{ display: 'none' }}
         id={props.tag}
         onChange={(e) => {
-          const setChecked = (prev) => {
-            if (e.target.checked) {
-              return prev ? [...prev, props.tag] : [props.tag];
-            } else {
-              return prev.filter((tag) => e.target.value !== tag);
-            }
-          };
-          props.setSelectedList((prev) => setChecked(prev));
+          if (props.isEdit) {
+            const setChecked = (prev) => {
+              if (e.target.checked) {
+                return prev ? [...prev, props.tag] : [props.tag];
+              } else {
+                return prev.filter((tag) => e.target.value !== tag);
+              }
+            };
+            props.setSelectedList((prev) => setChecked(prev));
+          }
         }}
       />
     </label>
