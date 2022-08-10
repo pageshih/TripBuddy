@@ -56,7 +56,7 @@ function ReviewTags({
 }) {
   const tagContainer = useRef();
   const [isShowShadow, setIsShowShadow] = useState();
-  const [addTagInputValue, setAddTagInputValue] = useState();
+  const [addTagInputValue, setAddTagInputValue] = useState('');
   const submitTimer = useRef();
 
   useEffect(() => {

@@ -126,7 +126,7 @@ function AddReview({
 
   const addCheckedTag = (addTag, setAddTag) => {
     if (addTag) {
-      if (!reviewTags.includes(addTag)) {
+      if (!reviewTags?.includes(addTag)) {
         setReviewTags(reviewTags ? [addTag, ...reviewTags] : [addTag]);
         setCheckedReviewTags(
           checkedReviewTags ? [addTag, ...checkedReviewTags] : [addTag]
