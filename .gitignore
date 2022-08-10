@@ -2,3 +2,5 @@ build
 node_modules
 *apiKey.js
 .env
+.firebase*
+firebase.json
